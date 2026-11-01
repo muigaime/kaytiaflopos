@@ -123,7 +123,17 @@ $("#exGo").onclick = () => {
     });
     $("#mEx").classList.remove("show");
     showRc(
-      `<b>EXCHANGE TICKET</b><br>${o.dept} · <b>${o.label}</b><br>${o.no} · ${hhmm(new Date())} · ${user ? user.n : ""}<hr><b>REMOVE</b><div class="r"><b>${q} × ${oi.n}</b></div><b>ADD</b><div class="r"><b>${q} × ${ni.n}</b></div><hr>Reason: ${ex.reason}<br>${ex.back ? "Old item returned to stock." : "Old item not returned to stock."}`,
+      exchangeSlipHTML({
+        no: o.no,
+        dept: o.dept,
+        label: o.label,
+        waiter: user ? user.n : "",
+        q,
+        from: oi.n,
+        to: ni.n,
+        reason: ex.reason,
+        back: ex.back
+      }),
       null,
       "Close"
     );

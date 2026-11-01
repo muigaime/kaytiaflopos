@@ -4,6 +4,7 @@ function boShow() {
   $("#boLogin").style.display = ok ? "none" : "grid";
   $("#app").style.display = ok ? "" : "none";
   if (ok) {
+    posKioskOff(); // signed in to Back Office: the POS rule no longer applies
     setUser(boUser.n);
     all();
   } else {
@@ -30,6 +31,7 @@ function boOpen() {
   boShow();
 }
 function posOpen() {
+  posKioskOn();
   boUser = null;
   $("#bo").classList.remove("show");
   $("#start").style.display = "none";

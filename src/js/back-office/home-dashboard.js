@@ -79,7 +79,7 @@ function mods() {
     ["Accounting", "book", "#2f9e75", "Next build", "Ledgers and tax"],
     ["M-Pesa & eTIMS", "phone", "#12804a", "Next build", "Sync and invoices"],
     ["Reports", "chart", "#2b7bb9", "14 reports", "Sales, staff, items, payments"],
-    ["Settings", "gear", "#7d8da1", "Next build", "Taxes, devices"]
+    ["Settings", "gear", "#7d8da1", "Bills and receipts", "Hotel details and till number"]
   ];
   $("#mods").innerHTML = M.map(
     ([n, ic, c, a, b], i) =>

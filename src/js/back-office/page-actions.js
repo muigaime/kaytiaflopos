@@ -93,6 +93,10 @@ $("#vSub").onclick = e => {
     recAct(a.slice(4), b);
     return;
   }
+  if (a.slice(0, 3) === "hs_") {
+    settingsAct(a.slice(3));
+    return;
+  }
   if (a.slice(0, 3) === "ap_") {
     apAct(a.slice(3), b);
     return;

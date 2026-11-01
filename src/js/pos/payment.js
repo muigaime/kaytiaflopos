@@ -112,7 +112,16 @@ $("#pAdd").onclick = () => {
 $("#pOk").onclick = () => {
   const direct = !payT,
     targets = direct
-      ? [{ label: $("#fTable").value || "Direct sale", dept, lines: { ...cart } }]
+      ? [
+          {
+            label: $("#fTable").value || "Walk-in",
+            guest: $("#fGuest").value,
+            covers: $("#fCov").value,
+            room: $("#fRoom").value,
+            dept,
+            lines: { ...cart }
+          }
+        ]
       : payT;
   const q = pays.map(p => ({ ...p, left: c2(p.amt) }));
   let html = "",
@@ -162,25 +171,25 @@ $("#pOk").onclick = () => {
     const cu = "KRACU0100" + Math.floor(1000 + Math.random() * 8999),
       inv = rno - 1000;
     rno++;
-    html +=
-      `<div style="page-break-after:always"><b>MWANGAZA SUPERMART</b><br>Nairobi CBD · PIN P051234567X<br>Tax Invoice ${no}<br>${direct ? "" : "Order: " + o.label + "<br>"}${new Date().toLocaleString("en-KE")}<br>Served by ${user ? user.n : ""} · ${o.dept}<hr>` +
-      lines
-        .map(
-          ({ it, q: n }) =>
-            `<div class="r"><span>${n} × ${it.n} (${it.t})</span><span>${(it.p * n).toFixed(2)}</span></div>`
-        )
-        .join("") +
-      `<hr><div class="r"><span>Net</span><span>${t.net.toFixed(2)}</span></div><div class="r"><span>VAT</span><span>${t.tax.toFixed(2)}</span></div><div class="r"><b>TOTAL</b><b>${t.g.toFixed(2)}</b></div>${al.join("")}${chv > 0 && bi === targets.length - 1 ? `<div class="r"><span>Change</span><span>${chv.toFixed(2)}</span></div>` : ""}<hr>CU serial: ${cu}<br>CU invoice no: ${inv}<br>${qr(no + cu)}Scan to verify on KRA eTIMS<br>(demo QR)${
-        direct
-          ? `<hr><i>Stock used: ${Object.entries(used)
-              .map(([k, v]) => ING[k] + " " + v)
-              .join(", ")}</i>`
-          : ""
-      }<hr></div>`;
+    html += receiptHTML({
+      no,
+      dept: o.dept,
+      label: o.label,
+      guest: o.guest,
+      covers: o.covers,
+      room: o.room,
+      waiter: user ? user.n : "",
+      lines: lines.map(({ it, q: n }) => ({ q: n, n: it.n, p: it.p, t: it.t })),
+      t,
+      paid: al.join(""),
+      change: bi === targets.length - 1 ? chv : 0,
+      credit: pays.some(p => p.m === "credit"),
+      fiscal: `CU serial: ${cu}<br>CU invoice no: ${inv}${qr(no + cu)}Scan to verify on KRA eTIMS<br>(demo QR)`
+    });
   });
   if (targets.length > 1)
     html +=
-      `<div><b>SETTLEMENT SUMMARY</b><br>${targets.length} bills · ${KES(gsum)}<hr>` +
+      `<div class="slip sl-order"><div class="sl-ot">Settlement summary</div><div class="sl-sub">${targets.length} bills · ${KES(gsum)}</div><div class="sl-paid">` +
       pays
         .map(
           p =>
@@ -190,13 +199,13 @@ $("#pOk").onclick = () => {
       (chv > 0
         ? `<div class="r"><span>Change given</span><span>${chv.toFixed(2)}</span></div>`
         : "") +
-      `</div>`;
+      `</div></div>`;
   pays.filter(p => p.m === "credit").forEach(p => (CU[p.ci].owes += p.amt));
   if (direct) {
     cart = {};
     kmsg = "";
     rider = null;
-    ["fTable", "fGuest", "fCov"].forEach(i => ($("#" + i).value = ""));
+    ["fTable", "fGuest", "fCov", "fRoom"].forEach(i => ($("#" + i).value = ""));
   } else
     targets.forEach(o => {
       const i = orders.indexOf(o);

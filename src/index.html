@@ -34,6 +34,23 @@
     <!-- The company logo, kept once here: Start, Back Office and Front Desk screens copy it. -->
     <img id="logoSrc" src="assets/logo.png" alt="" hidden />
 
+    <!-- POS: full screen lock (a Manager PIN is needed to leave) -->
+    <div id="fsGate">
+      <div class="fsg-box">
+        <h3 id="fsgT"></h3>
+        <p id="fsgS"></p>
+        <input
+          id="fsgPin"
+          type="password"
+          inputmode="numeric"
+          autocomplete="off"
+          placeholder="Manager PIN"
+        />
+        <div id="fsgMsg"></div>
+        <div class="fsg-row"><button id="fsgBack"></button><button id="fsgOk">Confirm</button></div>
+      </div>
+    </div>
+
     <!-- ==================== POS: cashier PIN login ==================== -->
     <div id="login">
       <button class="fsl" id="fsl">⛶ Maximise</button>
@@ -96,9 +113,7 @@
     <!-- ==================== POS: till (category rail, item grid, bill) ==================== -->
     <div class="pos">
       <nav class="rail">
-        <div class="mk">
-          <i class="hotelMark"></i><span class="hotelName"></span>
-        </div>
+        <div class="mk"><i class="hotelMark"></i><span class="hotelName"></span></div>
         <button id="spBtn" aria-label="Sale point"></button>
         <div class="cats" id="cats"></div>
         <div class="rtools">
@@ -137,7 +152,8 @@
             <label>Waiter</label><input id="fWaiter" readonly /><label>Currency</label
             ><input value="KES" readonly /> <label>Time</label><input id="fDT" readonly /><label
               >Covers</label
-            ><input id="fCov" type="number" inputmode="numeric" min="0" />
+            ><input id="fCov" type="number" inputmode="numeric" min="0" /><label>Room</label
+            ><input id="fRoom" />
           </div>
           <div class="tbl">
             <div class="th">
@@ -316,7 +332,7 @@
       <div class="box">
         <div class="rcpt" id="rc"></div>
         <div class="row">
-          <button class="mini" onclick="window.print()">Print 80mm</button
+          <button class="mini" id="rcPrint">Print</button
           ><button class="chip" id="rcCharge" style="display: none">Charge</button
           ><button class="chip on" id="rcClose" data-close>New sale</button>
         </div>
@@ -442,6 +458,7 @@
     <script src="js/pos/payment.js"></script>
     <script src="js/pos/orders.js"></script>
     <script src="js/pos/exchange.js"></script>
+    <script src="js/pos/slips.js"></script>
     <script src="js/pos/login-session.js"></script>
 
     <!-- ==================== Start menu (POS / Back Office / Front Desk) ==================== -->
@@ -866,6 +883,7 @@
     <script src="js/back-office/approvals.js" data-private></script>
     <script src="js/back-office/selling-points.js" data-private></script>
     <script src="js/back-office/production.js" data-private></script>
+    <script src="js/back-office/settings.js" data-private></script>
     <script src="js/back-office/navigation.js" data-private></script>
     <script src="js/back-office/demo-data.js" data-private></script>
     <script src="js/back-office/page-actions.js" data-private></script>

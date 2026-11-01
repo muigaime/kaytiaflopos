@@ -4,6 +4,7 @@ const TTL = {
     rep: "Reports",
     rooms: "Room reports",
     rec: "Recipes & Production",
+    settings: "Settings",
     recrep: "Recipe & Production Report",
     sales: "Sales & Orders",
     prod: "Products",
@@ -19,6 +20,7 @@ const TTL = {
     "Reports": "rep",
     "Room reports": "rooms",
     "Recipes & Production": "rec",
+    "Settings": "settings",
     "Recipe & Production Report": "recrep",
     "Sales & Orders": "sales",
     "Products": "prod",
@@ -37,7 +39,7 @@ function render() {
   $("#vSub").innerHTML =
     (view === "inv"
       ? ""
-      : `<div class="hello"><div><h1>${TTL[view]}</h1><p>${view === "sales" ? br + " · " + PL[per] : view === "recrep" ? "How each item was used in production and in recipes, and what remains" : view === "rec" ? "Turn kitchen materials into what you sell, by production or by recipe" : view === "rooms" ? "Occupancy, guests and room sales · revenue for the " + PL[per] : view === "rep" ? "Run any report for a date range and sale point" : view === "outlets" ? "Bars, restaurants, kitchens and shops that get stock from a store and sell on the POS" : view === "pur" ? "Purchase orders, receiving goods and what you have bought" : view === "vendors" ? "The vendors you buy from. You choose them on purchase orders and when receiving goods" : "Shared live with the POS terminal"}</p></div>${
+      : `<div class="hello"><div><h1>${TTL[view]}</h1><p>${view === "sales" ? br + " · " + PL[per] : view === "settings" ? "The details your guests see on bills and receipts" : view === "recrep" ? "How each item was used in production and in recipes, and what remains" : view === "rec" ? "Turn kitchen materials into what you sell, by production or by recipe" : view === "rooms" ? "Occupancy, guests and room sales · revenue for the " + PL[per] : view === "rep" ? "Run any report for a date range and sale point" : view === "outlets" ? "Bars, restaurants, kitchens and shops that get stock from a store and sell on the POS" : view === "pur" ? "Purchase orders, receiving goods and what you have bought" : view === "vendors" ? "The vendors you buy from. You choose them on purchase orders and when receiving goods" : "Shared live with the POS terminal"}</p></div>${
           view === "sales" || view === "rooms"
             ? `<div class="seg">${[
                 ["today", "Today"],

@@ -64,11 +64,15 @@ function doSend(label) {
       at: new Date(),
       guest: $("#fGuest").value.trim(),
       covers: $("#fCov").value.trim(),
+      room: $("#fRoom").value.trim(),
       rider: rider,
       waiter: user ? user.n : ""
     };
     orders.push(o);
-  } else if (rider && !o.rider) o.rider = rider;
+  } else {
+    if (rider && !o.rider) o.rider = rider;
+    o.room = o.room || $("#fRoom").value.trim();
+  }
   for (const [id, q] of Object.entries(round)) {
     o.lines[id] = (o.lines[id] || 0) + q;
     itemStockMove(get(id), q);
@@ -79,17 +83,24 @@ function doSend(label) {
   $("#mSend").classList.remove("show");
   drawCart();
   showRc(
-    `<b>KITCHEN / BAR ORDER</b><br>${o.dept} · <b>${o.label}</b><br>${o.no} · Round ${o.rounds}<br>${hhmm(new Date())} · ${user ? user.n : ""}${o.guest ? "<br>Guest: " + o.guest + (o.covers ? " · Covers: " + o.covers : "") : ""}${o.rider ? "<br>Rider: " + o.rider.n + " " + o.rider.p + " " + o.rider.a : ""}<hr>` +
-      Object.entries(round)
-        .map(([id, q]) => `<div class="r"><b>${q} × ${get(id).n}</b></div>`)
-        .join("") +
-      `<hr>${kmsg ? "<b>NOTE: " + kmsg + "</b><br>" : ""}Sent. Bill and charge later from Orders.`,
+    orderSlips(round, {
+      no: o.no,
+      dept: o.dept,
+      label: o.label,
+      guest: o.guest,
+      covers: o.covers,
+      room: o.room,
+      waiter: user ? user.n : o.waiter,
+      rider: o.rider,
+      round: o.rounds,
+      note: kmsg
+    }) + '<div class="sl-scr">Sent. Bill and charge later from Open orders.</div>',
     null,
     "Close"
   );
   kmsg = "";
   rider = null;
-  ["fTable", "fGuest", "fCov"].forEach(i => ($("#" + i).value = ""));
+  ["fTable", "fGuest", "fCov", "fRoom"].forEach(i => ($("#" + i).value = ""));
   drawCart();
 }
 function ordList() {
@@ -127,16 +138,19 @@ $("#ordList").onclick = e => {
     openPay([o]);
   }
   if (a === "bill") {
-    const t = totals(o.lines);
     showRc(
-      `<b>MWANGAZA SUPERMART</b><br>PROFORMA BILL<br>(not a tax invoice)<br>${o.label} · ${o.dept} · ${o.no}<br>${o.rider ? "Rider: " + o.rider.n + " " + o.rider.p + "<br>" : ""}${new Date().toLocaleString("en-KE")}<hr>` +
-        Object.entries(o.lines)
-          .map(
-            ([id, q]) =>
-              `<div class="r"><span>${q} × ${get(id).n}</span><span>${(get(id).p * q).toFixed(2)}</span></div>`
-          )
-          .join("") +
-        `<hr><div class="r"><span>Net</span><span>${t.net.toFixed(2)}</span></div><div class="r"><span>VAT</span><span>${t.tax.toFixed(2)}</span></div><div class="r"><b>TOTAL</b><b>${t.g.toFixed(2)}</b></div><hr>Please pay at the till.<br>Tax invoice issued on payment.`,
+      guestBillHTML({
+        no: o.no,
+        dept: o.dept,
+        label: o.label,
+        guest: o.guest,
+        covers: o.covers,
+        room: o.room,
+        waiter: o.waiter,
+        rider: o.rider,
+        lines: slipLines(o.lines),
+        t: totals(o.lines)
+      }),
       o,
       "Close"
     );

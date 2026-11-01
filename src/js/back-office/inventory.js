@@ -1485,6 +1485,7 @@ $("#vSub").oninput = e => {
     if (p === "rc") rcSync(f); // direct receive (receive.js)
     if (p === "vs") vsSync(f); // vendor statement (vendors.js)
     if (p === "pr" || p === "rcp" || p === "recb" || p === "recr") prSync(p, f);
+    if (p === "vh" || p === "hs") settingsPreview(); // settings.js
     if (p === "spe") speSync(f); // editing a selling point product (selling-points.js) // Recipes & Production (production.js)
   }
 };

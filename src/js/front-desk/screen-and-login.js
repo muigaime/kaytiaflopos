@@ -18,6 +18,7 @@ function fdDraw() {
   $("#fdBody").innerHTML = FD_VIEWS[fdView]();
 }
 function fdShow() {
+  posKioskOff(); // signed in to Front Desk: the POS rule no longer applies
   ensureRoomTypes();
   if (!ROOMS.length) fdSeed();
   $("#start").style.display = "none";

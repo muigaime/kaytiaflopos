@@ -847,3 +847,467 @@ body > .modal select:focus {
     transform: none;
   }
 }
+
+/* ---------------------------------------------------------------- compact menu
+   Busy outlets carry long menus, so tiles stay small; 64px is still an easy tap. */
+.pos .items {
+  grid-template-columns: repeat(auto-fill, minmax(116px, 1fr));
+  gap: 6px;
+}
+.pos .ms {
+  margin: 6px 2px 0;
+  gap: 10px;
+  font-size: 14px;
+}
+.pos .it {
+  grid-template-rows: 1fr auto;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 6px;
+  min-height: 64px;
+  padding: 7px 8px 6px;
+  border-radius: 5px;
+}
+.pos .it .nm {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  padding-right: 0;
+  font-size: 13px;
+  line-height: 1.2;
+}
+.pos .it.has .nm {
+  padding-right: 20px;
+}
+.pos .it .pr {
+  grid-column: 1;
+  grid-row: 2;
+  margin-top: 3px;
+  padding-top: 0;
+  border-top: 0;
+  font-size: 12px;
+}
+.pos .it .pr::before {
+  content: none;
+}
+.pos .it .lw {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: end;
+  margin-top: 0;
+  font-size: 10px;
+  white-space: nowrap;
+}
+.pos .it .in {
+  top: 5px;
+  right: 5px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9px;
+  font-size: 11px;
+}
+
+/* ---------------------------------------------------------------- full screen lock */
+#fsGate {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: none;
+  place-items: center;
+  padding: 16px;
+  background: rgba(14, 10, 6, 0.94);
+  color: #241b12;
+}
+#fsGate.show {
+  display: grid;
+}
+#fsGate .fsg-box {
+  width: min(420px, 100%);
+  display: grid;
+  gap: 12px;
+  padding: 24px;
+  background: #fffdf8;
+  border-top: 3px solid #c7a25a;
+  border-radius: 6px;
+}
+#fsGate h3 {
+  margin: 0;
+  font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+  font-size: 23px;
+  font-weight: 500;
+}
+#fsGate p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: #75695a;
+}
+#fsgPin {
+  padding: 12px 14px;
+  font-size: 18px;
+  letter-spacing: 0.2em;
+  background: transparent;
+  border: 1px solid #c7a25a;
+  border-radius: 8px;
+  color: #241b12;
+}
+#fsgPin::placeholder {
+  font-size: 14px;
+  letter-spacing: normal;
+}
+#fsgMsg {
+  min-height: 18px;
+  font-size: 13px;
+  color: #a4342a;
+}
+#fsGate .fsg-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+#fsGate button {
+  min-height: 46px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid #e2d9c8;
+  background: transparent;
+  color: #241b12;
+}
+#fsGate #fsgOk {
+  background: linear-gradient(180deg, #e3c98e, #c7a25a 55%, #9c7a36);
+  border-color: #9c7a36;
+  color: #1c1408;
+}
+
+/* ---------------------------------------------------------------- printed slips (80mm, black only) */
+#mRc .box {
+  max-width: 372px;
+}
+#rc {
+  max-height: 68vh;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+}
+.slip {
+  --sl-serif: "Playfair Display", Georgia, "Times New Roman", serif;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 302px;
+  margin: 0 auto 14px;
+  padding: 16px 14px;
+  background: #fffefa;
+  border: 1px solid #e3d8c3;
+  color: #111;
+  font:
+    12px/1.45 "Schibsted Grotesk",
+    Arial,
+    Helvetica,
+    sans-serif;
+  font-variant-numeric: lining-nums;
+  text-align: left;
+}
+.slip .sl-head {
+  text-align: center;
+}
+.slip .sl-crest {
+  width: 42px;
+  height: 42px;
+  margin: 0 auto 7px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #111;
+  border-radius: 50%;
+  outline: 1px solid #111;
+  outline-offset: 2px;
+  font: 500 21px/1 var(--sl-serif);
+}
+.slip .sl-name {
+  font: 600 20px/1.2 var(--sl-serif);
+}
+.slip .sl-co {
+  font-size: 11px;
+  line-height: 1.35;
+}
+.slip .sl-orn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 7px;
+  font-size: 8px;
+}
+.slip .sl-orn i {
+  flex: 1;
+  border-top: 1px solid #111;
+}
+.slip .sl-title {
+  font: 600 15px/1.2 var(--sl-serif);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.slip .sl-sub {
+  margin-top: 2px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.slip .sl-meta {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 2px 10px;
+  margin: 10px 0 8px;
+  font-size: 11.5px;
+}
+.slip .sl-meta div {
+  display: flex;
+  gap: 5px;
+  min-width: 0;
+}
+.slip .sl-meta .w {
+  grid-column: 1 / -1;
+}
+.slip .sl-meta span {
+  flex: none;
+}
+.slip .sl-meta span::after {
+  content: ":";
+}
+.slip .sl-meta b {
+  min-width: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.slip .sl-t {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
+}
+.slip .sl-t th {
+  padding: 4px 3px;
+  border-top: 1px solid #111;
+  border-bottom: 1px solid #111;
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-align: left;
+  text-transform: uppercase;
+}
+.slip .sl-t td {
+  padding: 5px 3px;
+  border-bottom: 1px dotted #111;
+  vertical-align: top;
+}
+.slip .sl-t small {
+  font-size: 9.5px;
+}
+.slip .n,
+.slip .sl-t th.n {
+  text-align: right;
+  white-space: nowrap;
+}
+.slip .sl-r,
+.slip .sl-paid .r,
+.slip .sl-total {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+.slip .sl-tots {
+  margin-top: 6px;
+}
+.slip .sl-total {
+  margin-top: 4px;
+  padding: 5px 0;
+  border-top: 1px solid #111;
+  border-bottom: 3px double #111;
+  font: 600 16px/1.2 var(--sl-serif);
+  font-variant-numeric: lining-nums;
+}
+.slip .sl-paid {
+  margin-top: 10px;
+}
+.slip h5 {
+  margin: 0 0 3px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.slip .sl-sign {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+.slip .sl-sign div {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+}
+.slip .sl-sign span {
+  flex: none;
+  font-weight: 600;
+}
+.slip .sl-sign i {
+  flex: 1;
+  border-bottom: 1px solid #111;
+}
+.slip .sl-till {
+  margin-top: 16px;
+  padding: 7px 4px;
+  border: 1px solid #111;
+  text-align: center;
+}
+.slip .sl-till span {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.slip .sl-till b {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.slip .sl-fiscal {
+  margin-top: 10px;
+  font-size: 10.5px;
+  text-align: center;
+}
+.slip .sl-fiscal .qr {
+  margin: 5px auto;
+  border-radius: 0;
+}
+.slip .sl-thanks {
+  margin-top: 12px;
+  font: italic 500 14px/1.3 var(--sl-serif);
+  text-align: center;
+}
+.slip .sl-small {
+  margin-top: 8px;
+  font-size: 10px;
+  text-align: center;
+}
+.slip .sl-foot {
+  margin-top: 10px;
+  font-size: 10.5px;
+  font-weight: 600;
+  text-align: center;
+}
+/* Orders: read at a glance across a busy kitchen */
+.slip .sl-ot {
+  padding: 7px 0;
+  border-top: 2px solid #111;
+  border-bottom: 2px solid #111;
+  font: 600 21px/1.15 var(--sl-serif);
+  letter-spacing: 0.05em;
+  text-align: center;
+  text-transform: uppercase;
+}
+.slip .sl-round {
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-align: center;
+  text-transform: uppercase;
+}
+.slip .sl-make {
+  border-top: 1px solid #111;
+}
+.slip .sl-make div {
+  display: flex;
+  gap: 10px;
+  padding: 6px 2px;
+  border-bottom: 1px dotted #111;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+.slip .sl-make b {
+  flex: none;
+  min-width: 26px;
+  font-weight: 800;
+}
+.slip .sl-h {
+  margin-top: 8px;
+}
+.slip .sl-note {
+  margin-top: 8px;
+  padding: 5px 7px;
+  border: 1px solid #111;
+  font-size: 13px;
+  font-weight: 700;
+}
+.sl-scr {
+  margin: 0 auto 4px;
+  font-size: 12.5px;
+  text-align: center;
+  color: var(--mute);
+}
+/* Back Office → Settings: samples of every slip */
+.set-prev {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 14px;
+  margin-top: 14px;
+}
+.set-prev .slip {
+  flex: 0 1 302px;
+  margin: 0;
+}
+@media print {
+  html.prc,
+  html.prc body {
+    height: auto !important;
+    overflow: visible !important;
+    background: none !important;
+  }
+  html.prc body > *:not(#mRc) {
+    display: none !important;
+  }
+  html.prc #mRc {
+    display: block !important;
+    position: static;
+    padding: 0;
+    background: none;
+    backdrop-filter: none;
+  }
+  html.prc #mRc .box {
+    display: block;
+    width: 80mm;
+    max-width: none;
+    max-height: none;
+    overflow: visible;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: none;
+  }
+  html.prc #mRc .box > .row,
+  html.prc .sl-scr {
+    display: none;
+  }
+  html.prc #rc {
+    position: static;
+    width: 80mm;
+    max-height: none;
+    overflow: visible;
+  }
+  html.prc .slip {
+    max-width: none;
+    margin: 0;
+    padding: 3mm;
+    border: 0;
+    background: none;
+    color: #000;
+  }
+  html.prc .slip + .slip {
+    break-before: page;
+  }
+}

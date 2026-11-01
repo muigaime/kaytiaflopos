@@ -24,7 +24,7 @@ const vsBlank = () => {
 };
 invF.vs = vsBlank();
 // Letterhead on statements (business name comes from the front desk settings).
-invF.vh = { addr: "", phone: "", email: "", web: "", pin: "" };
+invF.vh = { addr: "", phone: "", email: "", web: "", pin: "", till: "", thanks: "" };
 
 const slashDate = ymd => ymd.split("-").reverse().join("/"),
   daysApart = (a, b) => Math.round((new Date(b + "T00:00:00") - new Date(a + "T00:00:00")) / 864e5),

@@ -59,7 +59,7 @@ function drawGrid() {
           n = inCart(i.id);
         const head =
           catSel === "All" && i.c !== section ? `<h3 class="ms">${(section = i.c)}</h3>` : "";
-        return `${head}<button class="it${n ? " has" : ""}" style="--h:${hue(i.c)}" data-i="${i.id}" ${a <= 0 ? "disabled" : ""}>${n ? `<span class="in">${n}</span>` : ""}<span class="lw ${a <= 0 ? "out" : ""}">${a <= 0 && !n ? "Out of stock" : a < 10 && a > 0 ? a + " left" : ""}</span><span class="nm">${i.n}</span><span class="cg">${i.c}</span><span class="pr">${posMoney(i.p)}</span></button>`;
+        return `${head}<button class="it${n ? " has" : ""}" style="--h:${hue(i.c)}" data-i="${i.id}" title="${i.n.replace(/"/g, "&quot;")}" ${a <= 0 ? "disabled" : ""}>${n ? `<span class="in">${n}</span>` : ""}<span class="lw ${a <= 0 ? "out" : ""}">${a <= 0 && !n ? "Out of stock" : a < 10 && a > 0 ? a + " left" : ""}</span><span class="nm">${i.n}</span><span class="cg">${i.c}</span><span class="pr">${posMoney(i.p)}</span></button>`;
       })
       .join("") || '<div class="empty">No items in this category.</div>';
 }
@@ -135,7 +135,7 @@ function resetSale() {
   rider = null;
   nextQty = 1;
   selId = null;
-  ["fTable", "fGuest", "fCov"].forEach(i => ($("#" + i).value = ""));
+  ["fTable", "fGuest", "fCov", "fRoom"].forEach(i => ($("#" + i).value = ""));
   drawCart();
 }
 $("#grid").onclick = e => {
@@ -406,16 +406,19 @@ $("#settleBtn").onclick = () => {
 };
 $("#printBtn").onclick = () => {
   if (Object.keys(cart).length && !cur) {
-    const t = totals();
     showRc(
-      `<b>MWANGAZA SUPERMART</b><br>PROFORMA BILL<br>(not a tax invoice)<br>${$("#fTable").value || $("#fGuest").value || "Walk-in"} · ${dept}<br>${new Date().toLocaleString("en-KE")}<hr>` +
-        Object.entries(cart)
-          .map(
-            ([id, q]) =>
-              `<div class="r"><span>${q} × ${get(id).n}</span><span>${(get(id).p * q).toFixed(2)}</span></div>`
-          )
-          .join("") +
-        `<hr><div class="r"><span>Net</span><span>${t.net.toFixed(2)}</span></div><div class="r"><span>VAT</span><span>${t.tax.toFixed(2)}</span></div><div class="r"><b>TOTAL</b><b>${t.g.toFixed(2)}</b></div><hr>Tax invoice issued on payment.`,
+      guestBillHTML({
+        no: $("#fBill").value,
+        dept,
+        label: $("#fTable").value || "Walk-in",
+        guest: $("#fGuest").value,
+        covers: $("#fCov").value,
+        room: $("#fRoom").value,
+        waiter: user ? user.n : "",
+        rider,
+        lines: slipLines(cart),
+        t: totals()
+      }),
       null,
       "Close"
     );
@@ -423,6 +426,7 @@ $("#printBtn").onclick = () => {
 };
 $("#lock").onclick = e => {
   const go = () => {
+    posKioskOn(); // the next person starts in full screen
     user = null;
     pin = "";
     pdraw();
