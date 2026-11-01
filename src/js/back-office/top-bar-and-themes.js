@@ -127,8 +127,8 @@ function greet(n) {
 function all() {
   render();
   dayBar();
-  repTiles();
   roomsCard();
+  $("#kl").textContent = br + " · " + PL[per];
   kpis();
   mods();
   trend();

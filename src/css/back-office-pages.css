@@ -462,12 +462,12 @@
   color: #2ec4b6;
 }
 /* Choice buttons: GRN receipt type, and "Stock for <selling point>" in the item popup */
-:is(.inv, #itModal) .grn-modes {
+:is(.inv, #itModal, #speModal) .grn-modes {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
 }
-:is(.inv, #itModal) .grn-mode {
+:is(.inv, #itModal, #speModal) .grn-mode {
   display: grid;
   gap: 3px;
   text-align: left;
@@ -478,10 +478,10 @@
   color: var(--ink);
   cursor: pointer;
 }
-:is(.inv, #itModal) .grn-mode b {
+:is(.inv, #itModal, #speModal) .grn-mode b {
   font-size: 14px;
 }
-:is(.inv, #itModal) .grn-mode b i {
+:is(.inv, #itModal, #speModal) .grn-mode b i {
   font-style: normal;
   background: #f2a43a;
   color: #2b1d05;
@@ -490,14 +490,14 @@
   font-size: 11px;
   margin-left: 4px;
 }
-:is(.inv, #itModal) .grn-mode span {
+:is(.inv, #itModal, #speModal) .grn-mode span {
   font-size: 12px;
   color: var(--mute);
 }
-:is(.inv, #itModal) .grn-mode:hover {
+:is(.inv, #itModal, #speModal) .grn-mode:hover {
   border-color: #2ec4b6;
 }
-:is(.inv, #itModal) .grn-mode.on {
+:is(.inv, #itModal, #speModal) .grn-mode.on {
   border-color: #2ec4b6;
   background:
     linear-gradient(135deg, rgba(46, 196, 182, 0.2), rgba(46, 196, 182, 0.04)), var(--card);
@@ -515,7 +515,7 @@
   padding: 5px 8px;
 }
 @media (max-width: 800px) {
-  :is(.inv, #itModal) .grn-modes {
+  :is(.inv, #itModal, #speModal) .grn-modes {
     grid-template-columns: minmax(0, 1fr);
   }
 }
@@ -1349,4 +1349,249 @@
 .inv .dmg-in {
   max-width: 90px;
   border-color: rgba(242, 107, 107, 0.55);
+}
+
+/* Popups with a fixed header and footer: the item form and the selling point delete check */
+#bo .box.itm {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  width: min(820px, 96vw);
+  max-width: min(820px, 96vw);
+  max-height: 90vh;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  box-shadow: 0 24px 60px rgba(5, 20, 31, 0.35);
+}
+.itm-h {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 22px 14px;
+  border-bottom: 1px solid var(--line);
+}
+.itm-h h3 {
+  margin: 0;
+  font-size: 19px;
+}
+.itm-h p {
+  margin: 3px 0 0;
+  color: var(--mute);
+  font-size: 13px;
+}
+#bo .itm-x {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--mute);
+}
+#bo .itm-x:hover {
+  color: var(--ink);
+  border-color: var(--mute);
+}
+.itm-b {
+  flex: 1;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 4px 22px 16px;
+}
+.itm-s {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+.itm-s:last-child {
+  border-bottom: 0;
+  padding-bottom: 2px;
+}
+.itm-s h4 {
+  margin: 0 0 10px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.itm-s h4 span {
+  margin-left: 4px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.itm-g {
+  display: grid;
+  gap: 12px;
+  align-items: start;
+}
+.itm-g3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.itm-g5 {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+.itm-gn {
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr);
+}
+#bo .itm-g label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink);
+}
+#bo .itm-g input,
+#bo .itm-g select {
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  box-sizing: border-box;
+  margin: 0;
+}
+.itm-hint {
+  margin-top: 8px;
+  font-size: 12.5px;
+  color: var(--mute);
+}
+.itm-hint:empty {
+  display: none;
+}
+.itm-eq {
+  align-self: end;
+  padding-bottom: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--mute);
+}
+#itModal .it-ways,
+#speModal .it-ways {
+  margin-bottom: 12px;
+}
+#itModal .grn-mode,
+#speModal .grn-mode {
+  padding: 10px 12px;
+}
+#itModal .grn-mode b,
+#speModal .grn-mode b {
+  font-size: 13px;
+}
+.itm-f {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 22px;
+  border-top: 1px solid var(--line);
+}
+#bo .itm-f button {
+  width: auto;
+  padding: 10px 18px;
+}
+.sp-del {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 7px;
+  font-size: 13.5px;
+}
+.sp-del.bad {
+  color: var(--bad);
+}
+#bo button.sp-del-go {
+  background: #b3261e;
+  border-color: #b3261e;
+  color: #fff;
+}
+@media (max-width: 720px) {
+  .itm-g5 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .itm-g3,
+  .itm-gn {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Item popup: "Made in-house" */
+.itm-tick {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  font-size: 13px;
+  color: var(--mute);
+  cursor: pointer;
+}
+#bo .itm-tick input {
+  flex: none;
+  width: 17px;
+  height: 17px;
+  margin: 1px 0 0;
+}
+.itm-tick b {
+  display: block;
+  color: var(--ink);
+}
+#itModal .it-ways2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.itm-g4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.itm-span2 {
+  grid-column: span 2;
+}
+@media (max-width: 720px) {
+  .itm-g4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .itm-span2 {
+    grid-column: auto;
+  }
+}
+
+/* Editing a selling point product: the ingredient row */
+.spe-lines {
+  margin-top: 10px;
+}
+#speModal .spe-lines .fr > * {
+  min-width: 0;
+}
+#speModal .tw {
+  margin-top: 10px;
+}
+
+/* Kitchen materials: stock on its way here */
+.km-wait {
+  margin: 10px 0 14px;
+  padding: 10px 14px;
+  border: 1px solid rgba(242, 164, 58, 0.45);
+  border-radius: 12px;
+  background: rgba(242, 164, 58, 0.08);
+}
+.inv .pn .km-wait h4 {
+  margin: 0 0 6px;
+  color: #f2a43a;
+}
+.km-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 6px 0;
+  font-size: 13px;
+}
+.km-act {
+  display: flex;
+  flex: none;
+  gap: 6px;
 }

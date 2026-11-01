@@ -1,0 +1,849 @@
+/* ==================== POS: five-star look ====================
+   A fine-dining room, not a till: the menu reads like a printed menu card, the bill like an ivory guest
+   check, and brass is kept for the one thing that matters on each screen.
+   Skin only: layout breakpoints stay in pos.css. "Theme" switches the room between day and evening;
+   the guest check stays ivory in both. */
+.pos,
+#login,
+#bye,
+#shMgr,
+body > .modal {
+  --bg: #f3eee4;
+  --card: #fffdf8;
+  --ink: #241b12;
+  --mute: #75695a;
+  --line: #e2d9c8;
+  --brand: #1c1611;
+  --brand-ink: #f6efe0;
+  --chip: #f4eee2;
+  --tint: #efe6d4;
+  --amber: #b58a3c;
+  --amber-ink: #1c1408;
+  --rail: #17120d;
+  --go: #1f6f55;
+  --warn: #9a6a12;
+  --bad: #a4342a;
+  --ok: #1f6f55;
+  --sh: 0 30px 70px rgba(30, 20, 8, 0.28);
+  /* fixed across both rooms */
+  --brass: #c7a25a;
+  --brass-hi: #e3c98e;
+  --brass-lo: #9c7a36;
+  --ivory: #fbf6ea;
+  --ivory-ink: #2a2016;
+  --ivory-mute: #7c6e5a;
+  --ivory-line: #e3d8c3;
+  --serif: "Playfair Display", Georgia, "Times New Roman", serif;
+  --hair: rgba(199, 162, 90, 0.28);
+}
+:root[data-theme="dark"] .pos,
+:root[data-theme="dark"] #login,
+:root[data-theme="dark"] #bye,
+:root[data-theme="dark"] #shMgr,
+:root[data-theme="dark"] body > .modal {
+  --bg: #120e0a;
+  --card: #1d1712;
+  --ink: #f1e9da;
+  --mute: #a4977f;
+  --line: #342a1f;
+  --brand: #c7a25a;
+  --brand-ink: #1c1408;
+  --chip: #261e17;
+  --tint: #2c2318;
+  --rail: #0b0806;
+  --go: #6fbf9f;
+  --warn: #e2b866;
+  --bad: #e58a7c;
+  --ok: #6fbf9f;
+  --sh: 0 30px 70px rgba(0, 0, 0, 0.65);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .pos,
+  :root:not([data-theme="light"]) #login,
+  :root:not([data-theme="light"]) #bye,
+  :root:not([data-theme="light"]) #shMgr,
+  :root:not([data-theme="light"]) body > .modal {
+    --bg: #120e0a;
+    --card: #1d1712;
+    --ink: #f1e9da;
+    --mute: #a4977f;
+    --line: #342a1f;
+    --brand: #c7a25a;
+    --brand-ink: #1c1408;
+    --chip: #261e17;
+    --tint: #2c2318;
+    --rail: #0b0806;
+    --go: #6fbf9f;
+    --warn: #e2b866;
+    --bad: #e58a7c;
+    --ok: #6fbf9f;
+    --sh: 0 30px 70px rgba(0, 0, 0, 0.65);
+  }
+}
+
+/* ---------------------------------------------------------------- the room */
+.pos {
+  background:
+    radial-gradient(1100px 500px at 62% -12%, rgba(199, 162, 90, 0.14), transparent 70%), var(--bg);
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.pos .b {
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 10px;
+  box-shadow: none;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+.pos .b:hover {
+  border-color: var(--brass);
+}
+
+/* ---------------------------------------------------------------- left: the menu's contents */
+.pos .rail {
+  background: linear-gradient(180deg, rgba(199, 162, 90, 0.1), transparent 240px), var(--rail);
+  border-right: 1px solid rgba(199, 162, 90, 0.22);
+  color: #d9ccb6;
+}
+.pos .mk {
+  gap: 10px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(199, 162, 90, 0.22);
+}
+.pos .mk i {
+  background: none;
+  border: 1px solid var(--brass);
+  color: var(--brass-hi);
+  border-radius: 50%;
+  font-family: var(--serif);
+  font-style: normal;
+  font-weight: 500;
+  box-shadow:
+    inset 0 0 0 2px var(--rail),
+    inset 0 0 0 3px rgba(199, 162, 90, 0.45);
+}
+.pos .mk span {
+  color: #f4ecdc;
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 1.25;
+  letter-spacing: 0.01em;
+}
+.pos #spBtn {
+  background: transparent;
+  border: 1px solid rgba(199, 162, 90, 0.35);
+  border-radius: 10px;
+  color: #f4ecdc;
+  font-weight: 600;
+}
+.pos .cat {
+  background: none;
+  border: 0;
+  border-radius: 0;
+  color: #b9ab93;
+  font-family: var(--serif);
+  font-size: 16px;
+  font-weight: 500;
+  text-align: left;
+  border-left: 2px solid transparent;
+  box-shadow: none;
+}
+.pos .cat:hover {
+  color: #f4ecdc;
+}
+.pos .cat.on {
+  background: linear-gradient(90deg, rgba(199, 162, 90, 0.16), transparent);
+  color: var(--brass-hi);
+  border-left-color: var(--brass);
+  box-shadow: none;
+}
+.pos .rail .b {
+  background: transparent;
+  border: 1px solid rgba(199, 162, 90, 0.22);
+  color: #c9bba3;
+  font-weight: 500;
+}
+.pos .rail .b:hover {
+  border-color: var(--brass);
+  color: #f4ecdc;
+}
+.pos .rail #shiftBtn {
+  background: rgba(111, 191, 159, 0.12);
+  border-color: rgba(111, 191, 159, 0.45);
+  color: #a9dcc6;
+}
+.pos .rail #home {
+  background: transparent;
+  border-color: var(--brass);
+  color: var(--brass-hi);
+}
+
+/* ---------------------------------------------------------------- top of the room */
+.pos .tb {
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--hair);
+  border-radius: 0;
+  box-shadow: none;
+  padding-left: 2px;
+  padding-right: 2px;
+}
+.pos .tb .bkm {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  box-shadow: none;
+}
+.pos .ttl b {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 24px;
+  letter-spacing: 0.005em;
+  color: var(--ink);
+}
+.pos .ttl span {
+  color: var(--mute);
+  letter-spacing: 0.02em;
+}
+.pos .tb #newSale {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: var(--brand-ink);
+}
+
+/* ---------------------------------------------------------------- the menu card */
+.pos .items {
+  align-content: start;
+  gap: 10px;
+}
+.pos .ms {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 10px 2px 0;
+  font-family: var(--serif);
+  font-size: 19px;
+  font-weight: 500;
+  font-style: italic;
+  color: var(--ink);
+}
+.pos .ms:first-child {
+  margin-top: 2px;
+}
+.pos .ms::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--brass), transparent);
+}
+.pos .it {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  grid-template-columns: minmax(0, 1fr);
+  width: 100%;
+  justify-items: stretch;
+  min-height: 112px;
+  padding: 14px 15px 12px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(40, 28, 12, 0.05);
+  color: var(--ink);
+  text-align: left;
+  transition:
+    border-color 0.18s,
+    box-shadow 0.18s,
+    transform 0.12s;
+}
+.pos .it::before,
+.pos .it::after {
+  display: none;
+}
+.pos .it:hover:not(:disabled) {
+  border-color: var(--brass);
+  box-shadow: 0 8px 22px rgba(60, 40, 12, 0.13);
+  transform: translateY(-1px);
+}
+.pos .it:active:not(:disabled) {
+  transform: translateY(0) scale(0.99);
+}
+.pos .it .nm {
+  font-family: var(--serif);
+  font-size: 16.5px;
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--ink);
+  padding-right: 22px;
+}
+.pos .it .cg {
+  display: none;
+}
+.pos .it .pr {
+  grid-row: 3;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px dotted var(--line);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: 0.01em;
+}
+.pos .it .pr::before {
+  content: "KES ";
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--mute);
+}
+.pos .it .lw {
+  grid-row: 2;
+  align-self: start;
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--warn);
+}
+.pos .it .lw:empty {
+  display: none;
+}
+.pos .it .lw.out {
+  color: var(--bad);
+}
+.pos .it.has {
+  border-color: var(--brass);
+  box-shadow: inset 0 0 0 1px var(--brass);
+  background: linear-gradient(160deg, rgba(199, 162, 90, 0.13), transparent 60%), var(--card);
+}
+.pos .it .in {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: var(--brass);
+  color: #1c1408;
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: none;
+}
+.pos .it:disabled {
+  background: transparent;
+  border-style: dashed;
+  box-shadow: none;
+  opacity: 1;
+}
+.pos .it:disabled .nm,
+.pos .it:disabled .pr {
+  color: var(--mute);
+}
+
+/* ---------------------------------------------------------------- bottom tools */
+.pos .botb .b {
+  background: transparent;
+  color: var(--ink);
+  font-weight: 500;
+}
+
+/* ---------------------------------------------------------------- right: the guest check */
+.pos .rp {
+  background: none;
+  border: 0;
+  box-shadow: none;
+}
+.pos .paper {
+  position: relative;
+  --line: var(--ivory-line);
+  background: var(--ivory);
+  color: var(--ivory-ink);
+  border: 0;
+  border-top: 3px solid var(--brass);
+  border-radius: 4px;
+  box-shadow: 0 18px 44px rgba(40, 26, 8, 0.2);
+  padding: 14px 16px 12px;
+}
+.pos .rh {
+  color: var(--ivory-mute);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+.pos .rh b {
+  color: var(--ivory-ink);
+}
+.pos .rh2 {
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--ivory-line);
+  border-radius: 0;
+  padding-bottom: 8px;
+  color: var(--ivory-ink);
+  font-family: var(--serif);
+  font-size: 19px;
+  font-weight: 500;
+  text-align: center;
+}
+.pos .fm {
+  color: var(--ivory-mute);
+}
+.pos .fm label {
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ivory-mute);
+}
+.pos .fm input {
+  font-size: 12.5px;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--ivory-line);
+  border-radius: 0;
+  color: var(--ivory-ink);
+  padding-left: 2px;
+  padding-right: 2px;
+}
+.pos .fm input:focus {
+  outline: 0;
+  border-bottom-color: var(--brass-lo);
+}
+.pos .fm input::placeholder {
+  color: #a99a82;
+}
+.pos .tbl {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+.pos .th {
+  background: none;
+  border-bottom: 1px solid var(--ivory-ink);
+  color: var(--ivory-mute);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.pos .th,
+.pos #lines .tr {
+  grid-template-columns: 76px minmax(0, 1fr) 70px 80px;
+  gap: 8px;
+}
+.pos #lines .tr {
+  border-bottom: 1px dotted var(--ivory-line);
+  color: var(--ivory-ink);
+  font-size: 13.5px;
+}
+.pos #lines .tr.sel {
+  background: rgba(199, 162, 90, 0.16);
+}
+.pos #lines .qc {
+  color: var(--ivory-ink);
+}
+.pos #lines .qc button {
+  background: transparent;
+  border: 1px solid #cdbfa6;
+  color: var(--ivory-ink);
+  box-shadow: none;
+}
+.pos #lines .qc button:hover {
+  border-color: var(--brass-lo);
+}
+.pos #lines .empty {
+  font-family: var(--serif);
+  font-style: italic;
+  color: var(--ivory-mute);
+}
+.pos .tt {
+  color: var(--ivory-mute);
+}
+.pos .tt .gl {
+  font-family: var(--serif);
+  font-size: 15px;
+  color: var(--ivory-ink);
+}
+.pos .tt .val {
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  color: var(--ivory-ink);
+  font-weight: 500;
+}
+.pos .tt .val.gv {
+  border-top: 1px solid var(--ivory-ink);
+  border-bottom: 3px double var(--ivory-ink);
+  border-left: 0;
+  background: none;
+  font-family: var(--serif);
+  font-variant-numeric: lining-nums tabular-nums;
+  font-size: 25px;
+  font-weight: 600;
+  color: var(--ivory-ink);
+}
+.pos .ml .b {
+  background: transparent;
+  border-color: #d4c7b0;
+  color: var(--ivory-ink);
+  font-weight: 500;
+}
+.pos .ml .b:hover {
+  border-color: var(--brass-lo);
+}
+
+/* ---------------------------------------------------------------- actions: one clear next step */
+.pos .acts {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.pos .act {
+  min-height: 46px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-bottom-width: 1px;
+  border-radius: 8px;
+  box-shadow: none;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+.pos .act:hover:not(:disabled) {
+  border-color: var(--brass);
+}
+.pos .act.a3 {
+  order: -2;
+  grid-column: span 2;
+  min-height: 58px;
+  background: linear-gradient(180deg, var(--brass-hi), var(--brass) 55%, var(--brass-lo));
+  border: 1px solid var(--brass-lo);
+  color: #1c1408;
+  font-family: var(--serif);
+  font-size: 18px;
+  font-weight: 600;
+  box-shadow: 0 8px 20px rgba(120, 88, 24, 0.3);
+}
+.pos .act.a1 {
+  order: -1;
+  grid-column: span 2;
+  min-height: 58px;
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--bg);
+  font-family: var(--serif);
+  font-size: 18px;
+  font-weight: 500;
+}
+.pos .act.a2,
+.pos .act.a4,
+.pos .act.a5 {
+  background: transparent;
+  font-weight: 500;
+}
+.pos .act.a6 {
+  background: transparent;
+  color: var(--bad);
+  font-weight: 500;
+}
+.pos .act:disabled {
+  opacity: 0.45;
+  box-shadow: none;
+}
+@media (max-width: 1100px) {
+  .pos .acts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .pos .act.a3,
+  .pos .act.a1 {
+    grid-column: span 1;
+  }
+}
+
+/* ---------------------------------------------------------------- arrival: the PIN screen */
+#login {
+  background: var(--bg);
+  color: var(--ink);
+}
+#login .lt {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(760px 420px at 50% 42%, rgba(199, 162, 90, 0.17), transparent 70%),
+    repeating-linear-gradient(45deg, transparent 0 22px, rgba(199, 162, 90, 0.035) 22px 23px),
+    repeating-linear-gradient(-45deg, transparent 0 22px, rgba(199, 162, 90, 0.035) 22px 23px),
+    #120d09;
+  border: 1px solid rgba(199, 162, 90, 0.3);
+  border-radius: 6px;
+  color: #f4ecdc;
+  text-align: center;
+  align-items: center;
+}
+#login .lt::after {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  border: 1px solid rgba(199, 162, 90, 0.28);
+  border-radius: 3px;
+  pointer-events: none;
+}
+#login .lt .bkm {
+  position: absolute;
+  z-index: 1;
+  top: 26px;
+  left: 26px;
+  background: transparent;
+  border: 1px solid rgba(199, 162, 90, 0.45);
+  color: #e9dcc3;
+  box-shadow: none;
+}
+#login .crest {
+  margin: 12vh auto 22px;
+  width: 92px;
+  height: 92px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--brass);
+  border-radius: 50%;
+  font-family: var(--serif);
+  font-size: 44px;
+  font-weight: 500;
+  color: var(--brass-hi);
+  box-shadow:
+    inset 0 0 0 4px #120d09,
+    inset 0 0 0 5px rgba(199, 162, 90, 0.5);
+}
+#login .lt h1 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: clamp(30px, 3.4vw, 46px);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  color: #f8f1e2;
+}
+#login .lt .ltag {
+  margin: 10px 0 0;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--brass-hi);
+}
+#login .lclock {
+  margin-top: 28px;
+  font-family: var(--serif);
+  font-size: 56px;
+  font-weight: 400;
+  color: #f8f1e2;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+#login .meta {
+  justify-content: center;
+  margin-top: 4px;
+  color: #b9ab93;
+}
+#login .meta .sp {
+  display: none;
+}
+#login .rt {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--brass);
+  border-radius: 6px;
+  box-shadow: var(--sh);
+}
+#pinDisp {
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  color: var(--ink);
+  letter-spacing: 12px;
+}
+#pinDisp:empty::before {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 18px;
+  letter-spacing: 0;
+  color: var(--mute);
+}
+#pinMsg {
+  color: var(--mute);
+}
+#login .kp button {
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-variant-numeric: lining-nums;
+  font-size: 25px;
+  font-weight: 500;
+  box-shadow: none;
+}
+#login .kp button:hover {
+  border-color: var(--brass);
+}
+#login .kp .en {
+  background: linear-gradient(180deg, var(--brass-hi), var(--brass) 55%, var(--brass-lo));
+  border-color: var(--brass-lo);
+  color: #1c1408;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+#login #swb {
+  background: transparent;
+  border: 1px dashed var(--brass);
+  border-radius: 8px;
+  color: var(--ink);
+}
+#login .bt button,
+#login .fsl {
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  box-shadow: none;
+}
+
+/* ---------------------------------------------------------------- the shift ledger */
+#shMgr {
+  background:
+    radial-gradient(1100px 500px at 50% -12%, rgba(199, 162, 90, 0.14), transparent 70%), var(--bg);
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+#shMgr h1,
+#shMgr h2 {
+  font-family: var(--serif);
+  font-weight: 500;
+}
+#shMgr h4 {
+  font-family: var(--serif);
+  font-size: 16px;
+  font-weight: 500;
+}
+#shMgr .shc,
+#shMgr .shm-rib {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  box-shadow: none;
+}
+#shMgr input:not([type="checkbox"]),
+#shMgr select {
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--ink);
+}
+/* Figures to read are tinted, so the box to fill in (Actual cash in till) stands out. */
+#shMgr input[readonly] {
+  background: var(--chip);
+  border-color: transparent;
+}
+#shMgr input:not([readonly]):not([type="checkbox"]) {
+  border-color: var(--brass);
+}
+#shMgr button {
+  border-radius: 8px;
+}
+
+/* ---------------------------------------------------------------- popups */
+body > .modal {
+  background: rgba(16, 11, 6, 0.66);
+}
+body > .modal .box {
+  background: var(--card);
+  color: var(--ink);
+  border: 1px solid var(--hair);
+  border-top: 3px solid var(--brass);
+  border-radius: 6px;
+  box-shadow: var(--sh);
+}
+body > .modal .box h3 {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 500;
+}
+body > .modal .big {
+  font-family: var(--serif);
+  font-variant-numeric: lining-nums;
+  font-weight: 500;
+  color: var(--ink);
+}
+body > .modal .chip {
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+}
+body > .modal .chip:hover {
+  border-color: var(--brass);
+}
+body > .modal .chip.on {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: var(--brand-ink);
+}
+body > .modal #pOk,
+body > .modal #selChgAll,
+body > .modal #exGo {
+  background: linear-gradient(180deg, var(--brass-hi), var(--brass) 55%, var(--brass-lo));
+  border-color: var(--brass-lo);
+  color: #1c1408;
+  font-weight: 700;
+}
+body > .modal .mini {
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+}
+body > .modal .status {
+  background: var(--chip);
+  border-radius: 6px;
+}
+body > .modal input,
+body > .modal select {
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+}
+body > .modal input:focus,
+body > .modal select:focus {
+  outline: 0;
+  border-color: var(--brass);
+  box-shadow: 0 0 0 3px rgba(199, 162, 90, 0.2);
+}
+
+/* Items appear quietly; no movement for anyone who has asked for none. */
+@keyframes lineIn {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+}
+.pos #lines .tr {
+  animation: lineIn 0.2s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pos .it,
+  .pos #lines .tr {
+    animation: none;
+    transition: none;
+  }
+  .pos .it:hover:not(:disabled) {
+    transform: none;
+  }
+}

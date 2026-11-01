@@ -125,12 +125,10 @@ $("#pOk").onclick = () => {
       used = {};
     gsum += t.g;
     if (direct)
-      lines.forEach(({ it, q: n }) =>
-        Object.entries(it.r).forEach(([k, v]) => {
-          stock[k] -= v * n;
-          used[k] = (used[k] || 0) + v * n;
-        })
-      );
+      lines.forEach(({ it, q: n }) => {
+        itemStockMove(it, n);
+        Object.entries(it.r).forEach(([k, v]) => (used[k] = (used[k] || 0) + v * n));
+      });
     let need = c2(t.g);
     const al = [],
       mx = {};

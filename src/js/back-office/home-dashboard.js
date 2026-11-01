@@ -258,8 +258,13 @@ const NOTES = () => {
       ic: "pos",
       c: "i"
     });
-  if (APPR.length)
-    L.push({ t: APPR.length + " approvals waiting", s: "Stock requests", ic: "check", c: "i" });
+  if (APPR.length + apCount())
+    L.push({
+      t: APPR.length + apCount() + " approvals waiting",
+      s: "Purchase orders, requisitions, issues and stock requests",
+      ic: "check",
+      c: "i"
+    });
   return L.length ? L : [{ t: "All clear", s: "Nothing needs attention", ic: "check", c: "g" }];
 };
 function addReq() {
@@ -278,17 +283,31 @@ function addReq() {
 }
 $("#newreq").onclick = addReq;
 function appr() {
-  $("#apv").innerHTML = APPR.length
-    ? APPR.map(
-        (a, i) =>
-          `<div class="row"><span class="ri i">${I(a.ic)}</span><div class="t"><b>${esc(a.t)}</b><span>${a.id} · ${a.s}</span></div><div style="display:flex;gap:5px"><button class="mini ok" data-ap="${i}" data-d="1">Approve</button><button class="mini" data-ap="${i}" data-d="0">Reject</button></div></div>`
-      ).join("")
-    : '<p style="color:var(--mute);text-align:center;padding:26px 0">All caught up. Nothing is waiting.</p>';
-  $("#apc").textContent = APPR.length;
+  const docs = apHomeHTML();
+  $("#apv").innerHTML =
+    (APPR.length
+      ? APPR.map(
+          (a, i) =>
+            `<div class="row"><span class="ri i">${I(a.ic)}</span><div class="t"><b>${esc(a.t)}</b><span>${a.id} · ${a.s}</span></div><div style="display:flex;gap:5px"><button class="mini ok" data-ap="${i}" data-d="1">Approve</button><button class="mini" data-ap="${i}" data-d="0">Reject</button></div></div>`
+        ).join("")
+      : "") +
+    (docs ||
+      (APPR.length
+        ? ""
+        : '<p style="color:var(--mute);text-align:center;padding:26px 0">All caught up. Nothing is waiting.</p>'));
+  $("#apc").textContent = APPR.length + apCount() + apToIssue().length;
+  // The approval popup, when opened from this panel.
+  $("#apHome").innerHTML = view === "home" ? apModalIfOpen() : "";
   $("#nc").textContent = NOTES().filter(n => n.c !== "g").length;
   $("#nb").textContent = lowCount();
 }
+$("#apHome").onclick = e => {
+  const b = e.target.closest("[data-a]");
+  if (b && b.dataset.a.slice(0, 3) === "ap_") apAct(b.dataset.a.slice(3), b);
+};
 $("#apv").onclick = e => {
+  const b = e.target.closest('[data-a^="ap_"]');
+  if (b) return apAct(b.dataset.a.slice(3), b);
   const i = e.target.dataset.ap;
   if (i === undefined) return;
   const a = APPR.splice(+i, 1)[0],

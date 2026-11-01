@@ -23,7 +23,8 @@ kaytia-pos-backoffice/
 │  │  ├─ start-screen.css                 start menu (POS / Back Office / Front Desk)
 │  │  ├─ shift-manager.css                back button, card swipe, shift screen, shift print
 │  │  ├─ front-desk.css                   Front Desk login, rooms, folios, housekeeping
-│  │  └─ back-office-pages.css            inventory, reports, themes, popovers
+│  │  ├─ back-office-pages.css            inventory, reports, themes, popovers
+│  │  └─ pos-five-star.css                POS look: menu card, guest check, brass accents (skin only; loads last)
 │  └─ js/                                 plain scripts sharing one global scope, loaded in index.html order
 │     ├─ pos/
 │     │  ├─ catalog-stock.js              tax, stores, ingredients, menu items
@@ -56,6 +57,7 @@ kaytia-pos-backoffice/
 │        ├─ approvals.js                  manager approval (PIN) of purchase orders, requisitions and issue notes
 │        ├─ inventory-reports.js          inventory reports: purchases, issues, damages (daily/weekly/monthly/yearly cost)
 │        ├─ stock-take-report.js          stock taking report (after each count, printable), variance report, stock take history, search boxes
+│        ├─ production.js                 Recipes & Production: kitchen materials, production batches, recipes
 │        ├─ selling-points.js             selling points (bars, restaurants, kitchens, shops): create, products, stock, staff
 │        ├─ navigation.js                 page titles, render(), go()
 │        ├─ demo-data.js                  seed(): sample sales

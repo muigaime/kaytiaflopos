@@ -54,7 +54,8 @@ const NAV = [
       ["Products", "box"],
       ["Inventory", "box"],
       ["Selling points", "pos"],
-      ["Recipes &amp; Production", "chef"]
+      ["Recipes &amp; Production", "chef"],
+      ["Recipe &amp; Production Report", "chart"]
     ]
   ],
   [
@@ -77,6 +78,7 @@ const NAV = [
     "Insights",
     [
       ["Reports", "chart"],
+      ["Room reports", "book"],
       ["Audit log", "shield"]
     ]
   ],

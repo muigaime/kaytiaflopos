@@ -11,7 +11,7 @@ const REP_KINDS = {
   },
   iss: {
     title: "Issues report",
-    what: "Stock issued from stores to selling points (and, if chosen, transfers between stores).",
+    what: "Stock issued from stores to selling points (and, if chosen, transfers between selling points).",
     party: "Issued to"
   },
   dmg: {
@@ -115,8 +115,10 @@ function periodOf(ms, by) {
   return { key: String(d.getFullYear()), label: String(d.getFullYear()) };
 }
 
-/** Places a report covers: stores, plus selling points for purchases (goods can be received there directly). */
-const repPlaces = kind => (kind === "pur" ? [...STORES, ...ALLD] : STORES);
+/** Places a report covers: stores, plus selling points for purchases (goods can be received there directly)
+ *  and for transfers (selling points transfer to each other). */
+const repAllPlaces = kind => kind === "pur" || (kind === "iss" && invRep.show !== "issues");
+const repPlaces = kind => (repAllPlaces(kind) ? [...STORES, ...ALLD] : STORES);
 /** Rows of a report for the chosen range and place. */
 function repFiltered(kind) {
   const A = new Date(invR[0] + "T00:00:00").getTime(),
@@ -175,14 +177,14 @@ function invReportHTML(kind) {
     `<div class="seg2">${list.map(([v, l]) => `<button class="${v === cur ? "on" : ""}" data-a="${act}" ${attr}="${v}">${l}</button>`).join("")}</div>`;
 
   return `<div class="pn"><h4>${K.title}</h4><div class="stk">${K.what}</div>
-  <div class="fr" style="align-items:end;margin-top:8px"><label>From<input type="date" data-ir="0" value="${invR[0]}"></label><label>To<input type="date" data-ir="1" value="${invR[1]}"></label>${seg(REP_RANGES, "", "inv_rprange", "data-rng")}</div>
+  <div class="fr" style="align-items:end;margin-top:8px"><label>From<input type="date" data-ir="0" value="${invR[0]}"></label><label>To<input type="date" data-ir="1" value="${invR[1]}"></label>${seg(kind === "pur" ? REP_RANGES.filter(([r]) => r !== "30") : REP_RANGES, "", "inv_rprange", "data-rng")}</div>
   <div class="fr" style="align-items:end"><label>Totals by${seg(REP_BY, invRep.by, "inv_rpby", "data-b")}</label>
-   <label>${kind === "pur" ? "Received into" : "Store"}<select data-rp="store">${opts([kind === "pur" ? "All places" : "All stores", ...repPlaces(kind)], invRep.store === "All" ? (kind === "pur" ? "All places" : "All stores") : invRep.store)}</select></label>
+   <label>${kind === "pur" ? "Received into" : repAllPlaces(kind) ? "From" : "Store"}<select data-rp="store">${opts([repAllPlaces(kind) ? "All places" : "All stores", ...repPlaces(kind)], invRep.store === "All" ? (repAllPlaces(kind) ? "All places" : "All stores") : invRep.store)}</select></label>
    ${
      kind === "iss"
        ? `<label>Show<select data-rp="show">${[
            ["issues", "Issues to selling points"],
-           ["transfers", "Transfers between stores"],
+           ["transfers", "Transfers between selling points"],
            ["both", "Both"]
          ]
            .map(

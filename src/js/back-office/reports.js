@@ -216,9 +216,9 @@ const REP = {
     ]
   ]
 };
-const tb = (c, r, f) => {
+const tb = (c, r, f, none = "No sales for this report, date range and sale point.") => {
   const n = i => (c[i][0] === "#" ? ' class="n"' : "");
-  return `<div class="tw"><table class="t"><tr>${c.map(x => (x[0] === "#" ? `<th class="n">${x.slice(1)}</th>` : `<th>${x}</th>`)).join("")}</tr>${r.length ? r.map(x => `<tr>${x.map((v, i) => `<td${n(i)}>${esc(v)}</td>`).join("")}</tr>`).join("") : `<tr><td colspan="${c.length}"><div class="empty">No sales for this report, date range and sale point.</div></td></tr>`}${r.length && f ? `<tr>${f.map((v, i) => `<td${n(i)}><b>${esc(v)}</b></td>`).join("")}</tr>` : ""}</table></div>`;
+  return `<div class="tw"><table class="t"><tr>${c.map(x => (x[0] === "#" ? `<th class="n">${x.slice(1)}</th>` : `<th>${x}</th>`)).join("")}</tr>${r.length ? r.map(x => `<tr>${x.map((v, i) => `<td${n(i)}>${esc(v)}</td>`).join("")}</tr>`).join("") : `<tr><td colspan="${c.length}"><div class="empty">${none}</div></td></tr>`}${r.length && f ? `<tr>${f.map((v, i) => `<td${n(i)}><b>${esc(v)}</b></td>`).join("")}</tr>` : ""}</table></div>`;
 };
 const V = {
   rep() {
@@ -527,7 +527,8 @@ function rrData(k) {
   R.sort((x, y) => (x[3] < y[3] ? -1 : 1));
   return [["Type", "Guest", "Room", "Date"], R];
 }
-function roomsCard() {
+/** The rooms summary cards. Shown on the dashboard and on Insights → Room reports. */
+function roomsKpiHTML() {
   if (!ROOMS.length) fdSeed();
   const [a, b] = rrRange(),
     c = {};
@@ -538,131 +539,87 @@ function roomsCard() {
   const occ = c.occ || 0,
     m = revenueByDay(a, b),
     rev = sum(Object.keys(m), d => m[d].room),
-    mealRev = sum(Object.keys(m), d => m[d].meal),
-    ih = RESERVATIONS.filter(r => r.status === "inhouse"),
-    [cols, rows, foot] = rrData(hrr),
+    mealRev = sum(Object.keys(m), d => m[d].meal);
+  return `<div class="kpis">${[
+    ["Rooms", ROOMS.length, "in the hotel"],
+    ["Occupied", occ, (c.vac || 0) + " vacant · " + (c.res || 0) + " reserved today"],
+    [
+      "Occupancy",
+      ROOMS.length ? Math.round((occ / ROOMS.length) * 100) + "%" : "0%",
+      (c.dirty || 0) + " dirty · " + (c.ooo || 0) + " out of order"
+    ],
+    ["Room revenue", KES(rev), "room rate only · " + PL[per]],
+    ["Breakfast and meals", KES(mealRev), PL[per]],
+    [
+      "Pending payments",
+      KES(
+        sum(
+          RESERVATIONS.filter(
+            r => (r.status === "inhouse" || r.status === "out") && folioOf(r).bal > 0.009
+          ),
+          r => folioOf(r).bal
+        )
+      ),
+      RESERVATIONS.filter(
+        r => (r.status === "inhouse" || r.status === "out") && folioOf(r).bal > 0.009
+      ).length + " guest(s) owing"
+    ]
+  ]
+    .map(
+      ([l, v, d]) =>
+        `<div class="k"><div class="l"><span>${l}</span></div><div class="v">${v}</div><div class="d"><span>${d}</span></div></div>`
+    )
+    .join("")}</div>`;
+}
+/** Insights → Room reports: tabs, summary cards and the full table. */
+function roomsReportHTML() {
+  if (!ROOMS.length) fdSeed();
+  const [cols, rows, foot] = rrData(hrr),
     q = [
       ["occ", "Occupancy Report"],
       ["ih", "In-house Guests"],
       ["rv", "Periodic Room Sales"]
     ];
-  $("#rml").textContent =
-    ROOMS.length + " rooms · " + occ + " occupied · " + PL[per] + " revenue " + KES(rev);
-  $("#rooms").innerHTML =
-    `<div class="fr" style="align-items:center;margin-bottom:12px"><div style="position:relative;flex:none"><button class="btn p" data-rr="menu">Rooms Report ▾</button><div class="pop" id="rrmenu" style="left:0;right:auto;top:44px;width:260px;padding:6px">${Object.entries(
-      RRL
+  return `<div class="fr" style="align-items:center;margin-bottom:12px"><div style="position:relative;flex:none"><button class="btn p" data-rr="menu">Rooms Report ▾</button><div class="pop rrmenu" style="left:0;right:auto;top:44px;width:260px;padding:6px">${Object.entries(
+    RRL
+  )
+    .map(
+      ([k, n]) =>
+        `<button class="mini" style="width:100%;text-align:left;border:0;background:${k === hrr ? "var(--tint)" : "none"};padding:9px 10px;margin:1px 0" data-rr="${k}">${n}</button>`
     )
-      .map(
-        ([k, n]) =>
-          `<button class="mini" style="width:100%;text-align:left;border:0;background:${k === hrr ? "var(--tint)" : "none"};padding:9px 10px;margin:1px 0" data-rr="${k}">${n}</button>`
-      )
-      .join(
-        ""
-      )}</div></div>${q.map(([k, n]) => `<button class="btn ${k === hrr ? "p" : ""}" data-rr="${k}" style="flex:none">${n}</button>`).join("")}<button class="btn a" data-rr="fd" style="flex:none">Open Front Desk</button></div>
- <div class="kpis" style="margin-bottom:12px">${[
-   ["Rooms", ROOMS.length, "in the hotel"],
-   ["Occupied", occ, (c.vac || 0) + " vacant · " + (c.res || 0) + " reserved today"],
-   [
-     "Occupancy",
-     ROOMS.length ? Math.round((occ / ROOMS.length) * 100) + "%" : "0%",
-     (c.dirty || 0) + " dirty · " + (c.ooo || 0) + " out of order"
-   ],
-   ["Room revenue", KES(rev), "room rate only · " + PL[per]],
-   ["Breakfast and meals", KES(mealRev), PL[per]],
-   [
-     "Pending payments",
-     KES(
-       sum(
-         RESERVATIONS.filter(
-           r => (r.status === "inhouse" || r.status === "out") && folioOf(r).bal > 0.009
-         ),
-         r => folioOf(r).bal
-       )
-     ),
-     RESERVATIONS.filter(
-       r => (r.status === "inhouse" || r.status === "out") && folioOf(r).bal > 0.009
-     ).length + " guest(s) owing"
-   ]
- ]
-   .map(
-     ([l, v, d]) =>
-       `<div class="k"><div class="l"><span>${l}</span></div><div class="v">${v}</div><div class="d"><span>${d}</span></div></div>`
-   )
-   .join("")}</div>
- <h3>${RRL[hrr]}</h3><div class="cs">${["rv", "pay", "rt", "gl"].includes(hrr) ? rrRange().join(" to ") : "Live position"}${rows.length > 12 ? " · showing first 12 rows" : ""}</div>${tb(cols, rows.slice(0, 12), foot)}`;
+    .join(
+      ""
+    )}</div></div>${q.map(([k, n]) => `<button class="btn ${k === hrr ? "p" : ""}" data-rr="${k}" style="flex:none">${n}</button>`).join("")}<button class="btn a" data-rr="fd" style="flex:none">Open Front Desk</button></div>
+ <div style="margin-bottom:12px">${roomsKpiHTML()}</div>
+ <h3>${RRL[hrr]}</h3><div class="cs">${["rv", "pay", "rt", "gl"].includes(hrr) ? rrRange().join(" to ") : "Live position"}</div>${tb(cols, rows, foot, "Nothing to show for this report and period.")}`;
 }
-$("#rooms").onclick = e => {
-  const b = e.target.closest("[data-rr]");
-  if (!b) return;
+function roomsCard() {
+  $("#rooms").innerHTML = roomsKpiHTML(); // dashboard: the summary cards only
+  const occ = ROOMS.filter(r => roomStatus(r) === "occ").length,
+    [a, b] = rrRange(),
+    m = revenueByDay(a, b);
+  $("#rml").textContent =
+    ROOMS.length +
+    " rooms · " +
+    occ +
+    " occupied · " +
+    PL[per] +
+    " revenue " +
+    KES(sum(Object.keys(m), d => m[d].room));
+}
+V.rooms = () => `<div class="pn">${roomsReportHTML()}</div>`;
+/** A click on the rooms report tabs (Room reports page). */
+function rrAct(b) {
   const k = b.dataset.rr;
-  if (k === "menu") {
-    $("#rrmenu").classList.toggle("show");
-    return;
-  }
+  if (k === "menu") return void b.parentElement.querySelector(".rrmenu").classList.toggle("show");
   if (k === "fd") return go("Front Desk");
   hrr = k;
-  roomsCard();
-};
-document.addEventListener("click", e => {
-  const m = $("#rrmenu");
-  if (m && !e.target.closest("[data-rr=menu]")) m.classList.remove("show");
-});
-let hrp = "sc";
-function repTiles() {
-  const L = sel(0),
-    [c, r, f, note] = REP[hrp][1](L),
-    q = [
-      ["com", "Sales Commission Report"],
-      ["is", "Item Sales Report"],
-      ["dr", "Daily Revenue Report"]
-    ];
-  $("#rl").textContent =
-    L.length + " bills · " + KES(sum(L, s => s.g)) + " in the " + PL[per] + " · " + br;
-  $("#reps").innerHTML =
-    `<div class="fr" style="align-items:center;margin-bottom:12px"><div style="position:relative;flex:none"><button class="btn p" data-hr="menu">Sales Report ▾</button><div class="pop" id="rmenu" style="left:0;right:auto;top:44px;width:310px;padding:6px">${Object.entries(
-      REP
-    )
-      .slice(0, 11)
-      .map(
-        ([k, x]) =>
-          `<button class="mini" style="width:100%;text-align:left;border:0;background:${k === hrp ? "var(--tint)" : "none"};padding:9px 10px;margin:1px 0" data-hr="${k}">${x[0]}</button>`
-      )
-      .join(
-        ""
-      )}</div></div>${q.map(([k, n]) => `<button class="btn ${k === hrp ? "p" : ""}" data-hr="${k}" style="flex:none">${n}</button>`).join("")}<button class="btn a" data-hr="full" style="flex:none">Open full report</button></div><h3>${REP[hrp][0]}</h3><div class="cs">${PL[per]} · ${br}${r.length > 12 ? " · showing first 12 rows" : ""}</div>${tb(c, r.slice(0, 12), f)}${note ? `<div class="cs" style="margin-top:8px">${note}</div>` : ""}`;
-}
-$("#reps").onclick = e => {
-  const b = e.target.closest("[data-hr]");
-  if (!b) return;
-  const k = b.dataset.hr;
-  if (k === "menu") {
-    $("#rmenu").classList.toggle("show");
-    return;
-  }
-  if (k !== "full") {
-    hrp = k;
-    return repTiles();
-  }
-  rp = hrp;
-  rf = ymd(rngOf(0)[0]);
-  rt = ymd(rngOf(0)[1] - 1);
-  rd = br === BRS[0] ? "All" : br;
-  view = "rep";
-  document
-    .querySelectorAll("#nav .nv")
-    .forEach(x => x.classList.toggle("on", x.dataset.n === "Reports"));
   all();
-};
+}
 document.addEventListener("click", e => {
-  const m = $("#rmenu");
-  if (m && !e.target.closest("[data-hr=menu]")) m.classList.remove("show");
+  if (!e.target.closest("[data-rr=menu]"))
+    document.querySelectorAll(".rrmenu").forEach(m => m.classList.remove("show"));
 });
-$("#reps").onchange = e => {
-  if (e.target.dataset.h === "sel") {
-    hrp = e.target.value;
-    repTiles();
-  }
-};
 function dayBar() {
   const d = curDay(),
     os = openShifts();

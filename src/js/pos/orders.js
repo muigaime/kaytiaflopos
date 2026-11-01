@@ -71,7 +71,7 @@ function doSend(label) {
   } else if (rider && !o.rider) o.rider = rider;
   for (const [id, q] of Object.entries(round)) {
     o.lines[id] = (o.lines[id] || 0) + q;
-    Object.entries(get(id).r).forEach(([k, v]) => (stock[k] -= v * q));
+    itemStockMove(get(id), q);
   }
   o.rounds++;
   cart = {};

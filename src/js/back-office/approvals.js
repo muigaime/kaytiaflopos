@@ -195,6 +195,69 @@ function apIssueNotes(store) {
   }</div>`;
 }
 
+// ---------------------------------------------------------------- dashboard: Approvals & tasks
+/** Approved requisitions the store still has to issue. */
+const apToIssue = () => REQS.filter(isOpenReq);
+/** Latest approved requisitions and issue notes that need nothing more. */
+const apRecent = n =>
+  [...REQS.filter(r => r.appr && !isOpenReq(r)), ...ISSUES.filter(x => x.appr)]
+    .sort((a, b) => (a.appr.at < b.appr.at ? 1 : -1))
+    .slice(0, n);
+/** Rows for the dashboard panel: waiting for a decision, approved to issue, recently approved. */
+function apHomeHTML() {
+  const head = (t, n) =>
+      n
+        ? `<div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin:12px 0 2px">${t}</div>`
+        : "",
+    row = (c, ic, t, s, btns) =>
+      `<div class="row"><span class="ri ${c}">${I(ic)}</span><div class="t"><b>${t}</b><span>${s}</span></div>${btns ? `<div style="display:flex;gap:5px">${btns}</div>` : ""}</div>`,
+    decide = (kind, d) =>
+      `<button class="mini ok" data-a="ap_open" data-k="${kind}" data-id="${esc(d.id)}" data-act="approve">Approve</button><button class="mini" data-a="ap_open" data-k="${kind}" data-id="${esc(d.id)}" data-act="reject">Reject</button>`,
+    items = d => d.lines.map(x => `${esc(itemInfo(x.k).name)} ${qtyBoth(x.k, x.q)}`).join(", "),
+    wait = apPending().sort((a, b) => (a.d.at < b.d.at ? -1 : 1)),
+    todo = apToIssue(),
+    recent = apRecent(5);
+  return (
+    head("Waiting for approval", wait.length) +
+    wait
+      .map(({ kind, d }) =>
+        row(
+          "w",
+          kind === "lpo" ? "truck" : kind === "req" ? "book" : "cart",
+          `${AP_KIND[kind]} ${esc(d.id)}`,
+          `${apTitle(kind, d).replace(esc(d.id) + " · ", "")} · ${kind === "lpo" ? "KES " + m2(lpoTotal(d)) : items(d)}`,
+          decide(kind, d)
+        )
+      )
+      .join("") +
+    head("Approved · to issue", todo.length) +
+    todo
+      .map(r => {
+        const st = r.store || STORES[0],
+          held = r.lines.reduce((a, x) => a + reqPend(r, x.k), 0);
+        return row(
+          "i",
+          "book",
+          `Requisition ${esc(r.id)}`,
+          `${esc(r.dept)} asks ${esc(st)} · ${items(r)}${held ? " · issue note waiting for approval" : ""}`,
+          `<button class="mini" data-a="ap_go" data-l="${esc(st)}">Issue stock</button>`
+        );
+      })
+      .join("") +
+    head("Recently approved", recent.length) +
+    recent
+      .map(d =>
+        row(
+          "g",
+          "check",
+          `${d.from ? "Issue" : "Requisition"} ${esc(d.id)}`,
+          `${d.from ? esc(d.from) + " → " + esc(d.to) : esc(d.dept) + " · " + esc(d.status)} · ${apNote(d)}`
+        )
+      )
+      .join("")
+  );
+}
+
 // ---------------------------------------------------------------- actions (data-a="ap_…")
 function apAct(a, b) {
   const d = b.dataset;
@@ -203,6 +266,12 @@ function apAct(a, b) {
     all();
     const p = $(d.act === "reject" ? "#apWhy" : "#apPin");
     return p && p.focus();
+  }
+  if (a === "go") {
+    // An approved requisition on the dashboard: go and issue it.
+    STKT.loc = d.l;
+    invT = "req";
+    return go("Inventory");
   }
   if (a === "close") {
     apM = null;

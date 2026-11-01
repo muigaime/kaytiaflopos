@@ -30,6 +30,11 @@ function fdBrand() {
     const e = $(x);
     if (e) e.textContent = FD_SETTINGS.name;
   });
+  // The POS carries the hotel's name and its initial as a crest.
+  document.querySelectorAll(".hotelName").forEach(e => (e.textContent = FD_SETTINGS.name));
+  document
+    .querySelectorAll(".hotelMark")
+    .forEach(e => (e.textContent = (FD_SETTINGS.name || "H").trim().charAt(0).toUpperCase()));
 }
 function fdSeed() {
   [

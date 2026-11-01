@@ -47,8 +47,8 @@ function stMovesAll(loc, t0) {
     if (m.loc !== loc || m.at < t0) return;
     const a = (A[m.k] = A[m.k] || { pur: 0, inn: 0, out: 0, sold: 0, dmg: 0, adj: 0 });
     if (m.t === "RECEIVE") a.pur += m.q;
-    else if (m.t === "ISSUE_IN" || m.t === "TRANS_IN") a.inn += m.q;
-    else if (m.t === "ISSUE_OUT" || m.t === "TRANS_OUT") a.out -= m.q;
+    else if (m.t === "ISSUE_IN" || m.t === "TRANS_IN" || m.t === "PROD_IN") a.inn += m.q;
+    else if (m.t === "ISSUE_OUT" || m.t === "TRANS_OUT" || m.t === "PROD_OUT") a.out -= m.q;
     else if (m.t === "SALE" || m.t === "SALE_RET") a.sold -= m.q;
     else if (m.t === "DAMAGE") a.dmg -= m.q;
     else if (m.t === "ADJUST") a.adj += m.q;
@@ -214,6 +214,7 @@ const ST_CSS = `.st-doc{position:relative;background:#fff;color:#111;border-radi
 .st-doc .st-meta div{display:flex;gap:10px}
 .st-doc .st-meta span{min-width:96px;font-weight:700}
 .st-doc .st-t{width:100%;border-collapse:collapse}
+.st-doc .rr-h{font-size:13px;margin:16px 0 4px}
 .st-doc .st-t th{font-size:11px;text-align:left;border-bottom:2px solid #111;padding:5px 4px;vertical-align:bottom}
 .st-doc .st-t td{padding:5px 4px;border-bottom:1px dotted #999;vertical-align:top}
 .st-doc .st-t small{display:block;color:#666;font-size:10.5px}

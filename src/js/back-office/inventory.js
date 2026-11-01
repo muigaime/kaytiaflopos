@@ -1,11 +1,10 @@
-// ---- inventory: stores, item setup, receive, purchase orders, requisitions, issue, transfer, damage, stock master ----
+// ---- inventory: stores, item setup, receive, purchase orders, requisitions, issue, damage, stock master ----
 // Stores (STORES) hold purchased stock. Selling points (ALLD) get stock from a store by requisition or issue.
 let invT = "stores";
 const invF = {
     rc: { store: STORES[0], sup: "", ref: "", lines: [] },
     rq: { dept: ALLD[0], store: STORES[0], note: "", lines: [] },
-    is: { from: STORES[0], to: ALLD[0], note: "", lines: [] },
-    tr: { from: STORES[0], to: ALLD[0], note: "", lines: [] },
+    is: { from: STORES[0], to: "", note: "", lines: [] },
     dm: { loc: STORES[0], k: "", q: "", why: "Damaged" },
     st: { name: "" },
     po: { store: STORES[0], sup: "", due: "", note: "", lines: [] },
@@ -258,7 +257,6 @@ const RAIL = [
   ["master", "Stock Master", "box"],
   ["req", "Requisitions", "book"],
   ["issue", "Issue", "cart", "store"],
-  ["transfer", "Transfer", "swap"],
   ["damage", "Damage", "alert"],
   "-",
   ["h", "Reports"],
@@ -304,7 +302,7 @@ const strip = () => {
 };
 /** "Main Store" / "Pool Bar (selling point)" as shown in headings. */
 const placeLabel = l => `<b>${esc(l)}</b>${isStore(l) ? "" : " (selling point)"}`;
-// ---- buying units on issue / transfer / request: type crates or pcs, stock moves in pcs ----
+// ---- buying units on issue / request / transfer: type crates or pcs, stock moves in pcs ----
 /** Units <select> for item k (buying unit first, e.g. "Crate (24 pcs)", then the unit of measure). */
 const unitSel = (id, k, cur = "buy", attr = "") =>
   `<select id="${id}" ${attr}>${k ? rcUnitOpts(k, cur) : ""}</select>`;
@@ -331,22 +329,24 @@ function mRows() {
     t0 = new Date(STKT.since).getTime(),
     agg = {};
   MOV.filter(m => m.loc === loc && m.at >= t0).forEach(m => {
-    const a = (agg[m.k] = agg[m.k] || { add: 0, inn: 0, sold: 0, dmg: 0, out: 0 });
+    const a = (agg[m.k] = agg[m.k] || { add: 0, inn: 0, sold: 0, dmg: 0, out: 0, prod: 0 });
     // Added: received, plus stock adjustments (either way). Damages: written off as damaged only.
     if (m.t === "RECEIVE" || m.t === "ADJUST") a.add += m.q;
     else if (m.t === "ISSUE_IN" || m.t === "TRANS_IN") a.inn += m.q;
     else if (m.t === "SALE" || m.t === "SALE_RET") a.sold -= m.q;
     else if (m.t === "DAMAGE") a.dmg -= m.q;
+    else if (m.t === "PROD_IN" || m.t === "PROD_OUT") a.prod += m.q;
     else if (m.t === "ISSUE_OUT" || m.t === "TRANS_OUT") a.out -= m.q;
   });
   const mk = (code, name, cost, grp, price, k, div) => {
-    const a = agg[k] || { add: 0, inn: 0, sold: 0, dmg: 0, out: 0 },
+    const a = agg[k] || { add: 0, inn: 0, sold: 0, dmg: 0, out: 0, prod: 0 },
       sys = have(loc, k) / div,
       A = a.add / div,
       In = a.inn / div,
       So = a.sold / div,
       Dm = a.dmg / div,
-      Ou = a.out / div;
+      Ou = a.out / div,
+      Pr = a.prod / div;
     return {
       code,
       name,
@@ -356,8 +356,9 @@ function mRows() {
       k,
       div,
       key: kind + "|" + loc + "|" + k + "|" + code,
-      op: sys - (A + In - So - Dm - Ou),
+      op: sys - (A + In - So - Dm - Ou + Pr),
       add: A,
+      prod: Pr,
       inn: In,
       sold: So,
       dmg: Dm,
@@ -409,9 +410,9 @@ function masterHTML() {
          const p = STKT.phys[r.key],
            has = p !== undefined && p !== "" && !isNaN(parseFloat(p)),
            v = has ? parseFloat(p) - r.sys : 0;
-         return `<tr${findAttr("master", r.code, r.name, r.grp)}><td>${r.code}</td><td>${esc(r.name)}</td><td class="n">${m2(r.cost)}</td><td>${esc(r.grp)}</td><td class="n">${r.price === "" ? "" : m2(r.price)}</td><td class="n">${fq(r.op)}</td><td class="n">${fq(r.add)}</td><td class="n">${fq(0)}</td><td class="n">${fq(r.inn)}</td><td class="n">${fq(r.sold)}</td><td><input type="number" min="0" step="any" class="dmg-in" data-dm="${esc(r.key)}" value="${Math.abs(r.dmg) < 1e-9 ? "" : +r.dmg.toFixed(3)}" placeholder="0" title="Type the quantity damaged: the change is written off (the Narration is the reason)"></td><td class="n">${fq(r.out)}</td><td class="n"><b>${fq(r.sys)}</b></td><td><input type="number" step="any" data-ph="${esc(r.key)}" value="${p === undefined ? "" : esc(p)}" style="max-width:110px"></td><td class="n ${v < 0 ? "neg" : ""}" data-vr="${esc(r.key)}" data-sys="${r.sys}">${has ? fq(v) : ""}</td><td><input data-pn="${esc(r.key)}" value="${esc(STKT.narr[r.key] || "")}" placeholder="Reason"></td></tr>`;
+         return `<tr${findAttr("master", r.code, r.name, r.grp)}><td>${r.code}</td><td>${esc(r.name)}</td><td class="n">${m2(r.cost)}</td><td>${esc(r.grp)}</td><td class="n">${r.price === "" ? "" : m2(r.price)}</td><td class="n">${fq(r.op)}</td><td class="n">${fq(r.add)}</td><td class="n">${fq(r.prod)}</td><td class="n">${fq(r.inn)}</td><td class="n">${fq(r.sold)}</td><td><input type="number" min="0" step="any" class="dmg-in" data-dm="${esc(r.key)}" value="${Math.abs(r.dmg) < 1e-9 ? "" : +r.dmg.toFixed(3)}" placeholder="0" title="Type the quantity damaged: the change is written off (the Narration is the reason)"></td><td class="n">${fq(r.out)}</td><td class="n"><b>${fq(r.sys)}</b></td><td><input type="number" step="any" data-ph="${esc(r.key)}" value="${p === undefined ? "" : esc(p)}" style="max-width:110px"></td><td class="n ${v < 0 ? "neg" : ""}" data-vr="${esc(r.key)}" data-sys="${r.sys}">${has ? fq(v) : ""}</td><td><input data-pn="${esc(r.key)}" value="${esc(STKT.narr[r.key] || "")}" placeholder="Reason"></td></tr>`;
        }).join("")
-     : '<tr><td colspan="16" class="stk">No items for this source. Receive, issue or transfer stock first, or tick "Show stock with zero balances".</td></tr>'
+     : '<tr><td colspan="16" class="stk">No items for this source. Receive or issue stock first, or tick "Show stock with zero balances".</td></tr>'
  }</table></div></div>`;
 }
 /** A selling point asks a store for stock (raised from the Selling points page). lines: [{ k, q }] in units. */
@@ -467,27 +468,11 @@ function issHTML() {
   const F = invF.is,
     L = recent(["ISSUE_OUT"], 15).filter(m => m.loc === STKT.loc);
   F.from = STKT.loc;
-  F.to = pick(F.to, ALLD);
+  // Until someone chooses, stock goes to the store's materials store first (Recipes & Production).
+  F.to = ALLD.includes(F.to) ? F.to : issueDefault(F.from);
   return `<div class="pn"><h4>Issue stock from ${placeLabel(F.from)} to a selling point</h4><div class="fr"><label>Issue to selling point<select data-iv="is.to">${opts(ALLD, F.to)}</select></label><label>Note<input data-iv="is.note" value="${esc(F.note)}" placeholder="Optional"></label></div>${lineEd("is")}<button class="chip on" data-a="inv_isspost">Raise issue note</button><div class="stk">The stock moves when a manager approves the issue note.</div></div>
  ${apIssueNotes(F.from)}
  <div class="pn tw"><h4>Recent issues</h4>${tb(
-   ["Date", "Reference", "From", "To", "Item", "#Quantity", "By"],
-   L.map(m => [dt2(m.at), m.ref, m.loc, m.peer, iN(m.k), fq(-m.q), m.by])
- )}</div>`;
-}
-function trfHTML() {
-  const F = invF.tr,
-    L = recent(["TRANS_OUT"], 15).filter(m => m.loc === STKT.loc);
-  F.from = STKT.loc;
-  // Stores transfer to stores; selling points transfer to other selling points (stock goes back by requisition).
-  const peers = (isStore(F.from) ? STORES : ALLD).filter(l => l !== F.from);
-  F.to = pick(F.to, peers);
-  return `<div class="pn"><h4>Transfer stock from ${placeLabel(F.from)}</h4>${
-    peers.length
-      ? `<div class="fr"><label>To<select data-iv="tr.to">${opts(peers, F.to)}</select></label><label>Note<input data-iv="tr.note" value="${esc(F.note)}" placeholder="Optional"></label></div>${lineEd("tr")}<button class="chip on" data-a="inv_trpost">Transfer stock</button>`
-      : `<div class="stk">There is no other ${isStore(F.from) ? "store" : "selling point"} to transfer to.</div>`
-  }</div>
- <div class="pn tw"><h4>Recent transfers</h4>${tb(
    ["Date", "Reference", "From", "To", "Item", "#Quantity", "By"],
    L.map(m => [dt2(m.at), m.ref, m.loc, m.peer, iN(m.k), fq(-m.q), m.by])
  )}</div>`;
@@ -628,7 +613,9 @@ function itPreview() {
     c = $("#itCost"),
     dupEl = $("#itDup");
   if (dupEl) {
-    const dup = itemDuplicate(F.name, F.code, F.edit),
+    // A recipe or attached product is not a new stock item, so it may share a stock item's name.
+    const dup =
+        itemMadeWay(F) === "recipe" || itemSpLink(F) ? "" : itemDuplicate(F.name, F.code, F.edit),
       named = F.name.trim() !== "";
     dupEl.textContent = dup
       ? "⚠ " + dup
@@ -643,11 +630,27 @@ function itPreview() {
     const per = parseFloat(F.perBuy),
       price = parseFloat(F.buyPrice),
       uom = F.uom.trim() || "unit";
-    c.textContent = per > 0 && price >= 0 ? `KES ${m2(price / per)} per ${uom}` : "-";
+    c.textContent =
+      String(F.buyPrice).trim() === ""
+        ? "set when it is produced or received"
+        : per > 0 && price >= 0
+          ? `KES ${m2(price / per)} per ${uom}`
+          : "-";
     const q = parseFloat(F.qty),
       e = $("#itEq");
     if (e) e.textContent = q > 0 && per > 0 ? `= ${qn(q * per)} ${uom}` : "";
+    // Margin as the selling price is typed (one sale uses one unit of measure).
+    const sell = parseFloat(F.spPrice),
+      unit = per > 0 && price >= 0 ? price / per : null,
+      mg = $("#itMargin");
+    if (mg)
+      mg.textContent =
+        sell > 0 && unit !== null
+          ? `Cost KES ${m2(unit)} per sale · margin ${Math.round(((sell - unit) / sell) * 100)}%`
+          : "With a price it shows on this POS at once. One sale uses one unit of measure.";
   }
+  const srcInfo = $("#itSrcInfo");
+  if (srcInfo) srcInfo.textContent = itSrcHint(F);
   const S = invF.sd,
     info = $("#sdInfo");
   if (info) {
@@ -700,29 +703,63 @@ function itemsHTML() {
 }
 /** The create / edit item popup. */
 function itemPopup(F, editing, lockUom) {
-  return `<div class="modal show" id="itModal" style="z-index:60"><div class="box" style="max-width:760px">
-  <div class="fr" style="align-items:center;justify-content:space-between"><h3>${editing ? "Edit item · " + esc(itemInfo(F.edit).name) : "New item"}</h3><button class="mini" data-a="inv_itcancel" aria-label="Close">✕</button></div>
-  <div class="fr"><label>Item name<input data-iv="it.name" id="itName" value="${esc(F.name)}" placeholder="e.g. Tusker Lager 500ml"></label>
-   <label>Item code<input data-iv="it.code" value="${esc(F.code)}" placeholder="${editing ? "" : nextItemCode()}"></label>
-   <label>Item group<input data-iv="it.group" list="grpL" value="${esc(F.group)}" placeholder="e.g. Beverages"></label></div>
-  <div class="fr"><label>Unit of measure (how stock is counted)<input data-iv="it.uom" list="uomL" value="${esc(F.uom)}" placeholder="pcs, ml, g, kg…" ${lockUom ? 'disabled title="This item already has stock or history, so its unit cannot change."' : ""}></label>
-   <label>Buying unit (how you buy it)<input data-iv="it.buyUnit" list="buyL" value="${esc(F.buyUnit)}" placeholder="e.g. Crate"></label>
-   <label>Units in one buying unit<input data-iv="it.perBuy" type="number" min="0" step="any" value="${esc(F.perBuy)}" placeholder="e.g. 24"></label>
-   <label>Buying price per buying unit (KES)<input data-iv="it.buyPrice" type="number" min="0" step="any" value="${esc(F.buyPrice)}" placeholder="e.g. 4200"></label>
-   <label>Reorder level (in units)<input data-iv="it.reorder" type="number" min="0" step="any" value="${esc(F.reorder)}" placeholder="Optional"></label></div>
-  <div class="stk">Cost per unit: <b id="itCost"></b>${lockUom ? " · Unit of measure is fixed because this item already has stock or history." : ""}</div>
-  <div class="stk" id="itDup" style="font-weight:600"></div>
-  ${
-    editing
-      ? ""
-      : itemSpPoint(F)
-        ? itemSpSection(F)
-        : `<h4 style="margin:6px 0 0">Opening stock into a store <span class="stk" style="font-weight:400">(optional)</span></h4>
-  <div class="fr"><label>Store<select data-iv="it.store">${opts(STORES, (F.store = pick(F.store, STORES)))}</select></label>
-   <label>Quantity received (in buying units)<input data-iv="it.qty" type="number" min="0" step="any" value="${esc(F.qty)}" placeholder="Leave empty to only create the item"></label>
-   <label>Vendor<input data-iv="it.sup" value="${esc(F.sup)}" placeholder="Optional"></label><span class="stk" id="itEq"></span></div>`
-  }
-  <div class="fr" style="justify-content:flex-end"><button class="mini" data-a="inv_itcancel">Cancel</button><button class="chip on" id="itSave" data-a="inv_itsave">${editing ? "Save changes" : "Save item"}</button></div>
+  if (!editing && itemSpPoint(F)) return itemSpNewPopup(F); // selling-points.js
+  const sp = editing ? "" : itemSpPoint(F),
+    M = itemMadeWay(F),
+    title = editing ? "Edit item" : sp ? "New product for " + esc(sp) : "New item",
+    sub = editing
+      ? esc(itemInfo(F.edit).name)
+      : M
+        ? "Made in-house, so there is nothing to buy."
+        : sp
+          ? "Saved once in the Stock Master, then stocked and sold here."
+          : "Saved once in the Stock Master, ready to receive into any store.";
+  return `<div class="modal show" id="itModal" style="z-index:60"><div class="box itm">
+  <header class="itm-h"><div><h3>${title}</h3><p>${sub}</p></div><button class="itm-x" data-a="inv_itcancel" aria-label="Close">✕</button></header>
+  <div class="itm-b" id="itBody">
+   <section class="itm-s"><h4>Item details</h4>
+    <div class="itm-g itm-gn">
+     <label>Item name<input data-iv="it.name" id="itName" value="${esc(F.name)}" placeholder="e.g. Tusker Lager 500ml"></label>
+     ${
+       M === "recipe"
+         ? ""
+         : `<label>Item code<input data-iv="it.code" value="${esc(F.code)}" placeholder="${editing ? "" : nextItemCode()}"></label>
+     <label>Item group<input data-iv="it.group" list="grpL" value="${esc(F.group)}" placeholder="e.g. Beverages"></label>`
+     }
+    </div>
+    <div class="itm-hint" id="itDup"></div>
+    ${itemMadeTick(F, editing)}
+   </section>
+   ${
+     M
+       ? itemMadeSection(F, sp)
+       : `<section class="itm-s"><h4>Units and cost</h4>
+    <div class="itm-g itm-g5">
+     <label>Unit of measure<input data-iv="it.uom" list="uomL" value="${esc(F.uom)}" placeholder="pcs, kg, ml" ${lockUom ? 'disabled title="This item already has stock or history, so its unit cannot change."' : ""}></label>
+     <label>Buying unit<input data-iv="it.buyUnit" list="buyL" value="${esc(F.buyUnit)}" placeholder="e.g. Crate"></label>
+     <label>Units per buying unit<input data-iv="it.perBuy" type="number" min="0" step="any" value="${esc(F.perBuy)}" placeholder="e.g. 24"></label>
+     <label>Buying price (KES)<input data-iv="it.buyPrice" type="number" min="0" step="any" value="${esc(F.buyPrice)}" placeholder="Optional"></label>
+     <label>Reorder level<input data-iv="it.reorder" type="number" min="0" step="any" value="${esc(F.reorder)}" placeholder="Optional"></label>
+    </div>
+    <div class="itm-hint">Cost per unit: <b id="itCost"></b>${lockUom ? " · The unit is fixed because this item already has stock or history." : ""}</div>
+   </section>`
+   }
+   ${
+     editing || M
+       ? ""
+       : sp
+         ? itemSpSection(F)
+         : `<section class="itm-s"><h4>Opening stock <span>optional</span></h4>
+    <div class="itm-g itm-g3">
+     <label>Store<select data-iv="it.store">${opts(STORES, (F.store = pick(F.store, STORES)))}</select></label>
+     <label>Quantity received (buying units)<input data-iv="it.qty" type="number" min="0" step="any" value="${esc(F.qty)}" placeholder="Empty = item only"></label>
+     <label>Vendor<input data-iv="it.sup" value="${esc(F.sup)}" placeholder="Optional"></label>
+    </div>
+    <div class="itm-hint" id="itEq"></div>
+   </section>`
+   }
+  </div>
+  <footer class="itm-f"><button class="mini" data-a="inv_itcancel">Cancel</button><button class="chip on" id="itSave" data-a="inv_itsave">${editing ? "Save changes" : M === "recipe" ? "Continue to recipe" : M ? "Continue to production" : sp ? "Save product" : "Save item"}</button></footer>
  </div></div>`;
 }
 /** Send stock to a selling point: issue it from a store and, with a price, sell it on that POS. */
@@ -744,17 +781,21 @@ function sendPanel(S, keys) {
     );
   }
   return `<div class="pn" id="sdPanel"><h4>Send stock to a selling point</h4>
-  <div class="stk">Issues the stock from a store to the selling point and puts it on that selling point's POS.</div>
+  <div class="stk">Issues the stock from a store to the selling point${isMaterials(S.sp) ? "" : " and puts it on that selling point's POS"}.</div>
   <div class="fr"><label>Item<select data-iv="sd.k">${keys.map(k => `<option value="${k}" ${k === S.k ? "selected" : ""}>${esc(itemInfo(k).name)} (${esc(itemInfo(k).uom)})</option>`).join("")}</select></label>
    <label>Selling point<select data-iv="sd.sp">${opts(ALLD, S.sp)}</select></label>
    <label>From store<select data-iv="sd.store">${STORES.map(l => `<option value="${esc(l)}" ${l === S.store ? "selected" : ""}>${esc(l)}${S.k ? ` · ${qn(have(l, S.k))} ${esc(u.uom)}` : ""}</option>`).join("")}</select></label>
    <label>Quantity<input data-iv="sd.qty" type="number" min="0" step="any" value="${esc(S.qty)}"></label>
    <label>Units<select data-iv="sd.unit">${u ? rcUnitOpts(S.k, S.unit) : ""}</select></label></div>
-  <h4 style="margin:6px 0 0">Sell it on the ${esc(S.sp)} POS</h4>
+  ${
+    isMaterials(S.sp)
+      ? ""
+      : `<h4 style="margin:6px 0 0">Sell it on the ${esc(S.sp)} POS</h4>
   <div class="fr"><label>Product name<input data-iv="sd.name" value="${esc(S.name)}" placeholder="${esc(u ? u.name : "")}" ${prod ? "disabled" : ""}></label>
    <label>Selling price (KES)<input data-iv="sd.price" type="number" min="0" step="any" value="${esc(S.price)}" placeholder="${prod ? "" : "Empty = stock only"}"></label>
    <label>One sale uses (${esc(u ? u.uom : "units")})<input data-iv="sd.per" type="number" min="0" step="any" value="${esc(S.per)}" ${prod ? "disabled" : ""}></label>
-   <label>VAT<select data-iv="sd.tax" ${prod ? "disabled" : ""}>${SP_TAX.map(([v, l]) => `<option value="${v}" ${v === S.tax ? "selected" : ""}>${l}</option>`).join("")}</select></label></div>
+   <label>VAT<select data-iv="sd.tax" ${prod ? "disabled" : ""}>${SP_TAX.map(([v, l]) => `<option value="${v}" ${v === S.tax ? "selected" : ""}>${l}</option>`).join("")}</select></label></div>`
+  }
   <div class="stk" id="sdInfo"></div>
   <button class="chip on" data-a="inv_itsend">Send to ${esc(S.sp)}</button></div>`;
 }
@@ -783,7 +824,6 @@ function invView() {
     master: masterHTML,
     req: reqHTML,
     issue: issHTML,
-    transfer: trfHTML,
     damage: dmgHTML,
     position: posHTML,
     riss: () => invReportHTML("iss"),
@@ -913,7 +953,7 @@ function invExport() {
             r.price,
             r.op,
             r.add,
-            0,
+            r.prod,
             r.inn,
             r.sold,
             r.dmg,
@@ -961,10 +1001,29 @@ const blankItemForm = (store = STORES[0]) => ({
   spWay: "req", // req: request it from the store · recv: the store receives it first · none
   spPrice: "",
   spCat: "",
-  spTax: "B"
+  spTax: "B",
+  // Ticked "Made in-house": it comes from a recipe or from production instead of being bought.
+  made: false,
+  madeWay: "recipe",
+  madeFrom: "", // an existing recipe or production to copy
+  madeSp: "",
+  // Opened from a selling point: what each sale deducts from (store stock is a normal bought item).
+  spSrc: "store",
+  srcPk: "", // finished item + place, or "new"
+  srcPer: "1",
+  srcCopy: "",
+  srcFrom: "",
+  lines: []
 });
 /** Create or update an item from the Item setup form; on create, optionally send stock to a store. */
 function itemSave() {
+  if (itemSpLink(invF.it)) return itemSpLinkSave(invF.it); // attached: no new stock item
+  if (itemSpNewProd(invF.it))
+    Object.assign(invF.it, { made: true, madeWay: "prod", madeSp: invF.it.sp });
+  const M = itemMadeWay(invF.it);
+  if (M === "recipe") return itemToRecipe(invF.it); // a recipe needs no stock item
+  // Production: a stock item with no buying details or opening stock; it comes in when it is made.
+  const made = M && itemMadeStart(invF.it);
   const F = invF.it,
     editing = !!F.edit && ING[F.edit] !== undefined,
     before = editing ? itemInfo(F.edit) : null,
@@ -972,15 +1031,16 @@ function itemSave() {
     uom = editing && itemUsed(F.edit) ? before.uom : F.uom.trim(),
     buyUnit = F.buyUnit.trim() || uom,
     perBuy = parseFloat(F.perBuy),
-    price = parseFloat(F.buyPrice),
+    // Optional: items made in production get their cost there. Left empty on an edit, the price stays.
+    noPrice = String(F.buyPrice).trim() === "",
+    price = noPrice ? (before ? +before.buyPrice : 0) : parseFloat(F.buyPrice),
     reorder = String(F.reorder).trim() === "" ? null : parseFloat(F.reorder),
     qty = parseFloat(F.qty),
     code = (F.code.trim() || (before && before.code) || nextItemCode()).toUpperCase();
   if (!name) return toast("Enter the item name.");
   if (!uom) return toast("Enter the unit of measure, e.g. pcs, ml or kg.");
   if (!(perBuy > 0)) return toast("Units in one buying unit must be more than 0.");
-  if (String(F.buyPrice).trim() === "" || !(price >= 0))
-    return toast("Enter the buying price (0 or more).");
+  if (!(price >= 0)) return toast("The buying price must be 0 or more.");
   if (reorder !== null && !(reorder >= 0)) return toast("The reorder level must be 0 or more.");
   if (!editing && String(F.qty).trim() !== "" && !(qty > 0))
     return toast("The quantity must be more than 0, or leave it empty.");
@@ -1031,12 +1091,20 @@ function itemSave() {
   invF.sd.k = k;
   invF.itLast = k; // highlight the new / edited row
   if (view === "pur" && purT === "receive" && !editing) rcPick(k, false); // created from Receive goods: ready to add
+  if (made) return itemToProduction(k, made, msg);
   if (sp) return itemSpDone(k, sp, F, qty * perBuy, spPrice, msg);
   bosave();
   toast(msg);
   all();
 }
 /** After opening the item popup: draw it, fill the live hints, put the cursor in the name. */
+/** Redraw the open popup without losing the place in it. */
+function itRedraw() {
+  const y = $("#itBody").scrollTop;
+  all();
+  itPreview();
+  $("#itBody").scrollTop = y;
+}
 function itOpened() {
   all();
   itPreview();
@@ -1152,9 +1220,22 @@ function invAct(a, b) {
     invF.it = { ...blankItemForm(sp ? spInfo(sp).store : invF.it.store), sp, open: true };
     return itOpened();
   }
+  if (a === "itmade") {
+    invF.it.made = b.checked;
+    return itRedraw();
+  }
+  if (a === "itsrc") {
+    invF.it.spSrc = d.w;
+    return itRedraw();
+  }
+  if (a === "itmway") {
+    invF.it.madeWay = d.w;
+    invF.it.madeFrom = "";
+    return itRedraw();
+  }
   if (a === "itway") {
     invF.it.spWay = d.w;
-    return all();
+    return itRedraw();
   }
   if (a === "itcancel") {
     invF.it = blankItemForm(invF.it.store);
@@ -1206,7 +1287,8 @@ function invAct(a, b) {
       u = S.k && ING[S.k] !== undefined ? itemInfo(S.k) : null,
       units = u ? toUnits(S.k, q, S.unit) : 0, // crates → pcs
       prod = u && sdProduct(S.k, S.sp),
-      price = String(S.price).trim() === "" ? null : parseFloat(S.price),
+      // A materials store sells nothing, so it takes no price.
+      price = isMaterials(S.sp) || String(S.price).trim() === "" ? null : parseFloat(S.price),
       per = parseFloat(S.per),
       name = (S.name.trim() || (u ? u.name : "")).trim();
     if (!u) return toast("Choose an item.");
@@ -1258,7 +1340,7 @@ function invAct(a, b) {
     STKT.phys = {};
     STKT.narr = {};
     // Stay on the same job (requisitions, damage...) for the newly chosen place when it applies there.
-    const placeTabs = ["master", "req", "issue", "transfer", "damage"];
+    const placeTabs = ["master", "req", "issue", "damage"];
     invT = d.t || (placeTabs.includes(invT) && tabAllowed(invT) ? invT : "master");
     return all();
   }
@@ -1296,7 +1378,7 @@ function invAct(a, b) {
       c = f === "rc" ? parseFloat($("#l_c_" + f).value) || 0 : 0;
     invF[f].pick = k;
     if (!(q > 0)) return toast("Enter a quantity above zero.");
-    const src = f === "is" || f === "tr" ? STKT.loc : null,
+    const src = f === "is" ? STKT.loc : null,
       L = invF[f].lines,
       ex = L.find(x => x.k === k),
       want = q + (ex ? ex.q : 0);
@@ -1355,27 +1437,6 @@ function invAct(a, b) {
     toast("Issue note " + x.id + " to " + F.to + " raised. It waits for a manager to approve it.");
     return all();
   }
-  if (a === "trpost") {
-    const F = invF.tr;
-    F.from = STKT.loc;
-    if (F.from === F.to || !LOCS.includes(F.to)) return toast("Choose where to transfer to.");
-    if (isStore(F.from) !== isStore(F.to))
-      return toast(
-        "Stores transfer to stores, selling points to selling points. Use issue or requisition."
-      );
-    if (!F.lines.length) return toast("Add at least one line.");
-    const bad = F.lines.find(x => x.q > have(F.from, x.k) + 1e-9);
-    if (bad) return toast("Not enough " + iN(bad.k) + " in " + F.from + ".");
-    const id = nid("TRF");
-    F.lines.forEach(x => {
-      mvc(F.from, x.k, -x.q, "TRANS_OUT", F.note || "Transfer " + id, F.to, id, boUser.n);
-      mvc(F.to, x.k, x.q, "TRANS_IN", F.note || "Transfer " + id, F.from, id, boUser.n);
-    });
-    invF.tr = { from: F.from, to: F.to, note: "", lines: [] };
-    bosave();
-    toast("Transferred from " + F.from + " to " + F.to + " (" + id + ").");
-    return all();
-  }
   if (a === "dmpost") {
     const F = invF.dm;
     F.loc = STKT.loc;
@@ -1416,11 +1477,14 @@ $("#vSub").oninput = e => {
   } else if (s.iv !== undefined) {
     const [p, f] = s.iv.split(".");
     invF[p][f] = e.target.value;
+    if (p === "it") itSrcSync(f); // selling-points.js
     if (p === "it" || p === "sd") itPreview();
     if (p === "sd") sdSync(f);
     if (p === "spp") spPreview();
     if (p === "spr" && f === "store") all(); // show the new store's quantities
     if (p === "rc") rcSync(f); // direct receive (receive.js)
     if (p === "vs") vsSync(f); // vendor statement (vendors.js)
+    if (p === "pr" || p === "rcp" || p === "recb" || p === "recr") prSync(p, f);
+    if (p === "spe") speSync(f); // editing a selling point product (selling-points.js) // Recipes & Production (production.js)
   }
 };

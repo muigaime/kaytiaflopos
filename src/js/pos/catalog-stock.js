@@ -41,6 +41,11 @@ function syncLocs() {
 }
 syncLocs();
 const isStore = l => STORES.includes(l);
+// A materials store (e.g. Kitchen Materials) is a place under Selling points that holds ingredients:
+// it gets issues and stock takes like a selling point, but never appears on the POS.
+const MATERIALS = "Materials store";
+const isMaterials = l => (OUTLET_INFO[l] || {}).type === MATERIALS;
+const posSells = l => ALLD.includes(l) && !isMaterials(l);
 function mv(loc, k, q, t, note, peer, ref, by) {
   STK[loc][k] = (STK[loc][k] || 0) + q;
   MOV.push({
@@ -57,6 +62,13 @@ function mv(loc, k, q, t, note, peer, ref, by) {
   if (MOV.length > 6000) MOV.splice(0, MOV.length - 6000);
 }
 const curLoc = () => (STK[dept] ? dept : "Bar");
+/** Where a product's ingredients are deducted: its materials store (recipes), else where it is sold. */
+const itemLoc = it => (it.from && STK[it.from] ? it.from : curLoc());
+/** Sell n of a product (a negative n puts the stock back). */
+function itemStockMove(it, n) {
+  const loc = itemLoc(it);
+  Object.entries(it.r).forEach(([k, v]) => mv(loc, k, -v * n, n > 0 ? "SALE" : "SALE_RET", "POS"));
+}
 const stock = new Proxy(
   {},
   {
@@ -110,7 +122,7 @@ const ING = {
   milk: "Milk 500ml",
   bread: "Bread"
 };
-let DEPTS = [...ALLD];
+let DEPTS = ALLD.filter(posSells);
 const ITEMS = [
   { id: 1, n: "Whiskey Shot (tot)", d: "Bar", c: "Spirits", p: 300, t: "B", r: { whisky: 25 } },
   { id: 2, n: "Whiskey Double", d: "Bar", c: "Spirits", p: 550, t: "B", r: { whisky: 50 } },

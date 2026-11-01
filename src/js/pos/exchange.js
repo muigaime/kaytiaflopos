@@ -102,12 +102,12 @@ $("#exGo").onclick = () => {
     ni = get(ex.nw);
   if (ex.o) {
     const o = ex.o;
-    if (ex.back) Object.entries(oi.r).forEach(([k, v]) => (stock[k] += v * q));
+    if (ex.back) itemStockMove(oi, -q);
     if (avail(ni) < q) {
-      if (ex.back) Object.entries(oi.r).forEach(([k, v]) => (stock[k] -= v * q));
+      if (ex.back) itemStockMove(oi, q);
       return fsNote("Not enough " + ni.n + " in stock.");
     }
-    Object.entries(ni.r).forEach(([k, v]) => (stock[k] -= v * q));
+    itemStockMove(ni, q);
     L[ex.old] -= q;
     if (L[ex.old] <= 0) delete L[ex.old];
     L[ex.nw] = (L[ex.nw] || 0) + q;

@@ -4,7 +4,11 @@ let dept = "Bar",
   rno = 1042,
   method = "cash",
   payRef = null;
-const avail = it => Math.min(...Object.entries(it.r).map(([k, v]) => Math.floor(stock[k] / v)));
+// 1e-9: quantities such as 0.1 must not lose a whole portion to rounding (0.3 / 0.1 = 2.9999…).
+const avail = it =>
+  Math.min(
+    ...Object.entries(it.r).map(([k, v]) => Math.floor((STK[itemLoc(it)][k] || 0) / v + 1e-9))
+  );
 const inCart = id => cart[id] || 0;
 let catSel = "All",
   nextQty = 1,
@@ -16,6 +20,7 @@ let catSel = "All",
 const get = id => ITEMS.find(i => i.id == id),
   pad = (n, l = 6) => String(n).padStart(l, "0");
 function drawDepts() {
+  $("#posOutlet").textContent = dept;
   $("#spBtn").textContent = dept;
   $("#hSP").textContent = dept;
 }
@@ -30,6 +35,11 @@ function renderCats() {
     .map(c => `<button class="cat ${c === catSel ? "on" : ""}" data-c="${c}">${c}</button>`)
     .join("");
 }
+/** 1450 → "1,450", 1450.5 → "1,450.50". */
+const posMoney = n =>
+  n.toLocaleString("en-KE", { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 });
+const bill2 = n =>
+  n.toLocaleString("en-KE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const hue = s => {
   let h = 7;
   for (const c of s) h = (h * 31 + c.charCodeAt(0)) % 360;
@@ -37,12 +47,19 @@ const hue = s => {
 };
 function drawGrid() {
   const list = ITEMS.filter(i => i.d === dept && (catSel === "All" || i.c === catSel));
+  // "All" reads like a menu: each category under its own heading.
+  let section = null;
   $("#grid").innerHTML =
-    list
+    (catSel === "All"
+      ? [...new Set(list.map(i => i.c))].flatMap(c => list.filter(i => i.c === c))
+      : list
+    )
       .map(i => {
         const a = avail(i) - inCart(i.id),
           n = inCart(i.id);
-        return `<button class="it${n ? " has" : ""}" style="--h:${hue(i.c)}" data-i="${i.id}" ${a <= 0 ? "disabled" : ""}>${n ? `<span class="in">${n}</span>` : ""}<span class="lw ${a <= 0 ? "out" : ""}">${a <= 0 && !n ? "Out of stock" : a < 10 && a > 0 ? a + " left" : ""}</span><span class="nm">${i.n}</span><span class="cg">${i.c}</span><span class="pr">${i.p.toFixed(2)}</span></button>`;
+        const head =
+          catSel === "All" && i.c !== section ? `<h3 class="ms">${(section = i.c)}</h3>` : "";
+        return `${head}<button class="it${n ? " has" : ""}" style="--h:${hue(i.c)}" data-i="${i.id}" ${a <= 0 ? "disabled" : ""}>${n ? `<span class="in">${n}</span>` : ""}<span class="lw ${a <= 0 ? "out" : ""}">${a <= 0 && !n ? "Out of stock" : a < 10 && a > 0 ? a + " left" : ""}</span><span class="nm">${i.n}</span><span class="cg">${i.c}</span><span class="pr">${posMoney(i.p)}</span></button>`;
       })
       .join("") || '<div class="empty">No items in this category.</div>';
 }
@@ -64,14 +81,14 @@ function drawCart() {
       .map(id => {
         const it = get(id),
           q = cart[id];
-        return `<div class="tr ${id == selId ? "sel" : ""}" data-r="${id}"><span class="qc"><button data-m="${id}">−</button>${q}<button data-p="${id}">+</button></span><span>${it.n}</span><span class="n">${it.p.toFixed(2)}</span><span class="n">${(it.p * q).toFixed(2)}</span></div>`;
+        return `<div class="tr ${id == selId ? "sel" : ""}" data-r="${id}"><span class="qc"><button data-m="${id}">−</button>${q}<button data-p="${id}">+</button></span><span>${it.n}</span><span class="n">${bill2(it.p)}</span><span class="n">${bill2(it.p * q)}</span></div>`;
       })
       .join("") ||
     `<div class="empty" style="padding:24px 8px">${cur ? "Adding to " + cur.label + ". Tap items to add." : "Tap an item to start an order."}</div>`;
   const t = totals();
-  $("#tNet").textContent = t.net.toFixed(2);
-  $("#tTax").textContent = t.tax.toFixed(2);
-  $("#tGross").textContent = t.g.toFixed(2);
+  $("#tNet").textContent = bill2(t.net);
+  $("#tTax").textContent = bill2(t.tax);
+  $("#tGross").textContent = bill2(t.g);
   $("#sendBtn").disabled = !ids.length;
   $("#ordBtn").textContent = `Open orders (${visOrders().length})`;
   $("#fBill").value = cur ? cur.no : "NBO-" + pad(rno);

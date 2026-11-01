@@ -108,4 +108,4 @@ $("#flEye").onclick = () => {
 };
 $("#flBack").onclick = () => fdExit(true);
 $("#fdOut").onclick = fdLogout;
-$("#fl img").src = $("#login img").src;
+$("#fl img").src = $("#logoSrc").src;

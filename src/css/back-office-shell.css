@@ -772,6 +772,14 @@ table.t {
   background: #fde4e1;
   color: #c0392b;
 }
+/* Main buttons: "#bo button" inherits dark text, which is unreadable on the brand colour.
+   Inventory, Purchasing and Vendors keep their own dark text on a teal button. */
+#bo button.chip.on {
+  color: var(--bi);
+}
+#bo .inv button.chip.on {
+  color: #06241c;
+}
 #bo .mini {
   border: 1px solid var(--line);
   background: var(--chip);
@@ -865,19 +873,25 @@ table.t {
 #bo .pop.show {
   display: block;
 }
+/* Above every popup (they use 60-75), and at the top so it never covers a popup's buttons. */
 #bo #toast {
   position: fixed;
-  bottom: 18px;
+  top: 18px;
   left: 50%;
   transform: translateX(-50%);
+  width: max-content;
+  max-width: min(640px, 92vw);
+  text-align: center;
+  font-weight: 600;
   background: var(--ink);
   color: var(--bg);
-  padding: 9px 16px;
-  border-radius: 10px;
+  padding: 11px 18px;
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(5, 20, 31, 0.4);
   opacity: 0;
   transition: 0.25s;
   pointer-events: none;
-  z-index: 50;
+  z-index: 200;
 }
 #bo #toast.s {
   opacity: 1;

@@ -8,6 +8,8 @@ $("#vSub").onclick = e => {
       .forEach(b => b.classList.toggle("on", b.dataset.p === p));
     return all();
   }
+  const roomTab = e.target.closest("[data-rr]");
+  if (roomTab) return rrAct(roomTab);
   const rr = e.target.closest("[data-r]");
   if (rr) {
     rp = rr.dataset.r;
@@ -85,6 +87,10 @@ $("#vSub").onclick = e => {
   }
   if (a.slice(0, 4) === "pur_") {
     purAct(a.slice(4), b);
+    return;
+  }
+  if (a.slice(0, 4) === "rec_") {
+    recAct(a.slice(4), b);
     return;
   }
   if (a.slice(0, 3) === "ap_") {
@@ -201,9 +207,14 @@ $("#vSub").onchange = e => {
     if (h) h.textContent = unitHint(t.value, STKT.loc);
     return;
   }
+  if (s.prunit !== undefined) {
+    // Recipes & Production: units for the chosen item.
+    $("#" + s.prunit).innerHTML = prUnitOpts(t.value);
+    return;
+  }
   if (s.spunit !== undefined) {
-    // Selling point request: units for the chosen item.
-    $("#spr_u").innerHTML = rcUnitOpts(t.value, "buy");
+    // Selling point request or transfer: units for the chosen item.
+    $("#" + (s.spunit || "spr_u")).innerHTML = rcUnitOpts(t.value, "buy");
     return;
   }
   if (s.rcq !== undefined) return rcQtyChange(t, +s.rcq);

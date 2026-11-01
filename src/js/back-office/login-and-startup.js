@@ -77,12 +77,15 @@ const boTry = async () => {
   }
 };
 $("#boGo").onclick = boTry;
-["#boU", "#boP"].forEach(
-  x =>
-    ($(x).onkeydown = e => {
-      if (e.key === "Enter") boTry();
-    })
-);
+// Enter on the username moves to the password; Enter on the password signs in.
+$("#boU").onkeydown = e => {
+  if (e.key !== "Enter") return;
+  if ($("#boU").value.trim()) $("#boP").focus();
+  else boTry();
+};
+$("#boP").onkeydown = e => {
+  if (e.key === "Enter") boTry();
+};
 const EYE =
     '<svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
   EYEX =
@@ -136,9 +139,9 @@ document.querySelectorAll(".bkm").forEach(
       $("#start").style.display = "grid";
     })
 );
-$("#start img").src = $("#login img").src;
-$("#bo .lg img").src = $("#login img").src;
-$("#boLogin img").src = $("#login img").src;
+$("#start img").src = $("#logoSrc").src;
+$("#bo .lg img").src = $("#logoSrc").src;
+$("#boLogin img").src = $("#logoSrc").src;
 setInterval(bosave, 4000);
 addEventListener("pagehide", bosave);
 drawCats();

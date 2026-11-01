@@ -32,6 +32,8 @@ const REQS = [],
   VPAYS = [],
   // Issue notes (store → selling point); stock moves when a manager approves (approvals.js)
   ISSUES = [],
+  // Production runs: { id, at, by, from, to, k, qty, cost, note, lines: [{ k, q, c }] } (production.js)
+  PRODS = [],
   STKT = {
     since: new Date(new Date().setHours(0, 0, 0, 0)).toISOString(),
     phys: {},
@@ -59,7 +61,8 @@ const toast = m => {
   t.textContent = m;
   t.className = "s";
   clearTimeout(toast.t);
-  toast.t = setTimeout(() => (t.className = ""), 1900);
+  // Long enough to read: confirmations can be a sentence or two.
+  toast.t = setTimeout(() => (t.className = ""), Math.min(7000, 2200 + m.length * 45));
 };
 const sum = (a, f) => a.reduce((x, y) => x + f(y), 0),
   esc = s =>
@@ -72,12 +75,12 @@ let boUser = null,
   per = "30",
   br = "All sale points";
 const POS = "#pos",
-  BRS = ["All sale points", ...ALLD],
+  BRS = ["All sale points", ...ALLD.filter(posSells)],
   PL = { today: "today", 7: "last 7 days", 30: "last 30 days" };
 /** Rebuild the top-bar sale point filter after selling points change. */
 function refreshBRS() {
   BRS.length = 1;
-  BRS.push(...ALLD);
+  BRS.push(...ALLD.filter(posSells));
   if (!BRS.includes(br)) br = BRS[0];
   $("#br").innerHTML = BRS.map(
     k => `<option ${k === br ? "selected" : ""}>${esc(k)}</option>`
@@ -100,6 +103,7 @@ function bosave() {
         VN: VENDORS,
         VP: VPAYS,
         IS: ISSUES,
+        PD: PRODS,
         ST: STORES,
         OL: ALLD,
         OI: OUTLET_INFO,
@@ -160,6 +164,8 @@ window.bosave = bosave;
     VPAYS.push(...(s.VP || []));
     ISSUES.length = 0;
     ISSUES.push(...(s.IS || []));
+    PRODS.length = 0;
+    PRODS.push(...(s.PD || []));
     if (s.SS) STKT.since = s.SS;
     Object.assign(ING, s.G);
     Object.assign(RO, s.R);
@@ -202,6 +208,28 @@ window.bosave = bosave;
       if (!STORES.includes(info.store)) info.store = STORES[0];
       OUTLET_INFO[o] = info;
     });
+    // Every hotel starts with one materials store for the kitchen (Recipes & Production).
+    if (!ALLD.some(isMaterials)) {
+      const name = "Kitchen Materials";
+      if (!st.includes(name)) {
+        if (!ALLD.includes(name)) ALLD.push(name);
+        OUTLET_INFO[name] = {
+          type: MATERIALS,
+          store: STORES.find(s => /kitchen/i.test(s)) || STORES[0]
+        };
+      }
+    }
+    // Recipes deduct straight from the materials store. A single item attached to production stays
+    // where that item is held; a plain product (one stock item, no source) stays at its selling point.
+    const mat = ALLD.find(isMaterials);
+    if (mat)
+      ITEMS.forEach(i => {
+        const K = Object.keys(i.r || {});
+        if (isMaterials(i.from)) return;
+        const made = K.length === 1 && i.from && PRODS.some(x => x.k === K[0] && x.to === i.from);
+        if (!made && (K.length > 1 || i.from)) i.from = mat;
+      });
+    fdBrand(); // the saved hotel name reaches the POS
     Object.keys(STK).forEach(l => {
       if (!STK[l] || typeof STK[l] !== "object") STK[l] = {};
     });
@@ -222,7 +250,11 @@ USERS.forEach((u, i) => {
   if (!u.card) u.card = "KT" + String(i + 1).padStart(4, "0");
   if (!u.role)
     u.role =
-      u.d.length >= ALLD.length ? "Manager" : u.d.includes("Supermarket") ? "Cashier" : "Waiter";
+      u.d.filter(posSells).length >= ALLD.filter(posSells).length
+        ? "Manager"
+        : u.d.includes("Supermarket")
+          ? "Cashier"
+          : "Waiter";
 });
 const H = async t => {
   t = "kaytia|" + t;

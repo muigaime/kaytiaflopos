@@ -6,7 +6,12 @@ const USERS = [
 ];
 let user = null,
   pin = "";
-$("#ldate").textContent = "Date: " + new Date().toLocaleDateString("en-GB");
+$("#ldate").textContent = new Date().toLocaleDateString("en-GB", {
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+  year: "numeric"
+});
 const pmsg = (t, bad) => {
   $("#pinMsg").textContent = t;
   $("#pinMsg").className = bad ? "bad" : "";
@@ -16,8 +21,8 @@ const pdraw = () => {
 };
 function loginAs(u) {
   user = u;
-  DEPTS = u.d.filter(d => ALLD.includes(d));
-  if (!DEPTS.length) DEPTS = [ALLD[0]];
+  DEPTS = u.d.filter(posSells);
+  if (!DEPTS.length) DEPTS = [ALLD.filter(posSells)[0] || ALLD[0]];
   dept = DEPTS[0];
   cart = {};
   pin = "";
@@ -62,7 +67,6 @@ $("#kp").onclick = e => {
   const k = e.target.dataset.k;
   if (k) pkey(k);
 };
-$("#bye img").src = $("#login img").src;
 function fsNote(m) {
   const n = document.createElement("div");
   n.id = "fsn";
@@ -202,6 +206,10 @@ function feed() {
   p.classList.add("feed");
 }
 const tick = () => {
+  $("#lclock").textContent = new Date().toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
   $("#clk").textContent = new Date().toLocaleString("en-KE", {
     weekday: "short",
     day: "numeric",
