@@ -1,0 +1,15 @@
+{
+  "name": "kaytia-pos-backoffice",
+  "version": "1.8.0",
+  "private": true,
+  "description": "Kaytia Smart ERP: POS, Back Office and Front Desk (single-file build from modular sources)",
+  "scripts": {
+    "dev": "node scripts/dev.js",
+    "build": "node scripts/build.js",
+    "format": "prettier --write \"src/**/*.{js,css,html}\"",
+    "format:check": "prettier --check \"src/**/*.{js,css,html}\""
+  },
+  "devDependencies": {
+    "prettier": "3.9.10"
+  }
+}

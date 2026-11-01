@@ -1,0 +1,175 @@
+const $ = s => document.querySelector(s),
+  KES = n =>
+    "KES " +
+    Number(n).toLocaleString("en-KE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const TAX = { A: 0, B: 16, C: 0 };
+// stock of raw ingredients, per department (base units)
+const STOCK0 = {
+  whisky: 7500,
+  tusker: 96,
+  soda: 80,
+  water: 48,
+  flour: 12000,
+  cheese: 4000,
+  sauce: 3000,
+  potato: 9000,
+  bun: 30,
+  beef: 3500,
+  rice: 20000,
+  sugar: 60,
+  milk: 40,
+  bread: 25
+};
+// Stores hold purchased stock (Back Office > Inventory). Selling points (ALLD) are the bars, kitchens,
+// restaurants and shops that receive stock from a store and sell it on the POS; each keeps its own stock.
+// Both lists can grow (Back Office); LOCS = stores + selling points, and STK has one stock map per place.
+const STORES = ["Main Store"],
+  ALLD = ["Bar", "Kitchen", "Supermarket"],
+  OUTLET_INFO = {
+    Bar: { type: "Bar", store: "Main Store" },
+    Kitchen: { type: "Kitchen", store: "Main Store" },
+    Supermarket: { type: "Shop", store: "Main Store" }
+  },
+  LOCS = [],
+  STK = {},
+  MOV = [];
+/** Rebuild LOCS after a store or selling point is added (keeps the same array, other code holds it). */
+function syncLocs() {
+  LOCS.length = 0;
+  LOCS.push(...STORES, ...ALLD);
+  LOCS.forEach(l => (STK[l] = STK[l] || {}));
+}
+syncLocs();
+const isStore = l => STORES.includes(l);
+function mv(loc, k, q, t, note, peer, ref, by) {
+  STK[loc][k] = (STK[loc][k] || 0) + q;
+  MOV.push({
+    at: Date.now(),
+    loc,
+    k,
+    q,
+    t,
+    note: note || "",
+    peer: peer || "",
+    ref: ref || "",
+    by: by || (typeof user !== "undefined" && user ? user.n : "")
+  });
+  if (MOV.length > 6000) MOV.splice(0, MOV.length - 6000);
+}
+const curLoc = () => (STK[dept] ? dept : "Bar");
+const stock = new Proxy(
+  {},
+  {
+    get: (t, k) => (typeof k === "string" ? STK[curLoc()][k] : undefined),
+    set: (t, k, v) => {
+      const o = STK[curLoc()][k] || 0,
+        d = v - o;
+      if (d) mv(curLoc(), k, d, d < 0 ? "SALE" : "SALE_RET", "POS");
+      else STK[curLoc()][k] = v;
+      return true;
+    },
+    has: (t, k) => k in STK[curLoc()],
+    ownKeys: () => Reflect.ownKeys(STK[curLoc()]),
+    getOwnPropertyDescriptor: (t, k) => ({
+      value: STK[curLoc()][k],
+      enumerable: true,
+      configurable: true,
+      writable: true
+    })
+  }
+);
+function seedStock() {
+  const use = {};
+  ITEMS.forEach(i =>
+    Object.keys(i.r).forEach(k => {
+      (use[k] = use[k] || new Set()).add(i.d);
+    })
+  );
+  Object.keys(STOCK0).forEach(k => {
+    LOCS.forEach(l => (STK[l][k] = 0));
+    STK[STORES[0]][k] = STOCK0[k];
+    const ds = [...(use[k] || [])];
+    ds.forEach(d => {
+      if (STK[d]) STK[d][k] = Math.round((STOCK0[k] * 0.5) / ds.length);
+    });
+  });
+}
+const ING = {
+  whisky: "Whiskey (ml)",
+  tusker: "Tusker",
+  soda: "Soda",
+  water: "Water",
+  flour: "Flour (g)",
+  cheese: "Cheese (g)",
+  sauce: "Sauce (g)",
+  potato: "Potato (g)",
+  bun: "Buns",
+  beef: "Beef (g)",
+  rice: "Rice (g)",
+  sugar: "Sugar 2kg",
+  milk: "Milk 500ml",
+  bread: "Bread"
+};
+let DEPTS = [...ALLD];
+const ITEMS = [
+  { id: 1, n: "Whiskey Shot (tot)", d: "Bar", c: "Spirits", p: 300, t: "B", r: { whisky: 25 } },
+  { id: 2, n: "Whiskey Double", d: "Bar", c: "Spirits", p: 550, t: "B", r: { whisky: 50 } },
+  { id: 3, n: "Tusker Lager", d: "Bar", c: "Beer", p: 350, t: "B", r: { tusker: 1 } },
+  { id: 4, n: "Soda 300ml", d: "Bar", c: "Soft drinks", p: 100, t: "B", r: { soda: 1 } },
+  { id: 5, n: "Water 500ml", d: "Bar", c: "Soft drinks", p: 80, t: "B", r: { water: 1 } },
+  {
+    id: 6,
+    n: "Margherita Pizza",
+    d: "Kitchen",
+    c: "Pizza",
+    p: 1100,
+    t: "B",
+    r: { flour: 250, cheese: 100, sauce: 50 }
+  },
+  { id: 7, n: "Chips Plain", d: "Kitchen", c: "Sides", p: 250, t: "B", r: { potato: 300 } },
+  {
+    id: 8,
+    n: "Beef Burger",
+    d: "Kitchen",
+    c: "Burgers",
+    p: 700,
+    t: "B",
+    r: { bun: 1, beef: 150, cheese: 20 }
+  },
+  { id: 9, n: "Water 500ml", d: "Kitchen", c: "Drinks", p: 80, t: "B", r: { water: 1 } },
+  {
+    id: 10,
+    n: "Rice 2kg (pkt)",
+    d: "Supermarket",
+    c: "Grocery",
+    p: 380,
+    t: "C",
+    r: { rice: 2000 }
+  },
+  { id: 11, n: "Sugar 2kg", d: "Supermarket", c: "Grocery", p: 330, t: "B", r: { sugar: 1 } },
+  { id: 12, n: "Fresh Milk 500ml", d: "Supermarket", c: "Dairy", p: 70, t: "A", r: { milk: 1 } },
+  { id: 13, n: "Bread 400g", d: "Supermarket", c: "Bakery", p: 65, t: "A", r: { bread: 1 } },
+  {
+    id: 14,
+    n: "Cheese Burger",
+    d: "Kitchen",
+    c: "Burgers",
+    p: 800,
+    t: "B",
+    r: { bun: 1, beef: 150, cheese: 40 }
+  },
+  {
+    id: 15,
+    n: "Beef Pilau",
+    d: "Kitchen",
+    c: "Africans",
+    p: 450,
+    t: "B",
+    r: { rice: 200, beef: 150 }
+  },
+  { id: 16, n: "Chapati", d: "Kitchen", c: "Africans", p: 50, t: "B", r: { flour: 80 } },
+  { id: 17, n: "Rice Plain", d: "Kitchen", c: "Africans", p: 150, t: "B", r: { rice: 200 } },
+  { id: 18, n: "Beef Stew", d: "Kitchen", c: "Beef", p: 400, t: "B", r: { beef: 200 } },
+  { id: 19, n: "Chips Masala", d: "Kitchen", c: "Sides", p: 300, t: "B", r: { potato: 300 } },
+  { id: 20, n: "Soda 300ml", d: "Kitchen", c: "Drinks", p: 100, t: "B", r: { soda: 1 } }
+];

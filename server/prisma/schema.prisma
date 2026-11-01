@@ -1,0 +1,1088 @@
+// Kaytia Smart ERP - Master Server database (PostgreSQL)
+//
+// Conventions
+// - Ids are UUID strings. Offline terminals create records with their own UUIDs, so a record keeps the
+//   same id on the terminal and on the master server (no id remapping during sync).
+// - Money is Decimal(14,2) in the currency named on the row; `amountBase` columns hold the KES value.
+// - Stock quantities are Decimal(14,3) in the stock item's BASE unit (ml, g, piece).
+// - DepartmentInventory holds current balances; StockMovement is the ledger that explains every change.
+// - Synced tables carry `originTerminalId` and `updatedAt` so the sync engine can trace and order changes.
+
+// The connection URL lives in prisma.config.ts (Prisma 7), read from DATABASE_URL in server/.env.
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// =====================================================================
+// Users, roles, departments, terminals, module toggles
+// =====================================================================
+
+/// What a user may do. Permission keys (e.g. "pos.void", "stock.approve") live in `permissions`.
+model Role {
+  id             String         @id @default(uuid())
+  name           String         @unique
+  /// Super cashiers / managers can open waiter shifts and authorize voids, discounts, price overrides.
+  isSuperCashier Boolean        @default(false)
+  permissions    String[]
+  users          User[]
+  moduleToggles  ModuleToggle[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+model User {
+  id           String    @id @default(uuid())
+  username     String    @unique
+  fullName     String
+  /// Back Office password (hashed). Null for POS-only staff.
+  passwordHash String?
+  /// POS / Front Desk PIN (hashed).
+  pinHash      String?
+  /// Keyed fingerprint of the PIN (HMAC with AUTH_SECRET). Lets PIN-only login find the user,
+  /// and makes PINs unique. Not reversible without the server secret.
+  pinLookup    String?   @unique
+  /// Staff swipe card number.
+  cardNo       String?   @unique
+  roleId       String
+  role         Role      @relation(fields: [roleId], references: [id])
+  active       Boolean   @default(true)
+  /// Wrong password / PIN attempts in a row; the account locks until lockedUntil after too many.
+  failedLogins Int       @default(0)
+  lockedUntil  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  sessions           AuthSession[]
+  overridesRequested OverrideGrant[] @relation("OverrideRequestedBy")
+  overridesGiven     OverrideGrant[] @relation("OverrideAuthorizedBy")
+
+  departments        UserDepartment[]
+  shifts             Shift[]             @relation("ShiftUser")
+  shiftsOpened       Shift[]             @relation("ShiftOpenedBy")
+  shiftsClosed       Shift[]             @relation("ShiftClosedBy")
+  daysOpened         BusinessDay[]       @relation("DayOpenedBy")
+  daysClosed         BusinessDay[]       @relation("DayClosedBy")
+  ordersWaited       Order[]             @relation("OrderWaiter")
+  ordersSettled      Order[]             @relation("OrderCashier")
+  orderItemsVoided   OrderItem[]         @relation("OrderItemVoidedBy")
+  payments           Payment[]
+  reservationsMade   Reservation[]       @relation("ReservationCreatedBy")
+  folioCharges       RoomFolioCharge[]
+  hkAssigned         HousekeepingTask[]  @relation("HkAssignee")
+  hkScheduled        HousekeepingTask[]  @relation("HkScheduler")
+  hkInspected        HousekeepingTask[]  @relation("HkInspector")
+  stockMovements     StockMovement[]
+  transfersRequested InventoryTransfer[] @relation("TransferRequestedBy")
+  transfersApproved  InventoryTransfer[] @relation("TransferApprovedBy")
+  transfersReceived  InventoryTransfer[] @relation("TransferReceivedBy")
+  stockTakesStarted  StockTakeSession[]  @relation("StockTakeStartedBy")
+  stockTakesApproved StockTakeSession[]  @relation("StockTakeApprovedBy")
+  stockTakeCounts    StockTakeItem[]
+  swaps              ItemSwapLog[]
+  auditLogs          AuditLog[]
+}
+
+enum SessionKind {
+  BACK_OFFICE // username + password
+  POS // PIN or staff card (POS, Front Desk, waiter devices)
+}
+
+/// A signed-in session. The client holds a random token; only its SHA-256 hash is stored here.
+model AuthSession {
+  id           String      @id @default(uuid())
+  userId       String
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash    String      @unique
+  kind         SessionKind
+  /// POS sessions can be locked to one department (sale point) and one terminal.
+  departmentId String?
+  terminalId   String?
+  ip           String?
+  createdAt    DateTime    @default(now())
+  expiresAt    DateTime
+  lastSeenAt   DateTime    @default(now())
+  revokedAt    DateTime?
+
+  @@index([userId, revokedAt])
+}
+
+/// A super cashier / manager PIN override for one restricted action (void, discount, price override,
+/// bill split...). Single use and short lived; the token is held by the requesting session.
+model OverrideGrant {
+  id             String    @id @default(uuid())
+  tokenHash      String    @unique
+  action         String
+  requestedById  String
+  requestedBy    User      @relation("OverrideRequestedBy", fields: [requestedById], references: [id])
+  authorizedById String
+  authorizedBy   User      @relation("OverrideAuthorizedBy", fields: [authorizedById], references: [id])
+  createdAt      DateTime  @default(now())
+  expiresAt      DateTime
+  usedAt         DateTime?
+}
+
+enum DepartmentKind {
+  STORE // holds stock, issues to outlets (Main Store, Kitchen Store, Beverage Store)
+  OUTLET // sells (Pool Bar, Main Restaurant, Supermarket, Room Service)
+  FRONT_OFFICE // Front Desk / PMS
+  ADMIN
+}
+
+model Department {
+  id        String         @id @default(uuid())
+  name      String         @unique
+  kind      DepartmentKind
+  /// Receipt / order printer for this department's KOT or BOT tickets.
+  printer   String?
+  active    Boolean        @default(true)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  users          UserDepartment[]
+  terminals      Terminal[]
+  menuItems      MenuItem[]
+  inventory      DepartmentInventory[]
+  movements      StockMovement[]
+  transfersOut   InventoryTransfer[]   @relation("TransferFrom")
+  transfersIn    InventoryTransfer[]   @relation("TransferTo")
+  stockTakes     StockTakeSession[]
+  stockTakeItems StockTakeItem[]
+  orders         Order[]
+}
+
+/// Department allocation: which departments (sale points / stores) a user may work in.
+model UserDepartment {
+  userId       String
+  departmentId String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+
+  @@id([userId, departmentId])
+}
+
+/// A physical client terminal (till, waiter tablet, front desk PC, kitchen screen) on the LAN.
+model Terminal {
+  id           String      @id @default(uuid())
+  name         String      @unique
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id])
+  /// Hash of the terminal's sync secret; terminals authenticate to the master server with it.
+  secretHash   String
+  lastSyncAt   DateTime?
+  active       Boolean     @default(true)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  syncOperations SyncOperation[]
+}
+
+enum ModuleKey {
+  DASHBOARD
+  PMS
+  POS
+  INVENTORY
+  ACCOUNTS
+  REPORTS
+  ADMIN
+}
+
+/// Module Management: enable/disable a module system-wide (roleId = null) or for one role.
+/// A role-specific row overrides the system-wide row.
+model ModuleToggle {
+  id        String    @id @default(uuid())
+  module    ModuleKey
+  roleId    String?
+  role      Role?     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  enabled   Boolean   @default(true)
+  updatedAt DateTime  @updatedAt
+
+  @@unique([module, roleId])
+}
+
+// =====================================================================
+// Business day, shifts, currencies
+// =====================================================================
+
+model BusinessDay {
+  id         String    @id @default(uuid())
+  /// Trading date this business day belongs to (night audit may close it after midnight).
+  date       DateTime  @db.Date
+  openedAt   DateTime  @default(now())
+  openedById String
+  openedBy   User      @relation("DayOpenedBy", fields: [openedById], references: [id])
+  closedAt   DateTime?
+  closedById String?
+  closedBy   User?     @relation("DayClosedBy", fields: [closedById], references: [id])
+
+  shifts Shift[]
+
+  @@index([closedAt])
+}
+
+/// A cashier or waiter shift. Waiters cannot open their own: openedById must be a super cashier / manager.
+model Shift {
+  id               String      @id @default(uuid())
+  businessDayId    String
+  businessDay      BusinessDay @relation(fields: [businessDayId], references: [id])
+  userId           String
+  user             User        @relation("ShiftUser", fields: [userId], references: [id])
+  openedById       String
+  openedBy         User        @relation("ShiftOpenedBy", fields: [openedById], references: [id])
+  openingFloat     Decimal     @default(0) @db.Decimal(14, 2)
+  openedAt         DateTime    @default(now())
+  closedAt         DateTime?
+  closedById       String?
+  closedBy         User?       @relation("ShiftClosedBy", fields: [closedById], references: [id])
+  /// Cash counted at close, and what the system expected (float + cash taken - payouts).
+  countedCash      Decimal?    @db.Decimal(14, 2)
+  expectedCash     Decimal?    @db.Decimal(14, 2)
+  originTerminalId String?
+  updatedAt        DateTime    @updatedAt
+
+  orders   Order[]
+  payments Payment[]
+
+  @@index([userId, closedAt])
+}
+
+/// Exchange rate to the base currency (KES). The latest row with effectiveFrom <= now applies.
+model ExchangeRate {
+  id            String   @id @default(uuid())
+  currency      String   @db.Char(3)
+  /// 1 unit of `currency` = rateToBase KES.
+  rateToBase    Decimal  @db.Decimal(14, 6)
+  effectiveFrom DateTime @default(now())
+
+  @@index([currency, effectiveFrom])
+}
+
+// =====================================================================
+// Customers (debtors / corporate accounts)
+// =====================================================================
+
+model Customer {
+  id          String   @id @default(uuid())
+  name        String
+  phone       String?
+  email       String?
+  kraPin      String?
+  isCorporate Boolean  @default(false)
+  creditLimit Decimal  @default(0) @db.Decimal(14, 2)
+  /// Amount owed now (KES). Kept in step with DEBTOR payments and settlements.
+  balance     Decimal  @default(0) @db.Decimal(14, 2)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  reservations Reservation[]
+  groups       GroupBooking[]
+  payments     Payment[]
+}
+
+// =====================================================================
+// PMS: rooms, categories, tariffs, guests, reservations, folios, housekeeping
+// =====================================================================
+
+enum MealPlan {
+  RO // Room only
+  BB // Bed & breakfast
+  HB // Half board
+  FB // Full board
+  AI // All inclusive
+}
+
+model RoomCategory {
+  id                String   @id @default(uuid())
+  code              String   @unique
+  name              String   @unique
+  roomClass         String   @default("Standard")
+  description       String?
+  baseRate          Decimal  @db.Decimal(14, 2)
+  /// Lowest rate front desk may give without authorization.
+  rateFloor         Decimal  @db.Decimal(14, 2)
+  defaultOccupancy  Int      @default(1)
+  maxAdults         Int      @default(2)
+  maxChildren       Int      @default(0)
+  maxGuests         Int      @default(2)
+  maxExtraBeds      Int      @default(0)
+  /// Charge per extra guest per night above defaultOccupancy.
+  extraGuestRate    Decimal  @default(0) @db.Decimal(14, 2)
+  features          String[]
+  facilities        String[]
+  housekeepingCheck Boolean  @default(true)
+  sequence          Int      @default(0)
+  active            Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  rooms        Room[]
+  tariffs      RoomTariff[]
+  reservations Reservation[]
+}
+
+/// Nightly rate for a category + meal plan (+ currency), optionally limited to a date window.
+model RoomTariff {
+  id                String       @id @default(uuid())
+  categoryId        String
+  category          RoomCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  mealPlan          MealPlan
+  currency          String       @default("KES") @db.Char(3)
+  /// Room + meals per night for `adultsIncluded` adults.
+  rate              Decimal      @db.Decimal(14, 2)
+  adultsIncluded    Int          @default(1)
+  /// Meal supplement per extra adult; children pay childPercent of it.
+  mealPerExtraAdult Decimal      @default(0) @db.Decimal(14, 2)
+  childPercent      Int          @default(50)
+  validFrom         DateTime?    @db.Date
+  validTo           DateTime?    @db.Date
+  active            Boolean      @default(true)
+
+  @@index([categoryId, mealPlan, currency])
+}
+
+enum RoomStatus {
+  VACANT_CLEAN
+  VACANT_DIRTY
+  OCCUPIED
+  INSPECTED
+  OUT_OF_ORDER
+  OUT_OF_SERVICE
+}
+
+model Room {
+  id         String       @id @default(uuid())
+  number     String       @unique
+  floor      String?
+  categoryId String
+  category   RoomCategory @relation(fields: [categoryId], references: [id])
+  status     RoomStatus   @default(VACANT_CLEAN)
+  notes      String?
+  active     Boolean      @default(true)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  reservations      Reservation[]
+  housekeepingTasks HousekeepingTask[]
+}
+
+model Guest {
+  id          String   @id @default(uuid())
+  fullName    String
+  nationality String?
+  idType      String? // National ID, Passport, Driving licence, Alien / resident ID, Other
+  idNumber    String?
+  phone       String?
+  email       String?
+  gender      String?
+  /// Reference to the stored scan of the ID / passport (file key, not the image itself).
+  documentRef String?
+  preferences String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  stays ReservationGuest[]
+
+  @@index([idNumber])
+  @@index([phone])
+}
+
+model GroupBooking {
+  id                String    @id @default(uuid())
+  name              String
+  /// Corporate account paying the master bill; null when an individual sponsor pays.
+  customerId        String?
+  customer          Customer? @relation(fields: [customerId], references: [id])
+  sponsorName       String?
+  sponsorPhone      String?
+  /// When true, room and incidental charges of all member reservations bill to the group's master folio.
+  masterBilling     Boolean   @default(true)
+  /// Master folio covers incidentals (F&B, minibar...) too, not only rooms.
+  coversIncidentals Boolean   @default(false)
+  arrival           DateTime  @db.Date
+  departure         DateTime  @db.Date
+  discountPct       Decimal   @default(0) @db.Decimal(5, 2)
+  cancelled         Boolean   @default(false)
+  originTerminalId  String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  reservations Reservation[]
+}
+
+enum ReservationStatus {
+  RESERVED
+  CHECKED_IN
+  CHECKED_OUT
+  CANCELLED
+  NO_SHOW
+}
+
+/// How the stay is settled when booked / checked in.
+enum SettlementMode {
+  PAY_NOW // full payment at check-in
+  DEPOSIT // part paid now, rest later
+  PENDING // check in with the whole balance pending
+  COMPLIMENTARY
+}
+
+model Reservation {
+  id               String            @id @default(uuid())
+  /// Human folio number, e.g. "FO-000123".
+  number           String            @unique
+  status           ReservationStatus @default(RESERVED)
+  categoryId       String
+  category         RoomCategory      @relation(fields: [categoryId], references: [id])
+  /// Null until a room is allocated.
+  roomId           String?
+  room             Room?             @relation(fields: [roomId], references: [id])
+  groupId          String?
+  group            GroupBooking?     @relation(fields: [groupId], references: [id])
+  /// Corporate account billed for this stay (direct bill).
+  customerId       String?
+  customer         Customer?         @relation(fields: [customerId], references: [id])
+  arrival          DateTime          @db.Date
+  departure        DateTime          @db.Date
+  adults           Int               @default(1)
+  children         Int               @default(0)
+  mealPlan         MealPlan          @default(RO)
+  currency         String            @default("KES") @db.Char(3)
+  /// Agreed nightly room rate and meal supplement per night, frozen at booking.
+  roomRate         Decimal           @db.Decimal(14, 2)
+  mealRate         Decimal           @default(0) @db.Decimal(14, 2)
+  settlement       SettlementMode    @default(PENDING)
+  earlyCheckIn     Boolean           @default(false)
+  lateCheckOut     Boolean           @default(false)
+  notes            String?
+  checkedInAt      DateTime?
+  checkedOutAt     DateTime?
+  createdById      String
+  createdBy        User              @relation("ReservationCreatedBy", fields: [createdById], references: [id])
+  originTerminalId String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  guests            ReservationGuest[]
+  charges           RoomFolioCharge[]
+  payments          Payment[]
+  ordersTransferred Order[]
+
+  @@index([roomId, status])
+  @@index([arrival, departure])
+  @@index([status])
+}
+
+model ReservationGuest {
+  reservationId String
+  guestId       String
+  reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  guest         Guest       @relation(fields: [guestId], references: [id])
+  isLead        Boolean     @default(false)
+
+  @@id([reservationId, guestId])
+}
+
+enum FolioChargeType {
+  ROOM
+  MEAL_PLAN
+  EXTRA_GUEST
+  EARLY_CHECKIN
+  LATE_CHECKOUT
+  FNB_TRANSFER // restaurant / bar bill posted to the room
+  MINIBAR
+  LAUNDRY
+  MISC
+  DISCOUNT // negative amount
+  WAIVER // negative amount (e.g. waived late check-out fee)
+}
+
+model RoomFolioCharge {
+  id               String          @id @default(uuid())
+  reservationId    String
+  reservation      Reservation     @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  type             FolioChargeType
+  description      String
+  /// Night the charge belongs to (room / meal / extra guest charges).
+  serviceDate      DateTime?       @db.Date
+  quantity         Decimal         @default(1) @db.Decimal(14, 3)
+  amount           Decimal         @db.Decimal(14, 2)
+  currency         String          @default("KES") @db.Char(3)
+  amountBase       Decimal         @db.Decimal(14, 2)
+  /// The POS order this charge came from. Unique, so one bill can never be posted to a room twice.
+  sourceOrderId    String?         @unique
+  sourceOrder      Order?          @relation(fields: [sourceOrderId], references: [id])
+  voided           Boolean         @default(false)
+  postedById       String
+  postedBy         User            @relation(fields: [postedById], references: [id])
+  originTerminalId String?
+  createdAt        DateTime        @default(now())
+
+  @@index([reservationId, type])
+}
+
+enum HousekeepingTaskType {
+  CLEAN
+  INSPECT
+  TURNDOWN
+  DEEP_CLEAN
+  MAINTENANCE
+}
+
+enum HousekeepingTaskStatus {
+  PENDING
+  IN_PROGRESS
+  DONE
+  INSPECTED
+  REJECTED
+  CANCELLED
+}
+
+model HousekeepingTask {
+  id               String                 @id @default(uuid())
+  roomId           String
+  room             Room                   @relation(fields: [roomId], references: [id])
+  type             HousekeepingTaskType
+  status           HousekeepingTaskStatus @default(PENDING)
+  priority         Int                    @default(0)
+  scheduledFor     DateTime               @db.Date
+  assignedToId     String?
+  assignedTo       User?                  @relation("HkAssignee", fields: [assignedToId], references: [id])
+  scheduledById    String
+  scheduledBy      User                   @relation("HkScheduler", fields: [scheduledById], references: [id])
+  inspectedById    String?
+  inspectedBy      User?                  @relation("HkInspector", fields: [inspectedById], references: [id])
+  notes            String?
+  startedAt        DateTime?
+  completedAt      DateTime?
+  inspectedAt      DateTime?
+  originTerminalId String?
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+
+  @@index([scheduledFor, status])
+  @@index([assignedToId, status])
+}
+
+// =====================================================================
+// Inventory: stock master, balances, recipes, movements, transfers, stock takes, swaps
+// =====================================================================
+
+/// Stock Master: every item held in stock (raw ingredients and resale goods).
+model StockItem {
+  id               String   @id @default(uuid())
+  code             String   @unique
+  name             String
+  category         String?
+  /// Unit all quantities are kept in: "ml", "g", "pc".
+  baseUnit         String
+  /// How it is bought, e.g. "Bottle 750ml" with 750 base units per purchase unit.
+  purchaseUnit     String?
+  unitsPerPurchase Decimal  @default(1) @db.Decimal(14, 3)
+  /// Usable share after trimming / waste (beef 85% => 0.85). Recipe depletion divides by this.
+  yieldFactor      Decimal  @default(1) @db.Decimal(6, 4)
+  /// Cost per base unit (KES), updated on goods received.
+  unitCost         Decimal  @default(0) @db.Decimal(14, 4)
+  /// Selling price per base unit when the item is also sold as-is (optional).
+  sellingPrice     Decimal? @db.Decimal(14, 2)
+  reorderLevel     Decimal  @default(0) @db.Decimal(14, 3)
+  criticalLevel    Decimal  @default(0) @db.Decimal(14, 3)
+  tracksExpiry     Boolean  @default(false)
+  active           Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  balances       DepartmentInventory[]
+  recipeUses     RecipeItem[]
+  movements      StockMovement[]
+  transferLines  InventoryTransferLine[]
+  stockTakeItems StockTakeItem[]
+  swapsFrom      ItemSwapLog[]           @relation("SwapFrom")
+  swapsTo        ItemSwapLog[]           @relation("SwapTo")
+}
+
+/// Current balance of a stock item in a department / store. Changed only together with a StockMovement.
+model DepartmentInventory {
+  departmentId String
+  stockItemId  String
+  department   Department @relation(fields: [departmentId], references: [id])
+  stockItem    StockItem  @relation(fields: [stockItemId], references: [id])
+  quantity     Decimal    @default(0) @db.Decimal(14, 3)
+  /// Department-specific reorder level (falls back to the Stock Master level when null).
+  reorderLevel Decimal?   @db.Decimal(14, 3)
+  updatedAt    DateTime   @updatedAt
+
+  @@id([departmentId, stockItemId])
+}
+
+/// A sellable POS item (menu / shelf item). Its recipe says which stock it uses.
+model MenuItem {
+  id           String       @id @default(uuid())
+  name         String
+  departmentId String
+  department   Department   @relation(fields: [departmentId], references: [id])
+  category     String
+  price        Decimal      @db.Decimal(14, 2)
+  /// KRA eTIMS tax category: A = exempt, B = 16% VAT, C = zero-rated, ...
+  taxCode      String       @default("B")
+  /// Order ticket station: KOT (kitchen) or BOT (bar).
+  station      OrderStation @default(KOT)
+  /// Items in this swap group can replace each other (e.g. beer brands in a bucket deal).
+  swapGroup    String?
+  active       Boolean      @default(true)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  recipe     RecipeItem[]
+  orderItems OrderItem[]
+}
+
+/// Portion control: one serving of `menuItem` uses `quantity` base units of `stockItem`
+/// (e.g. Whiskey Shot -> 30 ml of Whiskey 750ml; Steak -> 200 g of Beef).
+model RecipeItem {
+  id          String    @id @default(uuid())
+  menuItemId  String
+  stockItemId String
+  menuItem    MenuItem  @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  stockItem   StockItem @relation(fields: [stockItemId], references: [id])
+  quantity    Decimal   @db.Decimal(14, 3)
+
+  @@unique([menuItemId, stockItemId])
+}
+
+enum StockMovementType {
+  RECEIVE // goods received (GRN) into a store
+  TRANSFER_OUT
+  TRANSFER_IN
+  SALE // recipe depletion when an order item is sent
+  SALE_RETURN // voided order item put back
+  SWAP_OUT // item swap: stock of the original item returned
+  SWAP_IN // item swap: stock of the replacement item used
+  ISSUE_INTERNAL // non-sales: internal consumption
+  ISSUE_STAFF_MEAL // non-sales: staff meals
+  ISSUE_PROMO // non-sales: promotional use
+  WASTAGE // non-sales: wastage / damage / expiry
+  STOCKTAKE_ADJUST // variance committed by a stock take
+  ADJUST // manual correction
+}
+
+/// Inventory ledger: one row per change of one item in one department. quantity is signed.
+model StockMovement {
+  id               String            @id @default(uuid())
+  type             StockMovementType
+  departmentId     String
+  department       Department        @relation(fields: [departmentId], references: [id])
+  stockItemId      String
+  stockItem        StockItem         @relation(fields: [stockItemId], references: [id])
+  quantity         Decimal           @db.Decimal(14, 3)
+  unitCost         Decimal           @db.Decimal(14, 4)
+  /// Balance after this movement, for fast stock cards.
+  balanceAfter     Decimal           @db.Decimal(14, 3)
+  /// Source document: order item, transfer, stock take, swap...
+  refType          String?
+  refId            String?
+  note             String?
+  userId           String
+  user             User              @relation(fields: [userId], references: [id])
+  originTerminalId String?
+  createdAt        DateTime          @default(now())
+
+  @@index([stockItemId, departmentId, createdAt])
+  @@index([refType, refId])
+  @@index([type, createdAt])
+}
+
+enum TransferKind {
+  REQUISITION // outlet asks a store for stock
+  TRANSFER // store-to-store or store-to-outlet issue
+  NON_SALES_ISSUE // stock leaves inventory without a sale (see reason)
+}
+
+enum TransferStatus {
+  REQUESTED
+  APPROVED
+  ISSUED
+  RECEIVED
+  REJECTED
+  CANCELLED
+}
+
+enum NonSalesReason {
+  INTERNAL
+  STAFF_MEAL
+  PROMOTION
+  WASTAGE
+}
+
+model InventoryTransfer {
+  id               String          @id @default(uuid())
+  number           String          @unique
+  kind             TransferKind
+  status           TransferStatus  @default(REQUESTED)
+  fromDepartmentId String
+  fromDepartment   Department      @relation("TransferFrom", fields: [fromDepartmentId], references: [id])
+  /// Null for non-sales issues (stock leaves inventory).
+  toDepartmentId   String?
+  toDepartment     Department?     @relation("TransferTo", fields: [toDepartmentId], references: [id])
+  nonSalesReason   NonSalesReason?
+  note             String?
+  requestedById    String
+  requestedBy      User            @relation("TransferRequestedBy", fields: [requestedById], references: [id])
+  approvedById     String?
+  approvedBy       User?           @relation("TransferApprovedBy", fields: [approvedById], references: [id])
+  receivedById     String?
+  receivedBy       User?           @relation("TransferReceivedBy", fields: [receivedById], references: [id])
+  approvedAt       DateTime?
+  issuedAt         DateTime?
+  receivedAt       DateTime?
+  originTerminalId String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  lines InventoryTransferLine[]
+
+  @@index([status, kind])
+}
+
+model InventoryTransferLine {
+  id                String            @id @default(uuid())
+  transferId        String
+  transfer          InventoryTransfer @relation(fields: [transferId], references: [id], onDelete: Cascade)
+  stockItemId       String
+  stockItem         StockItem         @relation(fields: [stockItemId], references: [id])
+  requestedQuantity Decimal           @db.Decimal(14, 3)
+  issuedQuantity    Decimal?          @db.Decimal(14, 3)
+  receivedQuantity  Decimal?          @db.Decimal(14, 3)
+
+  @@unique([transferId, stockItemId])
+}
+
+enum StockTakeStatus {
+  COUNTING
+  APPROVED
+  CANCELLED
+}
+
+/// A stock take. "Approve & Take All Stocks at Once" commits every counted line in one transaction.
+model StockTakeSession {
+  id               String          @id @default(uuid())
+  number           String          @unique
+  status           StockTakeStatus @default(COUNTING)
+  /// Null = all departments.
+  departmentId     String?
+  department       Department?     @relation(fields: [departmentId], references: [id])
+  /// When true, items not counted are treated as counted at zero on approval.
+  uncountedAsZero  Boolean         @default(false)
+  startedById      String
+  startedBy        User            @relation("StockTakeStartedBy", fields: [startedById], references: [id])
+  startedAt        DateTime        @default(now())
+  approvedById     String?
+  approvedBy       User?           @relation("StockTakeApprovedBy", fields: [approvedById], references: [id])
+  approvedAt       DateTime?
+  /// Filled on approval: totals of the permanent audit report.
+  itemsCounted     Int?
+  shrinkageValue   Decimal?        @db.Decimal(14, 2)
+  surplusValue     Decimal?        @db.Decimal(14, 2)
+  netVarianceValue Decimal?        @db.Decimal(14, 2)
+  stockValueAfter  Decimal?        @db.Decimal(14, 2)
+  note             String?
+  updatedAt        DateTime        @updatedAt
+
+  items StockTakeItem[]
+
+  @@index([status])
+}
+
+model StockTakeItem {
+  id               String           @id @default(uuid())
+  sessionId        String
+  session          StockTakeSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  departmentId     String
+  department       Department       @relation(fields: [departmentId], references: [id])
+  stockItemId      String
+  stockItem        StockItem        @relation(fields: [stockItemId], references: [id])
+  /// Null until counted.
+  countedQuantity  Decimal?         @db.Decimal(14, 3)
+  countedById      String?
+  countedBy        User?            @relation(fields: [countedById], references: [id])
+  countedAt        DateTime?
+  /// System balance at the moment the count was entered. variance = counted - systemQuantity.
+  /// On approval the variance is ADDED to the live balance, so sales made after counting are kept.
+  systemQuantity   Decimal?         @db.Decimal(14, 3)
+  varianceQuantity Decimal?         @db.Decimal(14, 3)
+  unitCost         Decimal?         @db.Decimal(14, 4)
+  varianceValue    Decimal?         @db.Decimal(14, 2)
+  narration        String?
+
+  @@unique([sessionId, departmentId, stockItemId])
+}
+
+/// Item swap on an order (e.g. bucket of Tusker swapped to Guinness) with the stock it moved.
+model ItemSwapLog {
+  id               String    @id @default(uuid())
+  orderItemId      String
+  orderItem        OrderItem @relation(fields: [orderItemId], references: [id])
+  fromStockItemId  String
+  fromStockItem    StockItem @relation("SwapFrom", fields: [fromStockItemId], references: [id])
+  toStockItemId    String
+  toStockItem      StockItem @relation("SwapTo", fields: [toStockItemId], references: [id])
+  quantity         Decimal   @db.Decimal(14, 3)
+  reason           String?
+  userId           String
+  user             User      @relation(fields: [userId], references: [id])
+  originTerminalId String?
+  createdAt        DateTime  @default(now())
+}
+
+// =====================================================================
+// POS: orders, order items, payments, fiscalization
+// =====================================================================
+
+enum OrderStation {
+  KOT // kitchen order ticket
+  BOT // bar order ticket
+  NONE
+}
+
+enum OrderStatus {
+  OPEN // items sent, not billed
+  PROFORMA_PRINTED // pro-forma bill given to the customer
+  SETTLED // fully paid
+  TRANSFERRED_TO_ROOM // posted to a room folio
+  MERGED // merged into another order (mergedIntoId)
+  VOID
+}
+
+enum EtimsStatus {
+  NOT_REQUIRED
+  PENDING
+  SIGNED
+  FAILED
+}
+
+model Order {
+  id                String       @id @default(uuid())
+  /// Bill number printed on the pro-forma / receipt (and in its QR code).
+  number            String       @unique
+  status            OrderStatus  @default(OPEN)
+  departmentId      String
+  department        Department   @relation(fields: [departmentId], references: [id])
+  shiftId           String?
+  shift             Shift?       @relation(fields: [shiftId], references: [id])
+  waiterId          String
+  waiter            User         @relation("OrderWaiter", fields: [waiterId], references: [id])
+  cashierId         String?
+  cashier           User?        @relation("OrderCashier", fields: [cashierId], references: [id])
+  tableLabel        String?
+  guestName         String?
+  covers            Int?
+  /// When split, the parent order; when merged, the order it was merged into.
+  splitFromId       String?
+  splitFrom         Order?       @relation("OrderSplit", fields: [splitFromId], references: [id])
+  splits            Order[]      @relation("OrderSplit")
+  mergedIntoId      String?
+  mergedInto        Order?       @relation("OrderMerge", fields: [mergedIntoId], references: [id])
+  merged            Order[]      @relation("OrderMerge")
+  /// Set when the bill is posted to a guest's room folio.
+  roomReservationId String?
+  roomReservation   Reservation? @relation(fields: [roomReservationId], references: [id])
+  netTotal          Decimal      @default(0) @db.Decimal(14, 2)
+  taxTotal          Decimal      @default(0) @db.Decimal(14, 2)
+  discountTotal     Decimal      @default(0) @db.Decimal(14, 2)
+  grossTotal        Decimal      @default(0) @db.Decimal(14, 2)
+  proformaPrintedAt DateTime?
+  settledAt         DateTime?
+  etimsStatus       EtimsStatus  @default(PENDING)
+  etimsReceiptNo    String?
+  etimsSignedAt     DateTime?
+  originTerminalId  String?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  items       OrderItem[]
+  payments    Payment[]
+  folioCharge RoomFolioCharge?
+
+  @@index([status, departmentId])
+  @@index([waiterId, status])
+  @@index([shiftId])
+}
+
+enum OrderItemStatus {
+  SENT // ticket printed at KOT/BOT, stock depleted
+  VOID
+}
+
+model OrderItem {
+  id          String          @id @default(uuid())
+  orderId     String
+  order       Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItemId  String
+  menuItem    MenuItem        @relation(fields: [menuItemId], references: [id])
+  /// Name and price frozen when ordered.
+  name        String
+  quantity    Decimal         @db.Decimal(14, 3)
+  unitPrice   Decimal         @db.Decimal(14, 2)
+  taxCode     String
+  taxRate     Decimal         @db.Decimal(5, 2)
+  discount    Decimal         @default(0) @db.Decimal(14, 2)
+  lineTotal   Decimal         @db.Decimal(14, 2)
+  station     OrderStation
+  /// Which "Send order" round this line went out in (ticket number on the KOT/BOT).
+  round       Int             @default(1)
+  kitchenNote String?
+  status      OrderItemStatus @default(SENT)
+  voidReason  String?
+  voidedById  String?
+  voidedBy    User?           @relation("OrderItemVoidedBy", fields: [voidedById], references: [id])
+  createdAt   DateTime        @default(now())
+
+  swaps ItemSwapLog[]
+
+  @@index([orderId])
+}
+
+enum PaymentMethod {
+  CASH
+  MPESA
+  CARD
+  DEBTOR // charged to a customer account
+  ROOM_FOLIO // charged to a guest's room (see RoomFolioCharge)
+  BANK
+}
+
+enum PaymentStatus {
+  PENDING // e.g. M-Pesa STK push sent, waiting for callback
+  CONFIRMED
+  FAILED
+  REVERSED
+}
+
+/// Money received against an order (POS) or a reservation folio (PMS).
+model Payment {
+  id                     String        @id @default(uuid())
+  method                 PaymentMethod
+  status                 PaymentStatus @default(CONFIRMED)
+  orderId                String?
+  order                  Order?        @relation(fields: [orderId], references: [id])
+  reservationId          String?
+  reservation            Reservation?  @relation(fields: [reservationId], references: [id])
+  customerId             String?
+  customer               Customer?     @relation(fields: [customerId], references: [id])
+  shiftId                String?
+  shift                  Shift?        @relation(fields: [shiftId], references: [id])
+  amount                 Decimal       @db.Decimal(14, 2)
+  currency               String        @default("KES") @db.Char(3)
+  exchangeRate           Decimal       @default(1) @db.Decimal(14, 6)
+  amountBase             Decimal       @db.Decimal(14, 2)
+  /// M-Pesa receipt (e.g. "QGH7X2ABC1"), card approval code, bank reference...
+  reference              String?
+  mpesaPhone             String?
+  mpesaCheckoutRequestId String?       @unique
+  userId                 String
+  user                   User          @relation(fields: [userId], references: [id])
+  originTerminalId       String?
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
+
+  @@index([orderId])
+  @@index([reservationId])
+  @@index([shiftId, method])
+}
+
+// =====================================================================
+// Offline sync, integrations, audit
+// =====================================================================
+
+enum SyncStatus {
+  APPLIED
+  REJECTED // validation failed; the terminal must show the error and fix or discard
+  CONFLICT // newer server data won; terminal must refresh
+}
+
+/// Every operation a terminal pushes via POST /api/sync/push. The id is generated by the terminal,
+/// so a re-sent operation (after a dropped connection) is recognised and not applied twice.
+model SyncOperation {
+  id         String     @id
+  terminalId String
+  terminal   Terminal   @relation(fields: [terminalId], references: [id])
+  /// Per-terminal sequence number, applied in order.
+  sequence   Int
+  entity     String
+  action     String
+  payload    Json
+  clientTime DateTime
+  receivedAt DateTime   @default(now())
+  /// Staff member who performed the operation on the terminal.
+  userId     String?
+  status     SyncStatus
+  /// Error code when rejected.
+  error      String?
+  /// What the terminal is told: { result, warnings } or { error }. Returned again for a re-sent operation.
+  response   Json?
+
+  @@unique([terminalId, sequence])
+  @@index([receivedAt])
+}
+
+enum IntegrationKind {
+  MPESA_STK_PUSH
+  ETIMS_SIGN_RECEIPT
+  ETIMS_Z_REPORT
+  SMS
+  EMAIL
+}
+
+enum IntegrationStatus {
+  QUEUED
+  IN_PROGRESS
+  SUCCEEDED
+  FAILED // will retry until attempts reaches maxAttempts
+  DEAD // gave up; needs attention
+}
+
+/// Outbox for internet-bound calls. Only the master server talks to Daraja / eTIMS / SMS / email;
+/// terminals create jobs (through sync) and the server worker runs them with retries.
+model IntegrationJob {
+  id            String            @id @default(uuid())
+  kind          IntegrationKind
+  status        IntegrationStatus @default(QUEUED)
+  /// What the job is about, e.g. ("Order", orderId) or ("Payment", paymentId).
+  refType       String?
+  refId         String?
+  payload       Json
+  response      Json?
+  attempts      Int               @default(0)
+  maxAttempts   Int               @default(8)
+  nextAttemptAt DateTime          @default(now())
+  lastError     String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@index([status, nextAttemptAt])
+  @@index([refType, refId])
+}
+
+model AuditLog {
+  id             String   @id @default(uuid())
+  /// e.g. "order.sent", "order.void_item", "room.check_in", "shift.open", "stocktake.approve".
+  action         String
+  entity         String
+  entityId       String?
+  userId         String?
+  user           User?    @relation(fields: [userId], references: [id])
+  /// User who authorized the action with a super cashier PIN override, if any.
+  authorizedById String?
+  terminalId     String?
+  data           Json?
+  createdAt      DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([entity, entityId])
+  @@index([action, createdAt])
+}

@@ -1,0 +1,8 @@
+{
+  "files.eol": "\n",
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "prettier.requireConfig": true,
+  "files.exclude": { "**/.DS_Store": true },
+  "search.exclude": { "dist": true, "original": true }
+}

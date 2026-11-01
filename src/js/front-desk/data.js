@@ -1,0 +1,182 @@
+// ---- Front Desk: rooms, bookings, check-in, guest folios, housekeeping, reports ----
+const APP_VERSION = "1.8.0",
+  APP_BUILD = "26 Oct 2026";
+const ROOMS = [],
+  RESERVATIONS = [],
+  SEED_ROOM_RATES = [
+    ["Single", 3000],
+    ["Double", 4500],
+    ["Executive", 6500],
+    ["Suite", 9000]
+  ],
+  PAY_METHODS = { cash: "Cash", mpesa: "M-Pesa", account: "Customer account" },
+  ROOM_STATUS_LABELS = {
+    vac: "Vacant",
+    occ: "Occupied",
+    res: "Reserved today",
+    dirty: "Dirty",
+    ooo: "Out of order"
+  };
+const FD_SETTINGS = {
+    name: "Mwangaza Grand Hotel",
+    meals: { BB: 800, HB: 1800, FB: 2600 },
+    child: 50
+  },
+  MEAL_PLANS = { RO: "Room only", BB: "Bed & breakfast", HB: "Half board", FB: "Full board" };
+const mealPlanPrice = p => (!p || p === "RO" ? 0 : FD_SETTINGS.meals[p] || 0),
+  mealPerNight = (p, a, c) => mealPlanPrice(p) * (a + (c * FD_SETTINGS.child) / 100);
+function fdBrand() {
+  ["#fdHotel", "#flHotel"].forEach(x => {
+    const e = $(x);
+    if (e) e.textContent = FD_SETTINGS.name;
+  });
+}
+function fdSeed() {
+  [
+    [101, 0],
+    [102, 0],
+    [103, 0],
+    [104, 0],
+    [201, 1],
+    [202, 1],
+    [203, 1],
+    [204, 1],
+    [301, 2],
+    [302, 2],
+    [303, 3],
+    [304, 3]
+  ].forEach(([n, t]) =>
+    ROOMS.push({
+      no: String(n),
+      type: SEED_ROOM_RATES[t][0],
+      rate: SEED_ROOM_RATES[t][1],
+      status: "vac"
+    })
+  );
+}
+const toYmd = d => {
+    d = new Date(d);
+    return (
+      d.getFullYear() +
+      "-" +
+      String(d.getMonth() + 1).padStart(2, "0") +
+      "-" +
+      String(d.getDate()).padStart(2, "0")
+    );
+  },
+  todayYmd = () => toYmd(new Date()),
+  addDays = (x, n) => toYmd(new Date(new Date(x + "T00:00:00").getTime() + n * 864e5)),
+  nightsBetween = (a, b) =>
+    Math.max(1, Math.round((new Date(b + "T00:00:00") - new Date(a + "T00:00:00")) / 864e5));
+const stayOf = no => RESERVATIONS.find(r => r.room === no && r.status === "inhouse"),
+  roomByNo = no => ROOMS.find(r => r.no === no),
+  mealTotal = r =>
+    Math.round(
+      (r.mrate || 0) *
+        nightsBetween(r.in, r.out) *
+        ((r.adults || 1) + ((r.children || 0) * FD_SETTINGS.child) / 100) *
+        100
+    ) / 100,
+  folioOf = r => {
+    const n = nightsBetween(r.in, r.out),
+      room = n * r.rate,
+      meal = mealTotal(r),
+      ex = sSum(r.charges, c => c.amt),
+      paid = sSum(r.pays, p => p.amt);
+    return { n, room, meal, ex, total: room + meal + ex, paid, bal: room + meal + ex - paid };
+  };
+const isFree = (no, a, b, skip) =>
+  !RESERVATIONS.some(
+    r =>
+      r.id !== skip &&
+      r.room === no &&
+      (r.status === "reserved" || r.status === "inhouse") &&
+      r.in < b &&
+      a < r.out
+  );
+const roomStatus = r =>
+  r.status === "ooo"
+    ? "ooo"
+    : stayOf(r.no)
+      ? "occ"
+      : RESERVATIONS.some(
+            x =>
+              x.room === r.no && x.status === "reserved" && x.in <= todayYmd() && x.out > todayYmd()
+          )
+        ? "res"
+        : r.status === "dirty"
+          ? "dirty"
+          : "vac";
+const FD_ICONS = {
+  grid: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',
+  cal: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
+  cal2: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4M9 15h6"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  wallet: '<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M16 13h2M3 10h18"/>',
+  users:
+    '<circle cx="9" cy="8" r="3.5"/><path d="M2 20c0-3.5 3-5 7-5s7 1.5 7 5M17 5a3.5 3.5 0 010 7M22 20c0-2.5-1.5-4-4-4.6"/>',
+  userplus: '<circle cx="10" cy="8" r="4"/><path d="M2 21c0-4 4-6 8-6M18 14v6M15 17h6"/>',
+  broom: '<path d="M14 3l7 7M13 7l-9 9 4 4 9-9M7 13l4 4"/>',
+  chart: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+  gear: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>',
+  doc: '<path d="M7 3h8l4 4v14H7zM15 3v4h4M10 12h6M10 16h6"/>',
+  list: '<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>'
+};
+const FD_MENU = [
+  [
+    "Inhouse Guest Management",
+    [
+      ["grid", "Rooms Grid", "grid"],
+      ["checkin", "Guest Check In", "user"],
+      ["book", "Room Booking", "cal"],
+      ["group", "Group Booking", "users"],
+      ["dates", "Change Date", "cal2"],
+      ["shift", "Shift Management", "clock"],
+      ["post", "Cash Sale / Post Expenses", "wallet"],
+      ["pending", "Pending Payments", "wallet"]
+    ]
+  ],
+  [
+    "House Keeping and Rooms Management",
+    [
+      ["hk", "Room Housekeeping", "broom"],
+      ["occ", "Occupancy Rooms Reports", "chart"],
+      ["set", "Front Desk Settings", "gear"]
+    ]
+  ],
+  [
+    "Front Desk Reports",
+    [
+      ["rsales", "Periodic Sales Report", "doc"],
+      ["rpay", "Periodic Payment Report", "doc"],
+      ["rrev", "Periodic Revenue Report", "doc"],
+      ["rmeal", "Breakfast Report", "doc"],
+      ["rguests", "Guests and Invoices List", "list"],
+      ["rold", "Retrieve Old Summaries", "list"]
+    ]
+  ]
+];
+let fdView = "grid",
+  fdSelectedRoom = null,
+  fdSelectedRes = null,
+  fdPresetRoom = "",
+  fdPending = false,
+  fdDateRange = [addDays(todayYmd(), -29), todayYmd()],
+  fdNotice = null;
+const tableHTML = (h, r) =>
+  `<div style="overflow:auto"><table class="sht"><tr>${h.map(x => `<th>${x}</th>`).join("")}</tr>${r.length ? r.map(x => `<tr>${x.map(c => `<td>${c}</td>`).join("")}</tr>`).join("") : `<tr><td colspan="${h.length}" class="stk">Nothing to show.</td></tr>`}</table></div>`;
+const inputHTML = (id, ph, t) => `<input id="${id}" placeholder="${ph}"${t ? ` type="${t}"` : ""}>`,
+  roomOptionsHTML = (L, sel) =>
+    L.map(
+      r =>
+        `<option value="${r.no}" ${sel === r.no ? "selected" : ""}>${r.no} · ${r.type} · KES ${r.rate.toLocaleString()}</option>`
+    ).join("");
+const roomStatusCounts = () => {
+  const c = {};
+  ROOMS.forEach(r => {
+    const x = roomStatus(r);
+    c[x] = (c[x] || 0) + 1;
+  });
+  return c;
+};

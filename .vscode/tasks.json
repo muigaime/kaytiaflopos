@@ -1,0 +1,19 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build single-file HTML",
+      "type": "shell",
+      "command": "node scripts/build.js",
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "Dev server (live reload)",
+      "type": "shell",
+      "command": "node scripts/dev.js",
+      "isBackground": true,
+      "problemMatcher": []
+    }
+  ]
+}
