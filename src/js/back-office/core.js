@@ -50,7 +50,8 @@ const LS = "kaytia_pos_bo_v1",
   // Item setup details per stock item: { code, name, group, uom, buyUnit, perBuy, buyPrice }.
   // INGC[k] (cost per unit of measure) = buyPrice / perBuy, then a weighted average as stock arrives.
   INGU = {},
-  ADM = [];
+  ADM = [],
+  ROLE_OVER = {};
 Object.keys(stock).forEach(k => (RO[k] = Math.max(1, Math.round(stock[k] * 0.2))));
 const $ = s => document.querySelector(s),
   I = (n, c) => `<svg class="i"${c ? ` style="color:${c}"` : ""}><use href="#i-${n}"/></svg>`,
@@ -104,7 +105,7 @@ function bosave() {
         VP: VPAYS,
         BL: BILLLOG,
         OR: orders,
-        ON: ono,
+        RN: rno,
         IS: ISSUES,
         PD: PRODS,
         ST: STORES,
@@ -116,6 +117,7 @@ function bosave() {
         X: INGC,
         IU: INGU,
         A: ADM,
+        BR: ROLE_OVER,
         D: DAYS,
         H: SHIFTS,
         P: PAYOUTS,
@@ -176,7 +178,6 @@ window.bosave = bosave;
       });
       if (Object.keys(o.lines || {}).length) orders.push(o);
     });
-    ono = Math.max(ono, s.ON || 1);
     ISSUES.length = 0;
     ISSUES.push(...(s.IS || []));
     PRODS.length = 0;
@@ -192,6 +193,7 @@ window.bosave = bosave;
     CU.push(...s.C);
     ADM.length = 0;
     ADM.push(...(s.A || []));
+    Object.assign(ROLE_OVER, s.BR || {});
     DAYS.length = 0;
     DAYS.push(...(s.D || []));
     SHIFTS.length = 0;
@@ -207,7 +209,22 @@ window.bosave = bosave;
     ROOMTYPES.push(...(s.RT || []));
     GROUPS.length = 0;
     GROUPS.push(...(s.GR || []));
-    rno = Math.max(rno, 1042 + SALES.length);
+    // Older bills were NBO-001042 and open orders ORD-001. They move to the plain numbers, once.
+    const moved = {},
+      plain = x => (/^NBO-\d+$/.test(x) ? pad(+x.slice(4), 5) : moved[x] || x);
+    const top = SALES.reduce((a, x) => Math.max(a, +String(x.no).replace(/^NBO-/, "") || 0), 0);
+    rno = Math.max(rno, s.RN || 0, top + 1);
+    orders.forEach(o => {
+      if (!/^ORD-/.test(o.no)) return;
+      o.ord = o.ord || +o.no.slice(4) || "";
+      moved[o.no] = pad(rno++, 5);
+      o.no = moved[o.no];
+    });
+    SALES.forEach(x => {
+      x.no = plain(x.no);
+      if (x.ret) x.ret.of = plain(x.ret.of);
+    });
+    BILLLOG.forEach(x => (x.no = plain(x.no)));
   } catch (e) {}
 })();
 // Repair saved data from older or interrupted versions, so one bad value can't stop the app from opening.

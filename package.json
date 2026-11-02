@@ -2,7 +2,7 @@
   "name": "kaytia-pos-backoffice",
   "version": "1.8.0",
   "private": true,
-  "description": "Kaytia Smart ERP: POS, Back Office and Front Desk (single-file build from modular sources)",
+  "description": "Kaytia Flow: POS, Back Office and Front Desk (single-file build from modular sources)",
   "scripts": {
     "dev": "node scripts/dev.js",
     "build": "node scripts/build.js",

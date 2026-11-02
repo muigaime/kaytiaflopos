@@ -270,7 +270,7 @@ const RAIL = [
 ];
 const tabAllowed = t => {
   const x = RAIL.find(r => r !== "-" && r[0] === t);
-  return !x || x[3] !== "store" || isStore(STKT.loc);
+  return boTabOk("inv", t) && (!x || x[3] !== "store" || isStore(STKT.loc));
 };
 // Approved requisitions ("Pending" = approved before approvals existed) can be issued.
 const isOpenReq = r =>
@@ -833,7 +833,10 @@ function invView() {
     appr: apView // approvals.js
   };
   if (!isStore(STKT.loc)) STKT.loc = STORES[0]; // Inventory works on stores only
-  if (!tabAllowed(invT) || !B[invT]) invT = "master"; // e.g. LPO / purchases now live in Purchasing
+  if (!tabAllowed(invT) || !B[invT])
+    invT = tabAllowed("master")
+      ? "master"
+      : RAIL.filter(x => x !== "-" && B[x[0]] && tabAllowed(x[0]))[0][0]; // e.g. LPO / purchases now live in Purchasing
   if (invT === "items") setTimeout(itPreview); // fill the live hints once the page is on screen
   // Popups that can be opened from more than one tab (Item setup draws its own item popup).
   const popups =
@@ -1465,6 +1468,12 @@ document.addEventListener("keydown", e => {
 $("#vSub").oninput = e => {
   const s = e.target.dataset;
   if (s.bc !== undefined) return billFilter(s.bc, e.target.value);
+  if (s.urf) return urFilter(s.urf, e.target.value);
+  if (s.ws) return void (wsF[s.ws] = e.target.value);
+  if (s.sq !== undefined) {
+    salesF.q = e.target.value;
+    return void ($("#salesList").innerHTML = salesList());
+  }
   if (s.ph !== undefined) {
     STKT.phys[s.ph] = e.target.value;
     updMaster();

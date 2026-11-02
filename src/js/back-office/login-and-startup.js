@@ -6,6 +6,7 @@ function boShow() {
   if (ok) {
     posKioskOff(); // signed in to Back Office: the POS rule no longer applies
     setUser(boUser.n);
+    applyBoRights();
     all();
   } else {
     $("#boP").value = "";
@@ -62,13 +63,14 @@ const boTry = async () => {
     ok = a && a.ph === (await H(u + "|" + p));
   g.disabled = false;
   g.textContent = "Sign in";
+  if (ok && a.off) return bad("This account is disabled. Ask your administrator.");
   if (ok) {
     fails = 0;
     m.style.display = "none";
     try {
       $("#boRm").checked ? localStorage.setItem(RMK, u) : localStorage.removeItem(RMK);
     } catch (e) {}
-    boUser = { n: a.n, u: a.u };
+    boUser = { n: a.n, u: a.u, role: a.role || SUPER };
     boShow();
   } else {
     if (++fails >= 5) {
@@ -142,7 +144,6 @@ document.querySelectorAll(".bkm").forEach(
     })
 );
 $("#start img").src = $("#logoSrc").src;
-$("#bo .lg img").src = $("#logoSrc").src;
 $("#boLogin img").src = $("#logoSrc").src;
 setInterval(bosave, 4000);
 addEventListener("pagehide", bosave);

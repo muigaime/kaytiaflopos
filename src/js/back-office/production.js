@@ -92,6 +92,7 @@ function prAddLine(id) {
 
 // ---------------------------------------------------------------- page
 function recipesView() {
+  if (!boTabOk("rec", recT)) recT = "overview";
   const body =
     recT === "pbal" || recT === "allp"
       ? recBalHTML(recT)
@@ -102,10 +103,12 @@ function recipesView() {
           : recT === "log"
             ? prodLogHTML()
             : recOverviewHTML();
-  return `<div class="inv"><nav class="inv-rail">${REC_TABS.map(
-    ([t, l, ic]) =>
-      `<button class="ir ${t === recT ? "on" : ""}" data-a="rec_tab" data-t="${t}">${I(ic)}<span>${l}</span></button>`
-  ).join("")}</nav><div class="inv-main">${body}${apModalIfOpen()}</div></div>`;
+  return `<div class="inv"><nav class="inv-rail">${REC_TABS.filter(([t]) => boTabOk("rec", t))
+    .map(
+      ([t, l, ic]) =>
+        `<button class="ir ${t === recT ? "on" : ""}" data-a="rec_tab" data-t="${t}">${I(ic)}<span>${l}</span></button>`
+    )
+    .join("")}</nav><div class="inv-main">${body}${apModalIfOpen()}</div></div>`;
 }
 V.rec = recipesView;
 

@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>Kaytia POS + Back Office v1.8.0</title>
+    <title>Kaytia Flow v1.8.0</title>
     <meta name="app-version" content="1.8.0" />
     <link
       rel="stylesheet"
@@ -3514,6 +3514,62 @@ table.t {
     transform: translateY(-6px);
   }
 }
+
+/* The software name at the top of the side menu */
+#bo .lg.kf {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 2px 4px 14px;
+  padding: 10px 8px 16px;
+  border: 0;
+  border-bottom: 1px solid rgba(199, 162, 90, 0.34);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+#bo .kf-m {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid #c7a25a;
+  border-radius: 50%;
+  outline: 1px solid #c7a25a;
+  outline-offset: 2px;
+  color: #e3c98e;
+  font:
+    500 21px/1 "Playfair Display",
+    Georgia,
+    "Times New Roman",
+    serif;
+}
+#bo .kf-t {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+#bo .kf-t b {
+  color: #f6efe0;
+  font:
+    500 21px/1.1 "Playfair Display",
+    Georgia,
+    "Times New Roman",
+    serif;
+  white-space: nowrap;
+}
+#bo .kf-t em {
+  color: #e3c98e;
+  font-style: italic;
+}
+#bo .kf-t small {
+  color: #c7a25a;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
 #start {
   display: grid;
   place-items: stretch;
@@ -6925,6 +6981,504 @@ body.mgr #home {
   font-size: 20px;
   font-variant-numeric: tabular-nums;
 }
+
+#bo .bl-t tbody tr.pend td {
+  font-style: italic;
+  color: #9c7a36;
+}
+#bo .bl-t tbody tr.ret td {
+  color: var(--bad);
+}
+
+/* Sales & Orders */
+#bo .so-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 10px 14px;
+  margin-bottom: 14px;
+}
+#bo .so-bar label {
+  display: grid;
+  gap: 3px;
+  color: var(--mute);
+  font-size: 12px;
+}
+#bo .so-bar .so-q {
+  flex: 1 1 320px;
+}
+#bo .so-bar input {
+  box-sizing: border-box;
+  width: 100%;
+}
+#bo .so-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 14px;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+#bo .so-head h4 {
+  margin: 0;
+}
+#bo .so-head span {
+  color: var(--mute);
+  font-size: 13px;
+}
+#bo .so-r {
+  border-bottom: 1px solid var(--line);
+}
+#bo .so-r summary {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr) auto 130px;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 6px;
+  cursor: pointer;
+  list-style: none;
+}
+#bo .so-r summary::-webkit-details-marker {
+  display: none;
+}
+#bo .so-r summary:hover {
+  background: var(--tint);
+}
+#bo .so-no {
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+#bo .so-no small,
+#bo .so-m small {
+  display: block;
+  color: var(--mute);
+  font-size: 12px;
+  font-weight: 400;
+}
+#bo .so-g {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+#bo .so-d {
+  padding: 4px 6px 12px 114px;
+  color: var(--mute);
+  font-size: 13px;
+}
+#bo .so-a {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+@media (max-width: 640px) {
+  #bo .so-r summary {
+    grid-template-columns: 78px minmax(0, 1fr) auto;
+  }
+  #bo .so-r .tag {
+    display: none;
+  }
+  #bo .so-d {
+    padding-left: 6px;
+  }
+}
+
+/* ---------------------------------------------------------------- Waiter setup */
+#bo .ws {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  align-items: start;
+  gap: 14px;
+}
+#bo .ws-lh {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+#bo .ws-lh h4 {
+  margin: 0;
+}
+#bo .ws-w {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 8px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: none;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+#bo .ws-w:hover {
+  background: var(--tint);
+}
+#bo .ws-w.on {
+  background: linear-gradient(90deg, rgba(199, 162, 90, 0.26), transparent);
+  box-shadow: inset 3px 0 0 #c7a25a;
+}
+#bo .ws-w small,
+#bo .ws-p small,
+#bo .ws-h small {
+  display: block;
+  color: var(--mute);
+  font-size: 11.5px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+#bo .ws-a {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #c7a25a;
+  border-radius: 50%;
+  color: #9c7a36;
+  font-weight: 700;
+}
+#bo .ws-id {
+  padding: 3px 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--mute);
+  font-size: 12px;
+}
+#bo .ws-g {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px;
+}
+#bo .ws-g label,
+#bo .ws-foot {
+  display: grid;
+  gap: 3px;
+  color: var(--mute);
+  font-size: 12px;
+}
+#bo .ws-g input,
+#bo .ws-foot textarea {
+  box-sizing: border-box;
+  width: 100%;
+}
+#bo .ws-o,
+#bo .ws-pts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 18px;
+  margin-top: 12px;
+}
+#bo .ws-pts span {
+  color: var(--mute);
+  font-size: 12px;
+}
+#bo .ws-c {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+#bo .ws-c input,
+#bo .ws-p input {
+  flex: none;
+  width: 18px;
+  min-width: 0;
+  height: 18px;
+  margin: 0;
+  accent-color: #9c7a36;
+}
+#bo .ws-chip {
+  padding: 5px 12px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+}
+#bo .ws-chip.on {
+  border-color: #c7a25a;
+  background: rgba(199, 162, 90, 0.16);
+}
+#bo .ws-rh {
+  margin: 20px 0 2px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+#bo .ws-h {
+  margin: 12px 0 6px;
+  color: #9c7a36;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+#bo .ws-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 8px;
+}
+#bo .ws-p {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 11px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 13.5px;
+  cursor: pointer;
+  transition:
+    border-color 0.14s,
+    background 0.14s;
+}
+#bo .ws-p:hover {
+  border-color: #c7a25a;
+}
+#bo .ws-p:has(input:checked) {
+  border-color: #c7a25a;
+  background: rgba(199, 162, 90, 0.13);
+}
+#bo .ws-p b {
+  font-weight: 600;
+}
+#bo .ws-p.later {
+  border-style: dashed;
+  color: var(--mute);
+}
+#bo .ws-p.later b {
+  font-weight: 500;
+}
+#bo .ws-foot {
+  margin-top: 16px;
+}
+#bo .ws-go {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+#bo .ws-go .fill {
+  flex: 1;
+}
+@media (max-width: 900px) {
+  #bo .ws {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---------------------------------------------------------------- Users & roles */
+#bo .ur-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+#bo .ur-tabs button {
+  padding: 10px 16px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--mute);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+#bo .ur-tabs button.on {
+  border-bottom-color: #c7a25a;
+  color: var(--ink);
+}
+#bo .ur-new {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  align-items: end;
+  gap: 10px;
+}
+#bo .ur-new label,
+#bo .ur-top label {
+  display: grid;
+  gap: 3px;
+  color: var(--mute);
+  font-size: 12px;
+}
+#bo .ur-new input,
+#bo .ur-new select {
+  box-sizing: border-box;
+  width: 100%;
+}
+#bo .ur-t td {
+  vertical-align: middle;
+}
+#bo .ur-t td .ws-a {
+  display: inline-grid;
+  width: 28px;
+  height: 28px;
+  margin-right: 4px;
+  font-size: 13px;
+}
+#bo .ur-t tr.off td {
+  opacity: 0.55;
+}
+#bo .ur-me {
+  padding: 1px 7px;
+  border: 1px solid #c7a25a;
+  border-radius: 9px;
+  color: #9c7a36;
+  font-size: 10.5px;
+}
+#bo .ur-pw {
+  display: inline-flex;
+  gap: 6px;
+}
+#bo .ur-pw input {
+  width: 150px;
+  min-width: 0;
+}
+#bo .ur-st.yes {
+  color: var(--ok);
+}
+#bo .ur-st.no {
+  color: var(--bad);
+}
+#bo .ur-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 10px 18px;
+  margin-bottom: 12px;
+}
+#bo .ur-top select {
+  min-width: 220px;
+}
+#bo .ur-sum {
+  padding-bottom: 9px;
+  color: var(--mute);
+  font-size: 13px;
+}
+#bo .ur-sum b {
+  color: #9c7a36;
+  font-size: 22px;
+  font-weight: 700;
+}
+#bo .ur-note {
+  padding-bottom: 9px;
+  color: #9c7a36;
+  font-size: 13px;
+  font-style: italic;
+}
+#bo .ur-acts {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-left: auto;
+  padding-bottom: 4px;
+}
+#bo .ur-wrap {
+  max-height: 64vh;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-top: 3px solid #c7a25a;
+  border-radius: 6px;
+}
+#bo .ur-m {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+#bo .ur-m thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--card);
+}
+#bo .ur-m th {
+  padding: 9px 10px;
+  color: var(--mute);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-align: left;
+  text-transform: uppercase;
+}
+#bo .ur-m .c {
+  text-align: center;
+}
+#bo .ur-f td {
+  padding: 0 4px 8px;
+  border-bottom: 1px solid #c7a25a;
+}
+#bo .ur-f input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: 4px 6px;
+  font-size: 11.5px;
+}
+#bo .ur-m tbody tr[hidden] {
+  display: none;
+}
+#bo .ur-m tbody td {
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--line);
+}
+#bo .ur-m tbody tr:nth-child(even) {
+  background: rgba(199, 162, 90, 0.06);
+}
+#bo .ur-m tbody tr:hover {
+  background: rgba(199, 162, 90, 0.16);
+}
+#bo .ur-m .d {
+  min-width: 240px;
+  font-weight: 500;
+}
+#bo .ur-g {
+  min-width: 60px;
+  padding: 4px 12px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: transparent;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+#bo .ur-g.yes {
+  border-color: var(--ok);
+  background: var(--ok);
+  color: var(--card);
+}
+#bo .ur-g.no {
+  color: var(--mute);
+}
+#bo .ur-g:disabled {
+  cursor: default;
+  opacity: 0.75;
+}
+/* Without money rights: only the occupancy cards, and no revenue in the banner */
+#bo #vHome.nomoney #rooms .k:nth-child(n + 4) {
+  display: none;
+}
+#bo[data-pal="five"] #vHome.nomoney .hero-figs {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+#bo .ws-g select {
+  box-sizing: border-box;
+  width: 100%;
+}
+#bo .ws-always {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border: 1px solid #c7a25a;
+  border-radius: 6px;
+  background: rgba(199, 162, 90, 0.1);
+  font-size: 14px;
+}
 /* ==================== POS: five-star look ====================
    A fine-dining room, not a till: the menu reads like a printed menu card, the bill like an ivory guest
    check, and brass is kept for the one thing that matters on each screen.
@@ -9099,6 +9653,18 @@ body > .modal select:focus {
     zoom: 1.2;
   }
 }
+
+/* A return is started from Back Office, so its popup opens over it */
+#mBopt {
+  z-index: 70;
+}
+
+#mSel .sr .sr-no small {
+  display: block;
+  color: var(--mute);
+  font-size: 11px;
+  font-weight: 500;
+}
 /* ==================== Back Office: five-star look ====================
    The same room as the POS: walnut, ivory and brass, with a serif for anything worth reading twice.
    This is a colour theme (Theme → Five Star), so every Back Office page picks up the palette;
@@ -9198,11 +9764,6 @@ body > .modal select:focus {
 #bo[data-pal="five"] aside {
   background: linear-gradient(180deg, var(--rail2), var(--rail) 46%);
   border-right: 1px solid var(--hair);
-}
-#bo[data-pal="five"] .lg {
-  background: #fbf6ea;
-  border: 1px solid var(--brass);
-  box-shadow: inset 0 0 0 3px rgba(199, 162, 90, 0.14);
 }
 #bo[data-pal="five"] #nav .sec {
   color: var(--brass);
@@ -10157,7 +10718,7 @@ body > .modal select:focus {
             <div><b>Housekeeping</b><span>Rooms, always ready</span></div>
           </div>
           <div class="fl-pw"><img alt="Kaytia Tech Services" /></div>
-          <small>Front Desk · Kaytia Smart ERP · v1.8.0</small>
+          <small>Front Desk · Kaytia Flow · v1.8.0</small>
         </div>
       </div>
       <div class="fl-form">
@@ -10423,7 +10984,7 @@ const ITEMS = [
 let dept = "Bar",
   cart = {},
   held = [],
-  rno = 1042,
+  rno = 1,
   method = "cash",
   payRef = null;
 // 1e-9: quantities such as 0.1 must not lose a whole portion to rounding (0.3 / 0.1 = 2.9999…).
@@ -10439,6 +11000,13 @@ let catSel = "",
   rider = null,
   qMode = "next",
   qBuf = "";
+/** Bill numbers run on for ever. Order numbers start again with each staff shift. */
+const nextBill = () => pad(rno++, 5);
+function nextOrder(name) {
+  const sh = shiftOf(name);
+  if (sh) return (sh.ono = (sh.ono || 0) + 1);
+  return orders.reduce((a, o) => Math.max(a, o.ord || 0), 0) + 1;
+}
 const get = id => ITEMS.find(i => i.id == id),
   pad = (n, l = 6) => String(n).padStart(l, "0");
 // A waiter ticked for several sale points works in them side by side (dept = ALLP): the tabs on top
@@ -10505,7 +11073,7 @@ function drawGrid() {
       .map(i => {
         const a = avail(i) - inCart(i.id),
           n = inCart(i.id);
-        return `<button class="it${n ? " has" : ""}" style="--h:${hue(i.c)}" data-i="${i.id}" title="${i.n.replace(/"/g, "&quot;")}" ${a <= 0 ? "disabled" : ""}>${n ? `<span class="in">${n}</span>` : ""}<span class="lw ${a <= 0 ? "out" : ""}">${a <= 0 && !n ? "Out of stock" : a < 10 && a > 0 ? a + " left" : ""}</span><span class="nm">${i.n}</span><span class="cg">${i.c}</span><span class="pr">${posMoney(i.p)}</span></button>`;
+        return `<button class="it${n ? " has" : ""}" style="--h:${hue(i.c)}" data-i="${i.id}" title="${i.n.replace(/"/g, "&quot;")}" ${a <= 0 ? "disabled" : ""}>${n ? `<span class="in">${n}</span>` : ""}<span class="lw ${a <= 0 ? "out" : ""}">${a <= 0 && !n ? "Out of stock" : can("stock") && a < 10 && a > 0 ? a + " left" : ""}</span><span class="nm">${i.n}</span><span class="cg">${i.c}</span><span class="pr">${posMoney(i.p)}</span></button>`;
       })
       .join("") || '<div class="empty">No items in this category.</div>';
 }
@@ -10566,7 +11134,7 @@ function drawCart() {
   $("#tGross").textContent = bill2(t.g);
   $("#sendBtn").disabled = !ids.length;
   $("#ordBtn").textContent = `Open orders (${visOrders().length})`;
-  $("#fBill").value = cur ? cur.no : "NBO-" + pad(rno);
+  $("#fBill").value = cur ? cur.no : pad(rno, 5);
   if (cur) $("#fTable").value = cur.label;
   $("#fTable").disabled = !!cur;
   $("#fWaiter").value = user ? user.n : "";
@@ -10713,7 +11281,7 @@ function selRender() {
     ? `<div class="sr sh"><label><input type="checkbox" id="selAll" ${ch.length === L.length ? "checked" : ""}></label><span>Bill no</span><span>Table no</span><span>Waiter</span><span>Guest name</span><span>Date</span><span>Time</span><span>Curr</span><span class="n">Amount</span><span>S point</span></div>` +
       L.map(
         o =>
-          `<div class="sr ${selSet.has(o.no) ? "on" : ""}" data-row="${o.no}"><label><input type="checkbox" data-s="${o.no}" ${selSet.has(o.no) ? "checked" : ""}></label>${cell(o.no, "sr-no")}<span class="sr-t" title="${slipEsc(o.label)}"><b>${slipEsc(o.label)}</b></span>${cell(o.waiter || "–")}${cell(o.guest || "N/A")}${cell(o.at.toLocaleDateString("en-GB"))}${cell(o.at.toLocaleTimeString("en-GB"))}${cell("KES", "sr-cur")}<span class="n"><b>${bill2(totals(o.lines, o).g)}</b></span>${cell(billPlace(o.lines))}</div>`
+          `<div class="sr ${selSet.has(o.no) ? "on" : ""}" data-row="${o.no}"><label><input type="checkbox" data-s="${o.no}" ${selSet.has(o.no) ? "checked" : ""}></label><span class="sr-no" title="Bill ${slipEsc(o.no)}, order ${slipEsc(o.ord)}">${slipEsc(o.no)}<small>Order ${slipEsc(o.ord)}</small></span><span class="sr-t" title="${slipEsc(o.label)}"><b>${slipEsc(o.label)}</b></span>${cell(o.waiter || "–")}${cell(o.guest || "N/A")}${cell(o.at.toLocaleDateString("en-GB"))}${cell(o.at.toLocaleTimeString("en-GB"))}${cell("KES", "sr-cur")}<span class="n"><b>${bill2(totals(o.lines, o).g)}</b></span>${cell(billPlace(o.lines))}</div>`
       ).join("")
     : '<div class="empty">No pending bills for ' + w + ".</div>";
   // These work on one bill: highlight exactly one.
@@ -10774,8 +11342,8 @@ function orderView(o) {
   const t = totals(o.lines, o),
     ppl = o.waiter ? o.waiter : "–",
     row = (l, v) => (v ? `<div><span>${l}</span><b>${slipEsc(v)}</b></div>` : "");
-  $("#viewBody").innerHTML = `<h3>Order ${slipEsc(o.no)}</h3>
-  <div class="view-meta">${row("Table", o.label)}${row("Sale point", billPlace(o.lines))}${row("Waiter", ppl)}${row("Guest", o.guest)}${row("Covers", o.covers)}${row("Room", o.room)}${row("Sent", hhmm(o.at))}${row("Rounds", String(o.rounds))}${o.rider ? row("Rider", o.rider.n + " " + o.rider.p) : ""}</div>
+  $("#viewBody").innerHTML = `<h3>Bill ${slipEsc(o.no)}</h3>
+  <div class="view-meta">${row("Order no", o.ord)}${row("Table", o.label)}${row("Sale point", billPlace(o.lines))}${row("Waiter", ppl)}${row("Guest", o.guest)}${row("Covers", o.covers)}${row("Room", o.room)}${row("Sent", hhmm(o.at))}${row("Rounds", String(o.rounds))}${o.rider ? row("Rider", o.rider.n + " " + o.rider.p) : ""}</div>
   <div class="view-lines"><table><tr><th>Qty</th><th>Item</th><th class="n">Price</th><th class="n">Total</th></tr>${slipLines(
     o.lines,
     o
@@ -10926,18 +11494,20 @@ $("#settleBtn").onclick = () => {
 $("#printBtn").onclick = () => {
   if (Object.keys(cart).length && !cur) {
     showRc(
-      guestBillHTML({
-        no: $("#fBill").value,
-        dept: billPlace(cart),
-        label: $("#fTable").value || "Walk-in",
-        guest: $("#fGuest").value,
-        covers: $("#fCov").value,
-        room: $("#fRoom").value,
-        waiter: user ? user.n : "",
-        rider,
-        lines: slipLines(cart, cartAdj),
-        t: totals()
-      }),
+      waiterCopies(
+        guestBillHTML({
+          no: $("#fBill").value,
+          dept: billPlace(cart),
+          label: $("#fTable").value || "Walk-in",
+          guest: $("#fGuest").value,
+          covers: $("#fCov").value,
+          room: $("#fRoom").value,
+          waiter: user ? user.n : "",
+          rider,
+          lines: slipLines(cart, cartAdj),
+          t: totals()
+        })
+      ),
       null,
       "Close"
     );
@@ -10971,6 +11541,8 @@ const c2 = n => Math.round(n * 100),
 const payDue = () => (payT ? payT.reduce((a, o) => a + totals(o.lines, o).g, 0) : totals().g);
 const payBal = () => (c2(payDue()) - c2(pays.reduce((a, p) => a + p.amt, 0))) / 100;
 function openPay(tg) {
+  if (!can("clear")) return fsNote("You don't have the right to clear bills.");
+  if (!tg && newBillBlock()) return fsNote(newBillBlock());
   if (!shiftOk()) return;
   payT = tg || null;
   pays = [];
@@ -11094,7 +11666,8 @@ $("#pOk").onclick = () => {
   const chv = pays.reduce((a, p) => a + (p.chg || 0), 0);
   targets.forEach((o, bi) => {
     const t = totals(o.lines, o),
-      no = "NBO-" + pad(rno),
+      no = o.no || nextBill(),
+      ord = o.ord || nextOrder(user ? user.n : ""),
       lines = Object.entries(o.lines).map(([id, n]) => ({ it: get(id), q: n })),
       used = {};
     gsum += t.g;
@@ -11119,7 +11692,7 @@ $("#pOk").onclick = () => {
       }
     }
     const cu = "KRACU0100" + Math.floor(1000 + Math.random() * 8999),
-      inv = rno - 1000,
+      inv = +no,
       change = bi === targets.length - 1 ? chv : 0,
       credit = pays.some(p => p.m === "credit"),
       waiter = o.waiter || (user ? user.n : "");
@@ -11147,6 +11720,7 @@ $("#pOk").onclick = () => {
       leftDisc -= dd;
       SALES.push({
         no,
+        ord,
         at: new Date(),
         dept: d,
         label: o.label,
@@ -11155,7 +11729,19 @@ $("#pOk").onclick = () => {
         guest: o.guest,
         covers: o.covers,
         room: o.room,
-        ...(si === 0 ? { slip: { paid: al.join(""), change, credit, cu, inv, cur: t.cur } } : {}),
+        ...(si === 0
+          ? {
+              slip: {
+                paid: al.join(""),
+                change,
+                credit,
+                credits: pays.filter(p => p.m === "credit").map(p => ({ ci: p.ci, amt: p.amt })),
+                cu,
+                inv,
+                cur: t.cur
+              }
+            }
+          : {}),
         net: g - tax,
         tax,
         g,
@@ -11170,9 +11756,9 @@ $("#pOk").onclick = () => {
     try {
       bosave();
     } catch (e) {}
-    rno++;
     html += receiptHTML({
       no,
+      ord,
       dept: billPlace(o.lines),
       label: o.label,
       guest: o.guest,
@@ -11255,7 +11841,6 @@ $("#theme").onclick = () => {
 // ---- send order first, bill and charge later ----
 let orders = [],
   cur = null,
-  ono = 1,
   payOrder = null,
   selTbl = "";
 /** Save when an open order changes: sending, adding, settling or any bill option all end by redrawing the cart. */
@@ -11280,9 +11865,11 @@ const billAtPoints = (o, pts) =>
   pts.includes(o.dept) || billPoints(o.lines).some(d => pts.includes(d));
 /** A waiter works on their own bills. These roles see every waiter's bills at their sale points. */
 const BILL_ALL = ["Manager", "Super Cashier", "Cashier"];
-const seesAllBills = u => !!u && BILL_ALL.includes(u.role);
+const seesAllBills = u => !!u && (BILL_ALL.includes(u.role) || !!(u.perm && u.perm.allBills));
 const billsFor = (u, pts) =>
-  orders.filter(o => (u && o.waiter === u.n) || (seesAllBills(u) && billAtPoints(o, pts)));
+  orders.filter(
+    o => (u && o.waiter === u.n) || (seesAllBills(u) && (u.allSP || billAtPoints(o, pts)))
+  );
 const visOrders = () => billsFor(user, DEPTS);
 const hhmm = d => d.toLocaleTimeString("en-KE", { hour: "2-digit", minute: "2-digit" });
 const cnt = c => Object.values(c).reduce((a, b) => a + b, 0);
@@ -11338,6 +11925,17 @@ function doSend(label) {
       ? orders.filter(x => billAtPoints(x, DEPTS))
       : orders.filter(x => x.dept === dept)
     ).find(x => x.label.toLowerCase() === label.toLowerCase());
+  const stop = !o
+    ? newBillBlock()
+    : !cur && !canAddTo(o) && visOrders().includes(o)
+      ? `You don't have the right to add to ${o.waiter}'s bills.`
+      : o.printed && !can("addPrinted")
+        ? `${o.label} has been printed. You don't have the right to add to it.`
+        : "";
+  if (stop) {
+    $("#mSend").classList.remove("show");
+    return fsNote(stop);
+  }
   if (o && !cur && !visOrders().includes(o)) {
     $("#mSend").classList.remove("show");
     return fsNote(
@@ -11353,7 +11951,8 @@ function doSend(label) {
   }
   if (!o) {
     o = {
-      no: "ORD-" + String(ono++).padStart(3, "0"),
+      no: nextBill(),
+      ord: nextOrder(user ? user.n : ""),
       label,
       dept: dept === ALLP ? billPoints(round)[0] : dept,
       lines: {},
@@ -11383,6 +11982,7 @@ function doSend(label) {
   showRc(
     (tickets = orderTickets(round, {
       no: o.no,
+      ord: o.ord,
       dept: billPlace(o.lines),
       label: o.label,
       guest: o.guest,
@@ -11410,7 +12010,7 @@ function ordList() {
   $("#ordList").innerHTML = L.length
     ? L.map(o => {
         const t = totals(o.lines, o);
-        return `<div class="ord"><div class="h"><span>${o.label} · ${billPlace(o.lines)}</span><span>${KES(t.g)}</span></div><div class="m">${o.no} · ${seesAllBills(user) ? slipEsc(o.waiter || "No waiter") + " · " : ""}${cnt(o.lines)} items · ${o.rounds} round${o.rounds > 1 ? "s" : ""} · sent ${hhmm(o.at)} · <b>SENT</b></div><div class="row"><button class="mini" data-oa="add" data-o="${o.no}">Add items</button><button class="mini" data-oa="bill" data-o="${o.no}">Print bill</button><button class="mini" data-oa="swap" data-o="${o.no}">Swap</button><button class="chip on" data-oa="pay" data-o="${o.no}">Charge</button></div></div>`;
+        return `<div class="ord"><div class="h"><span>${o.label} · ${billPlace(o.lines)}</span><span>${KES(t.g)}</span></div><div class="m">Bill ${o.no} · Order ${o.ord} · ${seesAllBills(user) ? slipEsc(o.waiter || "No waiter") + " · " : ""}${cnt(o.lines)} items · ${o.rounds} round${o.rounds > 1 ? "s" : ""} · sent ${hhmm(o.at)} · <b>SENT</b></div><div class="row"><button class="mini" data-oa="add" data-o="${o.no}">Add items</button><button class="mini" data-oa="bill" data-o="${o.no}">Print bill</button><button class="mini" data-oa="swap" data-o="${o.no}">Swap</button><button class="chip on" data-oa="pay" data-o="${o.no}">Charge</button></div></div>`;
       }).join("")
     : '<div class="empty">No open orders. Use Send order to start one.</div>';
 }
@@ -11428,6 +12028,10 @@ $("#ordList").onclick = e => {
     exOpen(o);
     return;
   }
+  if (a === "add" && !canAddTo(o))
+    return fsNote(`You don't have the right to add to ${o.waiter}'s bills.`);
+  if (a === "add" && o.printed && !can("addPrinted"))
+    return fsNote(`${o.label} has been printed. You don't have the right to add to it.`);
   if (a === "add") {
     if (dept === ALLP) spTab = o.dept;
     else dept = o.dept;
@@ -11441,19 +12045,25 @@ $("#ordList").onclick = e => {
     openPay([o]);
   }
   if (a === "bill") {
+    if (!can("printGuest")) return fsNote("You don't have the right to print guest bills.");
+    o.printed = true;
+    ordersKeep();
     showRc(
-      guestBillHTML({
-        no: o.no,
-        dept: billPlace(o.lines),
-        label: o.label,
-        guest: o.guest,
-        covers: o.covers,
-        room: o.room,
-        waiter: o.waiter,
-        rider: o.rider,
-        lines: slipLines(o.lines, o),
-        t: totals(o.lines, o)
-      }),
+      waiterCopies(
+        guestBillHTML({
+          no: o.no,
+          ord: o.ord,
+          dept: billPlace(o.lines),
+          label: o.label,
+          guest: o.guest,
+          covers: o.covers,
+          room: o.room,
+          waiter: o.waiter,
+          rider: o.rider,
+          lines: slipLines(o.lines, o),
+          t: totals(o.lines, o)
+        })
+      ),
       o,
       "Close"
     );
@@ -11696,8 +12306,10 @@ const slipFoot = () => `<div class="sl-foot">${slipPrinted()}</div>`;
 
 /** d: { no, dept, label, guest, covers, room, waiter, rider, lines, t } */
 function guestBillHTML(d, B = slipBiz()) {
+  const footer = (USERS.find(u => u.n === d.waiter) || {}).footer;
   return `<div class="slip">${slipHead("Guest Bill", d.dept, B)}${slipMeta([
     ["Bill no", d.no],
+    ["Order no", d.ord],
     ["Covers", d.covers],
     ["Waiter", d.waiter],
     ["Table", d.label],
@@ -11705,13 +12317,14 @@ function guestBillHTML(d, B = slipBiz()) {
     ["Room", d.room],
     ["Date / time", slipNow(), 1],
     ...(d.rider ? [["Rider", `${d.rider.n} ${d.rider.p}`, 1]] : [])
-  ])}${slipMoneyRows(d.lines)}${slipTotals(d.t)}${slipSign()}${slipTill(B)}<div class="sl-small">This is not a tax invoice. A tax invoice is issued on payment.</div>${slipFoot()}</div>`;
+  ])}${slipMoneyRows(d.lines)}${slipTotals(d.t)}${slipSign()}${slipTill(B)}${footer ? `<div class="sl-note">${slipEsc(footer)}</div>` : ""}<div class="sl-small">This is not a tax invoice. A tax invoice is issued on payment.</div>${slipFoot()}</div>`;
 }
 /** d as above, plus paid (payment rows), change, fiscal (CU lines and QR), credit (needs a signature). */
 function receiptHTML(d, B = slipBiz()) {
   return `<div class="slip">${slipHead("Receipt", d.dept, B)}${d.reprint ? `<div class="sl-copy">Reprint · copy ${d.reprint}</div>` : ""}${slipMeta(
     [
-      ["Invoice", d.no],
+      ["Bill no", d.no],
+      ["Order no", d.ord],
       ["Covers", d.covers],
       ["Served by", d.waiter],
       ["Table", d.label],
@@ -11734,6 +12347,7 @@ function orderSlipHTML(station, d) {
   return `<div class="slip sl-order"><div class="sl-ot">${station} Order</div>${d.round > 1 ? `<div class="sl-round">Round ${d.round}</div>` : ""}${slipMeta(
     [
       ["Bill no", d.no],
+      ["Order no", d.ord],
       ["Covers", d.covers],
       ["Waiter", d.waiter],
       ["Table", d.label],
@@ -11751,6 +12365,7 @@ function voidSlipHTML(station, d) {
   return `<div class="slip sl-order sl-void"><div class="sl-ot">Void Alert</div><div class="sl-round">${station} · do not prepare</div>${slipMeta(
     [
       ["Bill no", d.no],
+      ["Order no", d.ord],
       ["Table", d.label],
       ["Waiter", d.waiter],
       ["Voided by", d.by],
@@ -11790,6 +12405,7 @@ function orderTickets(round, d, slip = orderSlipHTML) {
 function exchangeSlipHTML(d) {
   return `<div class="slip sl-order"><div class="sl-ot">Exchange</div>${slipMeta([
     ["Bill no", d.no],
+    ["Order no", d.ord],
     ["Table", d.label],
     ["Waiter", d.waiter],
     ["Sale point", d.dept],
@@ -11862,6 +12478,7 @@ function orderTicketLines(station, d) {
     ...(d.round > 1 ? [{ t: `ROUND ${d.round}`, bold: true, center: true }] : []),
     { t: "" },
     row("Bill no", d.no),
+    row("Order no", d.ord),
     row("Table", d.label),
     row("Covers", d.covers),
     row("Waiter", d.waiter),
@@ -11883,6 +12500,7 @@ function voidTicketLines(station, d) {
     { t: `${station.toUpperCase()} - DO NOT PREPARE`, bold: true, center: true },
     { t: "" },
     row("Bill no", d.no),
+    row("Order no", d.ord),
     row("Table", d.label),
     row("Waiter", d.waiter),
     row("Voided by", d.by),
@@ -12029,7 +12647,7 @@ function boptStart(act) {
   bopt = { act };
   $("#bopWheel").style.display = "none";
   boptEl("Box").style.display = "";
-  if (user && BILL_AUTH.includes(user.role)) {
+  if (actsAlone(act)) {
     bopt.by = user.n;
     return boptChoose();
   }
@@ -12057,6 +12675,7 @@ function boptAuth() {
   boptChoose();
 }
 function boptChoose() {
+  if (bopt.act === "ret") return retForm();
   if (bopt.act === "merge") return boptMergeForm();
   const L = boptBills(bopt.act);
   if (L.length === 1) return boptOpen(L[0]);
@@ -12112,6 +12731,14 @@ function boptDiscSave() {
   if (!d.v && !billAdj(b).disc && !(raw < 0)) return boptMsg("Enter the discount.");
   if (raw < 0) return boptMsg("The discount cannot be below zero.");
   if (d.type === "pct" && d.v > 100) return boptMsg("A discount cannot be more than 100%.");
+  const giver = USERS.find(u => u.n === bopt.by);
+  if (giver && !BILL_AUTH.includes(giver.role) && giver.maxDisc !== undefined) {
+    const pct = d.type === "pct" ? d.v : sub ? (d.v / sub) * 100 : 0;
+    if (pct > giver.maxDisc)
+      return boptMsg(
+        `Your limit is ${giver.maxDisc}%. Ask a Manager or Super Cashier to give more.`
+      );
+  }
   if (d.type === "amt" && d.v > sub)
     return boptMsg(`A discount cannot be more than the bill (${KES(sub)}).`);
   if (d.v > 0 && !why) return boptMsg("Enter the reason for the discount.");
@@ -12169,6 +12796,7 @@ const boptVoidLeft = () => {
   return L;
 };
 function boptVoidRows() {
+  if (bopt.act === "ret") return retRows();
   const b = bopt.bill,
     A = billAdj(b),
     f = boptEl("VF").value.trim().toLowerCase(),
@@ -12251,6 +12879,7 @@ function boptVoidSave() {
     voided,
     {
       no: b.no,
+      ord: b.ord,
       label: b.label,
       guest: b.guest,
       room: b.room,
@@ -12360,7 +12989,8 @@ function boptSplitSave() {
     return boptMsg(`${b.dept} already has an open bill called ${label}.`);
   const whole = M.length === Object.keys(b.lines).length && M.every(([id, q]) => q >= b.lines[id]),
     n = {
-      no: "ORD-" + String(ono++).padStart(3, "0"),
+      no: nextBill(),
+      ord: nextOrder(b.waiter),
       label,
       dept: b.dept,
       lines: {},
@@ -12446,6 +13076,7 @@ $("#mBopt").addEventListener("click", e => {
     return {
       disc: boptDiscSave,
       void: boptVoidSave,
+      ret: retSave,
       merge: boptMergeSave,
       split: boptSplitSave
     }[bopt.act]();
@@ -12453,11 +13084,307 @@ $("#mBopt").addEventListener("click", e => {
 $("#mBopt").addEventListener("input", e => {
   if (e.target.id === "bopVal") boptDiscSum();
   if (e.target.id === "bopVF") boptVoidRows();
-  if (e.target.id === "bopWhy" && bopt.act === "void") boptVoidChips();
+  if (e.target.id === "bopWhy" && (bopt.act === "void" || bopt.act === "ret")) boptVoidChips();
 });
 $("#mBopt").addEventListener("keydown", e => {
   if (e.key === "Enter" && e.target.id === "bopPin") boptAuth();
 });
+// ---- returning items from a paid bill ----
+// Sales are never deleted. A return needs a Manager or Super Cashier PIN, puts the items back in stock and
+// adds a credit note: a sale with negative amounts, so every report nets off and the original bill stays.
+const retLeft = s => l => l.q - ((s.returned || {})[l.id] || 0);
+const retCan = no =>
+  !/^FD-/.test(no) &&
+  SALES.some(s => s.no === no && !s.ret && s.lines.some(l => get(l.id) && retLeft(s)(l) > 0));
+/** A paid bill as the void screen expects it: what can still come back, and what each unit was paid at. */
+function retBill(no) {
+  const S = SALES.filter(s => s.no === no && !s.ret),
+    lines = {},
+    info = {};
+  S.forEach(s => {
+    const sub = s.lines.reduce((a, l) => a + l.p * l.q, 0),
+      k = sub ? s.g / sub : 0;
+    s.lines.forEach(l => {
+      const left = retLeft(s)(l);
+      if (get(l.id) && left > 0) {
+        lines[l.id] = left;
+        info[l.id] = { ...l, k, s };
+      }
+    });
+  });
+  return {
+    no,
+    label: S[0].label,
+    dept: S.map(s => s.dept).join(", "),
+    waiter: S[0].waiter || S[0].user,
+    lines,
+    info,
+    S
+  };
+}
+function retOpen(no) {
+  bopt = { act: "ret", bill: retBill(no) };
+  $("#bopWheel").style.display = "none";
+  boptEl("Box").style.display = "";
+  boptEl("Box").classList.remove("bop-split");
+  boptEl("Box").classList.add("bop-void");
+  boptEl("Body").innerHTML =
+    `<h3>Return items</h3><p class="stk">${slipEsc(bopt.bill.label)} · ${slipEsc(no)}. A Manager or Super Cashier needs to authorize this.</p>
+  <input id="bopPin" type="password" inputmode="numeric" autocomplete="off" placeholder="Authorizing PIN"><div class="bop-msg" id="bopMsg"></div>
+  <div class="row"><button class="mini" data-close>Cancel</button><button class="chip on" data-bg="auth">Continue</button></div>`;
+  $("#mBopt").classList.add("show");
+  $("#bopPin").focus();
+}
+const RETURN_REASONS = [
+  "Customer changed",
+  "Item spoilt",
+  "Wrong item served",
+  "Price error on system",
+  "Double entry",
+  "Goods returned"
+];
+function retForm() {
+  const b = bopt.bill;
+  bopt.vq = Object.fromEntries(Object.keys(b.lines).map(id => [id, 0]));
+  boptEl("Body").innerHTML =
+    `<h3>Return items</h3><p class="stk"><b>${slipEsc(b.label)}</b> · ${slipEsc(b.dept)} · ${slipEsc(b.no)} · authorized by ${slipEsc(bopt.by)}</p>
+  <div class="bv-wrap"><table class="bv-t"><thead><tr><th>Selected</th><th>Code</th><th>Description</th><th class="n">Qty</th><th class="n">Paid each</th><th class="n">Value</th></tr>
+  <tr class="bv-f"><td colspan="6"><input id="bopVF" placeholder="Filter items" autocomplete="off"></td></tr></thead><tbody id="bopVRows"></tbody></table></div>
+  <div class="bv-sum"><label class="bop-c"><input type="checkbox" id="bopVAll"> Select all</label><div id="bopVSum"></div></div>
+  <div class="bv-rs">${RETURN_REASONS.map(r => `<button class="bv-r" data-vw="${r}">${r}</button>`).join("")}</div>
+  <label>Return reason<textarea id="bopWhy" rows="2" placeholder="Tap a reason above or type your own"></textarea></label>
+  <div class="status">The items go back into stock, and the bill's own payment methods are refunded. The original bill stays on record.</div>
+  <div class="bop-msg" id="bopMsg"></div>
+  <div class="bv-go"><button class="bv-void" data-bg="save">Return items</button><button class="bv-close" data-close>Close</button></div>`;
+  retRows();
+}
+const retValue = (i, q) => i.p * q * i.k;
+function retRows() {
+  const b = bopt.bill,
+    f = boptEl("VF").value.trim().toLowerCase(),
+    ids = Object.keys(b.lines);
+  $("#bopVRows").innerHTML =
+    ids
+      .filter(id => !f || `${id} ${b.info[id].n}`.toLowerCase().includes(f))
+      .map(id => {
+        const i = b.info[id],
+          n = b.lines[id],
+          v = bopt.vq[id];
+        return `<tr class="${v ? "on" : ""}" data-vr="${id}"><td><input type="checkbox" tabindex="-1" ${v ? "checked" : ""}></td><td>${slipEsc(id)}</td><td class="d">${slipEsc(i.n)}</td><td class="n">${
+          v && n > 1
+            ? `<span class="qc"><button data-vs="${id}" data-d="-1" ${v <= 1 ? "disabled" : ""}>−</button><b>${v}</b><button data-vs="${id}" data-d="1" ${v >= n ? "disabled" : ""}>+</button></span><small>of ${n}</small>`
+            : n
+        }</td><td class="n">${bill2(i.p * i.k)}</td><td class="n">${bill2(retValue(i, n))}</td></tr>`;
+      })
+      .join("") || '<tr><td colspan="6" class="bv-none">No items match.</td></tr>';
+  const qty = Object.values(bopt.vq).reduce((a, q) => a + q, 0),
+    val = ids.reduce((a, id) => a + retValue(b.info[id], bopt.vq[id]), 0);
+  boptEl("VAll").checked = ids.every(id => bopt.vq[id] >= b.lines[id]);
+  $("#bopVSum").innerHTML =
+    `<span class="${qty ? "bv-out" : ""}">Returning <b>${KES(val)}</b>${qty ? ` · ${qty} item${qty > 1 ? "s" : ""}` : ""}</span>`;
+}
+function retSave() {
+  const b = bopt.bill,
+    V = Object.entries(bopt.vq).filter(([, q]) => q > 0),
+    why = boptEl("Why").value.trim();
+  if (!V.length) return boptMsg("Tick the items to return.");
+  if (!why) return boptMsg("Tap or type the reason for the return.");
+  const no = "RET-" + pad(new Set(SALES.filter(s => s.ret).map(s => s.no)).size + 1, 4),
+    at = new Date();
+  let total = 0,
+    credit = 0;
+  b.S.forEach(s => {
+    const here = V.filter(([id]) => b.info[id].s === s);
+    if (!here.length) return;
+    const g = here.reduce((a, [id, q]) => a + retValue(b.info[id], q), 0),
+      k = s.g ? g / s.g : 0,
+      mx = {};
+    Object.entries(s.mx || {}).forEach(([m, v]) => (mx[m] = -v * k));
+    credit -= mx.credit || 0;
+    total += g;
+    s.returned = s.returned || {};
+    here.forEach(([id, q]) => {
+      s.returned[id] = (s.returned[id] || 0) + q;
+      itemStockMove(get(id), -q);
+    });
+    SALES.push({
+      no,
+      ord: s.ord,
+      at,
+      dept: s.dept,
+      label: s.label,
+      user: s.user,
+      waiter: s.waiter || s.user,
+      guest: s.guest,
+      covers: s.covers,
+      room: s.room,
+      net: -(g - s.tax * k),
+      tax: -s.tax * k,
+      g: -g,
+      lines: here.map(([id, q]) => {
+        const i = b.info[id];
+        return { id: i.id, n: i.n, q: -q, p: i.p, t: i.t };
+      }),
+      disc: -(s.disc || 0) * k,
+      pl: s.pl || "",
+      mx,
+      ret: { of: b.no, why, by: bopt.by }
+    });
+  });
+  // What was on a customer's account comes off it. Older bills didn't keep whose account that was.
+  const keep = (b.S.find(s => s.slip) || {}).slip,
+    owed = keep && keep.credits;
+  let left = credit;
+  (owed || []).forEach(c => {
+    const take = Math.min(left, c.amt, CU[c.ci] ? CU[c.ci].owes : 0);
+    if (take > 0) {
+      CU[c.ci].owes -= take;
+      left -= take;
+    }
+  });
+  if (left > 0.009) SALES.filter(s => s.no === no).forEach(s => (s.ret.byHand = left));
+  boptLog(
+    "Return",
+    b,
+    why,
+    `${no}: ` + V.map(([id, q]) => `${q} ${b.info[id].n}`).join(", ") + " · back in stock",
+    -total,
+    {
+      points: [...new Set(V.map(([id]) => b.info[id].s.dept))],
+      waiter: b.waiter
+    }
+  );
+  boptDone(`Items returned: ${KES(total)}.`);
+  if (window.boRedraw) boRedraw();
+  showRc(returnSlipHTML(no), null, "Close");
+}
+/** The credit note, from what was saved. */
+function returnSlipHTML(no, copy, B = slipBiz()) {
+  const S = SALES.filter(s => s.no === no),
+    A = S[0],
+    tot = k => Math.abs(S.reduce((a, s) => a + (s[k] || 0), 0)),
+    lines = S.flatMap(s => s.lines).map(l => ({ q: -l.q, n: l.n, p: l.p, t: l.t })),
+    paid = {};
+  S.forEach(s => Object.entries(s.mx || {}).forEach(([m, v]) => (paid[m] = (paid[m] || 0) - v)));
+  return `<div class="slip">${slipHead("Credit Note", S.map(s => s.dept).join(", "), B)}${copy ? `<div class="sl-copy">Reprint · copy ${copy}</div>` : ""}${slipMeta(
+    [
+      ["Credit note", no],
+      ["Original bill", A.ret.of],
+      ["Order no", A.ord],
+      ["Served by", A.waiter || A.user],
+      ["Table", A.label],
+      ["Guest", A.guest || "N/A"],
+      ["Room", A.room],
+      ["Authorized by", A.ret.by, 1],
+      ["Date / time", slipStamp(A.at), 1]
+    ]
+  )}${slipMoneyRows(lines)}${slipTotals({
+    sub: lines.reduce((a, l) => a + l.p * l.q, 0),
+    disc: tot("disc"),
+    net: tot("net"),
+    tax: tot("tax"),
+    g: tot("g")
+  })}<div class="sl-paid"><h5>Refunded by</h5>${Object.entries(paid)
+    .filter(([, v]) => v > 0)
+    .map(([m, v]) => slipRow(MN[m] || m, bill2(v)))
+    .join(
+      ""
+    )}</div><div class="sl-note">Reason: ${slipEsc(A.ret.why)}</div>${A.ret.byHand ? `<div class="sl-note">Take KES ${bill2(A.ret.byHand)} off the customer's account by hand.</div>` : ""}${slipSign()}${slipFoot()}</div>`;
+}
+// ---- what a waiter may do on the POS, from Back Office → Waiter setup ----
+// Staff saved before Waiter setup have no rights list, so nothing changes for them.
+// Managers and Super Cashiers can always do everything.
+const WAITER_RIGHTS = [
+  [
+    "Bills",
+    [
+      ["allBills", "Access All Bills", "See other waiters' bills"],
+      ["create", "Create Bill", "Start a new bill or sale"],
+      ["clear", "Clear Bill", "Settle bills and take payment"],
+      ["addAll", "Add to All Bills", "Add items to other waiters' bills"],
+      ["addPrinted", "Add to Printed Bill", "Add items after the bill is printed"],
+      ["printGuest", "Print Guest Bill", "Print the bill for the guest"],
+      ["interim", "Access Interim Bills", "Use Select to see pending bills"]
+    ]
+  ],
+  [
+    "Bill options",
+    [
+      ["functions", "Access Functions", "Open the Bill options dial"],
+      ["disc", "Give Discount", "Without a manager's PIN"],
+      ["void", "Void Bills", "Without a manager's PIN"],
+      ["merge", "Merge Bills", "Without a manager's PIN"],
+      ["split", "Split Bills", "Without a manager's PIN"]
+    ]
+  ],
+  [
+    "Orders and payment",
+    [
+      ["send", "Send Order", "Send orders to the kitchen and bar"],
+      ["orderStatus", "Access Order Status", "Use the Open orders list"],
+      ["postAccount", "Post to Account", "Charge a customer's credit account"]
+    ]
+  ],
+  [
+    "Menu",
+    [
+      ["stock", "View Stock Balance", "See how many are left on the menu"],
+      ["switchSP", "Switch Sale Point", "Move between ticked sale points"]
+    ]
+  ]
+];
+/** Saved with the waiter, but no POS feature uses them yet. */
+const WAITER_RIGHTS_LATER = [
+  ["edit", "Edit Bills"],
+  ["listUsers", "List User Names"],
+  ["postRoom", "Post to Room"],
+  ["preCancel", "Preorder Cancel"],
+  ["pickPrice", "Pick Price List"],
+  ["switchCur", "Switch Currency"],
+  ["billMode", "Switch Billing Mode"]
+];
+const WAITER_DEFAULTS = [
+  "create",
+  "clear",
+  "addPrinted",
+  "printGuest",
+  "interim",
+  "functions",
+  "send",
+  "orderStatus",
+  "stock",
+  "switchSP"
+];
+const allowedAlways = u => !u || !u.perm || BILL_AUTH.includes(u.role);
+const can = k => allowedAlways(user) || !!user.perm[k];
+/** Bill options: a waiter with this right acts alone; anyone else needs a PIN. */
+const actsAlone = k => !!user && (BILL_AUTH.includes(user.role) || !!(user.perm && user.perm[k]));
+const canAddTo = o => allowedAlways(user) || o.waiter === user.n || !!user.perm.addAll;
+function applyRights() {
+  [
+    ["#sendBtn", "send"],
+    ["#printBtn", "printGuest"],
+    ["#settleBtn", "clear"],
+    ["#ordBtn", "orderStatus"],
+    ["#selBtn", "interim"],
+    ["#billBtn", "functions"],
+    ["#chSP", "switchSP"],
+    ["#spBtn", "switchSP"],
+    ['#mPay [data-m="credit"]', "postAccount"]
+  ].forEach(([s, k]) => {
+    const el = $(s);
+    if (el) el.style.display = can(k) ? "" : "none";
+  });
+}
+const waiterCopies = html => html.repeat(Math.max(1, (user && user.copies) || 1));
+/** Why this waiter can't open another bill, or "". */
+function newBillBlock() {
+  if (!can("create")) return "You don't have the right to create bills.";
+  const max = !allowedAlways(user) && user.maxPend;
+  if (max > 0 && orders.filter(o => o.waiter === user.n).length >= max)
+    return `You have reached your limit of ${max} pending bills. Clear one first.`;
+  return "";
+}
 // ---- cashier PIN login (module entry) ----
 const USERS = [
   { n: "Wanjiru Kamau", pin: "1234", d: ["Bar", "Kitchen"] },
@@ -12483,7 +13410,8 @@ function loginAs(u) {
   user = u;
   DEPTS = u.d.filter(posSells);
   if (!DEPTS.length) DEPTS = [ALLD.filter(posSells)[0] || ALLD[0]];
-  dept = DEPTS.length > 1 ? ALLP : DEPTS[0];
+  dept = DEPTS.length > 1 && can("switchSP") ? ALLP : DEPTS[0];
+  applyRights();
   spTab = DEPTS[0];
   cart = {};
   pin = "";
@@ -12807,14 +13735,12 @@ setInterval(tick, 30000);
             ><b>Report</b><span>14 sales reports at your fingertips</span>
           </div>
         </div>
-        <small
-          >Kaytia Smart ERP · Developed by Kaytia Tech Services · POS Software · POS Hardware</small
-        >
+        <small>Kaytia Flow · Developed by Kaytia Tech Services · POS Software · POS Hardware</small>
       </div>
       <div class="lform">
         <div class="lcard">
           <h3 id="stHi">Good evening,</h3>
-          <p class="ls">Welcome to Kaytia Smart ERP. Where would you like to start?</p>
+          <p class="ls">Welcome to Kaytia Flow. Where would you like to start?</p>
           <button class="opt" data-go="pos">
             <span class="oi"
               ><svg viewBox="0 0 24 24">
@@ -12846,7 +13772,7 @@ setInterval(tick, 30000);
             Tip: press <kbd>P</kbd> POS, <kbd>B</kbd> Back Office or <kbd>F</kbd> Front Desk
           </p>
           <p class="lalt" style="font-size: 11.5px">
-            Kaytia Smart ERP · Version 1.8.0 · Build 26 Oct 2026
+            Kaytia Flow · Version 1.8.0 · Build 26 Oct 2026
           </p>
         </div>
       </div>
@@ -12885,7 +13811,7 @@ setInterval(tick, 30000);
               ><span>Passwords are hashed, and sign-in locks after repeated failed attempts.</span>
             </div>
           </div>
-          <small>Kaytia Smart ERP · Developed by Kaytia Tech Services</small>
+          <small>Kaytia Flow · Developed by Kaytia Tech Services</small>
         </div>
         <div class="lform">
           <div class="lcard">
@@ -12952,7 +13878,13 @@ setInterval(tick, 30000);
       <!-- Back Office: app shell (side nav, top bar, home dashboard) -->
       <div class="app" id="app">
         <aside>
-          <div class="lg"><img alt="Kaytia Tech Services" src="" /></div>
+          <div class="lg kf">
+            <span class="kf-m" aria-hidden="true">K</span
+            ><span class="kf-t"
+              ><b>Kaytia <em>Flow</em></b
+              ><small>Back Office</small></span
+            >
+          </div>
           <div id="nav"></div>
         </aside>
         <main>
@@ -12991,7 +13923,7 @@ setInterval(tick, 30000);
               ><span class="av" id="av">A</span
               ><span
                 ><b id="un" style="display: block; line-height: 1.1">Admin</b
-                ><small style="color: var(--mute)">Super Admin</small></span
+                ><small id="urole" style="color: var(--mute)">Super Admin</small></span
               ></span
             >
           </div>
@@ -13089,8 +14021,8 @@ setInterval(tick, 30000);
               </div>
             </div>
             <p style="text-align: center; color: var(--mute); font-size: 12px; margin: 26px 0 6px">
-              Kaytia Smart ERP · Version 1.8.0 · Build 26 Oct 2026 · Developed by Kaytia Tech
-              Services · POS Software · POS Hardware
+              Kaytia Flow · Version 1.8.0 · Build 26 Oct 2026 · Developed by Kaytia Tech Services ·
+              POS Software · POS Hardware
             </p>
           </div>
         </main>
@@ -15783,7 +16715,8 @@ const LS = "kaytia_pos_bo_v1",
   // Item setup details per stock item: { code, name, group, uom, buyUnit, perBuy, buyPrice }.
   // INGC[k] (cost per unit of measure) = buyPrice / perBuy, then a weighted average as stock arrives.
   INGU = {},
-  ADM = [];
+  ADM = [],
+  ROLE_OVER = {};
 Object.keys(stock).forEach(k => (RO[k] = Math.max(1, Math.round(stock[k] * 0.2))));
 const $ = s => document.querySelector(s),
   I = (n, c) => `<svg class="i"${c ? ` style="color:${c}"` : ""}><use href="#i-${n}"/></svg>`,
@@ -15837,7 +16770,7 @@ function bosave() {
         VP: VPAYS,
         BL: BILLLOG,
         OR: orders,
-        ON: ono,
+        RN: rno,
         IS: ISSUES,
         PD: PRODS,
         ST: STORES,
@@ -15849,6 +16782,7 @@ function bosave() {
         X: INGC,
         IU: INGU,
         A: ADM,
+        BR: ROLE_OVER,
         D: DAYS,
         H: SHIFTS,
         P: PAYOUTS,
@@ -15909,7 +16843,6 @@ window.bosave = bosave;
       });
       if (Object.keys(o.lines || {}).length) orders.push(o);
     });
-    ono = Math.max(ono, s.ON || 1);
     ISSUES.length = 0;
     ISSUES.push(...(s.IS || []));
     PRODS.length = 0;
@@ -15925,6 +16858,7 @@ window.bosave = bosave;
     CU.push(...s.C);
     ADM.length = 0;
     ADM.push(...(s.A || []));
+    Object.assign(ROLE_OVER, s.BR || {});
     DAYS.length = 0;
     DAYS.push(...(s.D || []));
     SHIFTS.length = 0;
@@ -15940,7 +16874,22 @@ window.bosave = bosave;
     ROOMTYPES.push(...(s.RT || []));
     GROUPS.length = 0;
     GROUPS.push(...(s.GR || []));
-    rno = Math.max(rno, 1042 + SALES.length);
+    // Older bills were NBO-001042 and open orders ORD-001. They move to the plain numbers, once.
+    const moved = {},
+      plain = x => (/^NBO-\d+$/.test(x) ? pad(+x.slice(4), 5) : moved[x] || x);
+    const top = SALES.reduce((a, x) => Math.max(a, +String(x.no).replace(/^NBO-/, "") || 0), 0);
+    rno = Math.max(rno, s.RN || 0, top + 1);
+    orders.forEach(o => {
+      if (!/^ORD-/.test(o.no)) return;
+      o.ord = o.ord || +o.no.slice(4) || "";
+      moved[o.no] = pad(rno++, 5);
+      o.no = moved[o.no];
+    });
+    SALES.forEach(x => {
+      x.no = plain(x.no);
+      if (x.ret) x.ret.of = plain(x.ret.of);
+    });
+    BILLLOG.forEach(x => (x.no = plain(x.no)));
   } catch (e) {}
 })();
 // Repair saved data from older or interrupted versions, so one bad value can't stop the app from opening.
@@ -16023,6 +16972,370 @@ if (!ADM.length)
       bosave();
     }
   });
+// ---- Back Office access rights: every right, who gets it by default, and the checks ----
+// A right belongs to a role. Super Admin always has everything, so the system can't be locked out.
+// [key, description, module, function group]
+const BO_RIGHTS = [
+  ["home.money", "View sales and money figures on the dashboard.", "DASHBOARD", "ACCESS"],
+  ["pos.open", "Open the POS terminal.", "POINT OF SALE", "ACCESS"],
+  ["sales.view", "View Sales and Orders.", "SALES", "BILLS"],
+  ["sales.reprint", "Reprint bills and credit notes.", "SALES", "BILLS"],
+  ["sales.return", "Return items from a paid bill.", "SALES", "BILLS"],
+  ["shift.view", "View shifts and the business day.", "SHIFTS", "ACCESS"],
+  ["shift.day", "Start and end the business day.", "SHIFTS", "DAY"],
+  ["shift.manage", "Open and close staff shifts.", "SHIFTS", "STAFF SHIFTS"],
+  ["fo.open", "Open the Front Desk.", "FRONTOFFICE", "ACCESS"],
+  ["rep.rooms", "View room reports.", "FRONTOFFICE", "REPORTS"],
+  ["pur.lpo", "Create and manage purchase orders.", "PURCHASING", "ORDERS"],
+  ["pur.receive", "Receive goods into a store.", "PURCHASING", "RECEIVING"],
+  ["pur.report", "View the purchases report.", "PURCHASING", "REPORTS"],
+  ["inv.stores", "View and create stores.", "INVENTORY", "STORES"],
+  [
+    "inv.approve",
+    "Open approvals for purchase orders, requisitions and issues.",
+    "INVENTORY",
+    "APPROVALS"
+  ],
+  ["inv.items", "Create and edit stock items.", "INVENTORY", "ITEMS"],
+  ["inv.master", "Use Stock Master and stock taking.", "INVENTORY", "STOCK"],
+  ["inv.req", "Make and view requisitions.", "INVENTORY", "MOVEMENTS"],
+  ["inv.issue", "Issue stock from a store.", "INVENTORY", "MOVEMENTS"],
+  ["inv.damage", "Record damaged stock.", "INVENTORY", "MOVEMENTS"],
+  [
+    "inv.reports",
+    "View issue, damage, stock position and stock take reports.",
+    "INVENTORY",
+    "REPORTS"
+  ],
+  ["prod.manage", "Manage products and prices.", "PRODUCTS", "PRODUCTS"],
+  ["sp.view", "View selling points.", "SELLING POINTS", "ACCESS"],
+  ["sp.manage", "Create, change and delete selling points.", "SELLING POINTS", "SETUP"],
+  [
+    "sp.move",
+    "Transfer stock and make requisitions for selling points.",
+    "SELLING POINTS",
+    "MOVEMENTS"
+  ],
+  ["rec.view", "View kitchen materials, balances and the production log.", "KITCHEN", "ACCESS"],
+  ["rec.issue", "Issue stock to kitchen materials.", "KITCHEN", "MATERIALS"],
+  ["rec.prod", "Run production batches.", "KITCHEN", "PRODUCTION"],
+  ["rec.recipes", "Create and edit recipes.", "KITCHEN", "RECIPES"],
+  ["rec.report", "View the recipe and production report.", "KITCHEN", "REPORTS"],
+  ["cust.view", "View customers and what they owe.", "CUSTOMERS", "ACCESS"],
+  ["cust.manage", "Add credit customers.", "CUSTOMERS", "SETUP"],
+  ["cust.pay", "Record customer payments.", "CUSTOMERS", "PAYMENTS"],
+  ["vn.view", "View vendors and statements.", "VENDORS", "ACCESS"],
+  ["vn.pay", "Record vendor payments.", "VENDORS", "PAYMENTS"],
+  ["rep.sales", "View sales, item and revenue reports.", "REPORTS", "SALES"],
+  ["rep.bills", "View the Bills Report.", "REPORTS", "BILLS"],
+  ["rep.control", "View void, discount, return, merge and split reports.", "REPORTS", "CONTROL"],
+  ["rep.staff", "View staff and commission reports.", "REPORTS", "STAFF"],
+  ["rep.print", "Print reports.", "REPORTS", "PRINTING"],
+  ["fin.menu", "See the Accounting, Expenses and M-Pesa menus.", "FINANCE", "ACCESS"],
+  ["ws.manage", "Create and edit waiters.", "ADMINISTRATION", "STAFF"],
+  ["users.manage", "Manage back office users and role rights.", "ADMINISTRATION", "SECURITY"],
+  ["set.manage", "Change hotel details, printers and settings.", "ADMINISTRATION", "SETTINGS"]
+].map(([k, d, m, g], i) => ({ k, d, m, g, id: i + 1, num: 301 + i }));
+const SUPER = "Super Admin";
+const ALL_KEYS = BO_RIGHTS.map(r => r.k);
+const except = (...L) => ALL_KEYS.filter(k => !L.includes(k));
+const ROLE_DEFAULTS = {
+  "General Manager": except("users.manage"),
+  Manager: except("users.manage", "set.manage"),
+  Director: [
+    "home.money",
+    "sales.view",
+    "shift.view",
+    "rep.rooms",
+    "pur.report",
+    "inv.reports",
+    "rec.report",
+    "cust.view",
+    "vn.view",
+    "rep.sales",
+    "rep.bills",
+    "rep.control",
+    "rep.staff",
+    "rep.print"
+  ],
+  Supervisor: [
+    "pos.open",
+    "sales.view",
+    "sales.reprint",
+    "shift.view",
+    "shift.day",
+    "shift.manage",
+    "inv.req",
+    "sp.view",
+    "sp.move",
+    "rep.bills",
+    "rep.control",
+    "rep.print"
+  ],
+  Accountant: [
+    "home.money",
+    "sales.view",
+    "sales.reprint",
+    "shift.view",
+    "rep.rooms",
+    "pur.report",
+    "cust.view",
+    "cust.manage",
+    "cust.pay",
+    "vn.view",
+    "vn.pay",
+    "rep.sales",
+    "rep.bills",
+    "rep.control",
+    "rep.staff",
+    "rep.print",
+    "fin.menu"
+  ],
+  Finance: [
+    "home.money",
+    "sales.view",
+    "sales.reprint",
+    "sales.return",
+    "shift.view",
+    "rep.rooms",
+    "pur.report",
+    "cust.view",
+    "cust.manage",
+    "cust.pay",
+    "vn.view",
+    "vn.pay",
+    "rep.sales",
+    "rep.bills",
+    "rep.control",
+    "rep.staff",
+    "rep.print",
+    "fin.menu"
+  ],
+  Controller: [
+    "home.money",
+    "sales.view",
+    "sales.reprint",
+    "sales.return",
+    "shift.view",
+    "rep.rooms",
+    "pur.report",
+    "inv.approve",
+    "inv.master",
+    "inv.reports",
+    "rec.report",
+    "cust.view",
+    "vn.view",
+    "rep.sales",
+    "rep.bills",
+    "rep.control",
+    "rep.staff",
+    "rep.print",
+    "fin.menu"
+  ],
+  Store: [
+    "pur.receive",
+    "pur.report",
+    "inv.stores",
+    "inv.items",
+    "inv.master",
+    "inv.req",
+    "inv.issue",
+    "inv.damage",
+    "inv.reports",
+    "sp.view",
+    "rep.print"
+  ],
+  Procurement: [
+    "pur.lpo",
+    "pur.receive",
+    "pur.report",
+    "inv.req",
+    "inv.reports",
+    "vn.view",
+    "rep.print"
+  ],
+  Housekeeping: ["fo.open", "rep.rooms", "rep.print"],
+  Chef: [
+    "inv.req",
+    "inv.reports",
+    "sp.view",
+    "sp.move",
+    "rec.view",
+    "rec.issue",
+    "rec.prod",
+    "rec.recipes",
+    "rec.report",
+    "rep.print"
+  ],
+  Security: ["rep.rooms", "rep.print"],
+  Sales: [
+    "sales.view",
+    "fo.open",
+    "rep.rooms",
+    "cust.view",
+    "cust.manage",
+    "rep.sales",
+    "rep.bills",
+    "rep.print"
+  ]
+};
+const BO_ROLES = [...Object.keys(ROLE_DEFAULTS)];
+/** Does this role have this right, counting any changes made on the rights table? */
+const roleHas = (role, k) => {
+  if (role === SUPER) return true;
+  const o = ROLE_OVER[role];
+  return o && k in o ? o[k] : (ROLE_DEFAULTS[role] || []).includes(k);
+};
+const boCan = k => !boUser || roleHas(boUser.role || SUPER, k);
+const anyOf = (...L) => L.some(boCan);
+const PAGE_RIGHTS = {
+  "Point of Sale": ["pos.open"],
+  "Open POS terminal": ["pos.open"],
+  "Front Desk": ["fo.open"],
+  "Sales & Orders": ["sales.view"],
+  "Shifts & Day": ["shift.view"],
+  Purchasing: ["pur.lpo", "pur.receive", "pur.report"],
+  Products: ["prod.manage"],
+  Inventory: [
+    "inv.stores",
+    "inv.approve",
+    "inv.items",
+    "inv.master",
+    "inv.req",
+    "inv.issue",
+    "inv.damage",
+    "inv.reports"
+  ],
+  "Selling points": ["sp.view"],
+  "Recipes & Production": ["rec.view"],
+  "Recipe & Production Report": ["rec.report"],
+  Accounting: ["fin.menu"],
+  "Expenses & Income": ["fin.menu"],
+  "M-Pesa & eTIMS": ["fin.menu"],
+  "Waiter setup": ["ws.manage"],
+  Customers: ["cust.view"],
+  Vendors: ["vn.view"],
+  "HR & Payroll": ["users.manage"],
+  Reports: ["rep.sales", "rep.bills", "rep.control", "rep.staff"],
+  "Room reports": ["rep.rooms"],
+  "Audit log": ["users.manage"],
+  "Users & roles": ["users.manage"],
+  Settings: ["set.manage"]
+};
+const boPageOk = n => {
+  const L = PAGE_RIGHTS[String(n).replace("&amp;", "&")];
+  return !L || anyOf(...L);
+};
+const TAB_RIGHTS = {
+  inv: {
+    stores: "inv.stores",
+    appr: "inv.approve",
+    items: "inv.items",
+    master: "inv.master",
+    req: "inv.req",
+    issue: "inv.issue",
+    damage: "inv.damage",
+    riss: "inv.reports",
+    rdmg: "inv.reports",
+    position: "inv.reports",
+    variance: "inv.reports",
+    streps: "inv.reports"
+  },
+  pur: { lpo: "pur.lpo", receive: "pur.receive", rpur: "pur.report" },
+  rec: {
+    overview: "rec.view",
+    pbal: "rec.view",
+    allp: "rec.view",
+    log: "rec.view",
+    prod: "rec.prod",
+    recipes: "rec.recipes"
+  },
+  vn: { list: "vn.view", stmt: "vn.view", pay: "vn.pay" }
+};
+const boTabOk = (g, t) => !TAB_RIGHTS[g][t] || boCan(TAB_RIGHTS[g][t]);
+/** What a button in a page needs. Pages and tabs have their own checks above. */
+const ACT_RIGHTS = {
+  ret: "sales.return",
+  sales_print: "sales.reprint",
+  dstart: "shift.day",
+  dend: "shift.day",
+  sstart: "shift.manage",
+  send: "shift.manage",
+  addc: "cust.manage",
+  pay: "cust.pay",
+  addp: "prod.manage",
+  rep_print: "rep.print",
+  inv_stadd: "inv.stores",
+  inv_pomake: "pur.lpo",
+  inv_poladd: "pur.lpo",
+  inv_poldel: "pur.lpo",
+  inv_poclose: "pur.lpo",
+  inv_pocancel: "pur.lpo",
+  inv_porecv: "pur.receive",
+  inv_rcpost: "pur.receive",
+  inv_rqissue: "inv.issue",
+  inv_rqrej: "inv.issue",
+  inv_isspost: "inv.issue",
+  inv_dmpost: "inv.damage",
+  ap_ok: "inv.approve",
+  vs_pay: "vn.pay",
+  vs_payall: "vn.pay",
+  vs_paynow: "vn.pay",
+  sp_add: "sp.manage",
+  sp_addprod: "sp.manage",
+  sp_delask: "sp.manage",
+  sp_delyes: "sp.manage",
+  sp_delprod: "sp.manage",
+  sp_psave: "sp.manage",
+  sp_trpost: "sp.move",
+  sp_rqmake: "sp.move",
+  rec_issue: "rec.issue",
+  rec_run: "rec.prod",
+  rec_rsave: "rec.recipes",
+  rec_rdel: "rec.recipes"
+};
+const boDenied = () => toast("Your role doesn't include this. Ask your administrator.");
+const REP_CONTROL = ["rets", "blog", "vdep", "vall", "dlog", "msp", "ds"];
+const repRight = (k, title) =>
+  k === "bills"
+    ? "rep.bills"
+    : REP_CONTROL.includes(k)
+      ? "rep.control"
+      : /staff|waiter|commission/i.test(title)
+        ? "rep.staff"
+        : "rep.sales";
+/** Fits the Back Office to who has just signed in. */
+function applyBoRights() {
+  document.querySelectorAll("#nav .nv[data-n]").forEach(b => {
+    b.style.display = boPageOk(b.dataset.n) ? "" : "none";
+  });
+  document.querySelectorAll("#nav .sec").forEach(s => {
+    let x = s.nextElementSibling,
+      any = false;
+    while (x && !x.classList.contains("sec")) {
+      if (x.style.display !== "none") any = true;
+      x = x.nextElementSibling;
+    }
+    s.style.display = any ? "" : "none";
+  });
+  $("#openPos").style.display = boCan("pos.open") ? "" : "none";
+  $("#newreq").style.display = boCan("inv.req") ? "" : "none";
+  $("#urole").textContent = boUser ? boUser.role || SUPER : "";
+  const money = boCan("home.money"),
+    show = (el, on) => el && (el.style.display = on ? "" : "none");
+  $("#vHome").classList.toggle("nomoney", !money);
+  show($("#kl").parentElement, money);
+  show($("#kpis"), money);
+  show($("#pl").parentElement, money);
+  show(document.querySelector("#vHome .g2"), money);
+  show($("#ins").closest(".card"), money);
+  show($("#act").closest(".card"), money);
+  show($("#apv").closest(".card"), boCan("inv.approve"));
+  view = "home";
+  document
+    .querySelectorAll("#nav .nv")
+    .forEach(b => b.classList.toggle("on", b.dataset.n === "Home"));
+}
 // ---- data windows (current and previous period) ----
 const D = 864e5,
   d0 = () => {
@@ -16094,6 +17407,7 @@ const NAV = [
   [
     "People",
     [
+      ["Waiter setup", "users"],
       ["Customers", "users"],
       ["Vendors", "truck"],
       ["HR &amp; Payroll", "id"]
@@ -16138,11 +17452,12 @@ function kpis() {
   const C = sel(0),
     P = sel(1),
     rv = a => sum(a, s => s.g),
-    av = a => (a.length ? rv(a) / a.length : 0),
+    count = a => a.filter(s => !s.ret).length,
+    av = a => (count(a) ? rv(a) / count(a) : 0),
     L = [
       ["Revenue", rv(C), rv(P), "cash", s => s.g, KES],
       ["VAT collected", sum(C, s => s.tax), sum(P, s => s.tax), "chart", s => s.tax, KES],
-      ["Orders", C.length, P.length, "cart", s => 1, K],
+      ["Orders", count(C), count(P), "cart", s => (s.ret ? 0 : 1), K],
       ["Average basket", av(C), av(P), "wal", s => s.g, KES],
       ["Receivables", sum(CU, c => c.owes), null, "users", 0, KES],
       ["Open orders", orders.reduce((a, o) => a + totals(o.lines).g, 0), null, "pos", 0, KES]
@@ -16166,21 +17481,28 @@ function heroBar() {
       `<div><span>${l}</span><b ${id ? `id="${id}"` : ""}>${v}</b><small>${s}</small></div>`,
     ch = was > 0 ? ((now - was) / was) * 100 : null;
   $("#hMono").textContent = (FD_SETTINGS.name || "K").trim()[0];
+  const money = boCan("home.money");
   $("#hFigs").innerHTML =
-    fig(
-      "Revenue · " + PL[per],
-      KES(now),
-      ch === null
-        ? "No earlier period to compare"
-        : `${ch >= 0 ? "▲" : "▼"} ${Math.abs(ch).toFixed(1)}% on the period before`,
-      "heroFig"
-    ) +
+    (!money
+      ? ""
+      : fig(
+          "Revenue · " + PL[per],
+          KES(now),
+          ch === null
+            ? "No earlier period to compare"
+            : `${ch >= 0 ? "▲" : "▼"} ${Math.abs(ch).toFixed(1)}% on the period before`,
+          "heroFig"
+        )) +
     fig(
       "Occupancy",
       (ROOMS.length ? Math.round((occ / ROOMS.length) * 100) : 0) + "%",
       `${occ} of ${ROOMS.length} rooms`
     ) +
-    fig("Open bills", orders.length, KES(orders.reduce((a, o) => a + totals(o.lines, o).g, 0))) +
+    fig(
+      "Open bills",
+      orders.length,
+      money ? KES(orders.reduce((a, o) => a + totals(o.lines, o).g, 0)) : "On the POS"
+    ) +
     fig("Approvals", wait, wait ? "Waiting for a decision" : "Nothing waiting");
 }
 function mods() {
@@ -16222,7 +17544,14 @@ function mods() {
       CU.length + " credit customers",
       KES(sum(CU, c => c.owes)) + " owed"
     ],
-    ["Users & roles", "users", "#7d8da1", USERS.length + " staff", "PINs and sale points"],
+    [
+      "Waiter setup",
+      "users",
+      "#3a8fb7",
+      USERS.length + " POS staff",
+      "PINs, rights and sale points"
+    ],
+    ["Users & roles", "users", "#7d8da1", ADM.length + " users", "Back office roles and rights"],
     [
       "Purchasing",
       "dl",
@@ -16241,10 +17570,14 @@ function mods() {
     ],
     ["Settings", "gear", "#7d8da1", "Bills and receipts", "Hotel details and till number"]
   ];
-  $("#mods").innerHTML = M.map(
-    ([n, ic, c, a, b], i) =>
-      `<button class="m" data-m="${n}" style="--tc:var(--c${(i % 6) + 1})"><span class="ic" style="background:${c}1f;color:${c}">${I(ic)}</span><b>${n}</b><span class="n" style="color:${c}">${a}</span><span class="s">${b}</span></button>`
-  ).join("");
+  const noMoney = !boCan("home.money");
+  $("#mods").innerHTML = M.filter(([n]) => boPageOk(n))
+    .map(x => (noMoney ? x.map(v => (/KES/.test(String(v)) ? "Open" : v)) : x))
+    .map(
+      ([n, ic, c, a, b], i) =>
+        `<button class="m" data-m="${n}" style="--tc:var(--c${(i % 6) + 1})"><span class="ic" style="background:${c}1f;color:${c}">${I(ic)}</span><b>${n}</b><span class="n" style="color:${c}">${a}</span><span class="s">${b}</span></button>`
+    )
+    .join("");
 }
 $("#mods").onclick = e => {
   const b = e.target.closest("[data-m]");
@@ -16417,7 +17750,7 @@ function insights() {
 $("#ins").onclick = e => {
   const a = e.target.dataset.a;
   if (!a) return;
-  if (a === "req") addReq();
+  if (a === "req") boCan("inv.req") ? addReq() : boDenied();
   else if (a === "seed") {
     seed();
     bosave();
@@ -16491,6 +17824,7 @@ $("#apHome").onclick = e => {
   if (b && b.dataset.a.slice(0, 3) === "ap_") apAct(b.dataset.a.slice(3), b);
 };
 $("#apv").onclick = e => {
+  if (!boCan("inv.approve")) return;
   const b = e.target.closest('[data-a^="ap_"]');
   if (b) return apAct(b.dataset.a.slice(3), b);
   const i = e.target.dataset.ap;
@@ -16511,7 +17845,7 @@ function act() {
   $("#act").innerHTML = L.length
     ? L.map(
         s =>
-          `<div class="row"><span class="ri g">${I("pos")}</span><div class="t"><b>${esc(s.user)} completed ${s.no}</b><span>${KES(s.g)} · ${s.dept} · ${ago(s.at)}</span></div></div>`
+          `<div class="row"><span class="ri g">${I("pos")}</span><div class="t"><b>${s.ret ? `${esc(s.ret.by)} returned items from ${s.ret.of}` : `${esc(s.user)} completed ${s.no}`}</b><span>${KES(s.g)} · ${s.dept} · ${ago(s.at)}</span></div></div>`
       ).join("")
     : '<p style="color:var(--mute);text-align:center;padding:26px 0">No activity yet. Sales from the POS appear here.</p>';
 }
@@ -16597,7 +17931,9 @@ const voidTotal = R => sum(R, x => sum(voidParts(x), l => l.amt));
 // ---- printing a report: A4 landscape or an 80mm roll ----
 let rpSize = "a4";
 const printTools = k =>
-  `<span class="rp-size"><label><input type="radio" name="rpSize" data-rsz="a4" ${rpSize === "a4" ? "checked" : ""}> A4 size</label><label><input type="radio" name="rpSize" data-rsz="80" ${rpSize === "80" ? "checked" : ""}> Thermal paper (80mm)</label></span><button class="chip on" data-a="rep_print" data-k="${k}">Print</button>`;
+  !boCan("rep.print")
+    ? ""
+    : `<span class="rp-size"><label><input type="radio" name="rpSize" data-rsz="a4" ${rpSize === "a4" ? "checked" : ""}> A4 size</label><label><input type="radio" name="rpSize" data-rsz="80" ${rpSize === "80" ? "checked" : ""}> Thermal paper (80mm)</label></span><button class="chip on" data-a="rep_print" data-k="${k}">Print</button>`;
 const printedBy = () => `Printed ${new Date().toLocaleString("en-GB")} by ${esc(boUser.n)}`;
 function tablePrint(title, head, c, r, f) {
   const name = x => (x[0] === "#" ? x.slice(1) : x),
@@ -16641,11 +17977,13 @@ function repPrint(k) {
 }
 
 // ---- Bills Report: every settled bill, one line each; double-click to reprint ----
-const billF = { cashier: "All", pay: "All", net: false, col: {} };
+const billF = { status: "Combined", cashier: "All", pay: "All", net: false, col: {} };
 const billCols = () => [
   "Bill Date",
   "Bill Time",
   "Bill Number",
+  "Order",
+  "Status",
   "Table Number",
   "Waiter Name",
   "Cashier Name",
@@ -16661,12 +17999,14 @@ function billGroups() {
   rs().forEach(s => {
     const b = (o[s.no] = o[s.no] || {
       no: s.no,
+      ord: s.ord || "",
       at: s.at,
       label: s.label || "",
       waiter: s.waiter || s.user,
       cashier: s.user,
       guest: s.guest || "N/A",
       room: s.room || "",
+      status: s.ret ? "Returned" : "Settled",
       pts: [],
       net: 0,
       g: 0,
@@ -16677,11 +18017,39 @@ function billGroups() {
     b.g += s.g;
     Object.entries(s.mx || {}).forEach(([m, v]) => (b.mx[m] = (b.mx[m] || 0) + v));
   });
-  return Object.values(o)
+  const A = new Date(rf + "T00:00:00"),
+    Z = new Date(rt + "T23:59:59"),
+    open = orders
+      .filter(x => {
+        const at = new Date(x.at);
+        return at >= A && at <= Z && (rd === "All" || billPoints(x.lines).includes(rd));
+      })
+      .map(x => {
+        const t = totals(x.lines, x);
+        return {
+          no: x.no,
+          ord: x.ord || "",
+          at: new Date(x.at),
+          label: x.label,
+          waiter: x.waiter || "",
+          cashier: "",
+          guest: x.guest || "N/A",
+          room: x.room || "",
+          status: "Pending",
+          pts: billPoints(x.lines),
+          net: t.net,
+          g: t.g,
+          mx: {}
+        };
+      });
+  return [
+    ...(billF.status === "Pending" ? [] : Object.values(o)),
+    ...(billF.status === "Settled" ? [] : open)
+  ]
     .filter(
       b =>
         (billF.cashier === "All" || b.cashier === billF.cashier) &&
-        (billF.pay === "All" || b.mx[billF.pay] > 0)
+        (billF.pay === "All" || b.mx[billF.pay])
     )
     .sort((a, b) => a.at - b.at);
 }
@@ -16689,6 +18057,8 @@ const billRow = b => [
   b.at.toLocaleDateString("en-GB"),
   b.at.toLocaleTimeString("en-US"),
   b.no,
+  b.ord,
+  b.status,
   b.label,
   b.waiter,
   b.cashier,
@@ -16708,7 +18078,10 @@ const billShown = () => {
     });
   });
 };
-const billTotals = B => ({ net: sum(B, b => b.net), g: sum(B, b => b.g) });
+const billTotals = B => {
+  const P = B.filter(b => b.status === "Pending");
+  return { net: sum(B, b => b.net), g: sum(B, b => b.g), pend: sum(P, b => b.g) };
+};
 function billsGrid(c, r, none) {
   const opt = (L, v) =>
       L.map(
@@ -16717,7 +18090,14 @@ function billsGrid(c, r, none) {
     who = [...new Set(SALES.map(s => s.user))].sort(),
     t = billTotals(billShown()),
     G2 = billGroups();
-  return `<div class="bl-bar"><label>Cashier name<select data-bf="cashier">${opt(
+  return `<div class="bl-bar"><label>Bills<select data-bf="status">${opt(
+    [
+      ["Combined", "Settled and pending"],
+      ["Settled", "Settled only"],
+      ["Pending", "Pending only"]
+    ],
+    billF.status
+  )}</select></label><label>Cashier name<select data-bf="cashier">${opt(
     [["All", "All cashiers"], ...who.map(x => [x, x])],
     billF.cashier
   )}</select></label><label>Paymode<select data-bf="pay">${opt(
@@ -16729,10 +18109,10 @@ function billsGrid(c, r, none) {
  <tbody>${
    G2.map(b => {
      const x = billRow(b);
-     return `<tr data-bill="${esc(b.no)}" ${r.some(y => y[2] === b.no) ? "" : "hidden"}>${x.map((v, i) => `<td class="${c[i][0] === "#" ? "n" : ""}">${esc(v)}</td>`).join("")}</tr>`;
+     return `<tr data-bill="${esc(b.no)}" class="${b.status === "Pending" ? "pend" : b.status === "Returned" ? "ret" : ""}" ${r.some(y => y[2] === b.no) ? "" : "hidden"}>${x.map((v, i) => `<td class="${c[i][0] === "#" ? "n" : ""}">${esc(v)}</td>`).join("")}</tr>`;
    }).join("") || `<tr><td colspan="${c.length}"><div class="empty">${none}</div></td></tr>`
  }</tbody></table></div>
- <div class="bl-tot"><span id="blCnt">${plural(r.length, "bill")}</span>${billF.net ? `<span>Net <b id="blNet">${m2(t.net)}</b></span>` : ""}<span>Totals <b id="blG">${m2(t.g)}</b></span></div>`;
+ <div class="bl-tot"><span id="blCnt">${plural(r.length, "bill")}</span>${billF.net ? `<span>Net <b id="blNet">${m2(t.net)}</b></span>` : ""}<span>Settled <b id="blS">${m2(t.g - t.pend)}</b></span><span>Pending <b id="blP">${m2(t.pend)}</b></span><span>Combined <b id="blG">${m2(t.g)}</b></span></div>`;
 }
 /** Typing in a column filter keeps the cursor where it is, so rows are hidden rather than redrawn. */
 function billFilter(col, v) {
@@ -16745,12 +18125,38 @@ function billFilter(col, v) {
     .forEach(tr => (tr.hidden = !S.has(tr.dataset.bill)));
   $("#blCnt").textContent = plural(B.length, "bill");
   $("#blG").textContent = m2(t.g);
+  $("#blS").textContent = m2(t.g - t.pend);
+  $("#blP").textContent = m2(t.pend);
   if ($("#blNet")) $("#blNet").textContent = m2(t.net);
 }
 /** The bill as it was paid, on the paper chosen above, marked as a copy. */
 function billReprint(no) {
+  const open = orders.find(o => o.no === no);
+  if (open)
+    return showRc(
+      guestBillHTML({
+        no,
+        ord: open.ord,
+        dept: billPlace(open.lines),
+        label: open.label,
+        guest: open.guest,
+        covers: open.covers,
+        room: open.room,
+        waiter: open.waiter,
+        rider: open.rider,
+        lines: slipLines(open.lines, open),
+        t: totals(open.lines, open)
+      }),
+      null,
+      "Close"
+    );
   const S = SALES.filter(s => s.no === no);
   if (!S.length) return;
+  if (S[0].ret) {
+    S[0].copies = (S[0].copies || 0) + 1;
+    bosave();
+    return showRc(returnSlipHTML(no, S[0].copies), null, "Close");
+  }
   const A = S[0],
     keep = (S.find(s => s.slip) || {}).slip,
     lines = S.flatMap(s => s.lines),
@@ -16760,6 +18166,7 @@ function billReprint(no) {
   A.copies = (A.copies || 0) + 1;
   const html = receiptHTML({
     no,
+    ord: A.ord,
     dept: S.map(s => s.dept).join(", "),
     label: A.label,
     guest: A.guest,
@@ -16811,6 +18218,118 @@ function billReprint(no) {
     "Close"
   );
 }
+// ---- Sales & Orders: the current day and open bills, unless searching ----
+const salesF = { q: "", from: "", to: "" };
+function salesList() {
+  const F = salesF,
+    w = F.q.trim().toLowerCase(),
+    a = F.from
+      ? new Date(F.from + "T00:00:00")
+      : F.to || w
+        ? new Date(0)
+        : curDay()
+          ? new Date(curDay().openedAt)
+          : new Date(d0()),
+    z = F.to ? new Date(F.to + "T23:59:59") : new Date(8.64e15),
+    hits = x => !w || x.toLowerCase().includes(w),
+    pts = br === BRS[0] ? null : br,
+    B = [];
+  by(
+    SALES.filter(s => s.at >= a && s.at <= z && (!pts || s.dept === pts)),
+    s => s.no
+  ).forEach(([no, S]) => {
+    const A = S[0],
+      lines = S.flatMap(s => s.lines),
+      who = A.waiter || A.user;
+    if (
+      hits(
+        [
+          no,
+          A.ord,
+          A.label,
+          who,
+          A.user,
+          A.guest,
+          A.room,
+          ...S.map(s => s.dept),
+          ...lines.map(l => l.n)
+        ].join(" ")
+      )
+    )
+      B.push({
+        no,
+        ord: A.ord,
+        at: A.at,
+        label: A.label,
+        who,
+        pts: S.map(s => s.dept).join(", "),
+        g: sum(S, s => s.g),
+        lines,
+        tag: A.ret ? ["Return", "bad"] : ["Settled", "ok"],
+        S
+      });
+  });
+  // Open bills belong to now, so they show unless dates were asked for.
+  orders.forEach(o => {
+    const at = new Date(o.at),
+      lines = slipLines(o.lines, o).map(l => ({ ...l })),
+      p = billPoints(o.lines);
+    if ((F.from || F.to) && (at < a || at > z)) return;
+    if (pts && !p.includes(pts)) return;
+    if (
+      hits(
+        [o.no, o.ord, o.label, o.waiter, o.guest, o.room, ...p, ...lines.map(l => l.n)].join(" ")
+      )
+    )
+      B.push({
+        no: o.no,
+        ord: o.ord,
+        at,
+        label: o.label,
+        who: o.waiter,
+        pts: p.join(", "),
+        g: totals(o.lines, o).g,
+        lines,
+        tag: ["Pending", "warn"]
+      });
+  });
+  B.sort((x, y) => y.at - x.at);
+  const L = B.slice(0, 200),
+    head = F.q || F.from || F.to ? "Search results" : "Current day",
+    paid = sum(
+      B.filter(b => b.S),
+      b => b.g
+    ),
+    open = sum(
+      B.filter(b => !b.S),
+      b => b.g
+    );
+  return `<div class="so-head"><h4>${head}</h4><span>${plural(B.length, "bill")} · Settled ${KES(paid)} · Pending ${KES(open)}</span></div>${
+    L.length
+      ? L.map(b => {
+          const s0 = b.S && b.S[0],
+            mx = {};
+          (b.S || []).forEach(s =>
+            Object.entries(s.mx || {}).forEach(([k, v]) => (mx[k] = (mx[k] || 0) + v))
+          );
+          return `<details class="so-r"><summary><span class="so-no">${esc(b.no)}<small>${b.ord ? "Order " + esc(b.ord) : ""}</small></span><span class="so-m"><b>${esc(b.label || "")}</b><small>${hhmm(b.at)} ${b.at.toLocaleDateString("en-GB")} · ${esc(b.pts)} · ${esc(b.who || "")}</small></span><span class="tag ${b.tag[1]}">${b.tag[0]}</span><b class="so-g">${KES(b.g)}</b></summary><div class="so-d">${b.lines.map(l => `${l.q}× ${esc(l.n)} @ ${(+l.p).toFixed(2)}`).join("<br>")}${
+            b.S
+              ? `<br>Paid: ${Object.entries(mx)
+                  .map(([k, v]) => (MN[k] || k) + " " + KES(v))
+                  .join(
+                    ", "
+                  )} · VAT ${sum(b.S, s => s.tax).toFixed(2)}${s0.ret ? `<br>Return from ${esc(s0.ret.of)}: ${esc(s0.ret.why)} · authorized by ${esc(s0.ret.by)}` : ""}`
+              : ""
+          }<div class="so-a"><button class="mini" data-a="sales_print" data-no="${esc(b.no)}">${b.S ? "Reprint" : "Print bill"}</button>${b.S && !s0.ret && retCan(b.no) && boCan("sales.return") ? `<button class="mini" data-a="ret" data-no="${esc(b.no)}">Return items</button>` : ""}</div></div></details>`;
+        }).join("")
+      : `<div class="empty">${F.q || F.from || F.to ? "No orders match this search." : "No orders yet in the current day."}</div>`
+  }${B.length > L.length ? `<div class="stk">Showing the latest ${L.length}. Narrow the search to see the rest.</div>` : ""}`;
+}
+/** A waiter's own commission rate from Waiter setup, otherwise the rate on the report. */
+const commRate = n => {
+  const u = USERS.find(x => x.n === n);
+  return u && u.comm !== undefined ? u.comm : rcm;
+};
 const REP = {
   bills: [
     "Bills Report",
@@ -16824,18 +18343,66 @@ const REP = {
         [
           "Total",
           plural(B.length, "bill"),
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
+          ...c.slice(2, billF.net ? -2 : -1).map(() => ""),
           ...(billF.net ? [m2(t.net)] : []),
           m2(t.g)
         ],
         "No bills for these dates and filters.",
         logHead("Bills")
+      ];
+    }
+  ],
+  rets: [
+    "Returned Items Report",
+    L => {
+      const R = by(
+          L.filter(s => s.ret),
+          s => s.no
+        ),
+        val = a => -sum(a, s => s.g),
+        T = sum(R, ([, a]) => val(a));
+      return [
+        [
+          "Date",
+          "Credit note",
+          "Original bill",
+          "Table",
+          "Sale point",
+          "Waiter",
+          "Items returned",
+          "Refunded by",
+          "Reason",
+          "Authorized by",
+          "#Value (KES)"
+        ],
+        R.map(([no, a]) => {
+          const paid = {};
+          a.forEach(s =>
+            Object.entries(s.mx || {}).forEach(([m, v]) => (paid[m] = (paid[m] || 0) - v))
+          );
+          return [
+            a[0].at.toLocaleString("en-GB"),
+            no,
+            a[0].ret.of,
+            a[0].label,
+            a.map(s => s.dept).join(", "),
+            a[0].waiter || a[0].user,
+            a
+              .flatMap(s => s.lines)
+              .map(l => `${-l.q} ${l.n}`)
+              .join(", "),
+            Object.entries(paid)
+              .filter(([, v]) => v > 0)
+              .map(([m, v]) => `${MN[m] || m} ${m2(v)}`)
+              .join(", "),
+            a[0].ret.why,
+            a[0].ret.by,
+            m2(val(a))
+          ];
+        }),
+        ["Total", plural(R.length, "return"), "", "", "", "", "", "", "", "", m2(T)],
+        "No items were returned in these dates.",
+        logHead(plural(R.length, "return") + " · " + KES(T))
       ];
     }
   ],
@@ -17181,8 +18748,11 @@ const REP = {
     "Sales Commission Report",
     L => [
       ["Staff", "#Sales", "#Rate %", "#Commission"],
-      by(L, s => s.user).map(([u, a]) => [u, m2(G(a)), rcm, m2((G(a) * rcm) / 100)]),
-      ["Total", m2(G(L)), rcm, m2((G(L) * rcm) / 100)]
+      by(L, s => s.waiter || s.user).map(([u, a]) => {
+        const r = commRate(u);
+        return [u, m2(G(a)), r, m2((G(a) * r) / 100)];
+      }),
+      ["Total", m2(G(L)), "", m2(sum(L, s => (s.g * commRate(s.waiter || s.user)) / 100))]
     ]
   ],
   is: [
@@ -17214,12 +18784,15 @@ const tb = (c, r, f, none = "No sales for this report, date range and sale point
 };
 const V = {
   rep() {
+    if (!boCan(repRight(rp, REP[rp][0])))
+      rp = Object.keys(REP).find(k => boCan(repRight(k, REP[k][0])));
     const [t, fn] = REP[rp],
       L = rs(),
       [c, r, f, note, head] = fn(L);
     return `<div style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start"><div class="pn" style="flex:1 1 230px;max-width:300px"><h4>Sales reports</h4>${Object.entries(
       REP
     )
+      .filter(([k, x]) => boCan(repRight(k, x[0])))
       .map(
         ([k, x]) =>
           `<button class="mini ${k === rp ? "ok" : ""}" style="text-align:left;width:100%" data-r="${k}">${x[0]}</button>`
@@ -17230,22 +18803,9 @@ const V = {
  <div style="color:var(--mute);font-size:12px">${head || `${L.length} bills · ${KES(G(L))} · ${rf} to ${rt} · ${rd === "All" ? "all sale points" : rd}`}</div>${rp === "bills" ? billsGrid(c, r, note) : head ? tb(c, r, f, note) : tb(c, r, f)}${note && !head ? `<div class="stk">${note}</div>` : ""}</div></div>`;
   },
   sales() {
-    const A = sel(0),
-      L = A.slice()
-        .sort((a, b) => b.at - a.at)
-        .slice(0, 100);
-    return `<div class="pn"><div class="fr" style="align-items:center"><h4 style="flex:3">${A.length} sales · ${KES(sum(A, s => s.g))}</h4><button class="mini" data-a="clr">Clear all sales</button></div>${
-      L.length
-        ? L.map(
-            s =>
-              `<details><summary>${hhmm(s.at)} ${s.at.toLocaleDateString("en-GB")} · ${s.no} · ${s.dept} · ${esc(s.user)} <b style="float:right">${KES(s.g)}</b></summary><div style="padding:6px 10px;font-size:13px;color:var(--mute)">${s.lines.map(l => `${l.q}× ${esc(l.n)} @ ${l.p.toFixed(2)}`).join("<br>")}<br>Paid: ${Object.entries(
-                s.mx || {}
-              )
-                .map(([k, v]) => (MN[k] || k) + " " + KES(v))
-                .join(", ")} · VAT ${s.tax.toFixed(2)}</div></details>`
-          ).join("")
-        : '<div class="empty">No sales in this range.</div>'
-    }</div>`;
+    const F = salesF,
+      on = F.q || F.from || F.to;
+    return `<div class="pn"><div class="so-bar"><label class="so-q">Search orders<input data-sq value="${esc(F.q)}" placeholder="Bill or order number, table, waiter, guest or item" autocomplete="off"></label><label>From<input type="date" data-sf="from" value="${esc(F.from)}"></label><label>To<input type="date" data-sf="to" value="${esc(F.to)}"></label>${on ? '<button class="mini" data-a="sales_clear">Back to current</button>' : ""}</div><div id="salesList">${salesList()}</div></div>`;
   },
   prod() {
     return `<div class="pn"><h4>Add product</h4><div class="fr"><input id="pn" placeholder="Name"><select id="pd">${ALLD.map(d => `<option>${d}</option>`).join("")}</select><input id="pc" placeholder="Category"><input id="pp" type="number" placeholder="Price KES"><select id="pt"><option value="B">B · VAT 16%</option><option value="A">A · 0%</option><option value="C">C · 0%</option></select><select id="pi">${Object.keys(
@@ -17268,10 +18828,6 @@ const V = {
      return `<tr><td>${esc(ING[k])}</td><td class="n">${s}</td><td><span class="tag ${st[0]}">${st[1]}</span></td><td><input type="number" step="any" value="${INGC[k] || ""}" placeholder="0" data-uc="${k}" style="max-width:90px"></td><td><div class="fr"><input type="number" id="rq_${k}" placeholder="Qty"><button class="mini" data-a="recv" data-k="${k}">Add</button></div></td></tr>`;
    })
    .join("")}</table></div>`;
-  },
-  staff() {
-    return `<div class="pn"><h4>Add staff</h4><div class="fr"><input id="su" placeholder="First Last"><select id="sr"><option>Waiter</option><option>Cashier</option><option>Super Cashier</option><option>Manager</option></select><input id="up" inputmode="numeric" placeholder="PIN (4 to 6 digits)"><button class="chip on" data-a="addu">Add</button></div></div>
- <div class="pn tw"><table class="t"><tr><th>Name</th><th>Role</th><th>PIN</th><th>Card ID</th><th>Sale points</th></tr>${USERS.map((u, i) => `<tr><td>${esc(u.n)}</td><td><select data-ur="${i}">${["Waiter", "Cashier", "Super Cashier", "Manager"].map(r => `<option ${u.role === r ? "selected" : ""}>${r}</option>`).join("")}</select></td><td><input value="${u.pin}" data-up="${i}" inputmode="numeric" style="max-width:100px"></td><td><input value="${esc(u.card || "")}" data-uk="${i}" placeholder="Click, then swipe" style="max-width:140px"></td><td>${ALLD.map(d => `<label style="margin-right:10px"><input type="checkbox" style="width:auto;min-width:0" data-ud="${i}" value="${d}" ${u.d.includes(d) ? "checked" : ""}> ${d}</label>`).join("")}</td></tr>`).join("")}</table></div><div class="pn"><h4>Back Office accounts</h4><div class="stk">Back Office signs in with a username and password. Passwords are stored as hashes on this device.</div><div class="fr"><input id="mn" placeholder="Full name"><input id="mu" placeholder="Username"><input id="mp" type="password" placeholder="Password (6+ characters)"><button class="chip on" data-a="addm">Add account</button></div><div class="tw"><table class="t"><tr><th>Name</th><th>Username</th><th>New password</th><th></th></tr>${ADM.map((a, i) => `<tr><td>${esc(a.n)}</td><td>${esc(a.u)}</td><td><input type="password" id="np_${i}" placeholder="New password"></td><td><div class="fr"><button class="mini" data-a="pwm" data-i="${i}">Change</button>${ADM.length > 1 ? `<button class="mini" data-a="delm" data-i="${i}">Remove</button>` : ""}</div></td></tr>`).join("")}</table></div></div>`;
   },
   cred() {
     return `<div class="pn"><h4>Add credit customer</h4><div class="fr"><input id="cn" placeholder="Customer name"><input id="cc" type="number" placeholder="Credit limit"><button class="chip on" data-a="addc">Add</button></div></div>
@@ -17598,6 +19154,7 @@ function roomsCard() {
     PL[per] +
     " revenue " +
     KES(sum(Object.keys(m), d => m[d].room));
+  if (!boCan("home.money")) $("#rml").textContent = ROOMS.length + " rooms · " + occ + " occupied";
 }
 V.rooms = () => `<div class="pn">${roomsReportHTML()}</div>`;
 /** A click on the rooms report tabs (Room reports page). */
@@ -17933,7 +19490,7 @@ const RAIL = [
 ];
 const tabAllowed = t => {
   const x = RAIL.find(r => r !== "-" && r[0] === t);
-  return !x || x[3] !== "store" || isStore(STKT.loc);
+  return boTabOk("inv", t) && (!x || x[3] !== "store" || isStore(STKT.loc));
 };
 // Approved requisitions ("Pending" = approved before approvals existed) can be issued.
 const isOpenReq = r =>
@@ -18496,7 +20053,10 @@ function invView() {
     appr: apView // approvals.js
   };
   if (!isStore(STKT.loc)) STKT.loc = STORES[0]; // Inventory works on stores only
-  if (!tabAllowed(invT) || !B[invT]) invT = "master"; // e.g. LPO / purchases now live in Purchasing
+  if (!tabAllowed(invT) || !B[invT])
+    invT = tabAllowed("master")
+      ? "master"
+      : RAIL.filter(x => x !== "-" && B[x[0]] && tabAllowed(x[0]))[0][0]; // e.g. LPO / purchases now live in Purchasing
   if (invT === "items") setTimeout(itPreview); // fill the live hints once the page is on screen
   // Popups that can be opened from more than one tab (Item setup draws its own item popup).
   const popups =
@@ -19128,6 +20688,12 @@ document.addEventListener("keydown", e => {
 $("#vSub").oninput = e => {
   const s = e.target.dataset;
   if (s.bc !== undefined) return billFilter(s.bc, e.target.value);
+  if (s.urf) return urFilter(s.urf, e.target.value);
+  if (s.ws) return void (wsF[s.ws] = e.target.value);
+  if (s.sq !== undefined) {
+    salesF.q = e.target.value;
+    return void ($("#salesList").innerHTML = salesList());
+  }
   if (s.ph !== undefined) {
     STKT.phys[s.ph] = e.target.value;
     updMaster();
@@ -20700,7 +22266,8 @@ const PUR_TABS = [
 
 function purchasingView() {
   if (!isStore(STKT.loc)) STKT.loc = STORES[0];
-  if (!PUR_TABS.some(([t]) => t === purT)) purT = "lpo";
+  if (!PUR_TABS.some(([t]) => t === purT) || !boTabOk("pur", purT))
+    purT = PUR_TABS.map(([t]) => t).find(t => boTabOk("pur", t));
   const openN = LPOS.filter(p => p.status === "Open" || p.status === "Partly received").length,
     body =
       purT === "rpur"
@@ -20709,10 +22276,12 @@ function purchasingView() {
           ? recvHTML() // the receiving store is chosen inside the GRN
           : storeBar("Purchase orders for") + lpoHTML(),
     popups = itemPopupIfOpen() + vendorPopupIfOpen() + apModalIfOpen();
-  return `<div class="inv"><nav class="inv-rail">${PUR_TABS.map(
-    ([t, l, ic]) =>
-      `<button class="ir ${t === purT ? "on" : ""}" data-a="pur_tab" data-t="${t}">${I(ic)}<span>${l}</span>${t === "lpo" && openN ? `<b>${openN}</b>` : ""}</button>`
-  ).join("")}</nav><div class="inv-main">${body}${popups}</div></div>`;
+  return `<div class="inv"><nav class="inv-rail">${PUR_TABS.filter(([t]) => boTabOk("pur", t))
+    .map(
+      ([t, l, ic]) =>
+        `<button class="ir ${t === purT ? "on" : ""}" data-a="pur_tab" data-t="${t}">${I(ic)}<span>${l}</span>${t === "lpo" && openN ? `<b>${openN}</b>` : ""}</button>`
+    )
+    .join("")}</nav><div class="inv-main">${body}${popups}</div></div>`;
 }
 
 /** Compact store chooser (Purchasing doesn't need Inventory's stock cards). */
@@ -20972,6 +22541,7 @@ function vsPrint(v, from, to) {
 
 // ---------------------------------------------------------------- page
 function vendorsView() {
+  if (!boTabOk("vn", vnT)) vnT = "list";
   invF.vn.open = false; // the vendor form is on the page itself
   if (!VENDORS.some(v => v.id === invF.vs.vendor)) invF.vs.vendor = VENDORS[0] ? VENDORS[0].id : "";
   const body =
@@ -20982,10 +22552,12 @@ function vendorsView() {
         : vnT === "stmt"
           ? vsStatementHTML()
           : vsPaymentsHTML();
-  return `<div class="inv"><nav class="inv-rail">${VN_TABS.map(
-    ([t, l, ic]) =>
-      `<button class="ir ${t === vnT ? "on" : ""}" data-a="vs_tab" data-t="${t}">${I(ic)}<span>${l}</span></button>`
-  ).join("")}</nav><div class="inv-main">${body}</div></div>`;
+  return `<div class="inv"><nav class="inv-rail">${VN_TABS.filter(([t]) => boTabOk("vn", t))
+    .map(
+      ([t, l, ic]) =>
+        `<button class="ir ${t === vnT ? "on" : ""}" data-a="vs_tab" data-t="${t}">${I(ic)}<span>${l}</span></button>`
+    )
+    .join("")}</nav><div class="inv-main">${body}</div></div>`;
 }
 
 const vsVendorSelect = () =>
@@ -21155,7 +22727,7 @@ V.vendors = vendorsView;
 // Requisition:  "Awaiting approval" → "Approved" (the store can issue it) or "Rejected".
 // Issue:        issuing (Issue tab, a requisition, Send to selling point) raises an issue note (ISSUES);
 //               the stock moves only when it is approved, after checking the store still has it.
-// A manager approves by typing their PIN (Users & roles). Each decision keeps who, when and why.
+// A manager approves by typing their PIN (Waiter setup). Each decision keeps who, when and why.
 const AWAIT = "Awaiting approval";
 let apM = null; // approval popup: { kind: "lpo" | "req" | "iss", id, act: "approve" | "reject" }
 
@@ -21276,7 +22848,7 @@ function apModalIfOpen() {
   ${
     mgrs.length
       ? `<label>Manager PIN<input id="apPin" type="password" inputmode="numeric" autocomplete="off" placeholder="${mgrs.length} manager(s) can ${rej ? "reject" : "approve"}"></label>`
-      : '<div class="stk" style="color:var(--bad)">No manager can approve yet. Give a staff member the Manager role under Users &amp; roles.</div>'
+      : '<div class="stk" style="color:var(--bad)">No manager can approve yet. Give a staff member the Manager role under Waiter setup.</div>'
   }
   <div class="stk">${apM.kind === "iss" && !rej ? "Approving moves the stock now." : apM.kind === "lpo" && !rej ? "Once approved the order can be received." : apM.kind === "req" && !rej ? "Once approved the store can issue it." : ""}</div>
   <div class="fr" style="justify-content:flex-end"><button class="mini" data-a="ap_close">Cancel</button><button class="chip on" data-a="ap_ok" ${mgrs.length ? "" : "disabled"}>${rej ? "Reject" : "Approve"}</button></div>
@@ -22578,6 +24150,7 @@ function prAddLine(id) {
 
 // ---------------------------------------------------------------- page
 function recipesView() {
+  if (!boTabOk("rec", recT)) recT = "overview";
   const body =
     recT === "pbal" || recT === "allp"
       ? recBalHTML(recT)
@@ -22588,10 +24161,12 @@ function recipesView() {
           : recT === "log"
             ? prodLogHTML()
             : recOverviewHTML();
-  return `<div class="inv"><nav class="inv-rail">${REC_TABS.map(
-    ([t, l, ic]) =>
-      `<button class="ir ${t === recT ? "on" : ""}" data-a="rec_tab" data-t="${t}">${I(ic)}<span>${l}</span></button>`
-  ).join("")}</nav><div class="inv-main">${body}${apModalIfOpen()}</div></div>`;
+  return `<div class="inv"><nav class="inv-rail">${REC_TABS.filter(([t]) => boTabOk("rec", t))
+    .map(
+      ([t, l, ic]) =>
+        `<button class="ir ${t === recT ? "on" : ""}" data-a="rec_tab" data-t="${t}">${I(ic)}<span>${l}</span></button>`
+    )
+    .join("")}</nav><div class="inv-main">${body}${apModalIfOpen()}</div></div>`;
 }
 V.rec = recipesView;
 
@@ -23500,7 +25075,8 @@ function printersHTML() {
   <div class="fr" style="justify-content:flex-end"><button class="chip on" style="flex:none" data-a="hs_save">Save printers</button></div></div>`;
 }
 const SET_SAMPLE = {
-  no: "NBO-001042",
+  no: "01042",
+  ord: 12,
   dept: "Main Restaurant",
   label: "T4",
   covers: "2",
@@ -23612,6 +25188,346 @@ async function settingsAct(a, b) {
   toast("Details saved. New bills and receipts will use them.");
   all();
 }
+// ---- Waiter setup: every POS user (waiter, cashier, super cashier, manager), and what each may do ----
+const POS_ROLES = ["Waiter", "Cashier", "Super Cashier", "Manager"];
+const wsBlank = () => ({
+  i: -1,
+  role: "Waiter",
+  n: "",
+  pin: "",
+  comm: "",
+  copies: "1",
+  maxPend: "0",
+  card: "",
+  maxDisc: "",
+  allSP: false,
+  restrict: false,
+  pts: [],
+  footer: "",
+  perm: Object.fromEntries(WAITER_DEFAULTS.map(k => [k, true]))
+});
+let wsF = wsBlank();
+const waiters = () =>
+  USERS.slice().sort(
+    (a, b) => POS_ROLES.indexOf(a.role) - POS_ROLES.indexOf(b.role) || a.n.localeCompare(b.n)
+  );
+/** Approvals and leaving full screen on the POS need a Manager's PIN. */
+const lastManager = u => u.role === "Manager" && USERS.filter(x => x.role === "Manager").length < 2;
+const wsPoints = () => ALLD.filter(posSells);
+function wsEdit(u) {
+  const all = wsPoints().every(d => u.d.includes(d));
+  wsF = {
+    i: USERS.indexOf(u),
+    role: u.role,
+    n: u.n,
+    pin: u.pin,
+    comm: u.comm === undefined ? "" : String(u.comm),
+    copies: String(u.copies || 1),
+    maxPend: String(u.maxPend || 0),
+    card: u.card || "",
+    maxDisc: u.maxDisc === undefined ? "" : String(u.maxDisc),
+    allSP: !!u.allSP,
+    restrict: !all,
+    pts: u.d.filter(posSells),
+    footer: u.footer || "",
+    // Someone set up before this page can do all of it today, so that's what shows.
+    perm: u.perm
+      ? { ...u.perm }
+      : Object.fromEntries(
+          WAITER_RIGHTS.flatMap(([, L]) => L).map(([k]) => [
+            k,
+            !["allBills", "disc", "void", "merge", "split", "addAll"].includes(k)
+          ])
+        )
+  };
+}
+const wsTile = (k, label, hint, off) =>
+  `<label class="ws-p ${off ? "later" : ""}"><input type="checkbox" data-wsp="${k}" ${wsF.perm[k] ? "checked" : ""}><span><b>${label}</b>${hint ? `<small>${hint}</small>` : ""}</span></label>`;
+V.wait = () => {
+  const F = wsF,
+    f = (l, k, attrs = "") =>
+      `<label>${l}<input data-ws="${k}" value="${esc(F[k])}" ${attrs}></label>`,
+    always = BILL_AUTH.includes(F.role),
+    who = F.role.toLowerCase(),
+    id = F.i < 0 ? "New" : USERS[F.i].wid || "Not numbered yet",
+    L = waiters();
+  return `<div class="ws"><div class="pn ws-list"><div class="ws-lh"><h4>POS staff (${L.length})</h4><button class="mini" data-a="ws_new">New</button></div>${
+    L.map(u => {
+      const open = orders.filter(o => o.waiter === u.n).length,
+        on = USERS.indexOf(u) === F.i;
+      return `<button class="ws-w ${on ? "on" : ""}" data-a="ws_edit" data-i="${USERS.indexOf(u)}"><span class="ws-a">${esc(u.n[0])}</span><span><b>${esc(u.n)}</b><small>${esc(u.role)} · ${plural(open, "open bill")}</small></span></button>`;
+    }).join("") || '<div class="empty">No POS staff yet.</div>'
+  }</div>
+ <div class="pn ws-form"><div class="ws-lh"><h4>${F.i < 0 ? "Create POS staff" : "Edit " + esc(F.n)}</h4><span class="ws-id">${esc(id)}</span></div>
+ <div class="ws-g"><label>Role<select data-wsr>${POS_ROLES.map(r => `<option ${r === F.role ? "selected" : ""}>${r}</option>`).join("")}</select></label>${f("User name", "n", 'placeholder="First Last" autocomplete="off"')}${f("Pass code", "pin", 'inputmode="numeric" placeholder="4 to 6 digits" autocomplete="off"')}${f("Card no", "card", 'placeholder="Optional" autocomplete="off"')}${f("Sales commission (%)", "comm", 'inputmode="decimal" placeholder="Report rate"')}${f("Bill copies", "copies", 'inputmode="numeric"')}${always ? "" : f("Maximum pending bills", "maxPend", 'inputmode="numeric" title="0 means no limit"') + f("Maximum discount (%)", "maxDisc", 'inputmode="decimal" placeholder="No limit"')}</div>
+ ${always ? "" : `<div class="ws-o"><label class="ws-c"><input type="checkbox" data-wsc="allSP" ${F.allSP ? "checked" : ""}> View bills from all sale points</label><label class="ws-c"><input type="checkbox" data-wsc="restrict" ${F.restrict ? "checked" : ""}> Restrict sale point access</label></div>`}
+ ${
+   !always && F.restrict
+     ? `<div class="ws-pts"><span>Sale points</span>${wsPoints()
+         .map(
+           d =>
+             `<label class="ws-c ws-chip ${F.pts.includes(d) ? "on" : ""}"><input type="checkbox" data-wsd="${esc(d)}" ${F.pts.includes(d) ? "checked" : ""}> ${esc(d)}</label>`
+         )
+         .join("")}</div>`
+     : ""
+ }
+ ${
+   always
+     ? `<div class="ws-always">${F.role}s can always do everything on the POS, so there are no rights to set.</div>`
+     : `<div class="ws-lh ws-rh"><h4>What this ${who} may do</h4><span><button class="mini" data-a="ws_all">Tick all</button> <button class="mini" data-a="ws_none">Clear all</button></span></div>
+ ${WAITER_RIGHTS.map(([g, R]) => `<div class="ws-h">${g}</div><div class="ws-grid">${R.map(([k, l, h]) => wsTile(k, l, h)).join("")}</div>`).join("")}
+ <div class="ws-h">Not active yet <small>Saved with the person, but the POS doesn't use these until those features are built</small></div><div class="ws-grid">${WAITER_RIGHTS_LATER.map(([k, l]) => wsTile(k, l, "", 1)).join("")}</div>`
+ }
+ <label class="ws-foot">Bill footer<textarea data-ws="footer" rows="2" placeholder="Printed on this person's guest bills">${esc(F.footer)}</textarea></label>
+ <div class="ws-go">${F.i < 0 ? "" : '<button class="mini" data-a="ws_del">Delete</button>'}<span class="fill"></span><button class="mini" data-a="ws_new">Cancel</button><button class="chip on" data-a="ws_save">${F.i < 0 ? "Create " + who : "Save changes"}</button></div></div></div>`;
+};
+function wsSave() {
+  const F = wsF,
+    n = F.n.trim(),
+    me = USERS[F.i],
+    num = v => parseFloat(v),
+    others = USERS.filter(u => u !== me),
+    card = cardId(F.card),
+    comm = F.comm.trim(),
+    disc = F.maxDisc.trim(),
+    copies = parseInt(F.copies, 10),
+    maxPend = parseInt(F.maxPend, 10);
+  if (!n) return toast("Enter the person's name.");
+  if (me && F.role !== me.role && lastManager(me))
+    return toast("Keep at least one Manager. Their PIN is needed for approvals.");
+  if (others.some(u => u.n.toLowerCase() === n.toLowerCase()))
+    return toast("Another staff member already has that name.");
+  if (!/^\d{4,6}$/.test(F.pin)) return toast("The pass code should be 4 to 6 digits.");
+  if (others.some(u => u.pin === F.pin)) return toast("Another staff member uses that pass code.");
+  if (card && others.some(u => u.card === card)) return toast("That card is already assigned.");
+  if (comm && !(num(comm) >= 0 && num(comm) <= 100))
+    return toast("Commission should be 0 to 100%.");
+  if (disc && !(num(disc) >= 0 && num(disc) <= 100))
+    return toast("Maximum discount should be 0 to 100%.");
+  if (!(copies >= 1 && copies <= 5)) return toast("Bill copies should be 1 to 5.");
+  if (!(maxPend >= 0)) return toast("Maximum pending bills should be 0 or more.");
+  if (F.restrict && !F.pts.length) return toast("Tick at least one sale point.");
+  const was = me && me.n,
+    u = me || {};
+  Object.assign(u, {
+    n,
+    pin: F.pin,
+    role: F.role,
+    d: F.role === "Manager" ? ALLD.slice() : F.restrict ? F.pts.slice() : wsPoints(),
+    allSP: F.allSP,
+    copies,
+    maxPend,
+    footer: F.footer.trim(),
+    perm: { ...F.perm }
+  });
+  if (card) u.card = card;
+  if (comm) u.comm = num(comm);
+  else delete u.comm;
+  if (disc) u.maxDisc = num(disc);
+  else delete u.maxDisc;
+  if (!u.wid)
+    u.wid =
+      "W" + pad(USERS.reduce((a, x) => Math.max(a, +String(x.wid || "").slice(1) || 0), 0) + 1, 4);
+  if (!me) {
+    if (!u.card) u.card = "KT" + String(USERS.length + 1).padStart(4, "0");
+    USERS.push(u);
+  }
+  // A new name follows the waiter's open bills and shift.
+  if (was && was !== n) {
+    orders.forEach(o => {
+      if (o.waiter === was) o.waiter = n;
+    });
+    openShifts().forEach(s => {
+      if (s.user === was) s.user = n;
+    });
+  }
+  bosave();
+  toast(me ? `${n} updated.` : `${n} created.`);
+  wsF = wsBlank();
+  all();
+}
+function wsAct(a, b) {
+  if (a === "ws_new") wsF = wsBlank();
+  else if (a === "ws_edit") wsEdit(USERS[+b.dataset.i]);
+  else if (a === "ws_all")
+    WAITER_RIGHTS.flatMap(([, L]) => L).forEach(([k]) => (wsF.perm[k] = true));
+  else if (a === "ws_none") wsF.perm = {};
+  else if (a === "ws_save") return wsSave();
+  else if (a === "ws_del") {
+    const u = USERS[wsF.i];
+    if (lastManager(u))
+      return toast("Keep at least one Manager. Their PIN is needed for approvals.");
+    if (orders.some(o => o.waiter === u.n))
+      return toast(`${u.n} still has open bills. Clear them first.`);
+    if (shiftOf(u.n)) return toast(`${u.n} has an open shift. Close it first.`);
+    return tapConfirm(
+      b,
+      () => {
+        USERS.splice(wsF.i, 1);
+        wsF = wsBlank();
+        bosave();
+        toast(`${u.n} deleted. Their past sales stay on record.`);
+        all();
+      },
+      "TAP AGAIN"
+    );
+  }
+  all();
+}
+// ---- Users & roles: back office users, and what each role may do. POS staff are in Waiter setup. ----
+let urT = "users",
+  urRole = BO_ROLES[0];
+const urF = {};
+const urCols = [
+  ["id", "ID"],
+  ["num", "Access Num"],
+  ["d", "Description"],
+  ["m", "Module Name"],
+  ["g", "Function Group"],
+  ["yes", "Grant Permission"]
+];
+const urYes = r => (roleHas(urRole, r.k) ? "YES" : "NO");
+const urCell = (r, c) => (c === "yes" ? urYes(r) : String(r[c]));
+const urShown = r =>
+  urCols.every(([c]) => {
+    const w = (urF[c] || "").trim().toLowerCase();
+    return !w || urCell(r, c).toLowerCase().includes(w);
+  });
+const roleCount = role => ADM.filter(a => (a.role || SUPER) === role).length;
+const roleGranted = role => BO_RIGHTS.filter(r => roleHas(role, r.k)).length;
+function urUsersHTML() {
+  return `<div class="pn"><h4>Create a back office user</h4><div class="ur-new"><label>Full name<input id="mn" autocomplete="off" placeholder="First Last"></label><label>Username<input id="mu" autocomplete="off" placeholder="At least 3 letters or digits"></label><label>Password<input id="mp" type="password" autocomplete="new-password" placeholder="At least 6 characters"></label><label>Role<select id="mr"><option value="">Choose a role</option>${BO_ROLES.map(r => `<option>${r}</option>`).join("")}<option>${SUPER}</option></select></label><button class="chip on" data-a="ur_add">Create user</button></div></div>
+ <div class="pn tw"><h4>Back office users (${ADM.length})</h4><table class="t ur-t"><tr><th>Name</th><th>Username</th><th>Role</th><th>Status</th><th>New password</th><th></th></tr>${ADM.map(
+   (a, i) => {
+     const me = boUser && a.u === boUser.u;
+     return `<tr class="${a.off ? "off" : ""}"><td><span class="ws-a">${esc(a.n[0])}</span> <b>${esc(a.n)}</b>${me ? ' <small class="ur-me">You</small>' : ""}</td><td>${esc(a.u)}</td><td><select data-ura="${i}" ${me ? "disabled" : ""}>${[...BO_ROLES, SUPER].map(r => `<option ${(a.role || SUPER) === r ? "selected" : ""}>${r}</option>`).join("")}</select></td><td><button class="mini ur-st ${a.off ? "no" : "yes"}" data-a="ur_off" data-i="${i}" ${me ? "disabled" : ""}>${a.off ? "Disabled" : "Active"}</button></td><td><span class="ur-pw"><input type="password" id="np_${i}" autocomplete="new-password" placeholder="New password"><button class="mini" data-a="ur_pw" data-i="${i}">Change</button></span></td><td>${me ? "" : `<button class="mini" data-a="ur_del" data-i="${i}">Delete</button>`}</td></tr>`;
+   }
+ ).join("")}</table></div>`;
+}
+function urRightsHTML() {
+  const sup = urRole === SUPER,
+    S = BO_RIGHTS.filter(urShown).length;
+  return `<div class="pn"><div class="ur-top"><label>User group<select data-urg>${[...BO_ROLES, SUPER].map(r => `<option ${r === urRole ? "selected" : ""}>${r}</option>`).join("")}</select></label><div class="ur-sum"><b id="urCount">${roleGranted(urRole)}</b> of ${BO_RIGHTS.length} rights granted · ${plural(roleCount(urRole), "user")}</div>${sup ? '<span class="ur-note">Super Admin always has every right.</span>' : `<span class="ur-acts"><button class="mini" data-a="ur_bulk" data-v="1">Grant all shown</button><button class="mini" data-a="ur_bulk" data-v="0">Revoke all shown</button><button class="mini" data-a="ur_reset">Reset to standard</button></span>`}</div>
+ <div class="ur-wrap"><table class="ur-m"><thead><tr>${urCols.map(([c, l]) => `<th class="${c === "yes" ? "c" : ""}">${l}</th>`).join("")}</tr><tr class="ur-f">${urCols.map(([c, l]) => `<td><input data-urf="${c}" value="${esc(urF[c] || "")}" placeholder="Filter" aria-label="Filter ${l}"></td>`).join("")}</tr></thead><tbody>${BO_RIGHTS.map(
+   r => {
+     const y = roleHas(urRole, r.k);
+     return `<tr data-rk="${r.k}" ${urShown(r) ? "" : "hidden"}><td>${r.id}</td><td>${r.num}</td><td class="d">${esc(r.d)}</td><td>${r.m}</td><td>${r.g}</td><td class="c"><button class="ur-g ${y ? "yes" : "no"}" data-a="ur_grant" data-k="${r.k}" ${sup ? "disabled" : ""} aria-pressed="${y}">${y ? "YES" : "NO"}</button></td></tr>`;
+   }
+ ).join(
+   ""
+ )}</tbody></table></div><div class="stk" id="urShownN">${plural(S, "right")} shown</div></div>`;
+}
+V.staff = () =>
+  `<div class="ur-tabs">${[
+    ["users", "Back office users"],
+    ["rights", "Role rights"]
+  ]
+    .map(
+      ([t, l]) =>
+        `<button class="${urT === t ? "on" : ""}" data-a="ur_tab" data-t="${t}">${l}</button>`
+    )
+    .join("")}</div>${urT === "users" ? urUsersHTML() : urRightsHTML()}`;
+function urSet(k, on) {
+  ROLE_OVER[urRole] = ROLE_OVER[urRole] || {};
+  ROLE_OVER[urRole][k] = on;
+}
+/** Filtering keeps the cursor in place, so rows are hidden rather than redrawn. */
+function urFilter(c, v) {
+  urF[c] = v;
+  let n = 0;
+  BO_RIGHTS.forEach(r => {
+    const on = urShown(r);
+    if (on) n++;
+    document.querySelector(`#vSub [data-rk="${r.k}"]`).hidden = !on;
+  });
+  $("#urShownN").textContent = plural(n, "right") + " shown";
+}
+const supers = () => ADM.filter(a => !a.off && (a.role || SUPER) === SUPER);
+function urRoleChange(i, role) {
+  const a = ADM[i];
+  if ((a.role || SUPER) === SUPER && role !== SUPER && !a.off && supers().length < 2) {
+    toast("Keep at least one active Super Admin.");
+    return all();
+  }
+  a.role = role;
+  bosave();
+  toast(`${a.n} is now ${role}.`);
+  all();
+}
+async function urAct(a, b) {
+  const d = b.dataset;
+  if (a === "ur_tab") {
+    urT = d.t;
+    return all();
+  }
+  if (a === "ur_grant") {
+    const on = !roleHas(urRole, d.k);
+    urSet(d.k, on);
+    b.className = "ur-g " + (on ? "yes" : "no");
+    b.textContent = on ? "YES" : "NO";
+    b.setAttribute("aria-pressed", on);
+    $("#urCount").textContent = roleGranted(urRole);
+    return bosave();
+  }
+  if (a === "ur_bulk") {
+    BO_RIGHTS.filter(urShown).forEach(r => urSet(r.k, d.v === "1"));
+    bosave();
+    return all();
+  }
+  if (a === "ur_reset") {
+    delete ROLE_OVER[urRole];
+    bosave();
+    toast(`${urRole} is back to the standard rights.`);
+    return all();
+  }
+  if (a === "ur_add") {
+    const n = $("#mn").value.trim(),
+      u = $("#mu").value.trim().toLowerCase(),
+      p = $("#mp").value,
+      role = $("#mr").value;
+    if (!n) return toast("Enter the user's full name.");
+    if (!/^[a-z0-9._-]{3,}$/.test(u))
+      return toast("The username needs 3 or more letters or digits.");
+    if (ADM.some(x => x.u === u)) return toast("That username is taken.");
+    if (p.length < 6) return toast("The password needs at least 6 characters.");
+    if (!role) return toast("Choose a role.");
+    ADM.push({ u, n, role, ph: await H(u + "|" + p) });
+    bosave();
+    toast(`${n} can now sign in as ${role}.`);
+    return all();
+  }
+  const x = ADM[+d.i];
+  if (a === "ur_pw") {
+    const p = $("#np_" + d.i).value;
+    if (p.length < 6) return toast("The password needs at least 6 characters.");
+    x.ph = await H(x.u + "|" + p);
+    bosave();
+    toast("Password changed.");
+    return all();
+  }
+  if (a === "ur_off") {
+    if (!x.off && (x.role || SUPER) === SUPER && supers().length < 2)
+      return toast("Keep at least one active Super Admin.");
+    x.off = !x.off;
+    bosave();
+    toast(`${x.n} is ${x.off ? "disabled and can't sign in" : "active again"}.`);
+    return all();
+  }
+  if (a === "ur_del") {
+    if (!x.off && (x.role || SUPER) === SUPER && supers().length < 2)
+      return toast("Keep at least one active Super Admin.");
+    return tapConfirm(
+      b,
+      () => {
+        ADM.splice(+d.i, 1);
+        bosave();
+        toast(`${x.n} deleted.`);
+        all();
+      },
+      "TAP AGAIN"
+    );
+  }
+}
 // ---- Back Office navigation: page titles, render() and go() ----
 const TTL = {
     shift: "Shifts & Day",
@@ -23627,6 +25543,7 @@ const TTL = {
     pur: "Purchasing",
     vendors: "Vendors",
     staff: "Users & roles",
+    wait: "Waiter setup",
     cred: "Customers"
   },
   VIEW = {
@@ -23643,7 +25560,8 @@ const TTL = {
     "Purchasing": "pur",
     "Vendors": "vendors",
     "Customers": "cred",
-    "Users & roles": "staff"
+    "Users & roles": "staff",
+    "Waiter setup": "wait"
   };
 function render() {
   const h = view === "home";
@@ -23653,8 +25571,8 @@ function render() {
   $("#vSub").innerHTML =
     (view === "inv"
       ? ""
-      : `<div class="hello"><div><h1>${TTL[view]}</h1><p>${view === "sales" ? br + " · " + PL[per] : view === "settings" ? "The details your guests see on bills and receipts" : view === "recrep" ? "How each item was used in production and in recipes, and what remains" : view === "rec" ? "Turn kitchen materials into what you sell, by production or by recipe" : view === "rooms" ? "Occupancy, guests and room sales · revenue for the " + PL[per] : view === "rep" ? "Run any report for a date range and sale point" : view === "outlets" ? "Bars, restaurants, kitchens and shops that get stock from a store and sell on the POS" : view === "pur" ? "Purchase orders, receiving goods and what you have bought" : view === "vendors" ? "The vendors you buy from. You choose them on purchase orders and when receiving goods" : "Shared live with the POS terminal"}</p></div>${
-          view === "sales" || view === "rooms"
+      : `<div class="hello"><div><h1>${TTL[view]}</h1><p>${view === "wait" ? "Create waiters, cashiers and managers, and choose what each may do on the POS" : view === "sales" ? br + " · the current day, unless you search" : view === "settings" ? "The details your guests see on bills and receipts" : view === "recrep" ? "How each item was used in production and in recipes, and what remains" : view === "rec" ? "Turn kitchen materials into what you sell, by production or by recipe" : view === "rooms" ? "Occupancy, guests and room sales · revenue for the " + PL[per] : view === "rep" ? "Run any report for a date range and sale point" : view === "outlets" ? "Bars, restaurants, kitchens and shops that get stock from a store and sell on the POS" : view === "pur" ? "Purchase orders, receiving goods and what you have bought" : view === "vendors" ? "The vendors you buy from. You choose them on purchase orders and when receiving goods" : "Who can sign in, and what each role may do"}</p></div>${
+          view === "rooms"
             ? `<div class="seg">${[
                 ["today", "Today"],
                 ["7", "7 days"],
@@ -23669,6 +25587,7 @@ function render() {
 }
 function go(n) {
   n = n.replace("&amp;", "&");
+  if (!boPageOk(n)) return boDenied();
   $("#ov").classList.remove("show");
   if (n === "Front Desk") {
     boUser = null;
@@ -23718,34 +25637,6 @@ function seed() {
     });
   }
 }
-async function admAct(a, b) {
-  const v = id => $("#" + id).value.trim();
-  if (a === "addm") {
-    const n = v("mn"),
-      u = v("mu").toLowerCase(),
-      p = $("#mp").value;
-    if (!n || !/^[a-z0-9._-]{3,}$/.test(u) || p.length < 6)
-      return toast("Use a name, a username (3+ letters or digits) and a 6+ character password.");
-    if (ADM.some(x => x.u === u)) return toast("That username is taken.");
-    ADM.push({ u, n, ph: await H(u + "|" + p) });
-    toast("Account added.");
-  } else if (a === "pwm") {
-    const x = ADM[b.dataset.i],
-      p = $("#np_" + b.dataset.i).value;
-    if (p.length < 6) return toast("Password needs 6+ characters.");
-    x.ph = await H(x.u + "|" + p);
-    toast("Password changed.");
-  } else {
-    const x = ADM[+b.dataset.i];
-    if (ADM.length < 2) return;
-    if (boUser && x.u === boUser.u)
-      return toast("You cannot remove the account you are signed in with.");
-    ADM.splice(+b.dataset.i, 1);
-    toast("Account removed.");
-  }
-  bosave();
-  all();
-}
 // ---- Back Office page actions: clicks and edits inside the sub pages (#vSub) ----
 $("#vSub").onclick = e => {
   const p = e.target.dataset.p;
@@ -23780,10 +25671,9 @@ $("#vSub").onclick = e => {
     v = id => $("#" + id).value.trim(),
     num = id => parseFloat($("#" + id).value);
   if (a === "rep_print") return repPrint(b.dataset.k);
-  if (a === "addm" || a === "pwm" || a === "delm") {
-    admAct(a, b);
-    return;
-  }
+  if (a.slice(0, 3) === "ws_") return wsAct(a, b);
+  if (ACT_RIGHTS[a] && !boCan(ACT_RIGHTS[a])) return boDenied();
+  if (a.slice(0, 3) === "ur_") return urAct(a, b);
   if (a === "dstart" || a === "dend") {
     const r = a === "dstart" ? dayStart(boUser.n) : dayEnd(boUser.n);
     toast(r || (a === "dstart" ? "Day started." : "Day ended."));
@@ -23867,17 +25757,13 @@ $("#vSub").onclick = e => {
     spAct(a.slice(3), b);
     return;
   }
-  if (a === "clr")
-    return tapConfirm(
-      b,
-      () => {
-        SALES.length = 0;
-        bosave();
-        all();
-      },
-      "TAP AGAIN"
-    );
-  else if (a === "addp") {
+  if (a === "ret") return retOpen(b.dataset.no);
+  if (a === "sales_print") return billReprint(b.dataset.no);
+  if (a === "sales_clear") {
+    Object.assign(salesF, { q: "", from: "", to: "" });
+    return all();
+  }
+  if (a === "addp") {
     const n = v("pn"),
       p = num("pp"),
       q = num("pq");
@@ -23907,12 +25793,6 @@ $("#vSub").onclick = e => {
     if (!(q > 0)) return toast("Enter a quantity.");
     stock[b.dataset.k] += q;
     toast("Stock received.");
-  } else if (a === "addu") {
-    const n = v("su"),
-      p = v("up");
-    if (!/^\S+\s+\S+/.test(n) || !/^\d{4,6}$/.test(p) || USERS.some(u => u.pin === p))
-      return toast("Use 'First Last' and a unique 4 to 6 digit PIN.");
-    USERS.push({ n, pin: p, d: v("sr") === "Manager" ? ALLD.slice() : [ALLD[0]], role: v("sr") });
   } else if (a === "addc") {
     const n = v("cn"),
       l = num("cc");
@@ -23928,6 +25808,7 @@ $("#vSub").onclick = e => {
   bosave();
   all();
 };
+window.boRedraw = () => all();
 $("#vSub").ondblclick = e => {
   const b = e.target.closest("[data-bill]");
   if (b) billReprint(b.dataset.bill);
@@ -23980,6 +25861,28 @@ $("#vSub").onchange = e => {
     return;
   }
   if (s.rsz) return void (rpSize = s.rsz);
+  if (s.urg !== undefined) {
+    urRole = t.value;
+    return all();
+  }
+  if (s.ura !== undefined) return urRoleChange(+s.ura, t.value);
+  if (s.wsr !== undefined) {
+    wsF.role = t.value;
+    return all();
+  }
+  if (s.wsp) return void (wsF.perm[s.wsp] = t.checked);
+  if (s.wsc) {
+    wsF[s.wsc] = t.checked;
+    return all();
+  }
+  if (s.wsd) {
+    wsF.pts = t.checked ? [...wsF.pts, s.wsd] : wsF.pts.filter(x => x !== s.wsd);
+    return all();
+  }
+  if (s.sf) {
+    salesF[s.sf] = t.value;
+    return all();
+  }
   if (s.bf) {
     billF[s.bf] = s.bf === "net" ? t.checked : t.value;
     return all();
@@ -24003,36 +25906,6 @@ $("#vSub").onchange = e => {
       p = parseFloat(t.value);
     if (p > 0) it.p = p;
     else t.value = it.p;
-  } else if (s.up !== undefined) {
-    const u = USERS[s.up];
-    if (/^\d{4,6}$/.test(t.value) && !USERS.some(x => x !== u && x.pin === t.value))
-      u.pin = t.value;
-    else {
-      t.value = u.pin;
-      toast("PIN must be 4 to 6 digits and unique.");
-    }
-  } else if (s.ud !== undefined) {
-    const u = USERS[s.ud],
-      d = ALLD.filter(x => (x === t.value ? t.checked : u.d.includes(x)));
-    if (!d.length) {
-      t.checked = true;
-      return toast("Keep at least one sale point.");
-    }
-    u.d = d;
-  } else if (s.ur !== undefined) {
-    const u = USERS[s.ur];
-    u.role = t.value;
-    if (t.value === "Manager" && u.d.length < ALLD.length) u.d = ALLD.slice();
-  } else if (s.uk !== undefined) {
-    const v = cardId(t.value),
-      u = USERS[s.uk];
-    if (v && USERS.some(x => x !== u && x.card === v)) {
-      t.value = u.card || "";
-      toast("That card is already assigned.");
-    } else {
-      u.card = v;
-      t.value = v;
-    }
   } else if (s.uc) {
     const c = parseFloat(t.value);
     INGC[s.uc] = c >= 0 ? c : 0;
@@ -24262,6 +26135,7 @@ function boShow() {
   if (ok) {
     posKioskOff(); // signed in to Back Office: the POS rule no longer applies
     setUser(boUser.n);
+    applyBoRights();
     all();
   } else {
     $("#boP").value = "";
@@ -24318,13 +26192,14 @@ const boTry = async () => {
     ok = a && a.ph === (await H(u + "|" + p));
   g.disabled = false;
   g.textContent = "Sign in";
+  if (ok && a.off) return bad("This account is disabled. Ask your administrator.");
   if (ok) {
     fails = 0;
     m.style.display = "none";
     try {
       $("#boRm").checked ? localStorage.setItem(RMK, u) : localStorage.removeItem(RMK);
     } catch (e) {}
-    boUser = { n: a.n, u: a.u };
+    boUser = { n: a.n, u: a.u, role: a.role || SUPER };
     boShow();
   } else {
     if (++fails >= 5) {
@@ -24398,7 +26273,6 @@ document.querySelectorAll(".bkm").forEach(
     })
 );
 $("#start img").src = $("#logoSrc").src;
-$("#bo .lg img").src = $("#logoSrc").src;
 $("#boLogin img").src = $("#logoSrc").src;
 setInterval(bosave, 4000);
 addEventListener("pagehide", bosave);

@@ -79,7 +79,9 @@ const voidTotal = R => sum(R, x => sum(voidParts(x), l => l.amt));
 // ---- printing a report: A4 landscape or an 80mm roll ----
 let rpSize = "a4";
 const printTools = k =>
-  `<span class="rp-size"><label><input type="radio" name="rpSize" data-rsz="a4" ${rpSize === "a4" ? "checked" : ""}> A4 size</label><label><input type="radio" name="rpSize" data-rsz="80" ${rpSize === "80" ? "checked" : ""}> Thermal paper (80mm)</label></span><button class="chip on" data-a="rep_print" data-k="${k}">Print</button>`;
+  !boCan("rep.print")
+    ? ""
+    : `<span class="rp-size"><label><input type="radio" name="rpSize" data-rsz="a4" ${rpSize === "a4" ? "checked" : ""}> A4 size</label><label><input type="radio" name="rpSize" data-rsz="80" ${rpSize === "80" ? "checked" : ""}> Thermal paper (80mm)</label></span><button class="chip on" data-a="rep_print" data-k="${k}">Print</button>`;
 const printedBy = () => `Printed ${new Date().toLocaleString("en-GB")} by ${esc(boUser.n)}`;
 function tablePrint(title, head, c, r, f) {
   const name = x => (x[0] === "#" ? x.slice(1) : x),
@@ -123,11 +125,13 @@ function repPrint(k) {
 }
 
 // ---- Bills Report: every settled bill, one line each; double-click to reprint ----
-const billF = { cashier: "All", pay: "All", net: false, col: {} };
+const billF = { status: "Combined", cashier: "All", pay: "All", net: false, col: {} };
 const billCols = () => [
   "Bill Date",
   "Bill Time",
   "Bill Number",
+  "Order",
+  "Status",
   "Table Number",
   "Waiter Name",
   "Cashier Name",
@@ -143,12 +147,14 @@ function billGroups() {
   rs().forEach(s => {
     const b = (o[s.no] = o[s.no] || {
       no: s.no,
+      ord: s.ord || "",
       at: s.at,
       label: s.label || "",
       waiter: s.waiter || s.user,
       cashier: s.user,
       guest: s.guest || "N/A",
       room: s.room || "",
+      status: s.ret ? "Returned" : "Settled",
       pts: [],
       net: 0,
       g: 0,
@@ -159,11 +165,39 @@ function billGroups() {
     b.g += s.g;
     Object.entries(s.mx || {}).forEach(([m, v]) => (b.mx[m] = (b.mx[m] || 0) + v));
   });
-  return Object.values(o)
+  const A = new Date(rf + "T00:00:00"),
+    Z = new Date(rt + "T23:59:59"),
+    open = orders
+      .filter(x => {
+        const at = new Date(x.at);
+        return at >= A && at <= Z && (rd === "All" || billPoints(x.lines).includes(rd));
+      })
+      .map(x => {
+        const t = totals(x.lines, x);
+        return {
+          no: x.no,
+          ord: x.ord || "",
+          at: new Date(x.at),
+          label: x.label,
+          waiter: x.waiter || "",
+          cashier: "",
+          guest: x.guest || "N/A",
+          room: x.room || "",
+          status: "Pending",
+          pts: billPoints(x.lines),
+          net: t.net,
+          g: t.g,
+          mx: {}
+        };
+      });
+  return [
+    ...(billF.status === "Pending" ? [] : Object.values(o)),
+    ...(billF.status === "Settled" ? [] : open)
+  ]
     .filter(
       b =>
         (billF.cashier === "All" || b.cashier === billF.cashier) &&
-        (billF.pay === "All" || b.mx[billF.pay] > 0)
+        (billF.pay === "All" || b.mx[billF.pay])
     )
     .sort((a, b) => a.at - b.at);
 }
@@ -171,6 +205,8 @@ const billRow = b => [
   b.at.toLocaleDateString("en-GB"),
   b.at.toLocaleTimeString("en-US"),
   b.no,
+  b.ord,
+  b.status,
   b.label,
   b.waiter,
   b.cashier,
@@ -190,7 +226,10 @@ const billShown = () => {
     });
   });
 };
-const billTotals = B => ({ net: sum(B, b => b.net), g: sum(B, b => b.g) });
+const billTotals = B => {
+  const P = B.filter(b => b.status === "Pending");
+  return { net: sum(B, b => b.net), g: sum(B, b => b.g), pend: sum(P, b => b.g) };
+};
 function billsGrid(c, r, none) {
   const opt = (L, v) =>
       L.map(
@@ -199,7 +238,14 @@ function billsGrid(c, r, none) {
     who = [...new Set(SALES.map(s => s.user))].sort(),
     t = billTotals(billShown()),
     G2 = billGroups();
-  return `<div class="bl-bar"><label>Cashier name<select data-bf="cashier">${opt(
+  return `<div class="bl-bar"><label>Bills<select data-bf="status">${opt(
+    [
+      ["Combined", "Settled and pending"],
+      ["Settled", "Settled only"],
+      ["Pending", "Pending only"]
+    ],
+    billF.status
+  )}</select></label><label>Cashier name<select data-bf="cashier">${opt(
     [["All", "All cashiers"], ...who.map(x => [x, x])],
     billF.cashier
   )}</select></label><label>Paymode<select data-bf="pay">${opt(
@@ -211,10 +257,10 @@ function billsGrid(c, r, none) {
  <tbody>${
    G2.map(b => {
      const x = billRow(b);
-     return `<tr data-bill="${esc(b.no)}" ${r.some(y => y[2] === b.no) ? "" : "hidden"}>${x.map((v, i) => `<td class="${c[i][0] === "#" ? "n" : ""}">${esc(v)}</td>`).join("")}</tr>`;
+     return `<tr data-bill="${esc(b.no)}" class="${b.status === "Pending" ? "pend" : b.status === "Returned" ? "ret" : ""}" ${r.some(y => y[2] === b.no) ? "" : "hidden"}>${x.map((v, i) => `<td class="${c[i][0] === "#" ? "n" : ""}">${esc(v)}</td>`).join("")}</tr>`;
    }).join("") || `<tr><td colspan="${c.length}"><div class="empty">${none}</div></td></tr>`
  }</tbody></table></div>
- <div class="bl-tot"><span id="blCnt">${plural(r.length, "bill")}</span>${billF.net ? `<span>Net <b id="blNet">${m2(t.net)}</b></span>` : ""}<span>Totals <b id="blG">${m2(t.g)}</b></span></div>`;
+ <div class="bl-tot"><span id="blCnt">${plural(r.length, "bill")}</span>${billF.net ? `<span>Net <b id="blNet">${m2(t.net)}</b></span>` : ""}<span>Settled <b id="blS">${m2(t.g - t.pend)}</b></span><span>Pending <b id="blP">${m2(t.pend)}</b></span><span>Combined <b id="blG">${m2(t.g)}</b></span></div>`;
 }
 /** Typing in a column filter keeps the cursor where it is, so rows are hidden rather than redrawn. */
 function billFilter(col, v) {
@@ -227,12 +273,38 @@ function billFilter(col, v) {
     .forEach(tr => (tr.hidden = !S.has(tr.dataset.bill)));
   $("#blCnt").textContent = plural(B.length, "bill");
   $("#blG").textContent = m2(t.g);
+  $("#blS").textContent = m2(t.g - t.pend);
+  $("#blP").textContent = m2(t.pend);
   if ($("#blNet")) $("#blNet").textContent = m2(t.net);
 }
 /** The bill as it was paid, on the paper chosen above, marked as a copy. */
 function billReprint(no) {
+  const open = orders.find(o => o.no === no);
+  if (open)
+    return showRc(
+      guestBillHTML({
+        no,
+        ord: open.ord,
+        dept: billPlace(open.lines),
+        label: open.label,
+        guest: open.guest,
+        covers: open.covers,
+        room: open.room,
+        waiter: open.waiter,
+        rider: open.rider,
+        lines: slipLines(open.lines, open),
+        t: totals(open.lines, open)
+      }),
+      null,
+      "Close"
+    );
   const S = SALES.filter(s => s.no === no);
   if (!S.length) return;
+  if (S[0].ret) {
+    S[0].copies = (S[0].copies || 0) + 1;
+    bosave();
+    return showRc(returnSlipHTML(no, S[0].copies), null, "Close");
+  }
   const A = S[0],
     keep = (S.find(s => s.slip) || {}).slip,
     lines = S.flatMap(s => s.lines),
@@ -242,6 +314,7 @@ function billReprint(no) {
   A.copies = (A.copies || 0) + 1;
   const html = receiptHTML({
     no,
+    ord: A.ord,
     dept: S.map(s => s.dept).join(", "),
     label: A.label,
     guest: A.guest,
@@ -293,6 +366,118 @@ function billReprint(no) {
     "Close"
   );
 }
+// ---- Sales & Orders: the current day and open bills, unless searching ----
+const salesF = { q: "", from: "", to: "" };
+function salesList() {
+  const F = salesF,
+    w = F.q.trim().toLowerCase(),
+    a = F.from
+      ? new Date(F.from + "T00:00:00")
+      : F.to || w
+        ? new Date(0)
+        : curDay()
+          ? new Date(curDay().openedAt)
+          : new Date(d0()),
+    z = F.to ? new Date(F.to + "T23:59:59") : new Date(8.64e15),
+    hits = x => !w || x.toLowerCase().includes(w),
+    pts = br === BRS[0] ? null : br,
+    B = [];
+  by(
+    SALES.filter(s => s.at >= a && s.at <= z && (!pts || s.dept === pts)),
+    s => s.no
+  ).forEach(([no, S]) => {
+    const A = S[0],
+      lines = S.flatMap(s => s.lines),
+      who = A.waiter || A.user;
+    if (
+      hits(
+        [
+          no,
+          A.ord,
+          A.label,
+          who,
+          A.user,
+          A.guest,
+          A.room,
+          ...S.map(s => s.dept),
+          ...lines.map(l => l.n)
+        ].join(" ")
+      )
+    )
+      B.push({
+        no,
+        ord: A.ord,
+        at: A.at,
+        label: A.label,
+        who,
+        pts: S.map(s => s.dept).join(", "),
+        g: sum(S, s => s.g),
+        lines,
+        tag: A.ret ? ["Return", "bad"] : ["Settled", "ok"],
+        S
+      });
+  });
+  // Open bills belong to now, so they show unless dates were asked for.
+  orders.forEach(o => {
+    const at = new Date(o.at),
+      lines = slipLines(o.lines, o).map(l => ({ ...l })),
+      p = billPoints(o.lines);
+    if ((F.from || F.to) && (at < a || at > z)) return;
+    if (pts && !p.includes(pts)) return;
+    if (
+      hits(
+        [o.no, o.ord, o.label, o.waiter, o.guest, o.room, ...p, ...lines.map(l => l.n)].join(" ")
+      )
+    )
+      B.push({
+        no: o.no,
+        ord: o.ord,
+        at,
+        label: o.label,
+        who: o.waiter,
+        pts: p.join(", "),
+        g: totals(o.lines, o).g,
+        lines,
+        tag: ["Pending", "warn"]
+      });
+  });
+  B.sort((x, y) => y.at - x.at);
+  const L = B.slice(0, 200),
+    head = F.q || F.from || F.to ? "Search results" : "Current day",
+    paid = sum(
+      B.filter(b => b.S),
+      b => b.g
+    ),
+    open = sum(
+      B.filter(b => !b.S),
+      b => b.g
+    );
+  return `<div class="so-head"><h4>${head}</h4><span>${plural(B.length, "bill")} · Settled ${KES(paid)} · Pending ${KES(open)}</span></div>${
+    L.length
+      ? L.map(b => {
+          const s0 = b.S && b.S[0],
+            mx = {};
+          (b.S || []).forEach(s =>
+            Object.entries(s.mx || {}).forEach(([k, v]) => (mx[k] = (mx[k] || 0) + v))
+          );
+          return `<details class="so-r"><summary><span class="so-no">${esc(b.no)}<small>${b.ord ? "Order " + esc(b.ord) : ""}</small></span><span class="so-m"><b>${esc(b.label || "")}</b><small>${hhmm(b.at)} ${b.at.toLocaleDateString("en-GB")} · ${esc(b.pts)} · ${esc(b.who || "")}</small></span><span class="tag ${b.tag[1]}">${b.tag[0]}</span><b class="so-g">${KES(b.g)}</b></summary><div class="so-d">${b.lines.map(l => `${l.q}× ${esc(l.n)} @ ${(+l.p).toFixed(2)}`).join("<br>")}${
+            b.S
+              ? `<br>Paid: ${Object.entries(mx)
+                  .map(([k, v]) => (MN[k] || k) + " " + KES(v))
+                  .join(
+                    ", "
+                  )} · VAT ${sum(b.S, s => s.tax).toFixed(2)}${s0.ret ? `<br>Return from ${esc(s0.ret.of)}: ${esc(s0.ret.why)} · authorized by ${esc(s0.ret.by)}` : ""}`
+              : ""
+          }<div class="so-a"><button class="mini" data-a="sales_print" data-no="${esc(b.no)}">${b.S ? "Reprint" : "Print bill"}</button>${b.S && !s0.ret && retCan(b.no) && boCan("sales.return") ? `<button class="mini" data-a="ret" data-no="${esc(b.no)}">Return items</button>` : ""}</div></div></details>`;
+        }).join("")
+      : `<div class="empty">${F.q || F.from || F.to ? "No orders match this search." : "No orders yet in the current day."}</div>`
+  }${B.length > L.length ? `<div class="stk">Showing the latest ${L.length}. Narrow the search to see the rest.</div>` : ""}`;
+}
+/** A waiter's own commission rate from Waiter setup, otherwise the rate on the report. */
+const commRate = n => {
+  const u = USERS.find(x => x.n === n);
+  return u && u.comm !== undefined ? u.comm : rcm;
+};
 const REP = {
   bills: [
     "Bills Report",
@@ -306,18 +491,66 @@ const REP = {
         [
           "Total",
           plural(B.length, "bill"),
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
+          ...c.slice(2, billF.net ? -2 : -1).map(() => ""),
           ...(billF.net ? [m2(t.net)] : []),
           m2(t.g)
         ],
         "No bills for these dates and filters.",
         logHead("Bills")
+      ];
+    }
+  ],
+  rets: [
+    "Returned Items Report",
+    L => {
+      const R = by(
+          L.filter(s => s.ret),
+          s => s.no
+        ),
+        val = a => -sum(a, s => s.g),
+        T = sum(R, ([, a]) => val(a));
+      return [
+        [
+          "Date",
+          "Credit note",
+          "Original bill",
+          "Table",
+          "Sale point",
+          "Waiter",
+          "Items returned",
+          "Refunded by",
+          "Reason",
+          "Authorized by",
+          "#Value (KES)"
+        ],
+        R.map(([no, a]) => {
+          const paid = {};
+          a.forEach(s =>
+            Object.entries(s.mx || {}).forEach(([m, v]) => (paid[m] = (paid[m] || 0) - v))
+          );
+          return [
+            a[0].at.toLocaleString("en-GB"),
+            no,
+            a[0].ret.of,
+            a[0].label,
+            a.map(s => s.dept).join(", "),
+            a[0].waiter || a[0].user,
+            a
+              .flatMap(s => s.lines)
+              .map(l => `${-l.q} ${l.n}`)
+              .join(", "),
+            Object.entries(paid)
+              .filter(([, v]) => v > 0)
+              .map(([m, v]) => `${MN[m] || m} ${m2(v)}`)
+              .join(", "),
+            a[0].ret.why,
+            a[0].ret.by,
+            m2(val(a))
+          ];
+        }),
+        ["Total", plural(R.length, "return"), "", "", "", "", "", "", "", "", m2(T)],
+        "No items were returned in these dates.",
+        logHead(plural(R.length, "return") + " · " + KES(T))
       ];
     }
   ],
@@ -663,8 +896,11 @@ const REP = {
     "Sales Commission Report",
     L => [
       ["Staff", "#Sales", "#Rate %", "#Commission"],
-      by(L, s => s.user).map(([u, a]) => [u, m2(G(a)), rcm, m2((G(a) * rcm) / 100)]),
-      ["Total", m2(G(L)), rcm, m2((G(L) * rcm) / 100)]
+      by(L, s => s.waiter || s.user).map(([u, a]) => {
+        const r = commRate(u);
+        return [u, m2(G(a)), r, m2((G(a) * r) / 100)];
+      }),
+      ["Total", m2(G(L)), "", m2(sum(L, s => (s.g * commRate(s.waiter || s.user)) / 100))]
     ]
   ],
   is: [
@@ -696,12 +932,15 @@ const tb = (c, r, f, none = "No sales for this report, date range and sale point
 };
 const V = {
   rep() {
+    if (!boCan(repRight(rp, REP[rp][0])))
+      rp = Object.keys(REP).find(k => boCan(repRight(k, REP[k][0])));
     const [t, fn] = REP[rp],
       L = rs(),
       [c, r, f, note, head] = fn(L);
     return `<div style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start"><div class="pn" style="flex:1 1 230px;max-width:300px"><h4>Sales reports</h4>${Object.entries(
       REP
     )
+      .filter(([k, x]) => boCan(repRight(k, x[0])))
       .map(
         ([k, x]) =>
           `<button class="mini ${k === rp ? "ok" : ""}" style="text-align:left;width:100%" data-r="${k}">${x[0]}</button>`
@@ -712,22 +951,9 @@ const V = {
  <div style="color:var(--mute);font-size:12px">${head || `${L.length} bills · ${KES(G(L))} · ${rf} to ${rt} · ${rd === "All" ? "all sale points" : rd}`}</div>${rp === "bills" ? billsGrid(c, r, note) : head ? tb(c, r, f, note) : tb(c, r, f)}${note && !head ? `<div class="stk">${note}</div>` : ""}</div></div>`;
   },
   sales() {
-    const A = sel(0),
-      L = A.slice()
-        .sort((a, b) => b.at - a.at)
-        .slice(0, 100);
-    return `<div class="pn"><div class="fr" style="align-items:center"><h4 style="flex:3">${A.length} sales · ${KES(sum(A, s => s.g))}</h4><button class="mini" data-a="clr">Clear all sales</button></div>${
-      L.length
-        ? L.map(
-            s =>
-              `<details><summary>${hhmm(s.at)} ${s.at.toLocaleDateString("en-GB")} · ${s.no} · ${s.dept} · ${esc(s.user)} <b style="float:right">${KES(s.g)}</b></summary><div style="padding:6px 10px;font-size:13px;color:var(--mute)">${s.lines.map(l => `${l.q}× ${esc(l.n)} @ ${l.p.toFixed(2)}`).join("<br>")}<br>Paid: ${Object.entries(
-                s.mx || {}
-              )
-                .map(([k, v]) => (MN[k] || k) + " " + KES(v))
-                .join(", ")} · VAT ${s.tax.toFixed(2)}</div></details>`
-          ).join("")
-        : '<div class="empty">No sales in this range.</div>'
-    }</div>`;
+    const F = salesF,
+      on = F.q || F.from || F.to;
+    return `<div class="pn"><div class="so-bar"><label class="so-q">Search orders<input data-sq value="${esc(F.q)}" placeholder="Bill or order number, table, waiter, guest or item" autocomplete="off"></label><label>From<input type="date" data-sf="from" value="${esc(F.from)}"></label><label>To<input type="date" data-sf="to" value="${esc(F.to)}"></label>${on ? '<button class="mini" data-a="sales_clear">Back to current</button>' : ""}</div><div id="salesList">${salesList()}</div></div>`;
   },
   prod() {
     return `<div class="pn"><h4>Add product</h4><div class="fr"><input id="pn" placeholder="Name"><select id="pd">${ALLD.map(d => `<option>${d}</option>`).join("")}</select><input id="pc" placeholder="Category"><input id="pp" type="number" placeholder="Price KES"><select id="pt"><option value="B">B · VAT 16%</option><option value="A">A · 0%</option><option value="C">C · 0%</option></select><select id="pi">${Object.keys(
@@ -750,10 +976,6 @@ const V = {
      return `<tr><td>${esc(ING[k])}</td><td class="n">${s}</td><td><span class="tag ${st[0]}">${st[1]}</span></td><td><input type="number" step="any" value="${INGC[k] || ""}" placeholder="0" data-uc="${k}" style="max-width:90px"></td><td><div class="fr"><input type="number" id="rq_${k}" placeholder="Qty"><button class="mini" data-a="recv" data-k="${k}">Add</button></div></td></tr>`;
    })
    .join("")}</table></div>`;
-  },
-  staff() {
-    return `<div class="pn"><h4>Add staff</h4><div class="fr"><input id="su" placeholder="First Last"><select id="sr"><option>Waiter</option><option>Cashier</option><option>Super Cashier</option><option>Manager</option></select><input id="up" inputmode="numeric" placeholder="PIN (4 to 6 digits)"><button class="chip on" data-a="addu">Add</button></div></div>
- <div class="pn tw"><table class="t"><tr><th>Name</th><th>Role</th><th>PIN</th><th>Card ID</th><th>Sale points</th></tr>${USERS.map((u, i) => `<tr><td>${esc(u.n)}</td><td><select data-ur="${i}">${["Waiter", "Cashier", "Super Cashier", "Manager"].map(r => `<option ${u.role === r ? "selected" : ""}>${r}</option>`).join("")}</select></td><td><input value="${u.pin}" data-up="${i}" inputmode="numeric" style="max-width:100px"></td><td><input value="${esc(u.card || "")}" data-uk="${i}" placeholder="Click, then swipe" style="max-width:140px"></td><td>${ALLD.map(d => `<label style="margin-right:10px"><input type="checkbox" style="width:auto;min-width:0" data-ud="${i}" value="${d}" ${u.d.includes(d) ? "checked" : ""}> ${d}</label>`).join("")}</td></tr>`).join("")}</table></div><div class="pn"><h4>Back Office accounts</h4><div class="stk">Back Office signs in with a username and password. Passwords are stored as hashes on this device.</div><div class="fr"><input id="mn" placeholder="Full name"><input id="mu" placeholder="Username"><input id="mp" type="password" placeholder="Password (6+ characters)"><button class="chip on" data-a="addm">Add account</button></div><div class="tw"><table class="t"><tr><th>Name</th><th>Username</th><th>New password</th><th></th></tr>${ADM.map((a, i) => `<tr><td>${esc(a.n)}</td><td>${esc(a.u)}</td><td><input type="password" id="np_${i}" placeholder="New password"></td><td><div class="fr"><button class="mini" data-a="pwm" data-i="${i}">Change</button>${ADM.length > 1 ? `<button class="mini" data-a="delm" data-i="${i}">Remove</button>` : ""}</div></td></tr>`).join("")}</table></div></div>`;
   },
   cred() {
     return `<div class="pn"><h4>Add credit customer</h4><div class="fr"><input id="cn" placeholder="Customer name"><input id="cc" type="number" placeholder="Credit limit"><button class="chip on" data-a="addc">Add</button></div></div>
@@ -1080,6 +1302,7 @@ function roomsCard() {
     PL[per] +
     " revenue " +
     KES(sum(Object.keys(m), d => m[d].room));
+  if (!boCan("home.money")) $("#rml").textContent = ROOMS.length + " rooms · " + occ + " occupied";
 }
 V.rooms = () => `<div class="pn">${roomsReportHTML()}</div>`;
 /** A click on the rooms report tabs (Room reports page). */

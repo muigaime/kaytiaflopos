@@ -98,11 +98,6 @@
   background: linear-gradient(180deg, var(--rail2), var(--rail) 46%);
   border-right: 1px solid var(--hair);
 }
-#bo[data-pal="five"] .lg {
-  background: #fbf6ea;
-  border: 1px solid var(--brass);
-  box-shadow: inset 0 0 0 3px rgba(199, 162, 90, 0.14);
-}
 #bo[data-pal="five"] #nav .sec {
   color: var(--brass);
   font-size: 10.5px;

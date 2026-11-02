@@ -12,11 +12,12 @@ function kpis() {
   const C = sel(0),
     P = sel(1),
     rv = a => sum(a, s => s.g),
-    av = a => (a.length ? rv(a) / a.length : 0),
+    count = a => a.filter(s => !s.ret).length,
+    av = a => (count(a) ? rv(a) / count(a) : 0),
     L = [
       ["Revenue", rv(C), rv(P), "cash", s => s.g, KES],
       ["VAT collected", sum(C, s => s.tax), sum(P, s => s.tax), "chart", s => s.tax, KES],
-      ["Orders", C.length, P.length, "cart", s => 1, K],
+      ["Orders", count(C), count(P), "cart", s => (s.ret ? 0 : 1), K],
       ["Average basket", av(C), av(P), "wal", s => s.g, KES],
       ["Receivables", sum(CU, c => c.owes), null, "users", 0, KES],
       ["Open orders", orders.reduce((a, o) => a + totals(o.lines).g, 0), null, "pos", 0, KES]
@@ -40,21 +41,28 @@ function heroBar() {
       `<div><span>${l}</span><b ${id ? `id="${id}"` : ""}>${v}</b><small>${s}</small></div>`,
     ch = was > 0 ? ((now - was) / was) * 100 : null;
   $("#hMono").textContent = (FD_SETTINGS.name || "K").trim()[0];
+  const money = boCan("home.money");
   $("#hFigs").innerHTML =
-    fig(
-      "Revenue · " + PL[per],
-      KES(now),
-      ch === null
-        ? "No earlier period to compare"
-        : `${ch >= 0 ? "▲" : "▼"} ${Math.abs(ch).toFixed(1)}% on the period before`,
-      "heroFig"
-    ) +
+    (!money
+      ? ""
+      : fig(
+          "Revenue · " + PL[per],
+          KES(now),
+          ch === null
+            ? "No earlier period to compare"
+            : `${ch >= 0 ? "▲" : "▼"} ${Math.abs(ch).toFixed(1)}% on the period before`,
+          "heroFig"
+        )) +
     fig(
       "Occupancy",
       (ROOMS.length ? Math.round((occ / ROOMS.length) * 100) : 0) + "%",
       `${occ} of ${ROOMS.length} rooms`
     ) +
-    fig("Open bills", orders.length, KES(orders.reduce((a, o) => a + totals(o.lines, o).g, 0))) +
+    fig(
+      "Open bills",
+      orders.length,
+      money ? KES(orders.reduce((a, o) => a + totals(o.lines, o).g, 0)) : "On the POS"
+    ) +
     fig("Approvals", wait, wait ? "Waiting for a decision" : "Nothing waiting");
 }
 function mods() {
@@ -96,7 +104,14 @@ function mods() {
       CU.length + " credit customers",
       KES(sum(CU, c => c.owes)) + " owed"
     ],
-    ["Users & roles", "users", "#7d8da1", USERS.length + " staff", "PINs and sale points"],
+    [
+      "Waiter setup",
+      "users",
+      "#3a8fb7",
+      USERS.length + " POS staff",
+      "PINs, rights and sale points"
+    ],
+    ["Users & roles", "users", "#7d8da1", ADM.length + " users", "Back office roles and rights"],
     [
       "Purchasing",
       "dl",
@@ -115,10 +130,14 @@ function mods() {
     ],
     ["Settings", "gear", "#7d8da1", "Bills and receipts", "Hotel details and till number"]
   ];
-  $("#mods").innerHTML = M.map(
-    ([n, ic, c, a, b], i) =>
-      `<button class="m" data-m="${n}" style="--tc:var(--c${(i % 6) + 1})"><span class="ic" style="background:${c}1f;color:${c}">${I(ic)}</span><b>${n}</b><span class="n" style="color:${c}">${a}</span><span class="s">${b}</span></button>`
-  ).join("");
+  const noMoney = !boCan("home.money");
+  $("#mods").innerHTML = M.filter(([n]) => boPageOk(n))
+    .map(x => (noMoney ? x.map(v => (/KES/.test(String(v)) ? "Open" : v)) : x))
+    .map(
+      ([n, ic, c, a, b], i) =>
+        `<button class="m" data-m="${n}" style="--tc:var(--c${(i % 6) + 1})"><span class="ic" style="background:${c}1f;color:${c}">${I(ic)}</span><b>${n}</b><span class="n" style="color:${c}">${a}</span><span class="s">${b}</span></button>`
+    )
+    .join("");
 }
 $("#mods").onclick = e => {
   const b = e.target.closest("[data-m]");
@@ -291,7 +310,7 @@ function insights() {
 $("#ins").onclick = e => {
   const a = e.target.dataset.a;
   if (!a) return;
-  if (a === "req") addReq();
+  if (a === "req") boCan("inv.req") ? addReq() : boDenied();
   else if (a === "seed") {
     seed();
     bosave();
@@ -365,6 +384,7 @@ $("#apHome").onclick = e => {
   if (b && b.dataset.a.slice(0, 3) === "ap_") apAct(b.dataset.a.slice(3), b);
 };
 $("#apv").onclick = e => {
+  if (!boCan("inv.approve")) return;
   const b = e.target.closest('[data-a^="ap_"]');
   if (b) return apAct(b.dataset.a.slice(3), b);
   const i = e.target.dataset.ap;
@@ -385,7 +405,7 @@ function act() {
   $("#act").innerHTML = L.length
     ? L.map(
         s =>
-          `<div class="row"><span class="ri g">${I("pos")}</span><div class="t"><b>${esc(s.user)} completed ${s.no}</b><span>${KES(s.g)} · ${s.dept} · ${ago(s.at)}</span></div></div>`
+          `<div class="row"><span class="ri g">${I("pos")}</span><div class="t"><b>${s.ret ? `${esc(s.ret.by)} returned items from ${s.ret.of}` : `${esc(s.user)} completed ${s.no}`}</b><span>${KES(s.g)} · ${s.dept} · ${ago(s.at)}</span></div></div>`
       ).join("")
     : '<p style="color:var(--mute);text-align:center;padding:26px 0">No activity yet. Sales from the POS appear here.</p>';
 }

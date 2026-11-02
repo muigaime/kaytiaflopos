@@ -11,6 +11,8 @@ const c2 = n => Math.round(n * 100),
 const payDue = () => (payT ? payT.reduce((a, o) => a + totals(o.lines, o).g, 0) : totals().g);
 const payBal = () => (c2(payDue()) - c2(pays.reduce((a, p) => a + p.amt, 0))) / 100;
 function openPay(tg) {
+  if (!can("clear")) return fsNote("You don't have the right to clear bills.");
+  if (!tg && newBillBlock()) return fsNote(newBillBlock());
   if (!shiftOk()) return;
   payT = tg || null;
   pays = [];
@@ -134,7 +136,8 @@ $("#pOk").onclick = () => {
   const chv = pays.reduce((a, p) => a + (p.chg || 0), 0);
   targets.forEach((o, bi) => {
     const t = totals(o.lines, o),
-      no = "NBO-" + pad(rno),
+      no = o.no || nextBill(),
+      ord = o.ord || nextOrder(user ? user.n : ""),
       lines = Object.entries(o.lines).map(([id, n]) => ({ it: get(id), q: n })),
       used = {};
     gsum += t.g;
@@ -159,7 +162,7 @@ $("#pOk").onclick = () => {
       }
     }
     const cu = "KRACU0100" + Math.floor(1000 + Math.random() * 8999),
-      inv = rno - 1000,
+      inv = +no,
       change = bi === targets.length - 1 ? chv : 0,
       credit = pays.some(p => p.m === "credit"),
       waiter = o.waiter || (user ? user.n : "");
@@ -187,6 +190,7 @@ $("#pOk").onclick = () => {
       leftDisc -= dd;
       SALES.push({
         no,
+        ord,
         at: new Date(),
         dept: d,
         label: o.label,
@@ -195,7 +199,19 @@ $("#pOk").onclick = () => {
         guest: o.guest,
         covers: o.covers,
         room: o.room,
-        ...(si === 0 ? { slip: { paid: al.join(""), change, credit, cu, inv, cur: t.cur } } : {}),
+        ...(si === 0
+          ? {
+              slip: {
+                paid: al.join(""),
+                change,
+                credit,
+                credits: pays.filter(p => p.m === "credit").map(p => ({ ci: p.ci, amt: p.amt })),
+                cu,
+                inv,
+                cur: t.cur
+              }
+            }
+          : {}),
         net: g - tax,
         tax,
         g,
@@ -210,9 +226,9 @@ $("#pOk").onclick = () => {
     try {
       bosave();
     } catch (e) {}
-    rno++;
     html += receiptHTML({
       no,
+      ord,
       dept: billPlace(o.lines),
       label: o.label,
       guest: o.guest,

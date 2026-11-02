@@ -36,7 +36,8 @@ function printersHTML() {
   <div class="fr" style="justify-content:flex-end"><button class="chip on" style="flex:none" data-a="hs_save">Save printers</button></div></div>`;
 }
 const SET_SAMPLE = {
-  no: "NBO-001042",
+  no: "01042",
+  ord: 12,
   dept: "Main Restaurant",
   label: "T4",
   covers: "2",

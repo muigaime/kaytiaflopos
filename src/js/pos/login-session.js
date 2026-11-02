@@ -23,7 +23,8 @@ function loginAs(u) {
   user = u;
   DEPTS = u.d.filter(posSells);
   if (!DEPTS.length) DEPTS = [ALLD.filter(posSells)[0] || ALLD[0]];
-  dept = DEPTS.length > 1 ? ALLP : DEPTS[0];
+  dept = DEPTS.length > 1 && can("switchSP") ? ALLP : DEPTS[0];
+  applyRights();
   spTab = DEPTS[0];
   cart = {};
   pin = "";

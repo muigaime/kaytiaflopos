@@ -10,7 +10,8 @@ const PUR_TABS = [
 
 function purchasingView() {
   if (!isStore(STKT.loc)) STKT.loc = STORES[0];
-  if (!PUR_TABS.some(([t]) => t === purT)) purT = "lpo";
+  if (!PUR_TABS.some(([t]) => t === purT) || !boTabOk("pur", purT))
+    purT = PUR_TABS.map(([t]) => t).find(t => boTabOk("pur", t));
   const openN = LPOS.filter(p => p.status === "Open" || p.status === "Partly received").length,
     body =
       purT === "rpur"
@@ -19,10 +20,12 @@ function purchasingView() {
           ? recvHTML() // the receiving store is chosen inside the GRN
           : storeBar("Purchase orders for") + lpoHTML(),
     popups = itemPopupIfOpen() + vendorPopupIfOpen() + apModalIfOpen();
-  return `<div class="inv"><nav class="inv-rail">${PUR_TABS.map(
-    ([t, l, ic]) =>
-      `<button class="ir ${t === purT ? "on" : ""}" data-a="pur_tab" data-t="${t}">${I(ic)}<span>${l}</span>${t === "lpo" && openN ? `<b>${openN}</b>` : ""}</button>`
-  ).join("")}</nav><div class="inv-main">${body}${popups}</div></div>`;
+  return `<div class="inv"><nav class="inv-rail">${PUR_TABS.filter(([t]) => boTabOk("pur", t))
+    .map(
+      ([t, l, ic]) =>
+        `<button class="ir ${t === purT ? "on" : ""}" data-a="pur_tab" data-t="${t}">${I(ic)}<span>${l}</span>${t === "lpo" && openN ? `<b>${openN}</b>` : ""}</button>`
+    )
+    .join("")}</nav><div class="inv-main">${body}${popups}</div></div>`;
 }
 
 /** Compact store chooser (Purchasing doesn't need Inventory's stock cards). */

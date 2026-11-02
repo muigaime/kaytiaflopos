@@ -32,10 +32,9 @@ $("#vSub").onclick = e => {
     v = id => $("#" + id).value.trim(),
     num = id => parseFloat($("#" + id).value);
   if (a === "rep_print") return repPrint(b.dataset.k);
-  if (a === "addm" || a === "pwm" || a === "delm") {
-    admAct(a, b);
-    return;
-  }
+  if (a.slice(0, 3) === "ws_") return wsAct(a, b);
+  if (ACT_RIGHTS[a] && !boCan(ACT_RIGHTS[a])) return boDenied();
+  if (a.slice(0, 3) === "ur_") return urAct(a, b);
   if (a === "dstart" || a === "dend") {
     const r = a === "dstart" ? dayStart(boUser.n) : dayEnd(boUser.n);
     toast(r || (a === "dstart" ? "Day started." : "Day ended."));
@@ -119,17 +118,13 @@ $("#vSub").onclick = e => {
     spAct(a.slice(3), b);
     return;
   }
-  if (a === "clr")
-    return tapConfirm(
-      b,
-      () => {
-        SALES.length = 0;
-        bosave();
-        all();
-      },
-      "TAP AGAIN"
-    );
-  else if (a === "addp") {
+  if (a === "ret") return retOpen(b.dataset.no);
+  if (a === "sales_print") return billReprint(b.dataset.no);
+  if (a === "sales_clear") {
+    Object.assign(salesF, { q: "", from: "", to: "" });
+    return all();
+  }
+  if (a === "addp") {
     const n = v("pn"),
       p = num("pp"),
       q = num("pq");
@@ -159,12 +154,6 @@ $("#vSub").onclick = e => {
     if (!(q > 0)) return toast("Enter a quantity.");
     stock[b.dataset.k] += q;
     toast("Stock received.");
-  } else if (a === "addu") {
-    const n = v("su"),
-      p = v("up");
-    if (!/^\S+\s+\S+/.test(n) || !/^\d{4,6}$/.test(p) || USERS.some(u => u.pin === p))
-      return toast("Use 'First Last' and a unique 4 to 6 digit PIN.");
-    USERS.push({ n, pin: p, d: v("sr") === "Manager" ? ALLD.slice() : [ALLD[0]], role: v("sr") });
   } else if (a === "addc") {
     const n = v("cn"),
       l = num("cc");
@@ -180,6 +169,7 @@ $("#vSub").onclick = e => {
   bosave();
   all();
 };
+window.boRedraw = () => all();
 $("#vSub").ondblclick = e => {
   const b = e.target.closest("[data-bill]");
   if (b) billReprint(b.dataset.bill);
@@ -232,6 +222,28 @@ $("#vSub").onchange = e => {
     return;
   }
   if (s.rsz) return void (rpSize = s.rsz);
+  if (s.urg !== undefined) {
+    urRole = t.value;
+    return all();
+  }
+  if (s.ura !== undefined) return urRoleChange(+s.ura, t.value);
+  if (s.wsr !== undefined) {
+    wsF.role = t.value;
+    return all();
+  }
+  if (s.wsp) return void (wsF.perm[s.wsp] = t.checked);
+  if (s.wsc) {
+    wsF[s.wsc] = t.checked;
+    return all();
+  }
+  if (s.wsd) {
+    wsF.pts = t.checked ? [...wsF.pts, s.wsd] : wsF.pts.filter(x => x !== s.wsd);
+    return all();
+  }
+  if (s.sf) {
+    salesF[s.sf] = t.value;
+    return all();
+  }
   if (s.bf) {
     billF[s.bf] = s.bf === "net" ? t.checked : t.value;
     return all();
@@ -255,36 +267,6 @@ $("#vSub").onchange = e => {
       p = parseFloat(t.value);
     if (p > 0) it.p = p;
     else t.value = it.p;
-  } else if (s.up !== undefined) {
-    const u = USERS[s.up];
-    if (/^\d{4,6}$/.test(t.value) && !USERS.some(x => x !== u && x.pin === t.value))
-      u.pin = t.value;
-    else {
-      t.value = u.pin;
-      toast("PIN must be 4 to 6 digits and unique.");
-    }
-  } else if (s.ud !== undefined) {
-    const u = USERS[s.ud],
-      d = ALLD.filter(x => (x === t.value ? t.checked : u.d.includes(x)));
-    if (!d.length) {
-      t.checked = true;
-      return toast("Keep at least one sale point.");
-    }
-    u.d = d;
-  } else if (s.ur !== undefined) {
-    const u = USERS[s.ur];
-    u.role = t.value;
-    if (t.value === "Manager" && u.d.length < ALLD.length) u.d = ALLD.slice();
-  } else if (s.uk !== undefined) {
-    const v = cardId(t.value),
-      u = USERS[s.uk];
-    if (v && USERS.some(x => x !== u && x.card === v)) {
-      t.value = u.card || "";
-      toast("That card is already assigned.");
-    } else {
-      u.card = v;
-      t.value = v;
-    }
   } else if (s.uc) {
     const c = parseFloat(t.value);
     INGC[s.uc] = c >= 0 ? c : 0;

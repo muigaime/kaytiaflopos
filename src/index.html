@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>Kaytia POS + Back Office v1.8.0</title>
+    <title>Kaytia Flow v1.8.0</title>
     <meta name="app-version" content="1.8.0" />
     <link
       rel="stylesheet"
@@ -394,7 +394,7 @@
             <div><b>Housekeeping</b><span>Rooms, always ready</span></div>
           </div>
           <div class="fl-pw"><img alt="Kaytia Tech Services" /></div>
-          <small>Front Desk · Kaytia Smart ERP · v1.8.0</small>
+          <small>Front Desk · Kaytia Flow · v1.8.0</small>
         </div>
       </div>
       <div class="fl-form">
@@ -473,6 +473,8 @@
     <script src="js/pos/slips.js"></script>
     <script src="js/pos/printers.js"></script>
     <script src="js/pos/bill-options.js"></script>
+    <script src="js/pos/sale-returns.js"></script>
+    <script src="js/pos/waiter-rights.js"></script>
     <script src="js/pos/login-session.js"></script>
 
     <!-- ==================== Start menu (POS / Back Office / Front Desk) ==================== -->
@@ -499,14 +501,12 @@
             ><b>Report</b><span>14 sales reports at your fingertips</span>
           </div>
         </div>
-        <small
-          >Kaytia Smart ERP · Developed by Kaytia Tech Services · POS Software · POS Hardware</small
-        >
+        <small>Kaytia Flow · Developed by Kaytia Tech Services · POS Software · POS Hardware</small>
       </div>
       <div class="lform">
         <div class="lcard">
           <h3 id="stHi">Good evening,</h3>
-          <p class="ls">Welcome to Kaytia Smart ERP. Where would you like to start?</p>
+          <p class="ls">Welcome to Kaytia Flow. Where would you like to start?</p>
           <button class="opt" data-go="pos">
             <span class="oi"
               ><svg viewBox="0 0 24 24">
@@ -538,7 +538,7 @@
             Tip: press <kbd>P</kbd> POS, <kbd>B</kbd> Back Office or <kbd>F</kbd> Front Desk
           </p>
           <p class="lalt" style="font-size: 11.5px">
-            Kaytia Smart ERP · Version 1.8.0 · Build 26 Oct 2026
+            Kaytia Flow · Version 1.8.0 · Build 26 Oct 2026
           </p>
         </div>
       </div>
@@ -577,7 +577,7 @@
               ><span>Passwords are hashed, and sign-in locks after repeated failed attempts.</span>
             </div>
           </div>
-          <small>Kaytia Smart ERP · Developed by Kaytia Tech Services</small>
+          <small>Kaytia Flow · Developed by Kaytia Tech Services</small>
         </div>
         <div class="lform">
           <div class="lcard">
@@ -644,7 +644,13 @@
       <!-- Back Office: app shell (side nav, top bar, home dashboard) -->
       <div class="app" id="app">
         <aside>
-          <div class="lg"><img alt="Kaytia Tech Services" src="" /></div>
+          <div class="lg kf">
+            <span class="kf-m" aria-hidden="true">K</span
+            ><span class="kf-t"
+              ><b>Kaytia <em>Flow</em></b
+              ><small>Back Office</small></span
+            >
+          </div>
           <div id="nav"></div>
         </aside>
         <main>
@@ -683,7 +689,7 @@
               ><span class="av" id="av">A</span
               ><span
                 ><b id="un" style="display: block; line-height: 1.1">Admin</b
-                ><small style="color: var(--mute)">Super Admin</small></span
+                ><small id="urole" style="color: var(--mute)">Super Admin</small></span
               ></span
             >
           </div>
@@ -781,8 +787,8 @@
               </div>
             </div>
             <p style="text-align: center; color: var(--mute); font-size: 12px; margin: 26px 0 6px">
-              Kaytia Smart ERP · Version 1.8.0 · Build 26 Oct 2026 · Developed by Kaytia Tech
-              Services · POS Software · POS Hardware
+              Kaytia Flow · Version 1.8.0 · Build 26 Oct 2026 · Developed by Kaytia Tech Services ·
+              POS Software · POS Hardware
             </p>
           </div>
         </main>
@@ -889,6 +895,7 @@
     <!-- Script group 4: Back Office. data-private: the build wraps this whole group in one
          (() => { ... })(); closure, so these files share names with each other but not with the rest. -->
     <script src="js/back-office/core.js" data-private></script>
+    <script src="js/back-office/access-rights.js" data-private></script>
     <script src="js/back-office/periods-and-nav.js" data-private></script>
     <script src="js/back-office/home-dashboard.js" data-private></script>
     <script src="js/back-office/reports.js" data-private></script>
@@ -902,6 +909,8 @@
     <script src="js/back-office/selling-points.js" data-private></script>
     <script src="js/back-office/production.js" data-private></script>
     <script src="js/back-office/settings.js" data-private></script>
+    <script src="js/back-office/waiter-setup.js" data-private></script>
+    <script src="js/back-office/users-and-roles.js" data-private></script>
     <script src="js/back-office/navigation.js" data-private></script>
     <script src="js/back-office/demo-data.js" data-private></script>
     <script src="js/back-office/page-actions.js" data-private></script>

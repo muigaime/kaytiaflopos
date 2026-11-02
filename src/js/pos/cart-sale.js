@@ -1,7 +1,7 @@
 let dept = "Bar",
   cart = {},
   held = [],
-  rno = 1042,
+  rno = 1,
   method = "cash",
   payRef = null;
 // 1e-9: quantities such as 0.1 must not lose a whole portion to rounding (0.3 / 0.1 = 2.9999…).
@@ -17,6 +17,13 @@ let catSel = "",
   rider = null,
   qMode = "next",
   qBuf = "";
+/** Bill numbers run on for ever. Order numbers start again with each staff shift. */
+const nextBill = () => pad(rno++, 5);
+function nextOrder(name) {
+  const sh = shiftOf(name);
+  if (sh) return (sh.ono = (sh.ono || 0) + 1);
+  return orders.reduce((a, o) => Math.max(a, o.ord || 0), 0) + 1;
+}
 const get = id => ITEMS.find(i => i.id == id),
   pad = (n, l = 6) => String(n).padStart(l, "0");
 // A waiter ticked for several sale points works in them side by side (dept = ALLP): the tabs on top
@@ -83,7 +90,7 @@ function drawGrid() {
       .map(i => {
         const a = avail(i) - inCart(i.id),
           n = inCart(i.id);
-        return `<button class="it${n ? " has" : ""}" style="--h:${hue(i.c)}" data-i="${i.id}" title="${i.n.replace(/"/g, "&quot;")}" ${a <= 0 ? "disabled" : ""}>${n ? `<span class="in">${n}</span>` : ""}<span class="lw ${a <= 0 ? "out" : ""}">${a <= 0 && !n ? "Out of stock" : a < 10 && a > 0 ? a + " left" : ""}</span><span class="nm">${i.n}</span><span class="cg">${i.c}</span><span class="pr">${posMoney(i.p)}</span></button>`;
+        return `<button class="it${n ? " has" : ""}" style="--h:${hue(i.c)}" data-i="${i.id}" title="${i.n.replace(/"/g, "&quot;")}" ${a <= 0 ? "disabled" : ""}>${n ? `<span class="in">${n}</span>` : ""}<span class="lw ${a <= 0 ? "out" : ""}">${a <= 0 && !n ? "Out of stock" : can("stock") && a < 10 && a > 0 ? a + " left" : ""}</span><span class="nm">${i.n}</span><span class="cg">${i.c}</span><span class="pr">${posMoney(i.p)}</span></button>`;
       })
       .join("") || '<div class="empty">No items in this category.</div>';
 }
@@ -144,7 +151,7 @@ function drawCart() {
   $("#tGross").textContent = bill2(t.g);
   $("#sendBtn").disabled = !ids.length;
   $("#ordBtn").textContent = `Open orders (${visOrders().length})`;
-  $("#fBill").value = cur ? cur.no : "NBO-" + pad(rno);
+  $("#fBill").value = cur ? cur.no : pad(rno, 5);
   if (cur) $("#fTable").value = cur.label;
   $("#fTable").disabled = !!cur;
   $("#fWaiter").value = user ? user.n : "";
@@ -291,7 +298,7 @@ function selRender() {
     ? `<div class="sr sh"><label><input type="checkbox" id="selAll" ${ch.length === L.length ? "checked" : ""}></label><span>Bill no</span><span>Table no</span><span>Waiter</span><span>Guest name</span><span>Date</span><span>Time</span><span>Curr</span><span class="n">Amount</span><span>S point</span></div>` +
       L.map(
         o =>
-          `<div class="sr ${selSet.has(o.no) ? "on" : ""}" data-row="${o.no}"><label><input type="checkbox" data-s="${o.no}" ${selSet.has(o.no) ? "checked" : ""}></label>${cell(o.no, "sr-no")}<span class="sr-t" title="${slipEsc(o.label)}"><b>${slipEsc(o.label)}</b></span>${cell(o.waiter || "–")}${cell(o.guest || "N/A")}${cell(o.at.toLocaleDateString("en-GB"))}${cell(o.at.toLocaleTimeString("en-GB"))}${cell("KES", "sr-cur")}<span class="n"><b>${bill2(totals(o.lines, o).g)}</b></span>${cell(billPlace(o.lines))}</div>`
+          `<div class="sr ${selSet.has(o.no) ? "on" : ""}" data-row="${o.no}"><label><input type="checkbox" data-s="${o.no}" ${selSet.has(o.no) ? "checked" : ""}></label><span class="sr-no" title="Bill ${slipEsc(o.no)}, order ${slipEsc(o.ord)}">${slipEsc(o.no)}<small>Order ${slipEsc(o.ord)}</small></span><span class="sr-t" title="${slipEsc(o.label)}"><b>${slipEsc(o.label)}</b></span>${cell(o.waiter || "–")}${cell(o.guest || "N/A")}${cell(o.at.toLocaleDateString("en-GB"))}${cell(o.at.toLocaleTimeString("en-GB"))}${cell("KES", "sr-cur")}<span class="n"><b>${bill2(totals(o.lines, o).g)}</b></span>${cell(billPlace(o.lines))}</div>`
       ).join("")
     : '<div class="empty">No pending bills for ' + w + ".</div>";
   // These work on one bill: highlight exactly one.
@@ -352,8 +359,8 @@ function orderView(o) {
   const t = totals(o.lines, o),
     ppl = o.waiter ? o.waiter : "–",
     row = (l, v) => (v ? `<div><span>${l}</span><b>${slipEsc(v)}</b></div>` : "");
-  $("#viewBody").innerHTML = `<h3>Order ${slipEsc(o.no)}</h3>
-  <div class="view-meta">${row("Table", o.label)}${row("Sale point", billPlace(o.lines))}${row("Waiter", ppl)}${row("Guest", o.guest)}${row("Covers", o.covers)}${row("Room", o.room)}${row("Sent", hhmm(o.at))}${row("Rounds", String(o.rounds))}${o.rider ? row("Rider", o.rider.n + " " + o.rider.p) : ""}</div>
+  $("#viewBody").innerHTML = `<h3>Bill ${slipEsc(o.no)}</h3>
+  <div class="view-meta">${row("Order no", o.ord)}${row("Table", o.label)}${row("Sale point", billPlace(o.lines))}${row("Waiter", ppl)}${row("Guest", o.guest)}${row("Covers", o.covers)}${row("Room", o.room)}${row("Sent", hhmm(o.at))}${row("Rounds", String(o.rounds))}${o.rider ? row("Rider", o.rider.n + " " + o.rider.p) : ""}</div>
   <div class="view-lines"><table><tr><th>Qty</th><th>Item</th><th class="n">Price</th><th class="n">Total</th></tr>${slipLines(
     o.lines,
     o
@@ -504,18 +511,20 @@ $("#settleBtn").onclick = () => {
 $("#printBtn").onclick = () => {
   if (Object.keys(cart).length && !cur) {
     showRc(
-      guestBillHTML({
-        no: $("#fBill").value,
-        dept: billPlace(cart),
-        label: $("#fTable").value || "Walk-in",
-        guest: $("#fGuest").value,
-        covers: $("#fCov").value,
-        room: $("#fRoom").value,
-        waiter: user ? user.n : "",
-        rider,
-        lines: slipLines(cart, cartAdj),
-        t: totals()
-      }),
+      waiterCopies(
+        guestBillHTML({
+          no: $("#fBill").value,
+          dept: billPlace(cart),
+          label: $("#fTable").value || "Walk-in",
+          guest: $("#fGuest").value,
+          covers: $("#fCov").value,
+          room: $("#fRoom").value,
+          waiter: user ? user.n : "",
+          rider,
+          lines: slipLines(cart, cartAdj),
+          t: totals()
+        })
+      ),
       null,
       "Close"
     );

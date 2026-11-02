@@ -213,6 +213,7 @@ function vsPrint(v, from, to) {
 
 // ---------------------------------------------------------------- page
 function vendorsView() {
+  if (!boTabOk("vn", vnT)) vnT = "list";
   invF.vn.open = false; // the vendor form is on the page itself
   if (!VENDORS.some(v => v.id === invF.vs.vendor)) invF.vs.vendor = VENDORS[0] ? VENDORS[0].id : "";
   const body =
@@ -223,10 +224,12 @@ function vendorsView() {
         : vnT === "stmt"
           ? vsStatementHTML()
           : vsPaymentsHTML();
-  return `<div class="inv"><nav class="inv-rail">${VN_TABS.map(
-    ([t, l, ic]) =>
-      `<button class="ir ${t === vnT ? "on" : ""}" data-a="vs_tab" data-t="${t}">${I(ic)}<span>${l}</span></button>`
-  ).join("")}</nav><div class="inv-main">${body}</div></div>`;
+  return `<div class="inv"><nav class="inv-rail">${VN_TABS.filter(([t]) => boTabOk("vn", t))
+    .map(
+      ([t, l, ic]) =>
+        `<button class="ir ${t === vnT ? "on" : ""}" data-a="vs_tab" data-t="${t}">${I(ic)}<span>${l}</span></button>`
+    )
+    .join("")}</nav><div class="inv-main">${body}</div></div>`;
 }
 
 const vsVendorSelect = () =>

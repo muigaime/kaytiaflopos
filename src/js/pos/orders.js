@@ -1,7 +1,6 @@
 // ---- send order first, bill and charge later ----
 let orders = [],
   cur = null,
-  ono = 1,
   payOrder = null,
   selTbl = "";
 /** Save when an open order changes: sending, adding, settling or any bill option all end by redrawing the cart. */
@@ -26,9 +25,11 @@ const billAtPoints = (o, pts) =>
   pts.includes(o.dept) || billPoints(o.lines).some(d => pts.includes(d));
 /** A waiter works on their own bills. These roles see every waiter's bills at their sale points. */
 const BILL_ALL = ["Manager", "Super Cashier", "Cashier"];
-const seesAllBills = u => !!u && BILL_ALL.includes(u.role);
+const seesAllBills = u => !!u && (BILL_ALL.includes(u.role) || !!(u.perm && u.perm.allBills));
 const billsFor = (u, pts) =>
-  orders.filter(o => (u && o.waiter === u.n) || (seesAllBills(u) && billAtPoints(o, pts)));
+  orders.filter(
+    o => (u && o.waiter === u.n) || (seesAllBills(u) && (u.allSP || billAtPoints(o, pts)))
+  );
 const visOrders = () => billsFor(user, DEPTS);
 const hhmm = d => d.toLocaleTimeString("en-KE", { hour: "2-digit", minute: "2-digit" });
 const cnt = c => Object.values(c).reduce((a, b) => a + b, 0);
@@ -84,6 +85,17 @@ function doSend(label) {
       ? orders.filter(x => billAtPoints(x, DEPTS))
       : orders.filter(x => x.dept === dept)
     ).find(x => x.label.toLowerCase() === label.toLowerCase());
+  const stop = !o
+    ? newBillBlock()
+    : !cur && !canAddTo(o) && visOrders().includes(o)
+      ? `You don't have the right to add to ${o.waiter}'s bills.`
+      : o.printed && !can("addPrinted")
+        ? `${o.label} has been printed. You don't have the right to add to it.`
+        : "";
+  if (stop) {
+    $("#mSend").classList.remove("show");
+    return fsNote(stop);
+  }
   if (o && !cur && !visOrders().includes(o)) {
     $("#mSend").classList.remove("show");
     return fsNote(
@@ -99,7 +111,8 @@ function doSend(label) {
   }
   if (!o) {
     o = {
-      no: "ORD-" + String(ono++).padStart(3, "0"),
+      no: nextBill(),
+      ord: nextOrder(user ? user.n : ""),
       label,
       dept: dept === ALLP ? billPoints(round)[0] : dept,
       lines: {},
@@ -129,6 +142,7 @@ function doSend(label) {
   showRc(
     (tickets = orderTickets(round, {
       no: o.no,
+      ord: o.ord,
       dept: billPlace(o.lines),
       label: o.label,
       guest: o.guest,
@@ -156,7 +170,7 @@ function ordList() {
   $("#ordList").innerHTML = L.length
     ? L.map(o => {
         const t = totals(o.lines, o);
-        return `<div class="ord"><div class="h"><span>${o.label} · ${billPlace(o.lines)}</span><span>${KES(t.g)}</span></div><div class="m">${o.no} · ${seesAllBills(user) ? slipEsc(o.waiter || "No waiter") + " · " : ""}${cnt(o.lines)} items · ${o.rounds} round${o.rounds > 1 ? "s" : ""} · sent ${hhmm(o.at)} · <b>SENT</b></div><div class="row"><button class="mini" data-oa="add" data-o="${o.no}">Add items</button><button class="mini" data-oa="bill" data-o="${o.no}">Print bill</button><button class="mini" data-oa="swap" data-o="${o.no}">Swap</button><button class="chip on" data-oa="pay" data-o="${o.no}">Charge</button></div></div>`;
+        return `<div class="ord"><div class="h"><span>${o.label} · ${billPlace(o.lines)}</span><span>${KES(t.g)}</span></div><div class="m">Bill ${o.no} · Order ${o.ord} · ${seesAllBills(user) ? slipEsc(o.waiter || "No waiter") + " · " : ""}${cnt(o.lines)} items · ${o.rounds} round${o.rounds > 1 ? "s" : ""} · sent ${hhmm(o.at)} · <b>SENT</b></div><div class="row"><button class="mini" data-oa="add" data-o="${o.no}">Add items</button><button class="mini" data-oa="bill" data-o="${o.no}">Print bill</button><button class="mini" data-oa="swap" data-o="${o.no}">Swap</button><button class="chip on" data-oa="pay" data-o="${o.no}">Charge</button></div></div>`;
       }).join("")
     : '<div class="empty">No open orders. Use Send order to start one.</div>';
 }
@@ -174,6 +188,10 @@ $("#ordList").onclick = e => {
     exOpen(o);
     return;
   }
+  if (a === "add" && !canAddTo(o))
+    return fsNote(`You don't have the right to add to ${o.waiter}'s bills.`);
+  if (a === "add" && o.printed && !can("addPrinted"))
+    return fsNote(`${o.label} has been printed. You don't have the right to add to it.`);
   if (a === "add") {
     if (dept === ALLP) spTab = o.dept;
     else dept = o.dept;
@@ -187,19 +205,25 @@ $("#ordList").onclick = e => {
     openPay([o]);
   }
   if (a === "bill") {
+    if (!can("printGuest")) return fsNote("You don't have the right to print guest bills.");
+    o.printed = true;
+    ordersKeep();
     showRc(
-      guestBillHTML({
-        no: o.no,
-        dept: billPlace(o.lines),
-        label: o.label,
-        guest: o.guest,
-        covers: o.covers,
-        room: o.room,
-        waiter: o.waiter,
-        rider: o.rider,
-        lines: slipLines(o.lines, o),
-        t: totals(o.lines, o)
-      }),
+      waiterCopies(
+        guestBillHTML({
+          no: o.no,
+          ord: o.ord,
+          dept: billPlace(o.lines),
+          label: o.label,
+          guest: o.guest,
+          covers: o.covers,
+          room: o.room,
+          waiter: o.waiter,
+          rider: o.rider,
+          lines: slipLines(o.lines, o),
+          t: totals(o.lines, o)
+        })
+      ),
       o,
       "Close"
     );

@@ -69,6 +69,7 @@ const NAV = [
   [
     "People",
     [
+      ["Waiter setup", "users"],
       ["Customers", "users"],
       ["Vendors", "truck"],
       ["HR &amp; Payroll", "id"]

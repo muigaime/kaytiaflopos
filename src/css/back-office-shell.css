@@ -987,3 +987,59 @@ table.t {
     transform: translateY(-6px);
   }
 }
+
+/* The software name at the top of the side menu */
+#bo .lg.kf {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 2px 4px 14px;
+  padding: 10px 8px 16px;
+  border: 0;
+  border-bottom: 1px solid rgba(199, 162, 90, 0.34);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+#bo .kf-m {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid #c7a25a;
+  border-radius: 50%;
+  outline: 1px solid #c7a25a;
+  outline-offset: 2px;
+  color: #e3c98e;
+  font:
+    500 21px/1 "Playfair Display",
+    Georgia,
+    "Times New Roman",
+    serif;
+}
+#bo .kf-t {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+#bo .kf-t b {
+  color: #f6efe0;
+  font:
+    500 21px/1.1 "Playfair Display",
+    Georgia,
+    "Times New Roman",
+    serif;
+  white-space: nowrap;
+}
+#bo .kf-t em {
+  color: #e3c98e;
+  font-style: italic;
+}
+#bo .kf-t small {
+  color: #c7a25a;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}

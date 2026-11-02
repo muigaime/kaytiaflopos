@@ -3,7 +3,7 @@
 // Requisition:  "Awaiting approval" → "Approved" (the store can issue it) or "Rejected".
 // Issue:        issuing (Issue tab, a requisition, Send to selling point) raises an issue note (ISSUES);
 //               the stock moves only when it is approved, after checking the store still has it.
-// A manager approves by typing their PIN (Users & roles). Each decision keeps who, when and why.
+// A manager approves by typing their PIN (Waiter setup). Each decision keeps who, when and why.
 const AWAIT = "Awaiting approval";
 let apM = null; // approval popup: { kind: "lpo" | "req" | "iss", id, act: "approve" | "reject" }
 
@@ -124,7 +124,7 @@ function apModalIfOpen() {
   ${
     mgrs.length
       ? `<label>Manager PIN<input id="apPin" type="password" inputmode="numeric" autocomplete="off" placeholder="${mgrs.length} manager(s) can ${rej ? "reject" : "approve"}"></label>`
-      : '<div class="stk" style="color:var(--bad)">No manager can approve yet. Give a staff member the Manager role under Users &amp; roles.</div>'
+      : '<div class="stk" style="color:var(--bad)">No manager can approve yet. Give a staff member the Manager role under Waiter setup.</div>'
   }
   <div class="stk">${apM.kind === "iss" && !rej ? "Approving moves the stock now." : apM.kind === "lpo" && !rej ? "Once approved the order can be received." : apM.kind === "req" && !rej ? "Once approved the store can issue it." : ""}</div>
   <div class="fr" style="justify-content:flex-end"><button class="mini" data-a="ap_close">Cancel</button><button class="chip on" data-a="ap_ok" ${mgrs.length ? "" : "disabled"}>${rej ? "Reject" : "Approve"}</button></div>

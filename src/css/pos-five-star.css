@@ -2172,3 +2172,15 @@ body > .modal select:focus {
     zoom: 1.2;
   }
 }
+
+/* A return is started from Back Office, so its popup opens over it */
+#mBopt {
+  z-index: 70;
+}
+
+#mSel .sr .sr-no small {
+  display: block;
+  color: var(--mute);
+  font-size: 11px;
+  font-weight: 500;
+}

@@ -97,7 +97,7 @@ function boptStart(act) {
   bopt = { act };
   $("#bopWheel").style.display = "none";
   boptEl("Box").style.display = "";
-  if (user && BILL_AUTH.includes(user.role)) {
+  if (actsAlone(act)) {
     bopt.by = user.n;
     return boptChoose();
   }
@@ -125,6 +125,7 @@ function boptAuth() {
   boptChoose();
 }
 function boptChoose() {
+  if (bopt.act === "ret") return retForm();
   if (bopt.act === "merge") return boptMergeForm();
   const L = boptBills(bopt.act);
   if (L.length === 1) return boptOpen(L[0]);
@@ -180,6 +181,14 @@ function boptDiscSave() {
   if (!d.v && !billAdj(b).disc && !(raw < 0)) return boptMsg("Enter the discount.");
   if (raw < 0) return boptMsg("The discount cannot be below zero.");
   if (d.type === "pct" && d.v > 100) return boptMsg("A discount cannot be more than 100%.");
+  const giver = USERS.find(u => u.n === bopt.by);
+  if (giver && !BILL_AUTH.includes(giver.role) && giver.maxDisc !== undefined) {
+    const pct = d.type === "pct" ? d.v : sub ? (d.v / sub) * 100 : 0;
+    if (pct > giver.maxDisc)
+      return boptMsg(
+        `Your limit is ${giver.maxDisc}%. Ask a Manager or Super Cashier to give more.`
+      );
+  }
   if (d.type === "amt" && d.v > sub)
     return boptMsg(`A discount cannot be more than the bill (${KES(sub)}).`);
   if (d.v > 0 && !why) return boptMsg("Enter the reason for the discount.");
@@ -237,6 +246,7 @@ const boptVoidLeft = () => {
   return L;
 };
 function boptVoidRows() {
+  if (bopt.act === "ret") return retRows();
   const b = bopt.bill,
     A = billAdj(b),
     f = boptEl("VF").value.trim().toLowerCase(),
@@ -319,6 +329,7 @@ function boptVoidSave() {
     voided,
     {
       no: b.no,
+      ord: b.ord,
       label: b.label,
       guest: b.guest,
       room: b.room,
@@ -428,7 +439,8 @@ function boptSplitSave() {
     return boptMsg(`${b.dept} already has an open bill called ${label}.`);
   const whole = M.length === Object.keys(b.lines).length && M.every(([id, q]) => q >= b.lines[id]),
     n = {
-      no: "ORD-" + String(ono++).padStart(3, "0"),
+      no: nextBill(),
+      ord: nextOrder(b.waiter),
       label,
       dept: b.dept,
       lines: {},
@@ -514,6 +526,7 @@ $("#mBopt").addEventListener("click", e => {
     return {
       disc: boptDiscSave,
       void: boptVoidSave,
+      ret: retSave,
       merge: boptMergeSave,
       split: boptSplitSave
     }[bopt.act]();
@@ -521,7 +534,7 @@ $("#mBopt").addEventListener("click", e => {
 $("#mBopt").addEventListener("input", e => {
   if (e.target.id === "bopVal") boptDiscSum();
   if (e.target.id === "bopVF") boptVoidRows();
-  if (e.target.id === "bopWhy" && bopt.act === "void") boptVoidChips();
+  if (e.target.id === "bopWhy" && (bopt.act === "void" || bopt.act === "ret")) boptVoidChips();
 });
 $("#mBopt").addEventListener("keydown", e => {
   if (e.key === "Enter" && e.target.id === "bopPin") boptAuth();

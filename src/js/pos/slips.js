@@ -76,8 +76,10 @@ const slipFoot = () => `<div class="sl-foot">${slipPrinted()}</div>`;
 
 /** d: { no, dept, label, guest, covers, room, waiter, rider, lines, t } */
 function guestBillHTML(d, B = slipBiz()) {
+  const footer = (USERS.find(u => u.n === d.waiter) || {}).footer;
   return `<div class="slip">${slipHead("Guest Bill", d.dept, B)}${slipMeta([
     ["Bill no", d.no],
+    ["Order no", d.ord],
     ["Covers", d.covers],
     ["Waiter", d.waiter],
     ["Table", d.label],
@@ -85,13 +87,14 @@ function guestBillHTML(d, B = slipBiz()) {
     ["Room", d.room],
     ["Date / time", slipNow(), 1],
     ...(d.rider ? [["Rider", `${d.rider.n} ${d.rider.p}`, 1]] : [])
-  ])}${slipMoneyRows(d.lines)}${slipTotals(d.t)}${slipSign()}${slipTill(B)}<div class="sl-small">This is not a tax invoice. A tax invoice is issued on payment.</div>${slipFoot()}</div>`;
+  ])}${slipMoneyRows(d.lines)}${slipTotals(d.t)}${slipSign()}${slipTill(B)}${footer ? `<div class="sl-note">${slipEsc(footer)}</div>` : ""}<div class="sl-small">This is not a tax invoice. A tax invoice is issued on payment.</div>${slipFoot()}</div>`;
 }
 /** d as above, plus paid (payment rows), change, fiscal (CU lines and QR), credit (needs a signature). */
 function receiptHTML(d, B = slipBiz()) {
   return `<div class="slip">${slipHead("Receipt", d.dept, B)}${d.reprint ? `<div class="sl-copy">Reprint · copy ${d.reprint}</div>` : ""}${slipMeta(
     [
-      ["Invoice", d.no],
+      ["Bill no", d.no],
+      ["Order no", d.ord],
       ["Covers", d.covers],
       ["Served by", d.waiter],
       ["Table", d.label],
@@ -114,6 +117,7 @@ function orderSlipHTML(station, d) {
   return `<div class="slip sl-order"><div class="sl-ot">${station} Order</div>${d.round > 1 ? `<div class="sl-round">Round ${d.round}</div>` : ""}${slipMeta(
     [
       ["Bill no", d.no],
+      ["Order no", d.ord],
       ["Covers", d.covers],
       ["Waiter", d.waiter],
       ["Table", d.label],
@@ -131,6 +135,7 @@ function voidSlipHTML(station, d) {
   return `<div class="slip sl-order sl-void"><div class="sl-ot">Void Alert</div><div class="sl-round">${station} · do not prepare</div>${slipMeta(
     [
       ["Bill no", d.no],
+      ["Order no", d.ord],
       ["Table", d.label],
       ["Waiter", d.waiter],
       ["Voided by", d.by],
@@ -170,6 +175,7 @@ function orderTickets(round, d, slip = orderSlipHTML) {
 function exchangeSlipHTML(d) {
   return `<div class="slip sl-order"><div class="sl-ot">Exchange</div>${slipMeta([
     ["Bill no", d.no],
+    ["Order no", d.ord],
     ["Table", d.label],
     ["Waiter", d.waiter],
     ["Sale point", d.dept],
