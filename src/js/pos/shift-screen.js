@@ -193,6 +193,10 @@ $("#shMgr").onclick = e => {
   }
   if (a === "dstart") {
     if (!canDay()) return shDraw("You don't have the right to start the day.");
+    if (user.role === "Waiter" && pendingOf(user.n).length)
+      return shDraw(
+        "Clear your pending bills or send them to a cashier before starting a new day."
+      );
     const r = dayStart(by);
     shiftBadge();
     drawCart();

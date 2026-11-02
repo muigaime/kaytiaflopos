@@ -52,9 +52,12 @@ const accSides = it =>
   ITEMS.filter(x => accUsable(x) && String(x.id) !== String(it.id).split("~")[0]);
 /** The item is on the order. If it's a food item with accompaniments, ask for them next. */
 function pickDone(id, q, it) {
+  const before = cart[id] || 0;
   add(id, q);
-  const L = accAsks(it) ? accSides(it) : [];
-  if (!L.length) return;
+  const added = (cart[id] || 0) - before,
+    L = accAsks(it) ? accSides(it) : [];
+  if (added <= 0 || !L.length) return;
+  q = added;
   accT = {
     it,
     q,

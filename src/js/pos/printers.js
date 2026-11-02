@@ -32,7 +32,7 @@ async function printTicket(printer, lines) {
       },
       body: JSON.stringify({
         printer: printer.win ? { name: printer.n } : { ip: printer.ip, port: printer.port },
-        lines
+        lines: lines.map(l => ({ ...l, t: String(l.t).slice(0, 200) }))
       }),
       signal: ctl.signal
     });

@@ -495,6 +495,9 @@ function payClear() {
       `</div></div>`;
   pays.filter(p => p.m === "credit").forEach(p => (CU[p.ci].owes += p.amt));
   if (direct) {
+    cartSwaps.filter(x => cart[x.toId]).forEach(x => swapLog(targets[0], x));
+    cartSwaps = [];
+    sync();
     cart = {};
     kmsg = "";
     rider = null;

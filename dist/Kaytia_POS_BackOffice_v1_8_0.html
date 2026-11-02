@@ -13751,7 +13751,7 @@ function dayReport(d, by) {
       s => s.at >= new Date(d.openedAt) && (!d.closedAt || s.at <= new Date(d.closedAt))
     ),
     paid = sSum(pays, p => p.amt);
-  return `<div class="rd">${rhead("END OF DAY SUMMARY")}<table>${rr("Day", d.id)}${rr("Business date", dateGB(dayDate(d)))}${rr("Opened", dm(d.openedAt) + " " + hm(d.openedAt) + " by " + hx(d.openedBy))}${rr("Closed", d.closedAt ? dm(d.closedAt) + " " + hm(d.closedAt) + " by " + hx(d.closedBy) : "Still open")}</table><hr><div class="sec">SALES</div><table>${rr("Bills", a.length)}${rr("Gross sales", R2(sSum(a, s => s.g)))}${rr("Taxes", R2(sSum(a, s => s.tax)))}${rr("Net sales", R2(sSum(a, s => s.g - s.tax)), 1)}</table><hr><div class="sec">PAYMODES (KSH)</div><table>${rr("CASH", R2(sPm(a, "cash")))}${rr("M-PESA", R2(sPm(a, "mpesa")))}${rr("CREDIT", R2(sPm(a, "credit")))}</table><hr><div class="sec">SHIFTS</div>${sh.length ? `<table>${sh.map(x => rr(hx(x.user) + " " + hm(x.openedAt) + "-" + (x.closedAt ? hm(x.closedAt) : "open"), x.closedAt ? "var " + sg(x.variance) : "open")).join("")}</table>` : "<div>None</div>"}<hr><div class="sec">CASH PAYOUTS / EXPENSES</div>${pays.length ? `<table>${pays.map(x => rr(hx(x.cat) + ": " + hx(x.desc) + " (" + hx(x.user) + ")", R2(x.amt))).join("")}${rr("TOTAL PAID OUT", R2(paid), 1)}</table>` : "<div>None</div>"}<hr><table>${rr("Total cash variance", sg(sSum(sh, x => x.variance || 0)), 1)}</table><hr><div class="c">Printed by ${hx(by || d.closedBy || d.openedBy)}</div></div>`;
+  return `<div class="rd">${rhead("END OF DAY SUMMARY")}<table>${rr("Day", d.id)}${rr("Business date", dateGB(dayDate(d)))}${rr("Opened", dm(d.openedAt) + " " + hm(d.openedAt) + " by " + hx(d.openedBy))}${rr("Closed", d.closedAt ? dm(d.closedAt) + " " + hm(d.closedAt) + " by " + hx(d.closedBy) : "Still open")}</table><hr><div class="sec">SALES</div><table>${rr("Bills", a.length)}${rr("Gross sales", R2(sSum(a, s => s.g)))}${rr("Taxes", R2(sSum(a, s => s.tax)))}${rr("Net sales", R2(sSum(a, s => s.g - s.tax)), 1)}</table><hr><div class="sec">PAYMODES (KSH)</div><table>${rr("CASH", R2(sPm(a, "cash")))}${rr("M-PESA", R2(sPm(a, "mpesa")))}${rr("PDQ", R2(sPm(a, "pdq")))}${rr("Complimentary", R2(sPm(a, "comp")))}${rr("Room", R2(sPm(a, "room")))}${rr("Tips", R2(sSum(a, s => Object.values(s.tips || {}).reduce((x, y) => x + y, 0))))}${rr("CREDIT", R2(sPm(a, "credit")))}</table><hr><div class="sec">SHIFTS</div>${sh.length ? `<table>${sh.map(x => rr(hx(x.user) + " " + hm(x.openedAt) + "-" + (x.closedAt ? hm(x.closedAt) : "open"), x.closedAt ? "var " + sg(x.variance) : "open")).join("")}</table>` : "<div>None</div>"}<hr><div class="sec">CASH PAYOUTS / EXPENSES</div>${pays.length ? `<table>${pays.map(x => rr(hx(x.cat) + ": " + hx(x.desc) + " (" + hx(x.user) + ")", R2(x.amt))).join("")}${rr("TOTAL PAID OUT", R2(paid), 1)}</table>` : "<div>None</div>"}<hr><table>${rr("Total cash variance", sg(sSum(sh, x => x.variance || 0)), 1)}</table><hr><div class="c">Printed by ${hx(by || d.closedBy || d.openedBy)}</div></div>`;
 }
 const $ = s => document.querySelector(s),
   KES = n =>
@@ -15076,6 +15076,9 @@ function payClear() {
       `</div></div>`;
   pays.filter(p => p.m === "credit").forEach(p => (CU[p.ci].owes += p.amt));
   if (direct) {
+    cartSwaps.filter(x => cart[x.toId]).forEach(x => swapLog(targets[0], x));
+    cartSwaps = [];
+    sync();
     cart = {};
     kmsg = "";
     rider = null;
@@ -15804,9 +15807,12 @@ const accSides = it =>
   ITEMS.filter(x => accUsable(x) && String(x.id) !== String(it.id).split("~")[0]);
 /** The item is on the order. If it's a food item with accompaniments, ask for them next. */
 function pickDone(id, q, it) {
+  const before = cart[id] || 0;
   add(id, q);
-  const L = accAsks(it) ? accSides(it) : [];
-  if (!L.length) return;
+  const added = (cart[id] || 0) - before,
+    L = accAsks(it) ? accSides(it) : [];
+  if (added <= 0 || !L.length) return;
+  q = added;
   accT = {
     it,
     q,
@@ -16149,7 +16155,7 @@ async function printTicket(printer, lines) {
       },
       body: JSON.stringify({
         printer: printer.win ? { name: printer.n } : { ip: printer.ip, port: printer.port },
-        lines
+        lines: lines.map(l => ({ ...l, t: String(l.t).slice(0, 200) }))
       }),
       signal: ctl.signal
     });
@@ -18315,6 +18321,10 @@ $("#shMgr").onclick = e => {
   }
   if (a === "dstart") {
     if (!canDay()) return shDraw("You don't have the right to start the day.");
+    if (user.role === "Waiter" && pendingOf(user.n).length)
+      return shDraw(
+        "Clear your pending bills or send them to a cashier before starting a new day."
+      );
     const r = dayStart(by);
     shiftBadge();
     drawCart();
@@ -18567,7 +18577,7 @@ function msDraw(msg) {
 /** A waiter counts no cash: the shift just ends, and nothing prints. */
 function msEnd() {
   const sh = shiftOf(user.n),
-    r = shiftEnd(sh, shiftCalc(sh).expected, user.n);
+    r = shiftEnd(sh, Math.max(0, shiftCalc(sh).expected), user.n);
   if (r) return msDraw(r);
   shiftBadge();
   msDraw("Shift ended.");
@@ -30766,6 +30776,11 @@ function wsSave() {
   if (was && was !== n) {
     orders.forEach(o => {
       if (o.waiter === was) o.waiter = n;
+      if (o.handedTo === was) o.handedTo = n;
+    });
+    SALES.forEach(s => {
+      if (s.user === was) s.user = n;
+      if (s.waiter === was) s.waiter = n;
     });
     openShifts().forEach(s => {
       if (s.user === was) s.user = n;

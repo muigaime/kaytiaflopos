@@ -146,6 +146,11 @@ function wsSave() {
   if (was && was !== n) {
     orders.forEach(o => {
       if (o.waiter === was) o.waiter = n;
+      if (o.handedTo === was) o.handedTo = n;
+    });
+    SALES.forEach(s => {
+      if (s.user === was) s.user = n;
+      if (s.waiter === was) s.waiter = n;
     });
     openShifts().forEach(s => {
       if (s.user === was) s.user = n;

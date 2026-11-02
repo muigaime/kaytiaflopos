@@ -186,7 +186,7 @@ function msDraw(msg) {
 /** A waiter counts no cash: the shift just ends, and nothing prints. */
 function msEnd() {
   const sh = shiftOf(user.n),
-    r = shiftEnd(sh, shiftCalc(sh).expected, user.n);
+    r = shiftEnd(sh, Math.max(0, shiftCalc(sh).expected), user.n);
   if (r) return msDraw(r);
   shiftBadge();
   msDraw("Shift ended.");
