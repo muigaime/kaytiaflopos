@@ -219,27 +219,6 @@ body > .modal {
   align-content: start;
   gap: 10px;
 }
-.pos .ms {
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin: 10px 2px 0;
-  font-family: var(--serif);
-  font-size: 19px;
-  font-weight: 500;
-  font-style: italic;
-  color: var(--ink);
-}
-.pos .ms:first-child {
-  margin-top: 2px;
-}
-.pos .ms::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(90deg, var(--brass), transparent);
-}
 .pos .it {
   position: relative;
   display: grid;
@@ -848,46 +827,41 @@ body > .modal select:focus {
   }
 }
 
-/* ---------------------------------------------------------------- compact menu
-   Busy outlets carry long menus, so tiles stay small; 64px is still an easy tap. */
+/* ---------------------------------------------------------------- menu tiles
+   One category shows at a time, so tiles are large enough to read at a glance. */
 .pos .items {
-  grid-template-columns: repeat(auto-fill, minmax(116px, 1fr));
-  gap: 6px;
-}
-.pos .ms {
-  margin: 6px 2px 0;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
   gap: 10px;
-  font-size: 14px;
 }
 .pos .it {
   grid-template-rows: 1fr auto;
   grid-template-columns: minmax(0, 1fr) auto;
-  column-gap: 6px;
-  min-height: 64px;
-  padding: 7px 8px 6px;
-  border-radius: 5px;
+  column-gap: 8px;
+  min-height: 120px;
+  padding: 12px 13px 10px;
+  border-radius: 6px;
 }
 .pos .it .nm {
   grid-column: 1 / -1;
   grid-row: 1;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   overflow: hidden;
   padding-right: 0;
-  font-size: 13px;
-  line-height: 1.2;
+  font-size: 17px;
+  line-height: 1.25;
 }
 .pos .it.has .nm {
-  padding-right: 20px;
+  padding-right: 28px;
 }
 .pos .it .pr {
   grid-column: 1;
   grid-row: 2;
-  margin-top: 3px;
+  margin-top: 8px;
   padding-top: 0;
   border-top: 0;
-  font-size: 12px;
+  font-size: 16px;
 }
 .pos .it .pr::before {
   content: none;
@@ -897,17 +871,17 @@ body > .modal select:focus {
   grid-row: 2;
   align-self: end;
   margin-top: 0;
-  font-size: 10px;
+  font-size: 12px;
   white-space: nowrap;
 }
 .pos .it .in {
-  top: 5px;
-  right: 5px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
-  border-radius: 9px;
-  font-size: 11px;
+  top: 9px;
+  right: 9px;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
+  border-radius: 12px;
+  font-size: 13px;
 }
 
 /* ---------------------------------------------------------------- full screen lock */
@@ -1309,5 +1283,892 @@ body > .modal select:focus {
   }
   html.prc .slip + .slip {
     break-before: page;
+  }
+}
+
+/* ---------------------------------------------------------------- Bill options */
+.pos .acts {
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+}
+.pos .act {
+  grid-column: span 3;
+}
+.pos .act.a3,
+.pos .act.a1,
+.pos .act.a7 {
+  grid-column: span 4;
+}
+.pos .act.a7 {
+  order: -1;
+  min-height: 58px;
+  background: transparent;
+  border: 1px solid var(--brass);
+  font-family: var(--serif);
+  font-size: 16px;
+  font-weight: 500;
+}
+.pos .act.a3,
+.pos .act.a1 {
+  font-size: 16px;
+}
+@media (max-width: 1100px) {
+  .pos .acts {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+  .pos .act.a3,
+  .pos .act.a1,
+  .pos .act.a7 {
+    grid-column: span 4;
+  }
+}
+#mBopt .bop-box {
+  max-width: 480px;
+}
+#bopBody {
+  display: grid;
+  gap: 10px;
+}
+#bopBody h3,
+#bopBody p {
+  margin: 0;
+}
+#bopBody label {
+  display: grid;
+  gap: 4px;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+#bopBody input:not([type="checkbox"]) {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+}
+#bopBody label.bop-c {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+.bop-msg {
+  min-height: 16px;
+  font-size: 13px;
+  color: var(--bad);
+}
+.bop-list {
+  display: grid;
+  gap: 6px;
+  max-height: 44vh;
+  overflow: auto;
+}
+#bopBody .bop-b {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  font-size: 13.5px;
+  font-weight: 400;
+  text-align: left;
+  cursor: pointer;
+}
+#bopBody .bop-b:hover,
+#bopBody .bop-b.on {
+  border-color: var(--brass);
+}
+#bopBody .bop-b.on {
+  box-shadow: inset 0 0 0 1px var(--brass);
+}
+#bopBody small {
+  display: block;
+  color: var(--mute);
+  font-size: 11.5px;
+  font-weight: 400;
+}
+.slip .sl-fx {
+  margin-top: 4px;
+  font-weight: 600;
+  text-align: right;
+}
+.pos #lines .tr-adj {
+  padding: 8px 6px;
+  font-size: 12.5px;
+  color: var(--ivory-mute);
+  text-align: right;
+}
+
+/* Select: highlighted bills, and which bills the options are for */
+#mSel .sr:not(.sh) {
+  cursor: pointer;
+}
+#mSel .sr.on {
+  background: rgba(199, 162, 90, 0.16);
+  box-shadow: inset 3px 0 0 var(--brass);
+}
+#mSel .sfoot .row {
+  flex-wrap: wrap;
+}
+/* Select: bills in order number order, and viewing what is inside one */
+#mSel .sr {
+  grid-template-columns: 34px 96px minmax(0, 1fr) 120px 372px;
+}
+#mSel .sr-no {
+  font-weight: 700;
+  font-size: 15px;
+}
+#mSel .sr-bill small {
+  display: block;
+}
+#mSel .sr-items {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+#mSel .ra {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+@media (max-width: 900px) {
+  #mSel .sr {
+    grid-template-columns: 34px 84px minmax(0, 1fr) auto;
+  }
+  #mSel .sr.sh > span:last-child {
+    display: none;
+  }
+  #mSel .ra {
+    grid-column: 1 / -1;
+  }
+}
+#mView .view-box {
+  max-width: 500px;
+}
+#viewBody {
+  display: grid;
+  gap: 12px;
+}
+#viewBody h3 {
+  margin: 0;
+}
+.view-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 16px;
+  font-size: 13px;
+}
+.view-meta div {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+.view-meta span {
+  color: var(--mute);
+}
+.view-meta b {
+  font-weight: 600;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+.view-lines {
+  max-height: 42vh;
+  overflow: auto;
+}
+.view-lines table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+.view-lines th {
+  position: sticky;
+  top: 0;
+  padding: 5px 4px;
+  background: var(--card);
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-align: left;
+  text-transform: uppercase;
+}
+.view-lines td {
+  padding: 7px 4px;
+  border-bottom: 1px dotted var(--line);
+  vertical-align: top;
+}
+.view-lines .n {
+  text-align: right;
+  white-space: nowrap;
+}
+.view-tots {
+  display: grid;
+  gap: 3px;
+  font-size: 13px;
+}
+.view-tots .sl-r,
+.view-total {
+  display: flex;
+  justify-content: space-between;
+}
+.view-total {
+  margin-top: 3px;
+  padding: 6px 0;
+  border-top: 1px solid var(--ink);
+  border-bottom: 3px double var(--ink);
+  font-family: var(--serif);
+  font-size: 18px;
+  font-weight: 600;
+  font-variant-numeric: lining-nums;
+}
+.view-tots small {
+  color: var(--mute);
+  text-align: right;
+}
+#viewBody h3 {
+  font-variant-numeric: lining-nums;
+}
+
+/* Select: one line per bill, in the columns the cashier reads */
+#selList {
+  overflow: auto;
+}
+#mSel .sr,
+#mSel .sr:not(.sh) {
+  grid-template-columns:
+    34px 104px minmax(90px, 1.1fr) minmax(100px, 1.2fr) minmax(100px, 1.2fr)
+    92px 78px 46px 104px minmax(90px, 1fr);
+  min-width: 900px;
+  gap: 10px;
+  padding: 9px 8px;
+  font-size: 14px;
+}
+#mSel .sr > span {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+#mSel .sr.sh {
+  background: var(--card);
+  border-bottom: 2px solid var(--ink);
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+#mSel .sr .sr-no {
+  font-size: 14px;
+}
+#mSel .sr-cur {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--bad);
+}
+#mSel .sr.on {
+  background: linear-gradient(180deg, #e3c98e, #c7a25a);
+  box-shadow: none;
+  color: #1c1408;
+}
+#mSel .sr.on .sr-cur {
+  color: #1c1408;
+}
+#selOne .chip {
+  padding: 11px;
+  font-size: 14px;
+}
+#selOne .chip:disabled {
+  opacity: 0.4;
+}
+
+#rcPrinted:empty {
+  display: none;
+}
+#rcPrinted.ok {
+  color: var(--ok);
+}
+#rcPrinted.bad {
+  color: var(--bad);
+}
+
+@media print {
+  html.prc .slip.sl-sent {
+    display: none;
+  }
+}
+
+/* Sale point tabs above the menu */
+.sp-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex: none;
+  margin-bottom: 8px;
+}
+.sp-tabs:empty {
+  display: none;
+}
+.pos .sp-tab {
+  flex: 1 1 110px;
+  max-width: 190px;
+  min-height: 54px;
+  padding: 8px 10px;
+  background: var(--brand);
+  border: 1px solid var(--brass);
+  border-radius: 6px;
+  color: var(--brand-ink);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.pos .sp-tab:hover {
+  border-color: var(--brass-hi);
+}
+.pos .sp-tab.on {
+  background: linear-gradient(180deg, var(--brass-hi), var(--brass) 55%, var(--brass-lo));
+  border-color: var(--brass-lo);
+  color: #1c1408;
+}
+
+/* ---------------------------------------------------------------- void screen */
+#mBopt .bop-box.bop-void {
+  max-width: 900px;
+}
+.bv-wrap {
+  max-height: 34vh;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.bv-t {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+.bv-t th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 10px 12px;
+  background: var(--card);
+  color: var(--mute);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-align: left;
+  text-transform: uppercase;
+}
+.bv-t .n {
+  text-align: right;
+  white-space: nowrap;
+}
+.bv-t th.n {
+  text-align: right;
+}
+.bv-f td {
+  padding: 0 8px 8px;
+  border-bottom: 2px solid var(--brass);
+}
+#bopBody #bopVF {
+  padding: 7px 10px;
+  font-size: 13px;
+}
+.bv-t tbody tr {
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+  transition: background 0.14s;
+}
+.bv-t tbody tr:hover {
+  background: rgba(199, 162, 90, 0.08);
+}
+.bv-t tbody td {
+  padding: 11px 12px;
+}
+.bv-t tbody .d {
+  font-family: var(--serif);
+  font-size: 16.5px;
+}
+.bv-t tbody tr.on {
+  background: linear-gradient(90deg, rgba(199, 162, 90, 0.42), rgba(199, 162, 90, 0.14));
+  box-shadow: inset 3px 0 0 var(--brass);
+}
+.bv-t tbody tr.on .d {
+  font-weight: 600;
+  text-decoration: line-through;
+  text-decoration-color: var(--bad);
+}
+.bv-t input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--bad);
+  pointer-events: none;
+}
+.bv-t .qc {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.bv-t .qc button {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--brass);
+  border-radius: 50%;
+  background: var(--card);
+  color: var(--ink);
+  font-size: 16px;
+  cursor: pointer;
+}
+.bv-t .qc button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+#bopBody .bv-t small {
+  display: inline;
+  margin-left: 6px;
+}
+.bv-none {
+  color: var(--mute);
+  text-align: center;
+}
+.bv-sum {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 20px;
+}
+#bopBody .bv-sum label.bop-c {
+  font-family: var(--serif);
+  font-size: 20px;
+  cursor: pointer;
+}
+.bv-sum input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--bad);
+}
+#bopVSum {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  font-size: 14px;
+}
+#bopVSum .bv-out,
+#bopVSum .bv-out b {
+  color: var(--bad);
+}
+.bv-rs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+}
+.bv-r {
+  min-height: 52px;
+  padding: 8px 10px;
+  border: 1px solid var(--brass);
+  border-radius: 6px;
+  background: linear-gradient(160deg, rgba(199, 162, 90, 0.26), rgba(199, 162, 90, 0.08));
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 15px;
+  line-height: 1.2;
+  cursor: pointer;
+  transition:
+    transform 0.12s,
+    box-shadow 0.18s;
+}
+.bv-r:hover {
+  box-shadow: 0 6px 16px rgba(60, 40, 12, 0.16);
+  transform: translateY(-1px);
+}
+.bv-r.on {
+  border-color: var(--bad);
+  background: var(--bad);
+  color: #fff;
+}
+#bopWhy {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 400;
+  resize: vertical;
+}
+.bv-go {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 10px;
+}
+.bv-void,
+.bv-close {
+  min-height: 58px;
+  border-radius: 6px;
+  font-family: var(--serif);
+  font-size: 21px;
+  cursor: pointer;
+}
+.bv-void {
+  border: 1px solid #7c231b;
+  background: linear-gradient(170deg, #b23c31, #7c231b);
+  color: #fff;
+  letter-spacing: 0.02em;
+}
+.bv-close {
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+}
+/* Black on the slip's white paper, so it stands out from an order at the pass. */
+.slip.sl-void .sl-ot {
+  border-color: #000;
+  background: #000;
+  color: #fff;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.slip.sl-void .sl-make span {
+  text-decoration: line-through;
+}
+
+/* ---------------------------------------------------------------- split: old bill beside new bill */
+#mBopt .bop-box.bop-split {
+  max-width: 860px;
+}
+.bs-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.bs-p {
+  display: grid;
+  grid-template-rows: auto minmax(180px, 38vh) auto;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--card);
+}
+.bs-p.bs-new {
+  border-color: var(--brass);
+  box-shadow: inset 0 0 0 1px var(--brass);
+}
+#bopBody .bs-h {
+  display: grid;
+  gap: 2px;
+  min-height: 50px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--serif);
+  font-size: 18px;
+  font-weight: 500;
+}
+#bopBody .bs-h small {
+  font-family: inherit;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+#bopBody .bs-h input {
+  padding: 5px 8px;
+}
+.bs-r {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 8px;
+  overflow: auto;
+}
+.bs-e {
+  align-self: center;
+  padding: 26px 16px;
+  color: var(--mute);
+  font-family: var(--serif);
+  font-size: 15px;
+  font-style: italic;
+  text-align: center;
+}
+.bs-i {
+  display: flex;
+  gap: 6px;
+}
+.bs-m,
+.bs-all {
+  min-height: 46px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+.bs-m {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  font-size: 15px;
+  text-align: left;
+}
+.bs-m:hover,
+.bs-all:hover {
+  border-color: var(--brass);
+  background: rgba(199, 162, 90, 0.14);
+}
+.bs-m span {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--serif);
+  font-size: 16px;
+}
+.bs-m i {
+  color: var(--brass);
+  font-size: 18px;
+  font-style: normal;
+}
+.bs-all {
+  padding: 0 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.bs-t {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-top: 2px solid var(--brass);
+  font-family: var(--serif);
+  font-size: 15px;
+}
+.bs-t b {
+  font-size: 20px;
+  font-weight: 600;
+}
+@media (max-width: 700px) {
+  .bs-pair {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------------------------------------------------------------- Bill options: the walnut and brass dial */
+.bop-wheel {
+  position: relative;
+  width: min(520px, 94vw);
+  aspect-ratio: 1;
+  border: 1px solid #c7a25a;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 36%, #3d2f20 0, #1f1812 60%, #130e09 100%);
+  box-shadow:
+    0 0 0 7px rgba(199, 162, 90, 0.14),
+    0 0 0 8px rgba(199, 162, 90, 0.6),
+    0 36px 84px rgba(0, 0, 0, 0.62);
+  animation: bwIn 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.15);
+}
+.bop-wheel::before {
+  content: "";
+  position: absolute;
+  inset: 5%;
+  border: 1px solid rgba(199, 162, 90, 0.34);
+  border-radius: 50%;
+  background:
+    linear-gradient(
+      45deg,
+      transparent calc(50% - 0.5px),
+      rgba(199, 162, 90, 0.24) 50%,
+      transparent calc(50% + 0.5px)
+    ),
+    linear-gradient(
+      -45deg,
+      transparent calc(50% - 0.5px),
+      rgba(199, 162, 90, 0.24) 50%,
+      transparent calc(50% + 0.5px)
+    );
+  pointer-events: none;
+}
+.bop-wheel::after {
+  content: "";
+  position: absolute;
+  inset: 34%;
+  border: 1px solid rgba(199, 162, 90, 0.7);
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 35%, #2c2218, #17110c);
+  box-shadow: 0 0 0 4px rgba(199, 162, 90, 0.1);
+  pointer-events: none;
+}
+.bop-wheel .bw-i {
+  position: absolute;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  width: 30%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #f5ead4;
+  font-family: var(--serif);
+  font-size: 15.5px;
+  line-height: 1.2;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+}
+.bop-wheel .bw-ic {
+  display: grid;
+  place-items: center;
+  width: 76px;
+  height: 76px;
+  border: 1px solid #c7a25a;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 28%, #4c3b27, #231a11);
+  box-shadow:
+    inset 0 0 0 3px rgba(199, 162, 90, 0.13),
+    0 10px 22px rgba(0, 0, 0, 0.42);
+  transition:
+    transform 0.16s,
+    box-shadow 0.18s,
+    background 0.18s;
+}
+.bop-wheel .bw-ic svg {
+  width: 32px;
+  height: 32px;
+  fill: none;
+  stroke: #e7cb8d;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke 0.18s;
+}
+.bop-wheel .bw-i:hover .bw-ic,
+.bop-wheel .bw-i:focus-visible .bw-ic {
+  background: linear-gradient(160deg, #e7cb8d, #b08a44);
+  box-shadow:
+    inset 0 0 0 3px rgba(255, 255, 255, 0.24),
+    0 0 26px rgba(199, 162, 90, 0.55);
+  transform: translateY(-3px) scale(1.06);
+}
+.bop-wheel .bw-i:hover svg,
+.bop-wheel .bw-i:focus-visible svg {
+  stroke: #1f1812;
+}
+.bop-wheel .bw-i[data-bo="void"]:hover .bw-ic,
+.bop-wheel .bw-i[data-bo="void"]:focus-visible .bw-ic {
+  border-color: #d9695c;
+  background: linear-gradient(160deg, #b23c31, #7c231b);
+  box-shadow:
+    inset 0 0 0 3px rgba(255, 255, 255, 0.16),
+    0 0 26px rgba(178, 60, 49, 0.6);
+}
+.bop-wheel .bw-i[data-bo="void"]:hover svg,
+.bop-wheel .bw-i[data-bo="void"]:focus-visible svg {
+  stroke: #fff;
+}
+.bop-wheel .bw-t {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: 40%;
+  width: 28%;
+  color: #c7a25a;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  line-height: 1.3;
+  text-align: center;
+  text-transform: uppercase;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.bop-wheel .bw-c {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: 50%;
+  width: 44px;
+  height: 44px;
+  border: 1px solid #c7a25a;
+  border-radius: 50%;
+  background: transparent;
+  color: #f5ead4;
+  font-size: 15px;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  transition:
+    background 0.16s,
+    color 0.16s;
+}
+.bop-wheel .bw-c:hover {
+  background: #c7a25a;
+  color: #1f1812;
+}
+.bop-wheel .bw-for {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: 56%;
+  width: 26%;
+  overflow: hidden;
+  color: #e7cb8d;
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: center;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  transform: translateX(-50%);
+}
+@keyframes bwIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) rotate(-6deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bop-wheel {
+    animation: none;
+  }
+}
+@media (max-width: 520px) {
+  .bop-wheel .bw-ic {
+    width: 58px;
+    height: 58px;
+  }
+  .bop-wheel .bw-i {
+    font-size: 13px;
+  }
+}
+
+/* A receipt reprinted from Back Office opens over it */
+#mRc {
+  z-index: 70;
+}
+.slip .sl-copy {
+  margin-bottom: 6px;
+  padding: 4px 0;
+  border-top: 1px dashed #111;
+  border-bottom: 1px dashed #111;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-align: center;
+  text-transform: uppercase;
+}
+@media print {
+  html.prc.a4 #mRc .box,
+  html.prc.a4 #rc {
+    width: auto;
+  }
+  html.prc.a4 .slip {
+    width: 130mm;
+    max-width: none;
+    margin: 0 auto;
+    padding: 2mm 0 0;
+    border: 0;
+    zoom: 1.2;
   }
 }

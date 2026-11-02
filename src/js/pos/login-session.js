@@ -23,12 +23,13 @@ function loginAs(u) {
   user = u;
   DEPTS = u.d.filter(posSells);
   if (!DEPTS.length) DEPTS = [ALLD.filter(posSells)[0] || ALLD[0]];
-  dept = DEPTS[0];
+  dept = DEPTS.length > 1 ? ALLP : DEPTS[0];
+  spTab = DEPTS[0];
   cart = {};
   pin = "";
   pdraw();
   const p = u.n.split(" ");
-  $("#cname").textContent = p[0] + " " + p[1][0] + ".";
+  $("#cname").textContent = p[1] ? p[0] + " " + p[1][0] + "." : p[0];
   $("#login").style.display = "none";
   pmsg("Enter your PIN, or swipe your staff card.");
   posAccess();

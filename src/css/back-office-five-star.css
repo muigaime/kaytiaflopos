@@ -1,0 +1,657 @@
+/* ==================== Back Office: five-star look ====================
+   The same room as the POS: walnut, ivory and brass, with a serif for anything worth reading twice.
+   This is a colour theme (Theme → Five Star), so every Back Office page picks up the palette;
+   the dashboard also gets its banner and tailored panels.
+   Chart colours are checked with the dataviz validator, once per mode, against the card colour. */
+#bo[data-pal="five"] {
+  --brand: #1c1611;
+  --bi: #f6efe0;
+  --acc: #c7a25a;
+  --amber: #c7a25a;
+  --amber-ink: #1c1408;
+  --bg: #f3eee4;
+  --card: #fffdf8;
+  --ink: #241b12;
+  --mute: #75695a;
+  --line: #e2d9c8;
+  --chip: #f4eee2;
+  --tint: #efe6d4;
+  --ok: #1f6f55;
+  --good: #1f6f55;
+  --warn: #9a6a12;
+  --bad: #a4342a;
+  --sh: 0 18px 44px rgba(30, 20, 8, 0.14);
+  --rail: #17120d;
+  --rail2: #2a2118;
+  --brass: #c7a25a;
+  --brass-hi: #e3c98e;
+  --brass-lo: #9c7a36;
+  --serif: "Playfair Display", Georgia, "Times New Roman", serif;
+  --hair: rgba(199, 162, 90, 0.34);
+  /* the donut takes these in the order c1, c3, c2, c4, c6, c5 */
+  --c1: #b0841a;
+  --c3: #2b6cc4;
+  --c2: #c2452d;
+  --c4: #12947f;
+  --c6: #8147b5;
+  --c5: #d06a1e;
+  --tr1: #b0841a;
+  --tr2: #2b6cc4;
+}
+:root[data-theme="dark"] #bo[data-pal="five"] {
+  --brand: #c7a25a;
+  --bi: #1c1408;
+  --bg: #120e0a;
+  --card: #1d1712;
+  --ink: #f1e9da;
+  --mute: #a4977f;
+  --line: #342a1f;
+  --chip: #261e17;
+  --tint: #2c2318;
+  --ok: #6fbf9f;
+  --good: #6fbf9f;
+  --warn: #e2b866;
+  --bad: #e58a7c;
+  --sh: 0 18px 44px rgba(0, 0, 0, 0.5);
+  --rail: #0b0806;
+  --rail2: #1d1712;
+  --c1: #b08526;
+  --c3: #4a8ee2;
+  --c2: #e0634c;
+  --c4: #1ea38a;
+  --c6: #9f6ddf;
+  --c5: #d4742a;
+  --tr1: #b08526;
+  --tr2: #4a8ee2;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) #bo[data-pal="five"] {
+    --brand: #c7a25a;
+    --bi: #1c1408;
+    --bg: #120e0a;
+    --card: #1d1712;
+    --ink: #f1e9da;
+    --mute: #a4977f;
+    --line: #342a1f;
+    --chip: #261e17;
+    --tint: #2c2318;
+    --ok: #6fbf9f;
+    --good: #6fbf9f;
+    --warn: #e2b866;
+    --bad: #e58a7c;
+    --sh: 0 18px 44px rgba(0, 0, 0, 0.5);
+    --rail: #0b0806;
+    --rail2: #1d1712;
+    --c1: #b08526;
+    --c3: #4a8ee2;
+    --c2: #e0634c;
+    --c4: #1ea38a;
+    --c6: #9f6ddf;
+    --c5: #d4742a;
+    --tr1: #b08526;
+    --tr2: #4a8ee2;
+  }
+}
+
+/* ---------------------------------------------------------------- side rail */
+#bo[data-pal="five"] aside {
+  background: linear-gradient(180deg, var(--rail2), var(--rail) 46%);
+  border-right: 1px solid var(--hair);
+}
+#bo[data-pal="five"] .lg {
+  background: #fbf6ea;
+  border: 1px solid var(--brass);
+  box-shadow: inset 0 0 0 3px rgba(199, 162, 90, 0.14);
+}
+#bo[data-pal="five"] #nav .sec {
+  color: var(--brass);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+}
+#bo[data-pal="five"] .nv {
+  color: #d8ccb6;
+  font-family: var(--serif);
+  font-size: 14px;
+  transition:
+    color 0.15s,
+    background 0.15s;
+}
+#bo[data-pal="five"] .nv:hover {
+  background: rgba(199, 162, 90, 0.1);
+  color: #f6efe0;
+}
+#bo[data-pal="five"] .nv.on {
+  background: linear-gradient(90deg, rgba(199, 162, 90, 0.26), transparent);
+  color: var(--brass-hi);
+  box-shadow: none;
+}
+#bo[data-pal="five"] .nv.on:before {
+  background: var(--brass);
+}
+#bo[data-pal="five"] .nv .b {
+  background: var(--brass);
+  color: #1c1408;
+  font-family: "Schibsted Grotesk", Arial, sans-serif;
+}
+#bo[data-pal="five"] .card h3 .pill {
+  font-family: "Schibsted Grotesk", Arial, sans-serif;
+}
+
+/* ---------------------------------------------------------------- top bar */
+#bo[data-pal="five"] .top {
+  background: var(--card);
+  border-bottom: 1px solid var(--hair);
+  box-shadow: none;
+}
+#bo[data-pal="five"] .ib.srch {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  width: auto;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--chip);
+  color: var(--mute);
+  font-size: 13px;
+  white-space: nowrap;
+}
+#bo[data-pal="five"] .ib.srch kbd {
+  position: static;
+  margin-left: 6px;
+  background: var(--card);
+}
+#bo[data-pal="five"] .av {
+  background: linear-gradient(160deg, #e3c98e, #9c7a36);
+  color: #1c1408;
+  font-family: var(--serif);
+}
+#bo[data-pal="five"] .ib .dot {
+  background: var(--bad);
+}
+
+/* ---------------------------------------------------------------- type and common parts */
+#bo[data-pal="five"] .hello h1,
+#bo[data-pal="five"] .h2 h2,
+#bo[data-pal="five"] .card h3,
+#bo[data-pal="five"] .pn h4 {
+  font-family: var(--serif);
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--ink);
+}
+#bo[data-pal="five"] .btn,
+#bo[data-pal="five"] .sq {
+  border-radius: 6px;
+}
+#bo[data-pal="five"] .btn.a {
+  background: linear-gradient(170deg, #e3c98e, #b58a3c);
+  color: #1c1408;
+}
+#bo[data-pal="five"] .card,
+#bo[data-pal="five"] .pn {
+  border: 1px solid var(--line);
+  border-top: 2px solid var(--brass);
+  border-radius: 6px;
+  background: var(--card);
+  box-shadow: 0 1px 2px rgba(40, 28, 12, 0.05);
+}
+#bo[data-pal="five"] .h2 {
+  align-items: center;
+  gap: 16px;
+  margin: 30px 0 14px;
+}
+#bo[data-pal="five"] .h2 h2 {
+  flex: none;
+  font-size: 22px;
+}
+#bo[data-pal="five"] .h2:after {
+  content: "";
+  order: 1;
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--brass), transparent);
+}
+#bo[data-pal="five"] .h2 small {
+  order: 2;
+  font-style: italic;
+  color: var(--mute);
+}
+
+/* ---------------------------------------------------------------- banner */
+#bo .hero-x {
+  display: none;
+}
+#bo[data-pal="five"] #vHome .hello {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px 20px;
+  margin-bottom: 16px;
+  padding: 24px 28px;
+  overflow: hidden;
+  border: 1px solid #000;
+  border-radius: 8px;
+  background: radial-gradient(circle at 12% 0, #4a3925 0, #241b12 48%, #17120d 100%);
+  box-shadow:
+    inset 0 0 0 1px var(--hair),
+    0 22px 50px rgba(30, 20, 8, 0.26);
+  color: #f6efe0;
+}
+#bo[data-pal="five"] #vHome .hello .hero-x {
+  display: grid;
+}
+#bo[data-pal="five"] .hero-mono {
+  place-items: center;
+  width: 62px;
+  height: 62px;
+  border: 1px solid var(--brass);
+  border-radius: 50%;
+  outline: 1px solid var(--brass);
+  outline-offset: 3px;
+  color: var(--brass-hi);
+  font-family: var(--serif);
+  font-size: 27px;
+}
+#bo[data-pal="five"] #vHome .hello h1 {
+  margin: 0;
+  color: #f6efe0;
+  font-size: 31px;
+  line-height: 1.15;
+}
+#bo[data-pal="five"] #vHome .hello p {
+  margin: 4px 0 0;
+  color: #cdbfa5;
+  font-style: italic;
+}
+#bo[data-pal="five"] #vHome .hello .seg {
+  border: 1px solid var(--hair);
+  background: rgba(255, 255, 255, 0.06);
+}
+#bo[data-pal="five"] #vHome .hello .seg button {
+  background: none;
+  color: #d8ccb6;
+}
+#bo[data-pal="five"] #vHome .hello .seg button.on {
+  background: var(--brass);
+  color: #1c1408;
+}
+#bo[data-pal="five"] #vHome .hello .btn.p {
+  border: 1px solid var(--brass);
+  background: transparent;
+  color: var(--brass-hi);
+}
+#bo[data-pal="five"] .hero-figs {
+  grid-column: 1 / -1;
+  grid-template-columns: 1.7fr repeat(3, 1fr);
+  padding-top: 16px;
+  border-top: 1px solid var(--hair);
+}
+#bo .hero-figs > div {
+  display: grid;
+  align-content: start;
+  gap: 3px;
+  min-width: 0;
+  padding: 0 22px;
+  border-left: 1px solid var(--hair);
+}
+#bo .hero-figs > div:first-child {
+  padding-left: 0;
+  border: 0;
+}
+#bo .hero-figs span {
+  color: var(--brass);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+#bo .hero-figs b {
+  color: #f6efe0;
+  font-family: var(--serif);
+  font-size: 25px;
+  font-weight: 500;
+  line-height: 1.2;
+  font-variant-numeric: lining-nums;
+}
+#bo .hero-figs div:first-child b {
+  color: var(--brass-hi);
+  font-size: 36px;
+}
+#bo .hero-figs small {
+  color: #cdbfa5;
+  font-size: 12.5px;
+}
+
+/* ---------------------------------------------------------------- figures */
+#bo[data-pal="five"] #rooms {
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+#bo[data-pal="five"] #rooms .k,
+#bo[data-pal="five"] .kpis .k {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--card);
+  box-shadow: 0 1px 2px rgba(40, 28, 12, 0.05);
+}
+#bo[data-pal="five"] #rooms .k:before,
+#bo[data-pal="five"] .kpis .k:before {
+  height: 2px;
+  background: var(--brass);
+  opacity: 1;
+}
+#bo[data-pal="five"] #rooms .k .l,
+#bo[data-pal="five"] .kpis .k .l {
+  color: var(--mute);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+#bo[data-pal="five"] .kpis .k .l svg {
+  color: var(--brass-lo);
+  stroke: var(--brass-lo);
+}
+#bo[data-pal="five"] #rooms .k .v,
+#bo[data-pal="five"] .kpis .k .v {
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 25px;
+  font-weight: 500;
+  font-variant-numeric: lining-nums;
+}
+#bo[data-pal="five"] .sp2 path:first-child {
+  fill: rgba(199, 162, 90, 0.16);
+}
+#bo[data-pal="five"] .sp2 path:last-child {
+  stroke: var(--brass-lo);
+}
+
+/* ---------------------------------------------------------------- applications */
+#bo[data-pal="five"] .mods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+#bo[data-pal="five"] .m {
+  flex: 1 1 200px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--card);
+  box-shadow: 0 1px 2px rgba(40, 28, 12, 0.05);
+  transition:
+    border-color 0.16s,
+    box-shadow 0.18s,
+    transform 0.12s;
+}
+#bo[data-pal="five"] .m:hover {
+  border-color: var(--brass);
+  box-shadow: 0 10px 24px rgba(60, 40, 12, 0.14);
+  transform: translateY(-2px);
+}
+#bo[data-pal="five"] .m .ic {
+  border: 1px solid var(--brass);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 28%, #4c3b27, #231a11) !important;
+  color: #e7cb8d !important;
+}
+#bo[data-pal="five"] .m b {
+  font-family: var(--serif);
+  font-size: 16.5px;
+  font-weight: 500;
+}
+#bo[data-pal="five"] .m .n {
+  color: var(--brass-lo) !important;
+  font-weight: 600;
+}
+:root[data-theme="dark"] #bo[data-pal="five"] .m .n {
+  color: var(--brass-hi) !important;
+}
+
+/* ---------------------------------------------------------------- lists and charts */
+#bo[data-pal="five"] .row .t b {
+  font-weight: 600;
+}
+#bo[data-pal="five"] .row .ri {
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px currentColor;
+}
+#bo .ch-tip {
+  position: fixed;
+  z-index: 80;
+  max-width: 260px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--card);
+  box-shadow: var(--sh);
+  color: var(--ink);
+  font-size: 12.5px;
+  line-height: 1.35;
+  pointer-events: none;
+}
+#bo .ch-tip[hidden] {
+  display: none;
+}
+#bo #trend .hit {
+  fill: transparent;
+}
+#bo #trend .hit:hover {
+  fill: rgba(127, 127, 127, 0.1);
+}
+
+@media (max-width: 1100px) {
+  #bo[data-pal="five"] #vHome .hello {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  #bo[data-pal="five"] #vHome .hello > div:nth-of-type(3) {
+    grid-column: 1 / -1;
+  }
+  #bo[data-pal="five"] .hero-figs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 0;
+  }
+  #bo .hero-figs > div:nth-child(odd) {
+    padding-left: 0;
+    border: 0;
+  }
+}
+@media (max-width: 640px) {
+  #bo[data-pal="five"] #vHome .hello {
+    padding: 18px;
+  }
+  #bo[data-pal="five"] #vHome .hello h1 {
+    font-size: 24px;
+  }
+  #bo[data-pal="five"] .h2 small {
+    display: none;
+  }
+  #bo .hero-figs div:first-child b {
+    font-size: 28px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #bo[data-pal="five"] .m,
+  #bo[data-pal="five"] .nv {
+    transition: none;
+  }
+  #bo[data-pal="five"] .m:hover {
+    transform: none;
+  }
+}
+
+/* ---------------------------------------------------------------- stock and purchasing pages
+   These have always been a dark workspace, so they stay dark: walnut and brass instead of navy and teal. */
+#bo[data-pal="five"] .inv {
+  --bg: #17120d;
+  --card: #241b12;
+  --ink: #f1e9da;
+  --mute: #b7a98f;
+  --line: #3a2e20;
+  --chip: #2c2318;
+  --tint: #2c2318;
+  --bad: #e58a7c;
+  --ok: #6fbf9f;
+  --warn: #e2b866;
+  background:
+    radial-gradient(700px 300px at 100% -10%, rgba(199, 162, 90, 0.14), transparent 60%), var(--bg);
+  border: 1px solid #3a2e20;
+  border-radius: 8px;
+}
+#bo[data-pal="five"] .inv .pn {
+  border-color: #3a2e20;
+  border-top-color: var(--brass);
+  background: var(--card);
+}
+#bo[data-pal="five"] .inv .pn h4 {
+  color: var(--brass-hi);
+}
+#bo[data-pal="five"] .inv .ir,
+#bo[data-pal="five"] .inv label,
+#bo[data-pal="five"] .inv label.sw,
+#bo[data-pal="five"] .inv .chip2,
+#bo[data-pal="five"] :is(.inv, #stModal) .seg2 button {
+  color: #d8ccb6;
+}
+#bo[data-pal="five"] .inv .ir.on {
+  background: linear-gradient(90deg, rgba(199, 162, 90, 0.26), transparent);
+  box-shadow: inset 3px 0 0 var(--brass);
+  color: var(--brass-hi);
+}
+#bo[data-pal="five"] .inv input,
+#bo[data-pal="five"] .inv select,
+#bo[data-pal="five"] .inv .grn textarea,
+#bo[data-pal="five"] .inv .t th,
+#bo[data-pal="five"] .inv .pbar,
+#bo[data-pal="five"] .inv .sc2 i,
+#bo[data-pal="five"] :is(.inv, #stModal) .seg2 {
+  background: #17120d;
+}
+#bo[data-pal="five"] .inv .t th {
+  color: var(--brass);
+}
+#bo[data-pal="five"] .inv input:focus,
+#bo[data-pal="five"] .inv select:focus,
+#bo[data-pal="five"] .inv .grn textarea:focus {
+  border-color: var(--brass);
+  box-shadow: 0 0 0 3px rgba(199, 162, 90, 0.2);
+}
+#bo[data-pal="five"] .inv .chip.on,
+#bo[data-pal="five"] .inv button.chip.on,
+#bo[data-pal="five"] :is(.inv, #stModal) .seg2 button.on {
+  background: linear-gradient(170deg, #e3c98e, #b58a3c);
+  color: #1c1408;
+}
+#bo[data-pal="five"] .inv .mini:hover,
+#bo[data-pal="five"] :is(.inv, #itModal, #speModal) .grn-mode:hover {
+  border-color: var(--brass);
+}
+#bo[data-pal="five"] .inv .t tr:hover td {
+  background: rgba(199, 162, 90, 0.08);
+}
+#bo[data-pal="five"] .inv .sc2.on {
+  border-color: var(--brass);
+  box-shadow:
+    0 0 0 2px rgba(199, 162, 90, 0.25),
+    0 8px 22px rgba(0, 0, 0, 0.3);
+}
+#bo[data-pal="five"] .inv .sc2 u,
+#bo[data-pal="five"] .inv .rbar {
+  background: linear-gradient(90deg, #9c7a36, #e3c98e);
+}
+#bo[data-pal="five"] .inv .pbar i {
+  background: repeating-linear-gradient(90deg, #b58a3c 0 10px, #e3c98e 10px 12px);
+}
+#bo[data-pal="five"] .inv label.sw:has(input:checked) {
+  border-color: var(--brass);
+  background: rgba(199, 162, 90, 0.16);
+}
+#bo[data-pal="five"] .inv .grn-head {
+  background:
+    linear-gradient(135deg, rgba(199, 162, 90, 0.14), rgba(199, 162, 90, 0) 60%), var(--card);
+}
+#bo[data-pal="five"] .inv .grn-kicker,
+#bo[data-pal="five"] .inv .grn-ab svg,
+#bo[data-pal="five"] .inv .grn-tot b.g {
+  color: var(--brass-hi);
+}
+#bo[data-pal="five"] .inv .grn-chip.lpo {
+  background: rgba(199, 162, 90, 0.16);
+  color: var(--brass-hi);
+}
+#bo[data-pal="five"] .inv .grn-entry {
+  background: rgba(199, 162, 90, 0.06);
+  border-color: rgba(199, 162, 90, 0.25);
+}
+#bo[data-pal="five"] .inv .grn-t tr.grn-sel td {
+  background: rgba(199, 162, 90, 0.1);
+}
+#bo[data-pal="five"] :is(.inv, #itModal, #speModal) .grn-mode.on {
+  border-color: var(--brass);
+  background:
+    linear-gradient(135deg, rgba(199, 162, 90, 0.2), rgba(199, 162, 90, 0.04)), var(--card);
+  box-shadow: inset 0 0 0 1px var(--brass);
+}
+
+/* ---------------------------------------------------------------- sign in */
+#bo[data-pal="five"] .lbrand {
+  background: radial-gradient(circle at 18% 0, #4a3925 0, #241b12 48%, #17120d 100%);
+  color: #f1e9da;
+}
+#bo[data-pal="five"] .lbrand h2 {
+  font-family: var(--serif);
+  font-weight: 500;
+  letter-spacing: 0;
+}
+#bo[data-pal="five"] .lbrand h2 em {
+  background: linear-gradient(90deg, #c7a25a, #f3e1b5, #c7a25a);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  font-style: italic;
+}
+#bo[data-pal="five"] .lbrand p,
+#bo[data-pal="five"] .lbrand small,
+#bo[data-pal="five"] .lsec span,
+#bo[data-pal="five"] .lpv .hd {
+  color: #cdbfa5;
+}
+#bo[data-pal="five"] .lpv,
+#bo[data-pal="five"] .lsec {
+  border-color: var(--hair);
+  background: rgba(255, 255, 255, 0.04);
+}
+#bo[data-pal="five"] .lbars i {
+  background: linear-gradient(#e3c98e, #9c7a36);
+}
+#bo[data-pal="five"] .lchips span {
+  border: 1px solid var(--hair);
+  background: transparent;
+  color: #e3c98e;
+}
+#bo[data-pal="five"] .lsec svg {
+  stroke: var(--brass);
+}
+#bo[data-pal="five"] .lcard h3 {
+  font-family: var(--serif);
+  font-weight: 500;
+}
+#bo[data-pal="five"] .lgo {
+  border-radius: 6px;
+  background: linear-gradient(170deg, #e3c98e, #b58a3c);
+  color: #1c1408;
+}
+#bo[data-pal="five"] .lgo:hover {
+  box-shadow: 0 10px 24px rgba(60, 40, 12, 0.3);
+}
+#bo[data-pal="five"] .inv .rhd {
+  color: var(--brass);
+}

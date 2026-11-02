@@ -2,7 +2,7 @@
 const REAS = ["Customer changed mind", "Wrong item served", "Spoiled / wasted", "Out of stock"];
 let ex = {};
 const exLines = () => (ex.o ? ex.o.lines : cart),
-  exDept = () => (ex.o ? ex.o.dept : dept);
+  exDept = () => (ex.o ? (billPoints(ex.o.lines).length > 1 ? ALLP : ex.o.dept) : dept);
 function exOpen(o) {
   const L = o ? o.lines : cart;
   if (!Object.keys(L).length) return fsNote("Nothing to exchange yet.");
@@ -35,12 +35,12 @@ function exRender() {
   $("#exQ").innerHTML = ex.old
     ? `<span>How many to exchange</span><div class="qc"><button data-eq="-1">−</button><b>${ex.qty}</b><button data-eq="1">+</button></div>`
     : '<span class="stk">Tap the item you want to replace.</span>';
-  const cats = ["All", ...new Set(ITEMS.filter(i => i.d === d).map(i => i.c))];
+  const cats = ["All", ...new Set(ITEMS.filter(i => inPoint(i, d)).map(i => i.c))];
   $("#exCats").innerHTML = cats
     .map(c => `<button class="chip ${c === ex.cat ? "on" : ""}" data-ec="${c}">${c}</button>`)
     .join("");
   $("#exNew").innerHTML = ITEMS.filter(
-    i => i.d === d && (ex.cat === "All" || i.c === ex.cat) && String(i.id) !== String(ex.old)
+    i => inPoint(i, d) && (ex.cat === "All" || i.c === ex.cat) && String(i.id) !== String(ex.old)
   )
     .map(i => {
       const a = avail(i) - (ex.o ? 0 : inCart(i.id)),

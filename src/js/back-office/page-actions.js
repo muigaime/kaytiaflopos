@@ -8,6 +8,11 @@ $("#vSub").onclick = e => {
       .forEach(b => b.classList.toggle("on", b.dataset.p === p));
     return all();
   }
+  const billTr = e.target.closest("[data-bill]");
+  if (billTr) {
+    document.querySelectorAll("#vSub tr.on[data-bill]").forEach(x => x.classList.remove("on"));
+    return billTr.classList.add("on");
+  }
   const roomTab = e.target.closest("[data-rr]");
   if (roomTab) return rrAct(roomTab);
   const rr = e.target.closest("[data-r]");
@@ -26,6 +31,7 @@ $("#vSub").onclick = e => {
   const a = b.dataset.a,
     v = id => $("#" + id).value.trim(),
     num = id => parseFloat($("#" + id).value);
+  if (a === "rep_print") return repPrint(b.dataset.k);
   if (a === "addm" || a === "pwm" || a === "delm") {
     admAct(a, b);
     return;
@@ -94,7 +100,7 @@ $("#vSub").onclick = e => {
     return;
   }
   if (a.slice(0, 3) === "hs_") {
-    settingsAct(a.slice(3));
+    settingsAct(a.slice(3), b);
     return;
   }
   if (a.slice(0, 3) === "ap_") {
@@ -174,6 +180,10 @@ $("#vSub").onclick = e => {
   bosave();
   all();
 };
+$("#vSub").ondblclick = e => {
+  const b = e.target.closest("[data-bill]");
+  if (b) billReprint(b.dataset.bill);
+};
 $("#vSub").onchange = e => {
   const t = e.target,
     s = t.dataset;
@@ -220,6 +230,11 @@ $("#vSub").onchange = e => {
     // Selling point request or transfer: units for the chosen item.
     $("#" + (s.spunit || "spr_u")).innerHTML = rcUnitOpts(t.value, "buy");
     return;
+  }
+  if (s.rsz) return void (rpSize = s.rsz);
+  if (s.bf) {
+    billF[s.bf] = s.bf === "net" ? t.checked : t.value;
+    return all();
   }
   if (s.rcq !== undefined) return rcQtyChange(t, +s.rcq);
   if (s.rcall !== undefined) {

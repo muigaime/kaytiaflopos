@@ -29,6 +29,34 @@ function kpis() {
     return `<div class="k"><div class="l"><span>${l}</span>${I(ic, "var(--mute)")}</div><div class="v">${fm(c)}</div><div class="d ${has ? (good ? "u" : "dn") : ""}">${has ? `${up ? "▲" : "▼"} ${Math.abs(pc).toFixed(1)}% <span>vs previous period</span>` : `<span>${p === null ? "Live balance" : "No previous data"}</span>`}</div>${f ? spark(ser(0, f), good) : ""}</div>`;
   }).join("");
 }
+/** The banner's headline figures (Five Star theme). */
+function heroBar() {
+  const rv = a => sum(a, s => s.g),
+    now = rv(sel(0)),
+    was = rv(sel(1)),
+    occ = ROOMS.filter(r => roomStatus(r) === "occ").length,
+    wait = APPR.length + apCount(),
+    fig = (l, v, s, id) =>
+      `<div><span>${l}</span><b ${id ? `id="${id}"` : ""}>${v}</b><small>${s}</small></div>`,
+    ch = was > 0 ? ((now - was) / was) * 100 : null;
+  $("#hMono").textContent = (FD_SETTINGS.name || "K").trim()[0];
+  $("#hFigs").innerHTML =
+    fig(
+      "Revenue · " + PL[per],
+      KES(now),
+      ch === null
+        ? "No earlier period to compare"
+        : `${ch >= 0 ? "▲" : "▼"} ${Math.abs(ch).toFixed(1)}% on the period before`,
+      "heroFig"
+    ) +
+    fig(
+      "Occupancy",
+      (ROOMS.length ? Math.round((occ / ROOMS.length) * 100) : 0) + "%",
+      `${occ} of ${ROOMS.length} rooms`
+    ) +
+    fig("Open bills", orders.length, KES(orders.reduce((a, o) => a + totals(o.lines, o).g, 0))) +
+    fig("Approvals", wait, wait ? "Waiting for a decision" : "Nothing waiting");
+}
 function mods() {
   const M = [
     [
@@ -78,7 +106,13 @@ function mods() {
     ],
     ["Accounting", "book", "#2f9e75", "Next build", "Ledgers and tax"],
     ["M-Pesa & eTIMS", "phone", "#12804a", "Next build", "Sync and invoices"],
-    ["Reports", "chart", "#2b7bb9", "14 reports", "Sales, staff, items, payments"],
+    [
+      "Reports",
+      "chart",
+      "#2b7bb9",
+      Object.keys(REP).length + " reports",
+      "Sales, staff, items, payments"
+    ],
     ["Settings", "gear", "#7d8da1", "Bills and receipts", "Hotel details and till number"]
   ];
   $("#mods").innerHTML = M.map(
@@ -123,12 +157,12 @@ function trend() {
   const bars = cur
       .map(
         (v, i) =>
-          `<rect x="${x(i) - bw / 2}" y="${y(v)}" width="${bw}" height="${H - B - y(v)}" rx="3" fill="url(#tg)"><title>${lab(i)}: ${KES(v)}</title></rect>`
+          `<rect x="${x(i) - bw / 2}" y="${y(v)}" width="${bw}" height="${H - B - y(v)}" rx="4" style="fill:var(--tr1,url(#tg))"/><rect class="hit" x="${x(i) - (W - L - 6) / n / 2}" y="${T}" width="${(W - L - 6) / n}" height="${H - T - B}" data-tip="${esc(lab(i))}: ${KES(v)} · before ${KES(prev[i])}"/>`
       )
       .join(""),
     pl = prev.map((v, i) => (i ? "L" : "M") + x(i).toFixed(1) + " " + y(v).toFixed(1)).join("");
   $("#trend").innerHTML =
-    `<svg class="ch" viewBox="0 0 ${W} ${H}"><defs><linearGradient id="tg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--c2)"/><stop offset="1" style="stop-color:var(--c1)"/></linearGradient></defs>${g}${bars}<path d="${pl}" fill="none" stroke="var(--acc)" stroke-width="2.2" stroke-dasharray="5 4"/></svg>`;
+    `<svg class="ch" viewBox="0 0 ${W} ${H}"><defs><linearGradient id="tg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--c2)"/><stop offset="1" style="stop-color:var(--c1)"/></linearGradient></defs>${g}${bars}<path d="${pl}" fill="none" style="stroke:var(--tr2,var(--acc))" stroke-width="2" stroke-dasharray="5 4" pointer-events="none"/></svg>`;
   $("#tc").textContent = KES(sum(cur, v => v)) + " in the " + PL[per] + " · " + br.toLowerCase();
   $("#pl").textContent = br + " · " + PL[per];
 }
@@ -139,15 +173,23 @@ function donut() {
     T = 2 * Math.PI * R;
   let o = 0;
   $("#mt").textContent = ad ? "Sales by department" : "Sales by category";
-  const m = grp(sel(0), s =>
+  const every = grp(sel(0), s =>
       ad ? [[s.dept, s.g]] : s.lines.map(l => [(get(l.id) || {}).c || "Other", l.p * l.q])
-    ).slice(0, 6),
-    tot = sum(m, x => x[1]);
+    ),
+    // More than six fold into Other, so the shares still add up to the whole.
+    top = every.length > 6 ? every.slice(0, 5) : every,
+    rest = sum(every.slice(top.length), x => x[1]),
+    m = rest ? [...top, ["Other", rest]] : top,
+    tot = sum(m, x => x[1]),
+    // A colour stays with its department or category when the period changes the ranking.
+    key = ad ? ALLD : [...new Set(ITEMS.map(i => i.c))],
+    slots = top.map(x => x[0]).sort((a, b) => key.indexOf(a) - key.indexOf(b)),
+    col = n => (slots.includes(n) ? C[slots.indexOf(n)] : "var(--mute)");
   $("#donut").innerHTML = tot
     ? `<svg class="ch" viewBox="0 0 200 200" style="max-width:220px;margin:0 auto"><g transform="rotate(-90 100 100)">${m
-        .map(([n, v], i) => {
+        .map(([n, v]) => {
           const l = (v / tot) * T,
-            s = `<circle cx="100" cy="100" r="${R}" fill="none" stroke="${C[i]}" stroke-width="30" stroke-dasharray="${l} ${T - l}" stroke-dashoffset="${-o}"><title>${esc(n)}: ${Math.round((v / tot) * 100)}%</title></circle>`;
+            s = `<circle cx="100" cy="100" r="${R}" fill="none" stroke="${col(n)}" stroke-width="26" stroke-dasharray="${Math.max(l - 2, 0.5)} ${T - Math.max(l - 2, 0.5)}" stroke-dashoffset="${-o}" data-tip="${esc(n)}: ${KES(v)} · ${Math.round((v / tot) * 100)}%"/>`;
           o += l;
           return s;
         })
@@ -158,12 +200,29 @@ function donut() {
   $("#dl").innerHTML = tot
     ? m
         .map(
-          ([n, v], i) =>
-            `<span><i style="background:${C[i]}"></i>${esc(n)} ${Math.round((v / tot) * 100)}%</span>`
+          ([n, v]) =>
+            `<span><i style="background:${col(n)}"></i>${esc(n)} ${Math.round((v / tot) * 100)}%</span>`
         )
         .join("")
     : "";
 }
+// One hover note for both charts.
+const chTip = document.createElement("div");
+chTip.className = "ch-tip";
+chTip.hidden = true;
+$("#bo").appendChild(chTip);
+["#trend", "#donut"].forEach(s => {
+  const el = $(s);
+  el.addEventListener("mousemove", e => {
+    const t = e.target.closest("[data-tip]");
+    chTip.hidden = !t;
+    if (!t) return;
+    chTip.textContent = t.dataset.tip;
+    chTip.style.left = Math.min(e.clientX + 14, innerWidth - 270) + "px";
+    chTip.style.top = e.clientY + 14 + "px";
+  });
+  el.addEventListener("mouseleave", () => (chTip.hidden = true));
+});
 function insights() {
   const L = [],
     lo = Object.keys(stock)

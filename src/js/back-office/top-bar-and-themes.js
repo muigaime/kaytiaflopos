@@ -122,12 +122,15 @@ function greet(n) {
       day: "numeric",
       month: "long",
       year: "numeric"
-    }) + " · Mwangaza Supermart, Nairobi CBD";
+    }) +
+    " · " +
+    FD_SETTINGS.name;
 }
 function all() {
   render();
   dayBar();
   roomsCard();
+  heroBar();
   $("#kl").textContent = br + " · " + PL[per];
   kpis();
   mods();
@@ -139,6 +142,7 @@ function all() {
 }
 
 const PALS = [
+    ["five", "Five Star", "#241b12", "#c7a25a"],
     ["ocean", "Ocean", "#1d5c8a", "#f2a43a"],
     ["emerald", "Emerald", "#0f8a6d", "#f5b942"],
     ["sunset", "Sunset", "#e4572e", "#ffb703"],
@@ -147,9 +151,12 @@ const PALS = [
     ["graphite", "Graphite", "#4a5a6e", "#4cc9f0"]
   ],
   TK = "kaytia_theme";
-let TH = { pal: "ocean", mode: "auto" };
+let TH = { pal: "five", mode: "auto" };
 try {
   TH = Object.assign(TH, JSON.parse(localStorage.getItem(TK) || "{}"));
+  // Ocean used to be the default, so it moves to Five Star once. Choosing Ocean later sticks.
+  if (!TH.v && TH.pal === "ocean") TH.pal = "five";
+  TH.v = 2;
 } catch (e) {}
 function thApply() {
   const r = document.documentElement;

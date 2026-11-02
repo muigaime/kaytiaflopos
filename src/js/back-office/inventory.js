@@ -1464,6 +1464,7 @@ document.addEventListener("keydown", e => {
 });
 $("#vSub").oninput = e => {
   const s = e.target.dataset;
+  if (s.bc !== undefined) return billFilter(s.bc, e.target.value);
   if (s.ph !== undefined) {
     STKT.phys[s.ph] = e.target.value;
     updMaster();

@@ -62,8 +62,12 @@ function mv(loc, k, q, t, note, peer, ref, by) {
   if (MOV.length > 6000) MOV.splice(0, MOV.length - 6000);
 }
 const curLoc = () => (STK[dept] ? dept : "Bar");
+/** The view that shows every sale point a waiter is ticked for, all at once. */
+const ALLP = "All sale points";
+/** Is item i on the menu of view d? */
+const inPoint = (i, d) => (d === ALLP ? DEPTS.includes(i.d) : i.d === d);
 /** Where a product's ingredients are deducted: its materials store (recipes), else where it is sold. */
-const itemLoc = it => (it.from && STK[it.from] ? it.from : curLoc());
+const itemLoc = it => (it.from && STK[it.from] ? it.from : STK[it.d] ? it.d : curLoc());
 /** Sell n of a product (a negative n puts the stock back). */
 function itemStockMove(it, n) {
   const loc = itemLoc(it);

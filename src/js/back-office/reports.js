@@ -44,7 +44,283 @@ const items = L => {
 const pc = (a, b) => (b ? ((a / b) * 100).toFixed(1) : "0.0"),
   G = L => sum(L, s => s.g),
   dt = s => hhmm(s.at) + " " + s.at.toLocaleDateString("en-GB");
+/** Bill options log entries in the report's dates and sale point, newest first. */
+const billLog = acts => {
+  const A = new Date(rf + "T00:00:00").getTime(),
+    B = new Date(rt + "T23:59:59").getTime();
+  return BILLLOG.filter(x => {
+    const t = new Date(x.at).getTime();
+    return (
+      t >= A &&
+      t <= B &&
+      (!acts || acts.includes(x.act)) &&
+      (rd === "All" || logPoints(x).includes(rd))
+    );
+  })
+    .slice()
+    .reverse();
+};
+const logPoints = x =>
+  x.items
+    ? [...new Set(x.items.map(l => l.d))]
+    : x.points && x.points.length
+      ? x.points
+      : String(x.dept || "").split(", ");
+const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
+const logHead = t => `${t} · ${rf} to ${rt} · ${rd === "All" ? "all sale points" : rd}`;
+const voidRows = () => billLog(["Void"]);
+/** What a void took off, limited to the chosen sale point. Older entries only kept a total. */
+const voidParts = x =>
+  (x.items || [{ n: x.detail.split(" · ")[0], q: 0, d: x.dept, amt: -x.amt }]).filter(
+    l => rd === "All" || l.d === rd
+  );
+const voidItemsText = P => P.map(l => (l.q ? `${l.q} ${l.n}` : l.n)).join(", ");
+const voidTotal = R => sum(R, x => sum(voidParts(x), l => l.amt));
+// ---- printing a report: A4 landscape or an 80mm roll ----
+let rpSize = "a4";
+const printTools = k =>
+  `<span class="rp-size"><label><input type="radio" name="rpSize" data-rsz="a4" ${rpSize === "a4" ? "checked" : ""}> A4 size</label><label><input type="radio" name="rpSize" data-rsz="80" ${rpSize === "80" ? "checked" : ""}> Thermal paper (80mm)</label></span><button class="chip on" data-a="rep_print" data-k="${k}">Print</button>`;
+const printedBy = () => `Printed ${new Date().toLocaleString("en-GB")} by ${esc(boUser.n)}`;
+function tablePrint(title, head, c, r, f) {
+  const name = x => (x[0] === "#" ? x.slice(1) : x),
+    num = i => (c[i][0] === "#" ? ' class="n"' : "");
+  if (rpSize === "a4")
+    return stPrint(
+      title,
+      `<div class="st-doc"><div class="st-head"><div>${esc(FD_SETTINGS.name)}</div><h2>${esc(title)}</h2></div><div class="st-foot"><span>${esc(head)}</span></div>
+ <table class="st-t"><thead><tr>${c.map((x, i) => `<th${num(i)}>${esc(name(x))}</th>`).join("")}</tr></thead><tbody>${r.map(x => `<tr>${x.map((v, i) => `<td${num(i)}>${esc(v)}</td>`).join("")}</tr>`).join("")}${f ? `<tr class="st-tot">${f.map((v, i) => `<td${num(i)}>${esc(v)}</td>`).join("")}</tr>` : ""}</tbody></table>
+ <div class="st-foot"><span>${printedBy()}</span></div></div>`
+    );
+  // A roll is too narrow for wide tables, so each record prints as its own short block.
+  const block = (x, tot) =>
+      `<div class="b${tot ? " t" : ""}">${x.map((v, i) => (v === "" || v === null || v === undefined ? "" : `<div><span>${esc(name(c[i]))}</span><b>${esc(v)}</b></div>`)).join("")}</div>`,
+    w = window.open("", "_blank");
+  if (!w) return toast("Allow pop-ups to print.");
+  w.document.write(
+    `<!DOCTYPE html><html><head><title>${esc(title)}</title><style>@page{size:80mm auto;margin:0}body{width:72mm;margin:0 auto;padding:4mm 0;font:11px/1.35 Arial,sans-serif;color:#000}h1{margin:0;font-size:14px;text-align:center}h2{margin:3px 0;padding:3px 0;border-top:2px solid #000;border-bottom:2px solid #000;font-size:12px;text-align:center;text-transform:uppercase}.h,.p{font-size:10px;text-align:center}.b{padding:4px 0;border-bottom:1px dashed #000}.b div{display:flex;justify-content:space-between;gap:8px}.b b{text-align:right;font-weight:600}.t{border-bottom:3px double #000;font-weight:700}.p{margin-top:6px}</style></head><body><h1>${esc(FD_SETTINGS.name)}</h1><h2>${esc(title)}</h2><div class="h">${esc(head)}</div>${r.map(x => block(x)).join("")}${f ? block(f, 1) : ""}<div class="p">${printedBy()}</div></body></html>`
+  );
+  w.document.close();
+  w.focus();
+  w.print();
+}
+function repPrint(k) {
+  let title, c, r, f, head;
+  if (k === "rooms") {
+    [c, r, f] = rrData(hrr);
+    title = RRL[hrr];
+    head = ["rv", "pay", "rt", "gl"].includes(hrr) ? rrRange().join(" to ") : "Live position";
+  } else {
+    let h;
+    title = REP[rp][0];
+    const L = rs();
+    [c, r, f, , h] = REP[rp][1](L);
+    head =
+      h ||
+      `${L.length} bills · ${KES(G(L))} · ${rf} to ${rt} · ${rd === "All" ? "all sale points" : rd}`;
+  }
+  if (!r.length) return toast("There is nothing to print for these dates.");
+  tablePrint(title, head, c, r, f);
+}
+
+// ---- Bills Report: every settled bill, one line each; double-click to reprint ----
+const billF = { cashier: "All", pay: "All", net: false, col: {} };
+const billCols = () => [
+  "Bill Date",
+  "Bill Time",
+  "Bill Number",
+  "Table Number",
+  "Waiter Name",
+  "Cashier Name",
+  "Sale Point Name",
+  "Guest Name",
+  "Account/Room",
+  ...(billF.net ? ["#Net Amount"] : []),
+  "#Bill Total"
+];
+/** A bill served from several sale points is several sales with one number. */
+function billGroups() {
+  const o = {};
+  rs().forEach(s => {
+    const b = (o[s.no] = o[s.no] || {
+      no: s.no,
+      at: s.at,
+      label: s.label || "",
+      waiter: s.waiter || s.user,
+      cashier: s.user,
+      guest: s.guest || "N/A",
+      room: s.room || "",
+      pts: [],
+      net: 0,
+      g: 0,
+      mx: {}
+    });
+    b.pts.push(s.dept);
+    b.net += s.net;
+    b.g += s.g;
+    Object.entries(s.mx || {}).forEach(([m, v]) => (b.mx[m] = (b.mx[m] || 0) + v));
+  });
+  return Object.values(o)
+    .filter(
+      b =>
+        (billF.cashier === "All" || b.cashier === billF.cashier) &&
+        (billF.pay === "All" || b.mx[billF.pay] > 0)
+    )
+    .sort((a, b) => a.at - b.at);
+}
+const billRow = b => [
+  b.at.toLocaleDateString("en-GB"),
+  b.at.toLocaleTimeString("en-US"),
+  b.no,
+  b.label,
+  b.waiter,
+  b.cashier,
+  b.pts.join(", "),
+  b.guest,
+  b.room,
+  ...(billF.net ? [m2(b.net)] : []),
+  m2(b.g)
+];
+const billShown = () => {
+  const C = billCols();
+  return billGroups().filter(b => {
+    const r = billRow(b);
+    return C.every((x, i) => {
+      const w = (billF.col[x] || "").trim().toLowerCase();
+      return !w || String(r[i]).toLowerCase().includes(w);
+    });
+  });
+};
+const billTotals = B => ({ net: sum(B, b => b.net), g: sum(B, b => b.g) });
+function billsGrid(c, r, none) {
+  const opt = (L, v) =>
+      L.map(
+        ([k, n]) => `<option value="${esc(k)}" ${k === v ? "selected" : ""}>${esc(n)}</option>`
+      ).join(""),
+    who = [...new Set(SALES.map(s => s.user))].sort(),
+    t = billTotals(billShown()),
+    G2 = billGroups();
+  return `<div class="bl-bar"><label>Cashier name<select data-bf="cashier">${opt(
+    [["All", "All cashiers"], ...who.map(x => [x, x])],
+    billF.cashier
+  )}</select></label><label>Paymode<select data-bf="pay">${opt(
+    [["All", "All paymodes"], ...Object.entries(MN)],
+    billF.pay
+  )}</select></label><label class="bl-net"><input type="checkbox" data-bf="net" ${billF.net ? "checked" : ""}> Show net amount on bills</label><span class="bl-hint">Double-click a bill to reprint it</span></div>
+ <div class="bl-wrap"><table class="bl-t"><thead><tr>${c.map(x => `<th class="${x[0] === "#" ? "n" : ""}">${esc(x.replace("#", ""))}</th>`).join("")}</tr>
+ <tr class="bl-f">${c.map(x => `<td><input data-bc="${esc(x)}" value="${esc(billF.col[x] || "")}" placeholder="Filter" aria-label="Filter ${esc(x.replace("#", ""))}"></td>`).join("")}</tr></thead>
+ <tbody>${
+   G2.map(b => {
+     const x = billRow(b);
+     return `<tr data-bill="${esc(b.no)}" ${r.some(y => y[2] === b.no) ? "" : "hidden"}>${x.map((v, i) => `<td class="${c[i][0] === "#" ? "n" : ""}">${esc(v)}</td>`).join("")}</tr>`;
+   }).join("") || `<tr><td colspan="${c.length}"><div class="empty">${none}</div></td></tr>`
+ }</tbody></table></div>
+ <div class="bl-tot"><span id="blCnt">${plural(r.length, "bill")}</span>${billF.net ? `<span>Net <b id="blNet">${m2(t.net)}</b></span>` : ""}<span>Totals <b id="blG">${m2(t.g)}</b></span></div>`;
+}
+/** Typing in a column filter keeps the cursor where it is, so rows are hidden rather than redrawn. */
+function billFilter(col, v) {
+  billF.col[col] = v;
+  const B = billShown(),
+    S = new Set(B.map(b => b.no)),
+    t = billTotals(B);
+  document
+    .querySelectorAll("#vSub [data-bill]")
+    .forEach(tr => (tr.hidden = !S.has(tr.dataset.bill)));
+  $("#blCnt").textContent = plural(B.length, "bill");
+  $("#blG").textContent = m2(t.g);
+  if ($("#blNet")) $("#blNet").textContent = m2(t.net);
+}
+/** The bill as it was paid, on the paper chosen above, marked as a copy. */
+function billReprint(no) {
+  const S = SALES.filter(s => s.no === no);
+  if (!S.length) return;
+  const A = S[0],
+    keep = (S.find(s => s.slip) || {}).slip,
+    lines = S.flatMap(s => s.lines),
+    money = k => sum(S, s => s[k] || 0),
+    paid = {};
+  S.forEach(s => Object.entries(s.mx || {}).forEach(([m, v]) => (paid[m] = (paid[m] || 0) + v)));
+  A.copies = (A.copies || 0) + 1;
+  const html = receiptHTML({
+    no,
+    dept: S.map(s => s.dept).join(", "),
+    label: A.label,
+    guest: A.guest,
+    covers: A.covers,
+    room: A.room,
+    waiter: A.waiter || A.user,
+    at: slipStamp(A.at),
+    reprint: A.copies,
+    lines: lines.map(l => ({ q: l.q, n: l.n, p: l.p, t: l.t })),
+    t: {
+      sub: sum(lines, l => l.p * l.q),
+      disc: money("disc"),
+      net: money("net"),
+      tax: money("tax"),
+      g: money("g"),
+      cur: keep && keep.cur,
+      pl: A.pl ? { n: A.pl } : null
+    },
+    paid:
+      keep && keep.paid
+        ? keep.paid
+        : Object.entries(paid)
+            .map(([m, v]) => slipRow(MN[m] || m, bill2(v)))
+            .join(""),
+    change: keep ? keep.change : 0,
+    credit: keep ? keep.credit : !!paid.credit,
+    fiscal: keep
+      ? `CU serial: ${keep.cu}<br>CU invoice no: ${keep.inv}${qr(no + keep.cu)}Scan to verify on KRA eTIMS<br>(demo QR)`
+      : ""
+  });
+  BILLLOG.push({
+    at: new Date().toISOString(),
+    act: "Reprint",
+    no,
+    label: A.label,
+    dept: S.map(s => s.dept).join(", "),
+    waiter: A.waiter || A.user,
+    by: boUser.n,
+    user: boUser.n,
+    why: "",
+    detail: `Copy ${A.copies} · ${rpSize === "a4" ? "A4" : "80mm"}`,
+    amt: 0,
+    points: S.map(s => s.dept)
+  });
+  bosave();
+  showRc(
+    rpSize === "a4" ? html.replace('class="slip"', 'class="slip sl-a4"') : html,
+    null,
+    "Close"
+  );
+}
 const REP = {
+  bills: [
+    "Bills Report",
+    () => {
+      const B = billShown(),
+        t = billTotals(B),
+        c = billCols();
+      return [
+        c,
+        B.map(billRow),
+        [
+          "Total",
+          plural(B.length, "bill"),
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ...(billF.net ? [m2(t.net)] : []),
+          m2(t.g)
+        ],
+        "No bills for these dates and filters.",
+        logHead("Bills")
+      ];
+    }
+  ],
   sc: [
     "Sales and Costs Report",
     L => {
@@ -78,6 +354,204 @@ const REP = {
         .map(([d, a]) => [d, a.length, m2(sum(a, s => s.net)), m2(sum(a, s => s.tax)), m2(G(a))]),
       ["Total", L.length, m2(sum(L, s => s.net)), m2(sum(L, s => s.tax)), m2(G(L))]
     ]
+  ],
+  blog: [
+    "Bill Options Log",
+    () => {
+      const R = billLog();
+      return [
+        [
+          "Date",
+          "Bill",
+          "Table",
+          "Sale point",
+          "Action",
+          "Details",
+          "Reason",
+          "Authorized by",
+          "Till user",
+          "#Change (KES)"
+        ],
+        R.map(x => [
+          new Date(x.at).toLocaleString("en-GB"),
+          x.no,
+          x.label,
+          x.dept,
+          x.act,
+          x.detail,
+          x.why,
+          x.by,
+          x.user,
+          m2(x.amt)
+        ]),
+        null,
+        R.length ? "" : "Nothing was changed through Bill options in these dates.",
+        logHead(plural(R.length, "change"))
+      ];
+    }
+  ],
+  vdep: [
+    "Voided Bills by Department",
+    () => {
+      const R = voidRows(),
+        rows = [];
+      by(
+        R.flatMap(x => voidParts(x).map(l => ({ x, l }))),
+        p => p.l.d
+      )
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .forEach(([d, P]) => {
+          by(P, p => p.x.at + "|" + p.x.no).forEach(([, a]) => {
+            const x = a[0].x;
+            rows.push([
+              d,
+              new Date(x.at).toLocaleString("en-GB"),
+              x.no,
+              x.label,
+              x.waiter || "",
+              voidItemsText(a.map(p => p.l)),
+              x.why,
+              x.by,
+              m2(sum(a, p => p.l.amt))
+            ]);
+          });
+          rows.push(["Total " + d, "", "", "", "", "", "", "", m2(sum(P, p => p.l.amt))]);
+        });
+      return [
+        [
+          "Department",
+          "Date",
+          "Bill",
+          "Table",
+          "Waiter",
+          "Items voided",
+          "Reason",
+          "Authorized by",
+          "#Value (KES)"
+        ],
+        rows,
+        ["Total", "", "", "", "", "", "", "", m2(voidTotal(R))],
+        R.length ? "" : "No voided bills in these dates.",
+        logHead(plural(R.length, "void") + " · " + KES(voidTotal(R)))
+      ];
+    }
+  ],
+  vall: [
+    "All Voided Bills",
+    () => {
+      const R = voidRows();
+      return [
+        [
+          "Date",
+          "Bill",
+          "Table",
+          "Department",
+          "Waiter",
+          "Items voided",
+          "Voided",
+          "Stock",
+          "Reason",
+          "Authorized by",
+          "Till user",
+          "#Value (KES)"
+        ],
+        R.map(x => {
+          const P = voidParts(x);
+          return [
+            new Date(x.at).toLocaleString("en-GB"),
+            x.no,
+            x.label,
+            [...new Set(P.map(l => l.d))].join(", "),
+            x.waiter || "",
+            voidItemsText(P),
+            x.items && !x.whole ? "Part of bill" : "Whole bill",
+            x.detail
+              .split(" · ")
+              .pop()
+              .replace(/^./, c => c.toUpperCase()),
+            x.why,
+            x.by,
+            x.user,
+            m2(sum(P, l => l.amt))
+          ];
+        }),
+        ["Total", plural(R.length, "void"), "", "", "", "", "", "", "", "", "", m2(voidTotal(R))],
+        R.length ? "" : "No voided bills in these dates.",
+        logHead(plural(R.length, "void") + " · " + KES(voidTotal(R)))
+      ];
+    }
+  ],
+  dlog: [
+    "Discount Report",
+    () => {
+      const R = billLog(["Discount", "Discount removed"]),
+        T = sum(R, x => -x.amt);
+      return [
+        [
+          "Date",
+          "Bill",
+          "Table",
+          "Sale point",
+          "Waiter",
+          "Discount",
+          "Reason",
+          "Authorized by",
+          "Till user",
+          "#Amount (KES)"
+        ],
+        R.map(x => [
+          new Date(x.at).toLocaleString("en-GB"),
+          x.no,
+          x.label,
+          logPoints(x).join(", "),
+          x.waiter || "",
+          x.act === "Discount" ? x.detail : "Removed",
+          x.why,
+          x.by,
+          x.user,
+          m2(-x.amt)
+        ]),
+        ["Total", plural(R.length, "change"), "", "", "", "", "", "", "", m2(T)],
+        R.length ? "" : "No discounts were given in these dates.",
+        logHead(plural(R.length, "change") + " · " + KES(T))
+      ];
+    }
+  ],
+  msp: [
+    "Merged & Split Bills",
+    () => {
+      const R = billLog(["Merge", "Split"]),
+        n = a => R.filter(x => x.act === a).length;
+      return [
+        [
+          "Date",
+          "Action",
+          "Bill",
+          "Table",
+          "Sale point",
+          "Waiter",
+          "Details",
+          "Authorized by",
+          "Till user",
+          "#Value (KES)"
+        ],
+        R.map(x => [
+          new Date(x.at).toLocaleString("en-GB"),
+          x.act === "Merge" ? "Merged" : "Split",
+          x.no,
+          x.label,
+          logPoints(x).join(", "),
+          x.waiter || "",
+          x.detail,
+          x.by,
+          x.user,
+          m2(Math.abs(x.amt))
+        ]),
+        null,
+        R.length ? "" : "No bills were merged or split in these dates.",
+        logHead(n("Merge") + " merged · " + n("Split") + " split")
+      ];
+    }
   ],
   ds: [
     "Discounted Sales Report",
@@ -224,7 +698,7 @@ const V = {
   rep() {
     const [t, fn] = REP[rp],
       L = rs(),
-      [c, r, f, note] = fn(L);
+      [c, r, f, note, head] = fn(L);
     return `<div style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start"><div class="pn" style="flex:1 1 230px;max-width:300px"><h4>Sales reports</h4>${Object.entries(
       REP
     )
@@ -234,8 +708,8 @@ const V = {
       )
       .join("")}</div>
  <div class="pn" style="flex:3 1 420px"><h4>${t}</h4><div class="fr" style="align-items:center"><input type="date" data-f="rf" value="${rf}"><input type="date" data-f="rt" value="${rt}"><select data-f="rd">${["All", ...ALLD].map(d => `<option ${d === rd ? "selected" : ""}>${d}</option>`).join("")}</select>${rp === "com" ? `<input type="number" step="any" data-f="rc" value="${rcm}" title="Commission rate %" placeholder="Rate %">` : ""}</div>
- <div class="fr"><button class="mini" data-q="0">Today</button><button class="mini" data-q="6">Last 7 days</button><button class="mini" data-q="29">Last 30 days</button></div>
- <div style="color:var(--mute);font-size:12px">${L.length} bills · ${KES(G(L))} · ${rf} to ${rt} · ${rd === "All" ? "all sale points" : rd}</div>${tb(c, r, f)}${note ? `<div class="stk">${note}</div>` : ""}</div></div>`;
+ <div class="fr"><button class="mini" data-q="0">Today</button><button class="mini" data-q="6">Last 7 days</button><button class="mini" data-q="29">Last 30 days</button>${printTools("rep")}</div>
+ <div style="color:var(--mute);font-size:12px">${head || `${L.length} bills · ${KES(G(L))} · ${rf} to ${rt} · ${rd === "All" ? "all sale points" : rd}`}</div>${rp === "bills" ? billsGrid(c, r, note) : head ? tb(c, r, f, note) : tb(c, r, f)}${note && !head ? `<div class="stk">${note}</div>` : ""}</div></div>`;
   },
   sales() {
     const A = sel(0),
@@ -278,8 +752,8 @@ const V = {
    .join("")}</table></div>`;
   },
   staff() {
-    return `<div class="pn"><h4>Add staff</h4><div class="fr"><input id="su" placeholder="First Last"><select id="sr"><option>Waiter</option><option>Cashier</option><option>Manager</option></select><input id="up" inputmode="numeric" placeholder="PIN (4 to 6 digits)"><button class="chip on" data-a="addu">Add</button></div></div>
- <div class="pn tw"><table class="t"><tr><th>Name</th><th>Role</th><th>PIN</th><th>Card ID</th><th>Sale points</th></tr>${USERS.map((u, i) => `<tr><td>${esc(u.n)}</td><td><select data-ur="${i}">${["Waiter", "Cashier", "Manager"].map(r => `<option ${u.role === r ? "selected" : ""}>${r}</option>`).join("")}</select></td><td><input value="${u.pin}" data-up="${i}" inputmode="numeric" style="max-width:100px"></td><td><input value="${esc(u.card || "")}" data-uk="${i}" placeholder="Click, then swipe" style="max-width:140px"></td><td>${ALLD.map(d => `<label style="margin-right:10px"><input type="checkbox" style="width:auto;min-width:0" data-ud="${i}" value="${d}" ${u.d.includes(d) ? "checked" : ""}> ${d}</label>`).join("")}</td></tr>`).join("")}</table></div><div class="pn"><h4>Back Office accounts</h4><div class="stk">Back Office signs in with a username and password. Passwords are stored as hashes on this device.</div><div class="fr"><input id="mn" placeholder="Full name"><input id="mu" placeholder="Username"><input id="mp" type="password" placeholder="Password (6+ characters)"><button class="chip on" data-a="addm">Add account</button></div><div class="tw"><table class="t"><tr><th>Name</th><th>Username</th><th>New password</th><th></th></tr>${ADM.map((a, i) => `<tr><td>${esc(a.n)}</td><td>${esc(a.u)}</td><td><input type="password" id="np_${i}" placeholder="New password"></td><td><div class="fr"><button class="mini" data-a="pwm" data-i="${i}">Change</button>${ADM.length > 1 ? `<button class="mini" data-a="delm" data-i="${i}">Remove</button>` : ""}</div></td></tr>`).join("")}</table></div></div>`;
+    return `<div class="pn"><h4>Add staff</h4><div class="fr"><input id="su" placeholder="First Last"><select id="sr"><option>Waiter</option><option>Cashier</option><option>Super Cashier</option><option>Manager</option></select><input id="up" inputmode="numeric" placeholder="PIN (4 to 6 digits)"><button class="chip on" data-a="addu">Add</button></div></div>
+ <div class="pn tw"><table class="t"><tr><th>Name</th><th>Role</th><th>PIN</th><th>Card ID</th><th>Sale points</th></tr>${USERS.map((u, i) => `<tr><td>${esc(u.n)}</td><td><select data-ur="${i}">${["Waiter", "Cashier", "Super Cashier", "Manager"].map(r => `<option ${u.role === r ? "selected" : ""}>${r}</option>`).join("")}</select></td><td><input value="${u.pin}" data-up="${i}" inputmode="numeric" style="max-width:100px"></td><td><input value="${esc(u.card || "")}" data-uk="${i}" placeholder="Click, then swipe" style="max-width:140px"></td><td>${ALLD.map(d => `<label style="margin-right:10px"><input type="checkbox" style="width:auto;min-width:0" data-ud="${i}" value="${d}" ${u.d.includes(d) ? "checked" : ""}> ${d}</label>`).join("")}</td></tr>`).join("")}</table></div><div class="pn"><h4>Back Office accounts</h4><div class="stk">Back Office signs in with a username and password. Passwords are stored as hashes on this device.</div><div class="fr"><input id="mn" placeholder="Full name"><input id="mu" placeholder="Username"><input id="mp" type="password" placeholder="Password (6+ characters)"><button class="chip on" data-a="addm">Add account</button></div><div class="tw"><table class="t"><tr><th>Name</th><th>Username</th><th>New password</th><th></th></tr>${ADM.map((a, i) => `<tr><td>${esc(a.n)}</td><td>${esc(a.u)}</td><td><input type="password" id="np_${i}" placeholder="New password"></td><td><div class="fr"><button class="mini" data-a="pwm" data-i="${i}">Change</button>${ADM.length > 1 ? `<button class="mini" data-a="delm" data-i="${i}">Remove</button>` : ""}</div></td></tr>`).join("")}</table></div></div>`;
   },
   cred() {
     return `<div class="pn"><h4>Add credit customer</h4><div class="fr"><input id="cn" placeholder="Customer name"><input id="cc" type="number" placeholder="Credit limit"><button class="chip on" data-a="addc">Add</button></div></div>
@@ -591,7 +1065,7 @@ function roomsReportHTML() {
       ""
     )}</div></div>${q.map(([k, n]) => `<button class="btn ${k === hrr ? "p" : ""}" data-rr="${k}" style="flex:none">${n}</button>`).join("")}<button class="btn a" data-rr="fd" style="flex:none">Open Front Desk</button></div>
  <div style="margin-bottom:12px">${roomsKpiHTML()}</div>
- <h3>${RRL[hrr]}</h3><div class="cs">${["rv", "pay", "rt", "gl"].includes(hrr) ? rrRange().join(" to ") : "Live position"}</div>${tb(cols, rows, foot, "Nothing to show for this report and period.")}`;
+ <div class="fr" style="align-items:center;justify-content:space-between"><h3 style="margin:0">${RRL[hrr]}</h3><span>${printTools("rooms")}</span></div><div class="cs">${["rv", "pay", "rt", "gl"].includes(hrr) ? rrRange().join(" to ") : "Live position"}</div>${tb(cols, rows, foot, "Nothing to show for this report and period.")}`;
 }
 function roomsCard() {
   $("#rooms").innerHTML = roomsKpiHTML(); // dashboard: the summary cards only

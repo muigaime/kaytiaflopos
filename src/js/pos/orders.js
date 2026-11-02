@@ -4,8 +4,32 @@ let orders = [],
   ono = 1,
   payOrder = null,
   selTbl = "";
+/** Save when an open order changes: sending, adding, settling or any bill option all end by redrawing the cart. */
+let ordersSaved = "[]";
+function ordersKeep() {
+  const now = JSON.stringify(orders);
+  if (now === ordersSaved) return;
+  ordersSaved = now;
+  if (window.bosave) window.bosave();
+}
 const TBL = ["T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "Takeaway"];
-const visOrders = () => orders.filter(o => DEPTS.includes(o.dept));
+/** The sale points a bill's items belong to. A bill can hold several in the All sale points view. */
+const billPoints = c => [
+  ...new Set(
+    Object.keys(c)
+      .map(id => (get(id) || {}).d)
+      .filter(Boolean)
+  )
+];
+const billPlace = c => billPoints(c).join(", ");
+const billAtPoints = (o, pts) =>
+  pts.includes(o.dept) || billPoints(o.lines).some(d => pts.includes(d));
+/** A waiter works on their own bills. These roles see every waiter's bills at their sale points. */
+const BILL_ALL = ["Manager", "Super Cashier", "Cashier"];
+const seesAllBills = u => !!u && BILL_ALL.includes(u.role);
+const billsFor = (u, pts) =>
+  orders.filter(o => (u && o.waiter === u.n) || (seesAllBills(u) && billAtPoints(o, pts)));
+const visOrders = () => billsFor(user, DEPTS);
 const hhmm = d => d.toLocaleTimeString("en-KE", { hour: "2-digit", minute: "2-digit" });
 const cnt = c => Object.values(c).reduce((a, b) => a + b, 0);
 function showRc(html, charge, closeLbl) {
@@ -52,13 +76,32 @@ $("#sendGo").onclick = () => {
   doSend(l);
 };
 function doSend(label) {
+  let tickets = [];
   const round = { ...cart };
-  let o = cur || orders.find(x => x.dept === dept && x.label.toLowerCase() === label.toLowerCase());
+  let o =
+    cur ||
+    (dept === ALLP
+      ? orders.filter(x => billAtPoints(x, DEPTS))
+      : orders.filter(x => x.dept === dept)
+    ).find(x => x.label.toLowerCase() === label.toLowerCase());
+  if (o && !cur && !visOrders().includes(o)) {
+    $("#mSend").classList.remove("show");
+    return fsNote(
+      `${o.label} is open under ${o.waiter}. Use another name, or ask a manager to merge.`
+    );
+  }
+  // This sale's discount or price list was authorized for this sale, not for the whole open bill.
+  if (o && !cur && (cartAdj.disc || cartAdj.pl || cartAdj.cur)) {
+    $("#mSend").classList.remove("show");
+    return fsNote(
+      `${o.label} is already open. Remove this sale's bill option, or add to that bill.`
+    );
+  }
   if (!o) {
     o = {
       no: "ORD-" + String(ono++).padStart(3, "0"),
       label,
-      dept,
+      dept: dept === ALLP ? billPoints(round)[0] : dept,
       lines: {},
       rounds: 0,
       at: new Date(),
@@ -66,7 +109,8 @@ function doSend(label) {
       covers: $("#fCov").value.trim(),
       room: $("#fRoom").value.trim(),
       rider: rider,
-      waiter: user ? user.n : ""
+      waiter: user ? user.n : "",
+      ...cartAdj
     };
     orders.push(o);
   } else {
@@ -83,9 +127,9 @@ function doSend(label) {
   $("#mSend").classList.remove("show");
   drawCart();
   showRc(
-    orderSlips(round, {
+    (tickets = orderTickets(round, {
       no: o.no,
-      dept: o.dept,
+      dept: billPlace(o.lines),
       label: o.label,
       guest: o.guest,
       covers: o.covers,
@@ -94,10 +138,14 @@ function doSend(label) {
       rider: o.rider,
       round: o.rounds,
       note: kmsg
-    }) + '<div class="sl-scr">Sent. Bill and charge later from Open orders.</div>',
+    }))
+      .map(x => x.html)
+      .join("") +
+      '<div class="sl-scr" id="rcPrinted"></div><div class="sl-scr">Sent. Bill and charge later from Open orders.</div>',
     null,
     "Close"
   );
+  printOrderTickets(tickets);
   kmsg = "";
   rider = null;
   ["fTable", "fGuest", "fCov", "fRoom"].forEach(i => ($("#" + i).value = ""));
@@ -107,8 +155,8 @@ function ordList() {
   const L = visOrders();
   $("#ordList").innerHTML = L.length
     ? L.map(o => {
-        const t = totals(o.lines);
-        return `<div class="ord"><div class="h"><span>${o.label} · ${o.dept}</span><span>${KES(t.g)}</span></div><div class="m">${o.no} · ${cnt(o.lines)} items · ${o.rounds} round${o.rounds > 1 ? "s" : ""} · sent ${hhmm(o.at)} · <b>SENT</b></div><div class="row"><button class="mini" data-oa="add" data-o="${o.no}">Add items</button><button class="mini" data-oa="bill" data-o="${o.no}">Print bill</button><button class="mini" data-oa="swap" data-o="${o.no}">Swap</button><button class="chip on" data-oa="pay" data-o="${o.no}">Charge</button></div></div>`;
+        const t = totals(o.lines, o);
+        return `<div class="ord"><div class="h"><span>${o.label} · ${billPlace(o.lines)}</span><span>${KES(t.g)}</span></div><div class="m">${o.no} · ${seesAllBills(user) ? slipEsc(o.waiter || "No waiter") + " · " : ""}${cnt(o.lines)} items · ${o.rounds} round${o.rounds > 1 ? "s" : ""} · sent ${hhmm(o.at)} · <b>SENT</b></div><div class="row"><button class="mini" data-oa="add" data-o="${o.no}">Add items</button><button class="mini" data-oa="bill" data-o="${o.no}">Print bill</button><button class="mini" data-oa="swap" data-o="${o.no}">Swap</button><button class="chip on" data-oa="pay" data-o="${o.no}">Charge</button></div></div>`;
       }).join("")
     : '<div class="empty">No open orders. Use Send order to start one.</div>';
 }
@@ -127,7 +175,8 @@ $("#ordList").onclick = e => {
     return;
   }
   if (a === "add") {
-    dept = o.dept;
+    if (dept === ALLP) spTab = o.dept;
+    else dept = o.dept;
     cur = o;
     cart = {};
     drawDepts();
@@ -141,15 +190,15 @@ $("#ordList").onclick = e => {
     showRc(
       guestBillHTML({
         no: o.no,
-        dept: o.dept,
+        dept: billPlace(o.lines),
         label: o.label,
         guest: o.guest,
         covers: o.covers,
         room: o.room,
         waiter: o.waiter,
         rider: o.rider,
-        lines: slipLines(o.lines),
-        t: totals(o.lines)
+        lines: slipLines(o.lines, o),
+        t: totals(o.lines, o)
       }),
       o,
       "Close"

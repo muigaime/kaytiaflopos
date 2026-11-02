@@ -6784,6 +6784,147 @@ body.mgr #home {
   flex: none;
   gap: 6px;
 }
+
+/* ---------------------------------------------------------------- printing and the Bills Report */
+#bo .rp-size {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 14px;
+  margin: 0 12px 0 auto;
+  font-size: 13px;
+}
+#bo .rp-size label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+}
+#bo .rp-size input {
+  width: auto;
+  min-width: 0;
+  accent-color: #9c7a36;
+}
+#bo .bl-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 10px 16px;
+  margin: 12px 0 10px;
+}
+#bo .bl-bar label {
+  display: grid;
+  gap: 3px;
+  font-size: 12px;
+  color: var(--mute);
+}
+#bo .bl-bar select {
+  min-width: 190px;
+}
+#bo .bl-bar .bl-net {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding-bottom: 8px;
+  font-size: 13px;
+  color: var(--ink);
+  cursor: pointer;
+}
+#bo .bl-net input {
+  width: auto;
+  min-width: 0;
+  accent-color: #9c7a36;
+}
+#bo .bl-hint {
+  margin-left: auto;
+  padding-bottom: 8px;
+  font-size: 12.5px;
+  font-style: italic;
+  color: #9c7a36;
+}
+#bo .bl-wrap {
+  max-height: 60vh;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-top: 3px solid #c7a25a;
+  border-radius: 6px;
+}
+#bo .bl-t {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+#bo .bl-t thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--card);
+}
+#bo .bl-t th {
+  padding: 8px 6px;
+  vertical-align: bottom;
+  color: var(--mute);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  text-align: left;
+  text-transform: uppercase;
+}
+#bo .bl-t .n {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+#bo .bl-f td {
+  padding: 0 3px 8px;
+  border-bottom: 1px solid #c7a25a;
+}
+#bo .bl-f input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: 4px 5px;
+  font-size: 11.5px;
+}
+#bo .bl-t tbody tr {
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.12s;
+}
+#bo .bl-t tbody tr[hidden] {
+  display: none;
+}
+#bo .bl-t tbody td {
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--line);
+}
+#bo .bl-t tbody tr:nth-child(even) {
+  background: rgba(199, 162, 90, 0.06);
+}
+#bo .bl-t tbody tr:hover {
+  background: rgba(199, 162, 90, 0.16);
+}
+#bo .bl-t tbody tr.on {
+  background: linear-gradient(90deg, rgba(199, 162, 90, 0.5), rgba(199, 162, 90, 0.2));
+  box-shadow: inset 3px 0 0 #9c7a36;
+  font-weight: 600;
+}
+#bo .bl-tot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: baseline;
+  gap: 8px 26px;
+  padding: 12px 4px 0;
+  font-size: 14px;
+  color: var(--mute);
+}
+#bo .bl-tot b {
+  margin-left: 6px;
+  color: var(--ink);
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
+}
 /* ==================== POS: five-star look ====================
    A fine-dining room, not a till: the menu reads like a printed menu card, the bill like an ivory guest
    check, and brass is kept for the one thing that matters on each screen.
@@ -7004,27 +7145,6 @@ body > .modal {
 .pos .items {
   align-content: start;
   gap: 10px;
-}
-.pos .ms {
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin: 10px 2px 0;
-  font-family: var(--serif);
-  font-size: 19px;
-  font-weight: 500;
-  font-style: italic;
-  color: var(--ink);
-}
-.pos .ms:first-child {
-  margin-top: 2px;
-}
-.pos .ms::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(90deg, var(--brass), transparent);
 }
 .pos .it {
   position: relative;
@@ -7634,46 +7754,41 @@ body > .modal select:focus {
   }
 }
 
-/* ---------------------------------------------------------------- compact menu
-   Busy outlets carry long menus, so tiles stay small; 64px is still an easy tap. */
+/* ---------------------------------------------------------------- menu tiles
+   One category shows at a time, so tiles are large enough to read at a glance. */
 .pos .items {
-  grid-template-columns: repeat(auto-fill, minmax(116px, 1fr));
-  gap: 6px;
-}
-.pos .ms {
-  margin: 6px 2px 0;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
   gap: 10px;
-  font-size: 14px;
 }
 .pos .it {
   grid-template-rows: 1fr auto;
   grid-template-columns: minmax(0, 1fr) auto;
-  column-gap: 6px;
-  min-height: 64px;
-  padding: 7px 8px 6px;
-  border-radius: 5px;
+  column-gap: 8px;
+  min-height: 120px;
+  padding: 12px 13px 10px;
+  border-radius: 6px;
 }
 .pos .it .nm {
   grid-column: 1 / -1;
   grid-row: 1;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   overflow: hidden;
   padding-right: 0;
-  font-size: 13px;
-  line-height: 1.2;
+  font-size: 17px;
+  line-height: 1.25;
 }
 .pos .it.has .nm {
-  padding-right: 20px;
+  padding-right: 28px;
 }
 .pos .it .pr {
   grid-column: 1;
   grid-row: 2;
-  margin-top: 3px;
+  margin-top: 8px;
   padding-top: 0;
   border-top: 0;
-  font-size: 12px;
+  font-size: 16px;
 }
 .pos .it .pr::before {
   content: none;
@@ -7683,17 +7798,17 @@ body > .modal select:focus {
   grid-row: 2;
   align-self: end;
   margin-top: 0;
-  font-size: 10px;
+  font-size: 12px;
   white-space: nowrap;
 }
 .pos .it .in {
-  top: 5px;
-  right: 5px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
-  border-radius: 9px;
-  font-size: 11px;
+  top: 9px;
+  right: 9px;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
+  border-radius: 12px;
+  font-size: 13px;
 }
 
 /* ---------------------------------------------------------------- full screen lock */
@@ -8097,6 +8212,1550 @@ body > .modal select:focus {
     break-before: page;
   }
 }
+
+/* ---------------------------------------------------------------- Bill options */
+.pos .acts {
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+}
+.pos .act {
+  grid-column: span 3;
+}
+.pos .act.a3,
+.pos .act.a1,
+.pos .act.a7 {
+  grid-column: span 4;
+}
+.pos .act.a7 {
+  order: -1;
+  min-height: 58px;
+  background: transparent;
+  border: 1px solid var(--brass);
+  font-family: var(--serif);
+  font-size: 16px;
+  font-weight: 500;
+}
+.pos .act.a3,
+.pos .act.a1 {
+  font-size: 16px;
+}
+@media (max-width: 1100px) {
+  .pos .acts {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+  .pos .act.a3,
+  .pos .act.a1,
+  .pos .act.a7 {
+    grid-column: span 4;
+  }
+}
+#mBopt .bop-box {
+  max-width: 480px;
+}
+#bopBody {
+  display: grid;
+  gap: 10px;
+}
+#bopBody h3,
+#bopBody p {
+  margin: 0;
+}
+#bopBody label {
+  display: grid;
+  gap: 4px;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+#bopBody input:not([type="checkbox"]) {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+}
+#bopBody label.bop-c {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+.bop-msg {
+  min-height: 16px;
+  font-size: 13px;
+  color: var(--bad);
+}
+.bop-list {
+  display: grid;
+  gap: 6px;
+  max-height: 44vh;
+  overflow: auto;
+}
+#bopBody .bop-b {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  font-size: 13.5px;
+  font-weight: 400;
+  text-align: left;
+  cursor: pointer;
+}
+#bopBody .bop-b:hover,
+#bopBody .bop-b.on {
+  border-color: var(--brass);
+}
+#bopBody .bop-b.on {
+  box-shadow: inset 0 0 0 1px var(--brass);
+}
+#bopBody small {
+  display: block;
+  color: var(--mute);
+  font-size: 11.5px;
+  font-weight: 400;
+}
+.slip .sl-fx {
+  margin-top: 4px;
+  font-weight: 600;
+  text-align: right;
+}
+.pos #lines .tr-adj {
+  padding: 8px 6px;
+  font-size: 12.5px;
+  color: var(--ivory-mute);
+  text-align: right;
+}
+
+/* Select: highlighted bills, and which bills the options are for */
+#mSel .sr:not(.sh) {
+  cursor: pointer;
+}
+#mSel .sr.on {
+  background: rgba(199, 162, 90, 0.16);
+  box-shadow: inset 3px 0 0 var(--brass);
+}
+#mSel .sfoot .row {
+  flex-wrap: wrap;
+}
+/* Select: bills in order number order, and viewing what is inside one */
+#mSel .sr {
+  grid-template-columns: 34px 96px minmax(0, 1fr) 120px 372px;
+}
+#mSel .sr-no {
+  font-weight: 700;
+  font-size: 15px;
+}
+#mSel .sr-bill small {
+  display: block;
+}
+#mSel .sr-items {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+#mSel .ra {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+@media (max-width: 900px) {
+  #mSel .sr {
+    grid-template-columns: 34px 84px minmax(0, 1fr) auto;
+  }
+  #mSel .sr.sh > span:last-child {
+    display: none;
+  }
+  #mSel .ra {
+    grid-column: 1 / -1;
+  }
+}
+#mView .view-box {
+  max-width: 500px;
+}
+#viewBody {
+  display: grid;
+  gap: 12px;
+}
+#viewBody h3 {
+  margin: 0;
+}
+.view-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 16px;
+  font-size: 13px;
+}
+.view-meta div {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+.view-meta span {
+  color: var(--mute);
+}
+.view-meta b {
+  font-weight: 600;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+.view-lines {
+  max-height: 42vh;
+  overflow: auto;
+}
+.view-lines table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+.view-lines th {
+  position: sticky;
+  top: 0;
+  padding: 5px 4px;
+  background: var(--card);
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-align: left;
+  text-transform: uppercase;
+}
+.view-lines td {
+  padding: 7px 4px;
+  border-bottom: 1px dotted var(--line);
+  vertical-align: top;
+}
+.view-lines .n {
+  text-align: right;
+  white-space: nowrap;
+}
+.view-tots {
+  display: grid;
+  gap: 3px;
+  font-size: 13px;
+}
+.view-tots .sl-r,
+.view-total {
+  display: flex;
+  justify-content: space-between;
+}
+.view-total {
+  margin-top: 3px;
+  padding: 6px 0;
+  border-top: 1px solid var(--ink);
+  border-bottom: 3px double var(--ink);
+  font-family: var(--serif);
+  font-size: 18px;
+  font-weight: 600;
+  font-variant-numeric: lining-nums;
+}
+.view-tots small {
+  color: var(--mute);
+  text-align: right;
+}
+#viewBody h3 {
+  font-variant-numeric: lining-nums;
+}
+
+/* Select: one line per bill, in the columns the cashier reads */
+#selList {
+  overflow: auto;
+}
+#mSel .sr,
+#mSel .sr:not(.sh) {
+  grid-template-columns:
+    34px 104px minmax(90px, 1.1fr) minmax(100px, 1.2fr) minmax(100px, 1.2fr)
+    92px 78px 46px 104px minmax(90px, 1fr);
+  min-width: 900px;
+  gap: 10px;
+  padding: 9px 8px;
+  font-size: 14px;
+}
+#mSel .sr > span {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+#mSel .sr.sh {
+  background: var(--card);
+  border-bottom: 2px solid var(--ink);
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+#mSel .sr .sr-no {
+  font-size: 14px;
+}
+#mSel .sr-cur {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--bad);
+}
+#mSel .sr.on {
+  background: linear-gradient(180deg, #e3c98e, #c7a25a);
+  box-shadow: none;
+  color: #1c1408;
+}
+#mSel .sr.on .sr-cur {
+  color: #1c1408;
+}
+#selOne .chip {
+  padding: 11px;
+  font-size: 14px;
+}
+#selOne .chip:disabled {
+  opacity: 0.4;
+}
+
+#rcPrinted:empty {
+  display: none;
+}
+#rcPrinted.ok {
+  color: var(--ok);
+}
+#rcPrinted.bad {
+  color: var(--bad);
+}
+
+@media print {
+  html.prc .slip.sl-sent {
+    display: none;
+  }
+}
+
+/* Sale point tabs above the menu */
+.sp-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex: none;
+  margin-bottom: 8px;
+}
+.sp-tabs:empty {
+  display: none;
+}
+.pos .sp-tab {
+  flex: 1 1 110px;
+  max-width: 190px;
+  min-height: 54px;
+  padding: 8px 10px;
+  background: var(--brand);
+  border: 1px solid var(--brass);
+  border-radius: 6px;
+  color: var(--brand-ink);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.pos .sp-tab:hover {
+  border-color: var(--brass-hi);
+}
+.pos .sp-tab.on {
+  background: linear-gradient(180deg, var(--brass-hi), var(--brass) 55%, var(--brass-lo));
+  border-color: var(--brass-lo);
+  color: #1c1408;
+}
+
+/* ---------------------------------------------------------------- void screen */
+#mBopt .bop-box.bop-void {
+  max-width: 900px;
+}
+.bv-wrap {
+  max-height: 34vh;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.bv-t {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+.bv-t th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 10px 12px;
+  background: var(--card);
+  color: var(--mute);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-align: left;
+  text-transform: uppercase;
+}
+.bv-t .n {
+  text-align: right;
+  white-space: nowrap;
+}
+.bv-t th.n {
+  text-align: right;
+}
+.bv-f td {
+  padding: 0 8px 8px;
+  border-bottom: 2px solid var(--brass);
+}
+#bopBody #bopVF {
+  padding: 7px 10px;
+  font-size: 13px;
+}
+.bv-t tbody tr {
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+  transition: background 0.14s;
+}
+.bv-t tbody tr:hover {
+  background: rgba(199, 162, 90, 0.08);
+}
+.bv-t tbody td {
+  padding: 11px 12px;
+}
+.bv-t tbody .d {
+  font-family: var(--serif);
+  font-size: 16.5px;
+}
+.bv-t tbody tr.on {
+  background: linear-gradient(90deg, rgba(199, 162, 90, 0.42), rgba(199, 162, 90, 0.14));
+  box-shadow: inset 3px 0 0 var(--brass);
+}
+.bv-t tbody tr.on .d {
+  font-weight: 600;
+  text-decoration: line-through;
+  text-decoration-color: var(--bad);
+}
+.bv-t input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--bad);
+  pointer-events: none;
+}
+.bv-t .qc {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.bv-t .qc button {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--brass);
+  border-radius: 50%;
+  background: var(--card);
+  color: var(--ink);
+  font-size: 16px;
+  cursor: pointer;
+}
+.bv-t .qc button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+#bopBody .bv-t small {
+  display: inline;
+  margin-left: 6px;
+}
+.bv-none {
+  color: var(--mute);
+  text-align: center;
+}
+.bv-sum {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 20px;
+}
+#bopBody .bv-sum label.bop-c {
+  font-family: var(--serif);
+  font-size: 20px;
+  cursor: pointer;
+}
+.bv-sum input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--bad);
+}
+#bopVSum {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  font-size: 14px;
+}
+#bopVSum .bv-out,
+#bopVSum .bv-out b {
+  color: var(--bad);
+}
+.bv-rs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+}
+.bv-r {
+  min-height: 52px;
+  padding: 8px 10px;
+  border: 1px solid var(--brass);
+  border-radius: 6px;
+  background: linear-gradient(160deg, rgba(199, 162, 90, 0.26), rgba(199, 162, 90, 0.08));
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 15px;
+  line-height: 1.2;
+  cursor: pointer;
+  transition:
+    transform 0.12s,
+    box-shadow 0.18s;
+}
+.bv-r:hover {
+  box-shadow: 0 6px 16px rgba(60, 40, 12, 0.16);
+  transform: translateY(-1px);
+}
+.bv-r.on {
+  border-color: var(--bad);
+  background: var(--bad);
+  color: #fff;
+}
+#bopWhy {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 400;
+  resize: vertical;
+}
+.bv-go {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 10px;
+}
+.bv-void,
+.bv-close {
+  min-height: 58px;
+  border-radius: 6px;
+  font-family: var(--serif);
+  font-size: 21px;
+  cursor: pointer;
+}
+.bv-void {
+  border: 1px solid #7c231b;
+  background: linear-gradient(170deg, #b23c31, #7c231b);
+  color: #fff;
+  letter-spacing: 0.02em;
+}
+.bv-close {
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+}
+/* Black on the slip's white paper, so it stands out from an order at the pass. */
+.slip.sl-void .sl-ot {
+  border-color: #000;
+  background: #000;
+  color: #fff;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.slip.sl-void .sl-make span {
+  text-decoration: line-through;
+}
+
+/* ---------------------------------------------------------------- split: old bill beside new bill */
+#mBopt .bop-box.bop-split {
+  max-width: 860px;
+}
+.bs-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.bs-p {
+  display: grid;
+  grid-template-rows: auto minmax(180px, 38vh) auto;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--card);
+}
+.bs-p.bs-new {
+  border-color: var(--brass);
+  box-shadow: inset 0 0 0 1px var(--brass);
+}
+#bopBody .bs-h {
+  display: grid;
+  gap: 2px;
+  min-height: 50px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--serif);
+  font-size: 18px;
+  font-weight: 500;
+}
+#bopBody .bs-h small {
+  font-family: inherit;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+#bopBody .bs-h input {
+  padding: 5px 8px;
+}
+.bs-r {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 8px;
+  overflow: auto;
+}
+.bs-e {
+  align-self: center;
+  padding: 26px 16px;
+  color: var(--mute);
+  font-family: var(--serif);
+  font-size: 15px;
+  font-style: italic;
+  text-align: center;
+}
+.bs-i {
+  display: flex;
+  gap: 6px;
+}
+.bs-m,
+.bs-all {
+  min-height: 46px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+.bs-m {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  font-size: 15px;
+  text-align: left;
+}
+.bs-m:hover,
+.bs-all:hover {
+  border-color: var(--brass);
+  background: rgba(199, 162, 90, 0.14);
+}
+.bs-m span {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--serif);
+  font-size: 16px;
+}
+.bs-m i {
+  color: var(--brass);
+  font-size: 18px;
+  font-style: normal;
+}
+.bs-all {
+  padding: 0 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.bs-t {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-top: 2px solid var(--brass);
+  font-family: var(--serif);
+  font-size: 15px;
+}
+.bs-t b {
+  font-size: 20px;
+  font-weight: 600;
+}
+@media (max-width: 700px) {
+  .bs-pair {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------------------------------------------------------------- Bill options: the walnut and brass dial */
+.bop-wheel {
+  position: relative;
+  width: min(520px, 94vw);
+  aspect-ratio: 1;
+  border: 1px solid #c7a25a;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 36%, #3d2f20 0, #1f1812 60%, #130e09 100%);
+  box-shadow:
+    0 0 0 7px rgba(199, 162, 90, 0.14),
+    0 0 0 8px rgba(199, 162, 90, 0.6),
+    0 36px 84px rgba(0, 0, 0, 0.62);
+  animation: bwIn 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.15);
+}
+.bop-wheel::before {
+  content: "";
+  position: absolute;
+  inset: 5%;
+  border: 1px solid rgba(199, 162, 90, 0.34);
+  border-radius: 50%;
+  background:
+    linear-gradient(
+      45deg,
+      transparent calc(50% - 0.5px),
+      rgba(199, 162, 90, 0.24) 50%,
+      transparent calc(50% + 0.5px)
+    ),
+    linear-gradient(
+      -45deg,
+      transparent calc(50% - 0.5px),
+      rgba(199, 162, 90, 0.24) 50%,
+      transparent calc(50% + 0.5px)
+    );
+  pointer-events: none;
+}
+.bop-wheel::after {
+  content: "";
+  position: absolute;
+  inset: 34%;
+  border: 1px solid rgba(199, 162, 90, 0.7);
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 35%, #2c2218, #17110c);
+  box-shadow: 0 0 0 4px rgba(199, 162, 90, 0.1);
+  pointer-events: none;
+}
+.bop-wheel .bw-i {
+  position: absolute;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  width: 30%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #f5ead4;
+  font-family: var(--serif);
+  font-size: 15.5px;
+  line-height: 1.2;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+}
+.bop-wheel .bw-ic {
+  display: grid;
+  place-items: center;
+  width: 76px;
+  height: 76px;
+  border: 1px solid #c7a25a;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 28%, #4c3b27, #231a11);
+  box-shadow:
+    inset 0 0 0 3px rgba(199, 162, 90, 0.13),
+    0 10px 22px rgba(0, 0, 0, 0.42);
+  transition:
+    transform 0.16s,
+    box-shadow 0.18s,
+    background 0.18s;
+}
+.bop-wheel .bw-ic svg {
+  width: 32px;
+  height: 32px;
+  fill: none;
+  stroke: #e7cb8d;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke 0.18s;
+}
+.bop-wheel .bw-i:hover .bw-ic,
+.bop-wheel .bw-i:focus-visible .bw-ic {
+  background: linear-gradient(160deg, #e7cb8d, #b08a44);
+  box-shadow:
+    inset 0 0 0 3px rgba(255, 255, 255, 0.24),
+    0 0 26px rgba(199, 162, 90, 0.55);
+  transform: translateY(-3px) scale(1.06);
+}
+.bop-wheel .bw-i:hover svg,
+.bop-wheel .bw-i:focus-visible svg {
+  stroke: #1f1812;
+}
+.bop-wheel .bw-i[data-bo="void"]:hover .bw-ic,
+.bop-wheel .bw-i[data-bo="void"]:focus-visible .bw-ic {
+  border-color: #d9695c;
+  background: linear-gradient(160deg, #b23c31, #7c231b);
+  box-shadow:
+    inset 0 0 0 3px rgba(255, 255, 255, 0.16),
+    0 0 26px rgba(178, 60, 49, 0.6);
+}
+.bop-wheel .bw-i[data-bo="void"]:hover svg,
+.bop-wheel .bw-i[data-bo="void"]:focus-visible svg {
+  stroke: #fff;
+}
+.bop-wheel .bw-t {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: 40%;
+  width: 28%;
+  color: #c7a25a;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  line-height: 1.3;
+  text-align: center;
+  text-transform: uppercase;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.bop-wheel .bw-c {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: 50%;
+  width: 44px;
+  height: 44px;
+  border: 1px solid #c7a25a;
+  border-radius: 50%;
+  background: transparent;
+  color: #f5ead4;
+  font-size: 15px;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  transition:
+    background 0.16s,
+    color 0.16s;
+}
+.bop-wheel .bw-c:hover {
+  background: #c7a25a;
+  color: #1f1812;
+}
+.bop-wheel .bw-for {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: 56%;
+  width: 26%;
+  overflow: hidden;
+  color: #e7cb8d;
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: center;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  transform: translateX(-50%);
+}
+@keyframes bwIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) rotate(-6deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bop-wheel {
+    animation: none;
+  }
+}
+@media (max-width: 520px) {
+  .bop-wheel .bw-ic {
+    width: 58px;
+    height: 58px;
+  }
+  .bop-wheel .bw-i {
+    font-size: 13px;
+  }
+}
+
+/* A receipt reprinted from Back Office opens over it */
+#mRc {
+  z-index: 70;
+}
+.slip .sl-copy {
+  margin-bottom: 6px;
+  padding: 4px 0;
+  border-top: 1px dashed #111;
+  border-bottom: 1px dashed #111;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-align: center;
+  text-transform: uppercase;
+}
+@media print {
+  html.prc.a4 #mRc .box,
+  html.prc.a4 #rc {
+    width: auto;
+  }
+  html.prc.a4 .slip {
+    width: 130mm;
+    max-width: none;
+    margin: 0 auto;
+    padding: 2mm 0 0;
+    border: 0;
+    zoom: 1.2;
+  }
+}
+/* ==================== Back Office: five-star look ====================
+   The same room as the POS: walnut, ivory and brass, with a serif for anything worth reading twice.
+   This is a colour theme (Theme → Five Star), so every Back Office page picks up the palette;
+   the dashboard also gets its banner and tailored panels.
+   Chart colours are checked with the dataviz validator, once per mode, against the card colour. */
+#bo[data-pal="five"] {
+  --brand: #1c1611;
+  --bi: #f6efe0;
+  --acc: #c7a25a;
+  --amber: #c7a25a;
+  --amber-ink: #1c1408;
+  --bg: #f3eee4;
+  --card: #fffdf8;
+  --ink: #241b12;
+  --mute: #75695a;
+  --line: #e2d9c8;
+  --chip: #f4eee2;
+  --tint: #efe6d4;
+  --ok: #1f6f55;
+  --good: #1f6f55;
+  --warn: #9a6a12;
+  --bad: #a4342a;
+  --sh: 0 18px 44px rgba(30, 20, 8, 0.14);
+  --rail: #17120d;
+  --rail2: #2a2118;
+  --brass: #c7a25a;
+  --brass-hi: #e3c98e;
+  --brass-lo: #9c7a36;
+  --serif: "Playfair Display", Georgia, "Times New Roman", serif;
+  --hair: rgba(199, 162, 90, 0.34);
+  /* the donut takes these in the order c1, c3, c2, c4, c6, c5 */
+  --c1: #b0841a;
+  --c3: #2b6cc4;
+  --c2: #c2452d;
+  --c4: #12947f;
+  --c6: #8147b5;
+  --c5: #d06a1e;
+  --tr1: #b0841a;
+  --tr2: #2b6cc4;
+}
+:root[data-theme="dark"] #bo[data-pal="five"] {
+  --brand: #c7a25a;
+  --bi: #1c1408;
+  --bg: #120e0a;
+  --card: #1d1712;
+  --ink: #f1e9da;
+  --mute: #a4977f;
+  --line: #342a1f;
+  --chip: #261e17;
+  --tint: #2c2318;
+  --ok: #6fbf9f;
+  --good: #6fbf9f;
+  --warn: #e2b866;
+  --bad: #e58a7c;
+  --sh: 0 18px 44px rgba(0, 0, 0, 0.5);
+  --rail: #0b0806;
+  --rail2: #1d1712;
+  --c1: #b08526;
+  --c3: #4a8ee2;
+  --c2: #e0634c;
+  --c4: #1ea38a;
+  --c6: #9f6ddf;
+  --c5: #d4742a;
+  --tr1: #b08526;
+  --tr2: #4a8ee2;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) #bo[data-pal="five"] {
+    --brand: #c7a25a;
+    --bi: #1c1408;
+    --bg: #120e0a;
+    --card: #1d1712;
+    --ink: #f1e9da;
+    --mute: #a4977f;
+    --line: #342a1f;
+    --chip: #261e17;
+    --tint: #2c2318;
+    --ok: #6fbf9f;
+    --good: #6fbf9f;
+    --warn: #e2b866;
+    --bad: #e58a7c;
+    --sh: 0 18px 44px rgba(0, 0, 0, 0.5);
+    --rail: #0b0806;
+    --rail2: #1d1712;
+    --c1: #b08526;
+    --c3: #4a8ee2;
+    --c2: #e0634c;
+    --c4: #1ea38a;
+    --c6: #9f6ddf;
+    --c5: #d4742a;
+    --tr1: #b08526;
+    --tr2: #4a8ee2;
+  }
+}
+
+/* ---------------------------------------------------------------- side rail */
+#bo[data-pal="five"] aside {
+  background: linear-gradient(180deg, var(--rail2), var(--rail) 46%);
+  border-right: 1px solid var(--hair);
+}
+#bo[data-pal="five"] .lg {
+  background: #fbf6ea;
+  border: 1px solid var(--brass);
+  box-shadow: inset 0 0 0 3px rgba(199, 162, 90, 0.14);
+}
+#bo[data-pal="five"] #nav .sec {
+  color: var(--brass);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+}
+#bo[data-pal="five"] .nv {
+  color: #d8ccb6;
+  font-family: var(--serif);
+  font-size: 14px;
+  transition:
+    color 0.15s,
+    background 0.15s;
+}
+#bo[data-pal="five"] .nv:hover {
+  background: rgba(199, 162, 90, 0.1);
+  color: #f6efe0;
+}
+#bo[data-pal="five"] .nv.on {
+  background: linear-gradient(90deg, rgba(199, 162, 90, 0.26), transparent);
+  color: var(--brass-hi);
+  box-shadow: none;
+}
+#bo[data-pal="five"] .nv.on:before {
+  background: var(--brass);
+}
+#bo[data-pal="five"] .nv .b {
+  background: var(--brass);
+  color: #1c1408;
+  font-family: "Schibsted Grotesk", Arial, sans-serif;
+}
+#bo[data-pal="five"] .card h3 .pill {
+  font-family: "Schibsted Grotesk", Arial, sans-serif;
+}
+
+/* ---------------------------------------------------------------- top bar */
+#bo[data-pal="five"] .top {
+  background: var(--card);
+  border-bottom: 1px solid var(--hair);
+  box-shadow: none;
+}
+#bo[data-pal="five"] .ib.srch {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  width: auto;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--chip);
+  color: var(--mute);
+  font-size: 13px;
+  white-space: nowrap;
+}
+#bo[data-pal="five"] .ib.srch kbd {
+  position: static;
+  margin-left: 6px;
+  background: var(--card);
+}
+#bo[data-pal="five"] .av {
+  background: linear-gradient(160deg, #e3c98e, #9c7a36);
+  color: #1c1408;
+  font-family: var(--serif);
+}
+#bo[data-pal="five"] .ib .dot {
+  background: var(--bad);
+}
+
+/* ---------------------------------------------------------------- type and common parts */
+#bo[data-pal="five"] .hello h1,
+#bo[data-pal="five"] .h2 h2,
+#bo[data-pal="five"] .card h3,
+#bo[data-pal="five"] .pn h4 {
+  font-family: var(--serif);
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--ink);
+}
+#bo[data-pal="five"] .btn,
+#bo[data-pal="five"] .sq {
+  border-radius: 6px;
+}
+#bo[data-pal="five"] .btn.a {
+  background: linear-gradient(170deg, #e3c98e, #b58a3c);
+  color: #1c1408;
+}
+#bo[data-pal="five"] .card,
+#bo[data-pal="five"] .pn {
+  border: 1px solid var(--line);
+  border-top: 2px solid var(--brass);
+  border-radius: 6px;
+  background: var(--card);
+  box-shadow: 0 1px 2px rgba(40, 28, 12, 0.05);
+}
+#bo[data-pal="five"] .h2 {
+  align-items: center;
+  gap: 16px;
+  margin: 30px 0 14px;
+}
+#bo[data-pal="five"] .h2 h2 {
+  flex: none;
+  font-size: 22px;
+}
+#bo[data-pal="five"] .h2:after {
+  content: "";
+  order: 1;
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--brass), transparent);
+}
+#bo[data-pal="five"] .h2 small {
+  order: 2;
+  font-style: italic;
+  color: var(--mute);
+}
+
+/* ---------------------------------------------------------------- banner */
+#bo .hero-x {
+  display: none;
+}
+#bo[data-pal="five"] #vHome .hello {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px 20px;
+  margin-bottom: 16px;
+  padding: 24px 28px;
+  overflow: hidden;
+  border: 1px solid #000;
+  border-radius: 8px;
+  background: radial-gradient(circle at 12% 0, #4a3925 0, #241b12 48%, #17120d 100%);
+  box-shadow:
+    inset 0 0 0 1px var(--hair),
+    0 22px 50px rgba(30, 20, 8, 0.26);
+  color: #f6efe0;
+}
+#bo[data-pal="five"] #vHome .hello .hero-x {
+  display: grid;
+}
+#bo[data-pal="five"] .hero-mono {
+  place-items: center;
+  width: 62px;
+  height: 62px;
+  border: 1px solid var(--brass);
+  border-radius: 50%;
+  outline: 1px solid var(--brass);
+  outline-offset: 3px;
+  color: var(--brass-hi);
+  font-family: var(--serif);
+  font-size: 27px;
+}
+#bo[data-pal="five"] #vHome .hello h1 {
+  margin: 0;
+  color: #f6efe0;
+  font-size: 31px;
+  line-height: 1.15;
+}
+#bo[data-pal="five"] #vHome .hello p {
+  margin: 4px 0 0;
+  color: #cdbfa5;
+  font-style: italic;
+}
+#bo[data-pal="five"] #vHome .hello .seg {
+  border: 1px solid var(--hair);
+  background: rgba(255, 255, 255, 0.06);
+}
+#bo[data-pal="five"] #vHome .hello .seg button {
+  background: none;
+  color: #d8ccb6;
+}
+#bo[data-pal="five"] #vHome .hello .seg button.on {
+  background: var(--brass);
+  color: #1c1408;
+}
+#bo[data-pal="five"] #vHome .hello .btn.p {
+  border: 1px solid var(--brass);
+  background: transparent;
+  color: var(--brass-hi);
+}
+#bo[data-pal="five"] .hero-figs {
+  grid-column: 1 / -1;
+  grid-template-columns: 1.7fr repeat(3, 1fr);
+  padding-top: 16px;
+  border-top: 1px solid var(--hair);
+}
+#bo .hero-figs > div {
+  display: grid;
+  align-content: start;
+  gap: 3px;
+  min-width: 0;
+  padding: 0 22px;
+  border-left: 1px solid var(--hair);
+}
+#bo .hero-figs > div:first-child {
+  padding-left: 0;
+  border: 0;
+}
+#bo .hero-figs span {
+  color: var(--brass);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+#bo .hero-figs b {
+  color: #f6efe0;
+  font-family: var(--serif);
+  font-size: 25px;
+  font-weight: 500;
+  line-height: 1.2;
+  font-variant-numeric: lining-nums;
+}
+#bo .hero-figs div:first-child b {
+  color: var(--brass-hi);
+  font-size: 36px;
+}
+#bo .hero-figs small {
+  color: #cdbfa5;
+  font-size: 12.5px;
+}
+
+/* ---------------------------------------------------------------- figures */
+#bo[data-pal="five"] #rooms {
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+#bo[data-pal="five"] #rooms .k,
+#bo[data-pal="five"] .kpis .k {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--card);
+  box-shadow: 0 1px 2px rgba(40, 28, 12, 0.05);
+}
+#bo[data-pal="five"] #rooms .k:before,
+#bo[data-pal="five"] .kpis .k:before {
+  height: 2px;
+  background: var(--brass);
+  opacity: 1;
+}
+#bo[data-pal="five"] #rooms .k .l,
+#bo[data-pal="five"] .kpis .k .l {
+  color: var(--mute);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+#bo[data-pal="five"] .kpis .k .l svg {
+  color: var(--brass-lo);
+  stroke: var(--brass-lo);
+}
+#bo[data-pal="five"] #rooms .k .v,
+#bo[data-pal="five"] .kpis .k .v {
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 25px;
+  font-weight: 500;
+  font-variant-numeric: lining-nums;
+}
+#bo[data-pal="five"] .sp2 path:first-child {
+  fill: rgba(199, 162, 90, 0.16);
+}
+#bo[data-pal="five"] .sp2 path:last-child {
+  stroke: var(--brass-lo);
+}
+
+/* ---------------------------------------------------------------- applications */
+#bo[data-pal="five"] .mods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+#bo[data-pal="five"] .m {
+  flex: 1 1 200px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--card);
+  box-shadow: 0 1px 2px rgba(40, 28, 12, 0.05);
+  transition:
+    border-color 0.16s,
+    box-shadow 0.18s,
+    transform 0.12s;
+}
+#bo[data-pal="five"] .m:hover {
+  border-color: var(--brass);
+  box-shadow: 0 10px 24px rgba(60, 40, 12, 0.14);
+  transform: translateY(-2px);
+}
+#bo[data-pal="five"] .m .ic {
+  border: 1px solid var(--brass);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 28%, #4c3b27, #231a11) !important;
+  color: #e7cb8d !important;
+}
+#bo[data-pal="five"] .m b {
+  font-family: var(--serif);
+  font-size: 16.5px;
+  font-weight: 500;
+}
+#bo[data-pal="five"] .m .n {
+  color: var(--brass-lo) !important;
+  font-weight: 600;
+}
+:root[data-theme="dark"] #bo[data-pal="five"] .m .n {
+  color: var(--brass-hi) !important;
+}
+
+/* ---------------------------------------------------------------- lists and charts */
+#bo[data-pal="five"] .row .t b {
+  font-weight: 600;
+}
+#bo[data-pal="five"] .row .ri {
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px currentColor;
+}
+#bo .ch-tip {
+  position: fixed;
+  z-index: 80;
+  max-width: 260px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--card);
+  box-shadow: var(--sh);
+  color: var(--ink);
+  font-size: 12.5px;
+  line-height: 1.35;
+  pointer-events: none;
+}
+#bo .ch-tip[hidden] {
+  display: none;
+}
+#bo #trend .hit {
+  fill: transparent;
+}
+#bo #trend .hit:hover {
+  fill: rgba(127, 127, 127, 0.1);
+}
+
+@media (max-width: 1100px) {
+  #bo[data-pal="five"] #vHome .hello {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  #bo[data-pal="five"] #vHome .hello > div:nth-of-type(3) {
+    grid-column: 1 / -1;
+  }
+  #bo[data-pal="five"] .hero-figs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 0;
+  }
+  #bo .hero-figs > div:nth-child(odd) {
+    padding-left: 0;
+    border: 0;
+  }
+}
+@media (max-width: 640px) {
+  #bo[data-pal="five"] #vHome .hello {
+    padding: 18px;
+  }
+  #bo[data-pal="five"] #vHome .hello h1 {
+    font-size: 24px;
+  }
+  #bo[data-pal="five"] .h2 small {
+    display: none;
+  }
+  #bo .hero-figs div:first-child b {
+    font-size: 28px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #bo[data-pal="five"] .m,
+  #bo[data-pal="five"] .nv {
+    transition: none;
+  }
+  #bo[data-pal="five"] .m:hover {
+    transform: none;
+  }
+}
+
+/* ---------------------------------------------------------------- stock and purchasing pages
+   These have always been a dark workspace, so they stay dark: walnut and brass instead of navy and teal. */
+#bo[data-pal="five"] .inv {
+  --bg: #17120d;
+  --card: #241b12;
+  --ink: #f1e9da;
+  --mute: #b7a98f;
+  --line: #3a2e20;
+  --chip: #2c2318;
+  --tint: #2c2318;
+  --bad: #e58a7c;
+  --ok: #6fbf9f;
+  --warn: #e2b866;
+  background:
+    radial-gradient(700px 300px at 100% -10%, rgba(199, 162, 90, 0.14), transparent 60%), var(--bg);
+  border: 1px solid #3a2e20;
+  border-radius: 8px;
+}
+#bo[data-pal="five"] .inv .pn {
+  border-color: #3a2e20;
+  border-top-color: var(--brass);
+  background: var(--card);
+}
+#bo[data-pal="five"] .inv .pn h4 {
+  color: var(--brass-hi);
+}
+#bo[data-pal="five"] .inv .ir,
+#bo[data-pal="five"] .inv label,
+#bo[data-pal="five"] .inv label.sw,
+#bo[data-pal="five"] .inv .chip2,
+#bo[data-pal="five"] :is(.inv, #stModal) .seg2 button {
+  color: #d8ccb6;
+}
+#bo[data-pal="five"] .inv .ir.on {
+  background: linear-gradient(90deg, rgba(199, 162, 90, 0.26), transparent);
+  box-shadow: inset 3px 0 0 var(--brass);
+  color: var(--brass-hi);
+}
+#bo[data-pal="five"] .inv input,
+#bo[data-pal="five"] .inv select,
+#bo[data-pal="five"] .inv .grn textarea,
+#bo[data-pal="five"] .inv .t th,
+#bo[data-pal="five"] .inv .pbar,
+#bo[data-pal="five"] .inv .sc2 i,
+#bo[data-pal="five"] :is(.inv, #stModal) .seg2 {
+  background: #17120d;
+}
+#bo[data-pal="five"] .inv .t th {
+  color: var(--brass);
+}
+#bo[data-pal="five"] .inv input:focus,
+#bo[data-pal="five"] .inv select:focus,
+#bo[data-pal="five"] .inv .grn textarea:focus {
+  border-color: var(--brass);
+  box-shadow: 0 0 0 3px rgba(199, 162, 90, 0.2);
+}
+#bo[data-pal="five"] .inv .chip.on,
+#bo[data-pal="five"] .inv button.chip.on,
+#bo[data-pal="five"] :is(.inv, #stModal) .seg2 button.on {
+  background: linear-gradient(170deg, #e3c98e, #b58a3c);
+  color: #1c1408;
+}
+#bo[data-pal="five"] .inv .mini:hover,
+#bo[data-pal="five"] :is(.inv, #itModal, #speModal) .grn-mode:hover {
+  border-color: var(--brass);
+}
+#bo[data-pal="five"] .inv .t tr:hover td {
+  background: rgba(199, 162, 90, 0.08);
+}
+#bo[data-pal="five"] .inv .sc2.on {
+  border-color: var(--brass);
+  box-shadow:
+    0 0 0 2px rgba(199, 162, 90, 0.25),
+    0 8px 22px rgba(0, 0, 0, 0.3);
+}
+#bo[data-pal="five"] .inv .sc2 u,
+#bo[data-pal="five"] .inv .rbar {
+  background: linear-gradient(90deg, #9c7a36, #e3c98e);
+}
+#bo[data-pal="five"] .inv .pbar i {
+  background: repeating-linear-gradient(90deg, #b58a3c 0 10px, #e3c98e 10px 12px);
+}
+#bo[data-pal="five"] .inv label.sw:has(input:checked) {
+  border-color: var(--brass);
+  background: rgba(199, 162, 90, 0.16);
+}
+#bo[data-pal="five"] .inv .grn-head {
+  background:
+    linear-gradient(135deg, rgba(199, 162, 90, 0.14), rgba(199, 162, 90, 0) 60%), var(--card);
+}
+#bo[data-pal="five"] .inv .grn-kicker,
+#bo[data-pal="five"] .inv .grn-ab svg,
+#bo[data-pal="five"] .inv .grn-tot b.g {
+  color: var(--brass-hi);
+}
+#bo[data-pal="five"] .inv .grn-chip.lpo {
+  background: rgba(199, 162, 90, 0.16);
+  color: var(--brass-hi);
+}
+#bo[data-pal="five"] .inv .grn-entry {
+  background: rgba(199, 162, 90, 0.06);
+  border-color: rgba(199, 162, 90, 0.25);
+}
+#bo[data-pal="five"] .inv .grn-t tr.grn-sel td {
+  background: rgba(199, 162, 90, 0.1);
+}
+#bo[data-pal="five"] :is(.inv, #itModal, #speModal) .grn-mode.on {
+  border-color: var(--brass);
+  background:
+    linear-gradient(135deg, rgba(199, 162, 90, 0.2), rgba(199, 162, 90, 0.04)), var(--card);
+  box-shadow: inset 0 0 0 1px var(--brass);
+}
+
+/* ---------------------------------------------------------------- sign in */
+#bo[data-pal="five"] .lbrand {
+  background: radial-gradient(circle at 18% 0, #4a3925 0, #241b12 48%, #17120d 100%);
+  color: #f1e9da;
+}
+#bo[data-pal="five"] .lbrand h2 {
+  font-family: var(--serif);
+  font-weight: 500;
+  letter-spacing: 0;
+}
+#bo[data-pal="five"] .lbrand h2 em {
+  background: linear-gradient(90deg, #c7a25a, #f3e1b5, #c7a25a);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  font-style: italic;
+}
+#bo[data-pal="five"] .lbrand p,
+#bo[data-pal="five"] .lbrand small,
+#bo[data-pal="five"] .lsec span,
+#bo[data-pal="five"] .lpv .hd {
+  color: #cdbfa5;
+}
+#bo[data-pal="five"] .lpv,
+#bo[data-pal="five"] .lsec {
+  border-color: var(--hair);
+  background: rgba(255, 255, 255, 0.04);
+}
+#bo[data-pal="five"] .lbars i {
+  background: linear-gradient(#e3c98e, #9c7a36);
+}
+#bo[data-pal="five"] .lchips span {
+  border: 1px solid var(--hair);
+  background: transparent;
+  color: #e3c98e;
+}
+#bo[data-pal="five"] .lsec svg {
+  stroke: var(--brass);
+}
+#bo[data-pal="five"] .lcard h3 {
+  font-family: var(--serif);
+  font-weight: 500;
+}
+#bo[data-pal="five"] .lgo {
+  border-radius: 6px;
+  background: linear-gradient(170deg, #e3c98e, #b58a3c);
+  color: #1c1408;
+}
+#bo[data-pal="five"] .lgo:hover {
+  box-shadow: 0 10px 24px rgba(60, 40, 12, 0.3);
+}
+#bo[data-pal="five"] .inv .rhd {
+  color: var(--brass);
+}
 </style>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -8237,6 +9896,7 @@ body > .modal select:focus {
           <span class="fill"></span><button class="b" id="newSale">New sale</button
           ><button class="b" id="qtyBtn">QTY</button>
         </div>
+        <div class="sp-tabs" id="spTabs"></div>
         <div class="items" id="grid"></div>
         <div class="botb">
           <button class="b" id="chSP">Change sale point</button
@@ -8289,7 +9949,8 @@ body > .modal select:focus {
           ><button class="act a3" id="settleBtn">Settle bill</button
           ><button class="act a4" id="ordBtn">Open orders</button
           ><button class="act a5" id="codeBtn">Change code</button
-          ><button class="act a6" id="lock">Log out</button>
+          ><button class="act a6" id="lock">Log out</button
+          ><button class="act a7" id="billBtn">Bill options</button>
         </div>
       </section>
     </div>
@@ -8310,8 +9971,10 @@ body > .modal select:focus {
         <div id="selList"></div>
         <div class="sfoot">
           <div class="stot" id="selTot"></div>
+          <div class="row" id="selOne"></div>
           <div class="row">
-            <button class="chip" id="selChg">Charge selected</button
+            <button class="chip" id="selOpt">Bill options</button
+            ><button class="chip" id="selChg">Charge selected</button
             ><button class="chip on" id="selChgAll">Charge all</button>
           </div>
         </div>
@@ -8433,6 +10096,13 @@ body > .modal select:focus {
     </div>
 
     <!-- POS: receipt, send order, open orders -->
+    <div class="modal" id="mBopt">
+      <div class="bop-wheel" id="bopWheel"></div>
+      <div class="box bop-box" id="bopBox"><div id="bopBody"></div></div>
+    </div>
+    <div class="modal" id="mView">
+      <div class="box view-box"><div id="viewBody"></div></div>
+    </div>
     <div class="modal" id="mRc">
       <div class="box">
         <div class="rcpt" id="rc"></div>
@@ -8623,8 +10293,12 @@ function mv(loc, k, q, t, note, peer, ref, by) {
   if (MOV.length > 6000) MOV.splice(0, MOV.length - 6000);
 }
 const curLoc = () => (STK[dept] ? dept : "Bar");
+/** The view that shows every sale point a waiter is ticked for, all at once. */
+const ALLP = "All sale points";
+/** Is item i on the menu of view d? */
+const inPoint = (i, d) => (d === ALLP ? DEPTS.includes(i.d) : i.d === d);
 /** Where a product's ingredients are deducted: its materials store (recipes), else where it is sold. */
-const itemLoc = it => (it.from && STK[it.from] ? it.from : curLoc());
+const itemLoc = it => (it.from && STK[it.from] ? it.from : STK[it.d] ? it.d : curLoc());
 /** Sell n of a product (a negative n puts the stock back). */
 function itemStockMove(it, n) {
   const loc = itemLoc(it);
@@ -8758,7 +10432,7 @@ const avail = it =>
     ...Object.entries(it.r).map(([k, v]) => Math.floor((STK[itemLoc(it)][k] || 0) / v + 1e-9))
   );
 const inCart = id => cart[id] || 0;
-let catSel = "All",
+let catSel = "",
   nextQty = 1,
   selId = null,
   kmsg = "",
@@ -8767,19 +10441,50 @@ let catSel = "All",
   qBuf = "";
 const get = id => ITEMS.find(i => i.id == id),
   pad = (n, l = 6) => String(n).padStart(l, "0");
+// A waiter ticked for several sale points works in them side by side (dept = ALLP): the tabs on top
+// choose whose menu shows, and the order keeps building across them.
+let spTab = "";
+const onMenu = i => (dept === ALLP ? i.d === spTab : i.d === dept);
+const shownPoint = () => (dept === ALLP ? spTab : dept);
+function drawTabs() {
+  if (dept === ALLP && !DEPTS.includes(spTab)) spTab = DEPTS[0];
+  $("#spTabs").innerHTML =
+    dept === ALLP
+      ? DEPTS.map(
+          d => `<button class="sp-tab ${d === spTab ? "on" : ""}" data-t="${d}">${d}</button>`
+        ).join("")
+      : "";
+}
+function showTab(d) {
+  spTab = d;
+  catSel = "";
+  drawDepts();
+  renderCats();
+  drawGrid();
+}
+$("#spTabs").onclick = e => {
+  const b = e.target.closest("[data-t]");
+  if (b) showTab(b.dataset.t);
+};
 function drawDepts() {
-  $("#posOutlet").textContent = dept;
-  $("#spBtn").textContent = dept;
-  $("#hSP").textContent = dept;
+  drawTabs();
+  $("#posOutlet").textContent = shownPoint();
+  $("#spBtn").textContent = shownPoint();
+  $("#hSP").textContent = shownPoint();
 }
 function drawCats() {
-  catSel = "All";
+  catSel = "";
   selId = null;
   renderCats();
 }
+/** This sale point's categories. The menu always shows one, the first until another is tapped. */
+function menuCats() {
+  const cs = [...new Set(ITEMS.filter(onMenu).map(i => i.c))];
+  if (!cs.includes(catSel)) catSel = cs[0] || "";
+  return cs;
+}
 function renderCats() {
-  const cs = ["All", ...new Set(ITEMS.filter(i => i.d === dept).map(i => i.c))];
-  $("#cats").innerHTML = cs
+  $("#cats").innerHTML = menuCats()
     .map(c => `<button class="cat ${c === catSel ? "on" : ""}" data-c="${c}">${c}</button>`)
     .join("");
 }
@@ -8794,46 +10499,68 @@ const hue = s => {
   return h;
 };
 function drawGrid() {
-  const list = ITEMS.filter(i => i.d === dept && (catSel === "All" || i.c === catSel));
-  // "All" reads like a menu: each category under its own heading.
-  let section = null;
+  menuCats();
   $("#grid").innerHTML =
-    (catSel === "All"
-      ? [...new Set(list.map(i => i.c))].flatMap(c => list.filter(i => i.c === c))
-      : list
-    )
+    ITEMS.filter(i => onMenu(i) && i.c === catSel)
       .map(i => {
         const a = avail(i) - inCart(i.id),
           n = inCart(i.id);
-        const head =
-          catSel === "All" && i.c !== section ? `<h3 class="ms">${(section = i.c)}</h3>` : "";
-        return `${head}<button class="it${n ? " has" : ""}" style="--h:${hue(i.c)}" data-i="${i.id}" title="${i.n.replace(/"/g, "&quot;")}" ${a <= 0 ? "disabled" : ""}>${n ? `<span class="in">${n}</span>` : ""}<span class="lw ${a <= 0 ? "out" : ""}">${a <= 0 && !n ? "Out of stock" : a < 10 && a > 0 ? a + " left" : ""}</span><span class="nm">${i.n}</span><span class="cg">${i.c}</span><span class="pr">${posMoney(i.p)}</span></button>`;
+        return `<button class="it${n ? " has" : ""}" style="--h:${hue(i.c)}" data-i="${i.id}" title="${i.n.replace(/"/g, "&quot;")}" ${a <= 0 ? "disabled" : ""}>${n ? `<span class="in">${n}</span>` : ""}<span class="lw ${a <= 0 ? "out" : ""}">${a <= 0 && !n ? "Out of stock" : a < 10 && a > 0 ? a + " left" : ""}</span><span class="nm">${i.n}</span><span class="cg">${i.c}</span><span class="pr">${posMoney(i.p)}</span></button>`;
       })
       .join("") || '<div class="empty">No items in this category.</div>';
 }
-function totals(c = cart) {
-  let g = 0,
+/** A bill's own terms: { pl: price list, disc: discount, cur: currency } (Bill options). */
+let cartAdj = {};
+const itemPrice = (it, a) =>
+  a && a.pl && a.pl.pct ? Math.round(it.p * (100 + a.pl.pct)) / 100 : it.p;
+function totals(c = cart, a = c === cart ? (cur ? { pl: cur.pl } : cartAdj) : null) {
+  let sub = 0,
     tax = 0;
   for (const [id, q] of Object.entries(c)) {
     const it = get(id),
-      l = it.p * q;
-    g += l;
+      l = itemPrice(it, a) * q;
+    sub += l;
     tax += (l * TAX[it.t]) / (100 + TAX[it.t]);
   }
-  return { g, tax, net: g - tax };
+  const d = a && a.disc,
+    disc = d ? Math.min(sub, d.type === "pct" ? Math.round(sub * d.v) / 100 : d.v) : 0,
+    k = sub ? (sub - disc) / sub : 1;
+  // VAT falls with the discount, so what is charged still includes the right tax.
+  return {
+    g: sub - disc,
+    tax: tax * k,
+    net: sub - disc - tax * k,
+    sub,
+    disc,
+    pl: a && a.pl,
+    cur: a && a.cur
+  };
 }
 function drawCart() {
-  const ids = Object.keys(cart);
+  const ids = Object.keys(cart),
+    adj = cur ? { pl: cur.pl } : cartAdj;
+  if (!ids.length) cartAdj = {};
   $("#lines").innerHTML =
     ids
       .map(id => {
         const it = get(id),
           q = cart[id];
-        return `<div class="tr ${id == selId ? "sel" : ""}" data-r="${id}"><span class="qc"><button data-m="${id}">−</button>${q}<button data-p="${id}">+</button></span><span>${it.n}</span><span class="n">${bill2(it.p)}</span><span class="n">${bill2(it.p * q)}</span></div>`;
+        return `<div class="tr ${id == selId ? "sel" : ""}" data-r="${id}"><span class="qc"><button data-m="${id}">−</button>${q}<button data-p="${id}">+</button></span><span>${it.n}</span><span class="n">${bill2(itemPrice(it, adj))}</span><span class="n">${bill2(itemPrice(it, adj) * q)}</span></div>`;
       })
       .join("") ||
     `<div class="empty" style="padding:24px 8px">${cur ? "Adding to " + cur.label + ". Tap items to add." : "Tap an item to start an order."}</div>`;
   const t = totals();
+  if (ids.length && (t.disc || t.pl || t.cur))
+    $("#lines").insertAdjacentHTML(
+      "beforeend",
+      `<div class="tr-adj">${[
+        t.pl && "Price list: " + t.pl.n,
+        t.disc && "Discount: -" + bill2(t.disc),
+        t.cur && `${t.cur.c} ${bill2(t.g / t.cur.rate)}`
+      ]
+        .filter(Boolean)
+        .join(" · ")}</div>`
+    );
   $("#tNet").textContent = bill2(t.net);
   $("#tTax").textContent = bill2(t.tax);
   $("#tGross").textContent = bill2(t.g);
@@ -8850,6 +10577,7 @@ function drawCart() {
   $("#kmBtn").textContent = kmsg ? "Kitchen msg ✓" : "Kitchen msg";
   $("#riderBtn").textContent = rider ? "Rider ✓" : "Rider details";
   drawGrid();
+  ordersKeep();
 }
 function add(id, d = 1) {
   const it = get(id),
@@ -8921,14 +10649,15 @@ $("#cancelBtn").onclick = e => {
 };
 $("#spBtn").onclick = $("#chSP").onclick = () => {
   $("#spList").innerHTML = DEPTS.map(
-    d => `<button class="chip ${d === dept ? "on" : ""}" data-d="${d}">${d}</button>`
+    d => `<button class="chip ${d === shownPoint() ? "on" : ""}" data-d="${d}">${d}</button>`
   ).join("");
   $("#mSP").classList.add("show");
 };
 $("#spList").onclick = e => {
   const d = e.target.dataset.d;
   if (!d) return;
-  if (d !== dept) {
+  if (dept === ALLP) showTab(d);
+  else if (d !== dept) {
     const had = Object.keys(cart).length;
     dept = d;
     resetSale();
@@ -8970,34 +10699,42 @@ $("#qtyBtn").onclick = () => {
   else qOpen("next", "Quantity for the next item");
 };
 let selSet = new Set();
-const myBills = () => {
-  const w = user ? user.n : "";
-  return orders.filter(o => o.waiter === w);
-};
+const myBills = () =>
+  visOrders().sort((a, b) => a.no.localeCompare(b.no, undefined, { numeric: true }));
 function selRender() {
   const L = myBills(),
-    w = user ? user.n : "",
-    tot = L.reduce((a, o) => a + totals(o.lines).g, 0),
+    w = seesAllBills(user) ? "all waiters" : user ? user.n : "",
+    tot = L.reduce((a, o) => a + totals(o.lines, o).g, 0),
     ch = L.filter(o => selSet.has(o.no)),
-    ct = ch.reduce((a, o) => a + totals(o.lines).g, 0);
+    ct = ch.reduce((a, o) => a + totals(o.lines, o).g, 0);
   $("#selT").textContent = "Pending bills · " + w;
+  const cell = (v, c = "") => `<span class="${c}" title="${slipEsc(v)}">${slipEsc(v)}</span>`;
   $("#selList").innerHTML = L.length
-    ? `<div class="sr sh"><label><input type="checkbox" id="selAll" ${ch.length === L.length ? "checked" : ""}> All</label><span>Bill</span><span class="n">Amount</span><span></span></div>` +
+    ? `<div class="sr sh"><label><input type="checkbox" id="selAll" ${ch.length === L.length ? "checked" : ""}></label><span>Bill no</span><span>Table no</span><span>Waiter</span><span>Guest name</span><span>Date</span><span>Time</span><span>Curr</span><span class="n">Amount</span><span>S point</span></div>` +
       L.map(
         o =>
-          `<div class="sr"><label><input type="checkbox" data-s="${o.no}" ${selSet.has(o.no) ? "checked" : ""}></label><span><b>${o.label}</b> · ${o.dept}<br><small>${o.no} · ${cnt(o.lines)} items · ${hhmm(o.at)}</small><br><small>${Object.entries(
-            o.lines
-          )
-            .map(([id, q]) => q + "× " + get(id).n)
-            .join(
-              ", "
-            )}</small></span><span class="n"><b>${KES(totals(o.lines).g)}</b></span><span class="ra"><button class="mini" data-oa="add" data-o="${o.no}">Add</button><button class="mini" data-oa="bill" data-o="${o.no}">Bill</button><button class="mini" data-oa="swap" data-o="${o.no}">Swap</button><button class="chip on" data-oa="pay" data-o="${o.no}">Charge</button></span></div>`
+          `<div class="sr ${selSet.has(o.no) ? "on" : ""}" data-row="${o.no}"><label><input type="checkbox" data-s="${o.no}" ${selSet.has(o.no) ? "checked" : ""}></label>${cell(o.no, "sr-no")}<span class="sr-t" title="${slipEsc(o.label)}"><b>${slipEsc(o.label)}</b></span>${cell(o.waiter || "–")}${cell(o.guest || "N/A")}${cell(o.at.toLocaleDateString("en-GB"))}${cell(o.at.toLocaleTimeString("en-GB"))}${cell("KES", "sr-cur")}<span class="n"><b>${bill2(totals(o.lines, o).g)}</b></span>${cell(billPlace(o.lines))}</div>`
       ).join("")
     : '<div class="empty">No pending bills for ' + w + ".</div>";
+  // These work on one bill: highlight exactly one.
+  const one = ch.length === 1 ? ch[0].no : "";
+  $("#selOne").innerHTML = [
+    ["view", "View"],
+    ["add", "Add items"],
+    ["bill", "Print bill"],
+    ["swap", "Swap"]
+  ]
+    .map(
+      ([a, l]) =>
+        `<button class="chip" data-oa="${a}" data-o="${one}" ${one ? "" : "disabled"}>${l}</button>`
+    )
+    .join("");
   $("#selTot").innerHTML =
     `<span>Selected ${ch.length} · ${KES(ct)}</span><span>ALL ${L.length} · ${KES(tot)}</span>`;
   $("#selChg").textContent = `Charge selected (${ch.length})`;
   $("#selChg").disabled = !ch.length;
+  $("#selOpt").textContent = `Bill options (${ch.length})`;
+  $("#selOpt").disabled = !ch.length;
   $("#selChgAll").disabled = !L.length;
 }
 function selOpen() {
@@ -9016,11 +10753,45 @@ $("#selList").onchange = e => {
   }
   selRender();
 };
-$("#selList").onclick = e => {
+$("#selOne").onclick = e => {
   const a = e.target.dataset.oa;
-  if (!a) return;
+  if (!a || !e.target.dataset.o) return;
+  if (a === "view") return orderView(orders.find(o => o.no === e.target.dataset.o));
   if (a === "add") $("#mSel").classList.remove("show");
   $("#ordList").onclick(e);
+};
+$("#selList").onclick = e => {
+  // Tapping anywhere on a bill highlights it; the tick box looks after itself.
+  const r = e.target.closest("[data-row]");
+  if (!r || e.target.closest("label")) return;
+  const no = r.dataset.row;
+  selSet.has(no) ? selSet.delete(no) : selSet.add(no);
+  selRender();
+};
+/** What is inside an order, without changing anything. */
+function orderView(o) {
+  if (!o) return;
+  const t = totals(o.lines, o),
+    ppl = o.waiter ? o.waiter : "–",
+    row = (l, v) => (v ? `<div><span>${l}</span><b>${slipEsc(v)}</b></div>` : "");
+  $("#viewBody").innerHTML = `<h3>Order ${slipEsc(o.no)}</h3>
+  <div class="view-meta">${row("Table", o.label)}${row("Sale point", billPlace(o.lines))}${row("Waiter", ppl)}${row("Guest", o.guest)}${row("Covers", o.covers)}${row("Room", o.room)}${row("Sent", hhmm(o.at))}${row("Rounds", String(o.rounds))}${o.rider ? row("Rider", o.rider.n + " " + o.rider.p) : ""}</div>
+  <div class="view-lines"><table><tr><th>Qty</th><th>Item</th><th class="n">Price</th><th class="n">Total</th></tr>${slipLines(
+    o.lines,
+    o
+  )
+    .map(
+      x =>
+        `<tr><td>${x.q}</td><td>${slipEsc(x.n)}</td><td class="n">${bill2(x.p)}</td><td class="n">${bill2(x.p * x.q)}</td></tr>`
+    )
+    .join("")}</table></div>
+  <div class="view-tots">${t.disc ? slipRow("Subtotal", bill2(t.sub)) + slipRow("Discount", "-" + bill2(t.disc)) : ""}${slipRow("Net", bill2(t.net))}${slipRow("VAT", bill2(t.tax))}<div class="view-total"><span>Total</span><span>${KES(t.g)}</span></div>${t.pl ? `<small>Price list: ${slipEsc(t.pl.n)}</small>` : ""}${t.cur ? `<small>${slipEsc(t.cur.c)} ${bill2(t.g / t.cur.rate)}</small>` : ""}</div>
+  <div class="row"><button class="chip on" data-close>Close</button></div>`;
+  $("#mView").classList.add("show");
+}
+$("#selOpt").onclick = () => {
+  const L = myBills().filter(o => selSet.has(o.no));
+  if (L.length) boptWheel(L);
 };
 $("#selChg").onclick = () => {
   const L = myBills().filter(o => selSet.has(o.no));
@@ -9035,7 +10806,7 @@ $("#selChgAll").onclick = () => {
 function findList() {
   const q = $("#fq").value.toLowerCase();
   $("#fr").innerHTML =
-    ITEMS.filter(i => i.d === dept && i.n.toLowerCase().includes(q))
+    ITEMS.filter(i => inPoint(i, dept) && i.n.toLowerCase().includes(q))
       .map(
         i =>
           `<button class="mini" style="width:100%;text-align:left;margin-bottom:6px;padding:10px" data-i="${i.id}">${i.n} · ${i.p.toFixed(2)}</button>`
@@ -9062,7 +10833,7 @@ $("#osk").innerHTML = OSK.map(
 ).join("");
 function findEnter() {
   const f = ITEMS.filter(
-    i => i.d === dept && i.n.toLowerCase().includes($("#fq").value.trim().toLowerCase())
+    i => inPoint(i, dept) && i.n.toLowerCase().includes($("#fq").value.trim().toLowerCase())
   );
   if (f.length === 1) {
     const q = nextQty;
@@ -9157,14 +10928,14 @@ $("#printBtn").onclick = () => {
     showRc(
       guestBillHTML({
         no: $("#fBill").value,
-        dept,
+        dept: billPlace(cart),
         label: $("#fTable").value || "Walk-in",
         guest: $("#fGuest").value,
         covers: $("#fCov").value,
         room: $("#fRoom").value,
         waiter: user ? user.n : "",
         rider,
-        lines: slipLines(cart),
+        lines: slipLines(cart, cartAdj),
         t: totals()
       }),
       null,
@@ -9197,7 +10968,7 @@ const CU = [
 ];
 const c2 = n => Math.round(n * 100),
   MN = { cash: "Cash", mpesa: "M-Pesa", credit: "Credit" };
-const payDue = () => (payT ? payT.reduce((a, o) => a + totals(o.lines).g, 0) : totals().g);
+const payDue = () => (payT ? payT.reduce((a, o) => a + totals(o.lines, o).g, 0) : totals().g);
 const payBal = () => (c2(payDue()) - c2(pays.reduce((a, p) => a + p.amt, 0))) / 100;
 function openPay(tg) {
   if (!shiftOk()) return;
@@ -9214,7 +10985,11 @@ function openPay(tg) {
 }
 function renderPay() {
   $("#pTotal").textContent = KES(payDue());
-  $("#pBills").textContent = payT ? payT.map(o => o.label).join(" · ") : "Direct sale · " + dept;
+  const payBill = !payT ? cartAdj : payT.length === 1 ? payT[0] : null,
+    payCur = payBill && payBill.cur;
+  $("#pBills").textContent =
+    (payT ? payT.map(o => o.label).join(" · ") : "Direct sale · " + billPlace(cart)) +
+    (payCur ? ` · ${payCur.c} ${bill2(payDue() / payCur.rate)} at ${payCur.rate}` : "");
   $("#pList").innerHTML = pays
     .map(
       (p, i) =>
@@ -9308,7 +11083,8 @@ $("#pOk").onclick = () => {
             covers: $("#fCov").value,
             room: $("#fRoom").value,
             dept,
-            lines: { ...cart }
+            lines: { ...cart },
+            ...cartAdj
           }
         ]
       : payT;
@@ -9317,7 +11093,7 @@ $("#pOk").onclick = () => {
     gsum = 0;
   const chv = pays.reduce((a, p) => a + (p.chg || 0), 0);
   targets.forEach((o, bi) => {
-    const t = totals(o.lines),
+    const t = totals(o.lines, o),
       no = "NBO-" + pad(rno),
       lines = Object.entries(o.lines).map(([id, n]) => ({ it: get(id), q: n })),
       used = {};
@@ -9342,37 +11118,72 @@ $("#pOk").onclick = () => {
         );
       }
     }
-    SALES.push({
-      no,
-      at: new Date(),
-      dept: o.dept,
-      label: o.label,
-      user: user ? user.n : "",
-      net: t.net,
-      tax: t.tax,
-      g: t.g,
-      lines: lines.map(({ it, q: n }) => ({ id: it.id, n: it.n, q: n, p: it.p, t: it.t })),
-      mx
+    const cu = "KRACU0100" + Math.floor(1000 + Math.random() * 8999),
+      inv = rno - 1000,
+      change = bi === targets.length - 1 ? chv : 0,
+      credit = pays.some(p => p.m === "credit"),
+      waiter = o.waiter || (user ? user.n : "");
+    const shares = billPoints(o.lines);
+    let leftMx = { ...mx },
+      leftG = t.g,
+      leftTax = t.tax,
+      leftDisc = t.disc;
+    shares.forEach((d, si) => {
+      const part = Object.fromEntries(Object.entries(o.lines).filter(([id]) => get(id).d === d)),
+        pt = totals(part, { ...o, disc: null }),
+        last = si === shares.length - 1,
+        k = t.sub ? pt.sub / t.sub : 1,
+        cents = n => Math.round(n * 100) / 100,
+        g = last ? leftG : cents(t.g * k),
+        tax = last ? leftTax : cents(t.tax * k),
+        dd = last ? leftDisc : cents(t.disc * k),
+        pmx = {};
+      Object.keys(mx).forEach(m => {
+        pmx[m] = last ? leftMx[m] : cents(mx[m] * k);
+        leftMx[m] -= pmx[m];
+      });
+      leftG -= g;
+      leftTax -= tax;
+      leftDisc -= dd;
+      SALES.push({
+        no,
+        at: new Date(),
+        dept: d,
+        label: o.label,
+        user: user ? user.n : "",
+        waiter,
+        guest: o.guest,
+        covers: o.covers,
+        room: o.room,
+        ...(si === 0 ? { slip: { paid: al.join(""), change, credit, cu, inv, cur: t.cur } } : {}),
+        net: g - tax,
+        tax,
+        g,
+        lines: lines
+          .filter(({ it }) => it.d === d)
+          .map(({ it, q: n }) => ({ id: it.id, n: it.n, q: n, p: itemPrice(it, o), t: it.t })),
+        disc: dd,
+        pl: t.pl ? t.pl.n : "",
+        mx: pmx
+      });
     });
     try {
       bosave();
     } catch (e) {}
-    const cu = "KRACU0100" + Math.floor(1000 + Math.random() * 8999),
-      inv = rno - 1000;
     rno++;
     html += receiptHTML({
       no,
-      dept: o.dept,
+      dept: billPlace(o.lines),
       label: o.label,
       guest: o.guest,
       covers: o.covers,
       room: o.room,
-      waiter: user ? user.n : "",
-      lines: lines.map(({ it, q: n }) => ({ q: n, n: it.n, p: it.p, t: it.t })),
+      waiter,
+      lines: lines.map(({ it, q: n }) => ({ q: n, n: it.n, p: itemPrice(it, o), t: it.t })),
       t,
       paid: al.join(""),
-      change: bi === targets.length - 1 ? chv : 0,
-      credit: pays.some(p => p.m === "credit"),
+      change,
+      credit,
       fiscal: `CU serial: ${cu}<br>CU invoice no: ${inv}${qr(no + cu)}Scan to verify on KRA eTIMS<br>(demo QR)`
     });
   });
@@ -9447,8 +11258,32 @@ let orders = [],
   ono = 1,
   payOrder = null,
   selTbl = "";
+/** Save when an open order changes: sending, adding, settling or any bill option all end by redrawing the cart. */
+let ordersSaved = "[]";
+function ordersKeep() {
+  const now = JSON.stringify(orders);
+  if (now === ordersSaved) return;
+  ordersSaved = now;
+  if (window.bosave) window.bosave();
+}
 const TBL = ["T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "Takeaway"];
-const visOrders = () => orders.filter(o => DEPTS.includes(o.dept));
+/** The sale points a bill's items belong to. A bill can hold several in the All sale points view. */
+const billPoints = c => [
+  ...new Set(
+    Object.keys(c)
+      .map(id => (get(id) || {}).d)
+      .filter(Boolean)
+  )
+];
+const billPlace = c => billPoints(c).join(", ");
+const billAtPoints = (o, pts) =>
+  pts.includes(o.dept) || billPoints(o.lines).some(d => pts.includes(d));
+/** A waiter works on their own bills. These roles see every waiter's bills at their sale points. */
+const BILL_ALL = ["Manager", "Super Cashier", "Cashier"];
+const seesAllBills = u => !!u && BILL_ALL.includes(u.role);
+const billsFor = (u, pts) =>
+  orders.filter(o => (u && o.waiter === u.n) || (seesAllBills(u) && billAtPoints(o, pts)));
+const visOrders = () => billsFor(user, DEPTS);
 const hhmm = d => d.toLocaleTimeString("en-KE", { hour: "2-digit", minute: "2-digit" });
 const cnt = c => Object.values(c).reduce((a, b) => a + b, 0);
 function showRc(html, charge, closeLbl) {
@@ -9495,13 +11330,32 @@ $("#sendGo").onclick = () => {
   doSend(l);
 };
 function doSend(label) {
+  let tickets = [];
   const round = { ...cart };
-  let o = cur || orders.find(x => x.dept === dept && x.label.toLowerCase() === label.toLowerCase());
+  let o =
+    cur ||
+    (dept === ALLP
+      ? orders.filter(x => billAtPoints(x, DEPTS))
+      : orders.filter(x => x.dept === dept)
+    ).find(x => x.label.toLowerCase() === label.toLowerCase());
+  if (o && !cur && !visOrders().includes(o)) {
+    $("#mSend").classList.remove("show");
+    return fsNote(
+      `${o.label} is open under ${o.waiter}. Use another name, or ask a manager to merge.`
+    );
+  }
+  // This sale's discount or price list was authorized for this sale, not for the whole open bill.
+  if (o && !cur && (cartAdj.disc || cartAdj.pl || cartAdj.cur)) {
+    $("#mSend").classList.remove("show");
+    return fsNote(
+      `${o.label} is already open. Remove this sale's bill option, or add to that bill.`
+    );
+  }
   if (!o) {
     o = {
       no: "ORD-" + String(ono++).padStart(3, "0"),
       label,
-      dept,
+      dept: dept === ALLP ? billPoints(round)[0] : dept,
       lines: {},
       rounds: 0,
       at: new Date(),
@@ -9509,7 +11363,8 @@ function doSend(label) {
       covers: $("#fCov").value.trim(),
       room: $("#fRoom").value.trim(),
       rider: rider,
-      waiter: user ? user.n : ""
+      waiter: user ? user.n : "",
+      ...cartAdj
     };
     orders.push(o);
   } else {
@@ -9526,9 +11381,9 @@ function doSend(label) {
   $("#mSend").classList.remove("show");
   drawCart();
   showRc(
-    orderSlips(round, {
+    (tickets = orderTickets(round, {
       no: o.no,
-      dept: o.dept,
+      dept: billPlace(o.lines),
       label: o.label,
       guest: o.guest,
       covers: o.covers,
@@ -9537,10 +11392,14 @@ function doSend(label) {
       rider: o.rider,
       round: o.rounds,
       note: kmsg
-    }) + '<div class="sl-scr">Sent. Bill and charge later from Open orders.</div>',
+    }))
+      .map(x => x.html)
+      .join("") +
+      '<div class="sl-scr" id="rcPrinted"></div><div class="sl-scr">Sent. Bill and charge later from Open orders.</div>',
     null,
     "Close"
   );
+  printOrderTickets(tickets);
   kmsg = "";
   rider = null;
   ["fTable", "fGuest", "fCov", "fRoom"].forEach(i => ($("#" + i).value = ""));
@@ -9550,8 +11409,8 @@ function ordList() {
   const L = visOrders();
   $("#ordList").innerHTML = L.length
     ? L.map(o => {
-        const t = totals(o.lines);
-        return `<div class="ord"><div class="h"><span>${o.label} · ${o.dept}</span><span>${KES(t.g)}</span></div><div class="m">${o.no} · ${cnt(o.lines)} items · ${o.rounds} round${o.rounds > 1 ? "s" : ""} · sent ${hhmm(o.at)} · <b>SENT</b></div><div class="row"><button class="mini" data-oa="add" data-o="${o.no}">Add items</button><button class="mini" data-oa="bill" data-o="${o.no}">Print bill</button><button class="mini" data-oa="swap" data-o="${o.no}">Swap</button><button class="chip on" data-oa="pay" data-o="${o.no}">Charge</button></div></div>`;
+        const t = totals(o.lines, o);
+        return `<div class="ord"><div class="h"><span>${o.label} · ${billPlace(o.lines)}</span><span>${KES(t.g)}</span></div><div class="m">${o.no} · ${seesAllBills(user) ? slipEsc(o.waiter || "No waiter") + " · " : ""}${cnt(o.lines)} items · ${o.rounds} round${o.rounds > 1 ? "s" : ""} · sent ${hhmm(o.at)} · <b>SENT</b></div><div class="row"><button class="mini" data-oa="add" data-o="${o.no}">Add items</button><button class="mini" data-oa="bill" data-o="${o.no}">Print bill</button><button class="mini" data-oa="swap" data-o="${o.no}">Swap</button><button class="chip on" data-oa="pay" data-o="${o.no}">Charge</button></div></div>`;
       }).join("")
     : '<div class="empty">No open orders. Use Send order to start one.</div>';
 }
@@ -9570,7 +11429,8 @@ $("#ordList").onclick = e => {
     return;
   }
   if (a === "add") {
-    dept = o.dept;
+    if (dept === ALLP) spTab = o.dept;
+    else dept = o.dept;
     cur = o;
     cart = {};
     drawDepts();
@@ -9584,15 +11444,15 @@ $("#ordList").onclick = e => {
     showRc(
       guestBillHTML({
         no: o.no,
-        dept: o.dept,
+        dept: billPlace(o.lines),
         label: o.label,
         guest: o.guest,
         covers: o.covers,
         room: o.room,
         waiter: o.waiter,
         rider: o.rider,
-        lines: slipLines(o.lines),
-        t: totals(o.lines)
+        lines: slipLines(o.lines, o),
+        t: totals(o.lines, o)
       }),
       o,
       "Close"
@@ -9603,7 +11463,7 @@ $("#ordList").onclick = e => {
 const REAS = ["Customer changed mind", "Wrong item served", "Spoiled / wasted", "Out of stock"];
 let ex = {};
 const exLines = () => (ex.o ? ex.o.lines : cart),
-  exDept = () => (ex.o ? ex.o.dept : dept);
+  exDept = () => (ex.o ? (billPoints(ex.o.lines).length > 1 ? ALLP : ex.o.dept) : dept);
 function exOpen(o) {
   const L = o ? o.lines : cart;
   if (!Object.keys(L).length) return fsNote("Nothing to exchange yet.");
@@ -9636,12 +11496,12 @@ function exRender() {
   $("#exQ").innerHTML = ex.old
     ? `<span>How many to exchange</span><div class="qc"><button data-eq="-1">−</button><b>${ex.qty}</b><button data-eq="1">+</button></div>`
     : '<span class="stk">Tap the item you want to replace.</span>';
-  const cats = ["All", ...new Set(ITEMS.filter(i => i.d === d).map(i => i.c))];
+  const cats = ["All", ...new Set(ITEMS.filter(i => inPoint(i, d)).map(i => i.c))];
   $("#exCats").innerHTML = cats
     .map(c => `<button class="chip ${c === ex.cat ? "on" : ""}" data-ec="${c}">${c}</button>`)
     .join("");
   $("#exNew").innerHTML = ITEMS.filter(
-    i => i.d === d && (ex.cat === "All" || i.c === ex.cat) && String(i.id) !== String(ex.old)
+    i => inPoint(i, d) && (ex.cat === "All" || i.c === ex.cat) && String(i.id) !== String(ex.old)
   )
     .map(i => {
       const a = avail(i) - (ex.o ? 0 : inCart(i.id)),
@@ -9768,10 +11628,15 @@ const slipEsc = s =>
   );
 const slipBiz = () => ({ name: FD_SETTINGS.name, ...(FD_SETTINGS.biz || {}) });
 /** Cart or order lines → [{ q, n, p, t }]. */
-const slipLines = c =>
-  Object.entries(c).map(([id, q]) => ({ q, n: get(id).n, p: get(id).p, t: get(id).t }));
-const slipNow = () =>
-  new Date().toLocaleString("en-GB", {
+const slipLines = (c, a) =>
+  Object.entries(c).map(([id, q]) => ({
+    q,
+    n: get(id).n,
+    p: itemPrice(get(id), a),
+    t: get(id).t
+  }));
+const slipStamp = d =>
+  d.toLocaleString("en-GB", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -9779,6 +11644,7 @@ const slipNow = () =>
     minute: "2-digit",
     second: "2-digit"
   });
+const slipNow = () => slipStamp(new Date());
 const slipPrinted = () =>
   new Date().toLocaleString("en-GB", {
     day: "2-digit",
@@ -9821,7 +11687,7 @@ const slipMoneyRows = lines =>
     .join("")}</table>`;
 const slipRow = (l, v) => `<div class="sl-r"><span>${l}</span><span>${v}</span></div>`;
 const slipTotals = t =>
-  `<div class="sl-tots">${slipRow("Net", bill2(t.net))}${slipRow("VAT", bill2(t.tax))}<div class="sl-total"><span>Total</span><span>KES ${bill2(t.g)}</span></div></div>`;
+  `<div class="sl-tots">${t.disc ? slipRow("Subtotal", bill2(t.sub)) + slipRow("Discount", "-" + bill2(t.disc)) : ""}${slipRow("Net", bill2(t.net))}${slipRow("VAT", bill2(t.tax))}<div class="sl-total"><span>Total</span><span>KES ${bill2(t.g)}</span></div>${t.cur ? `<div class="sl-fx">${slipEsc(t.cur.c)} ${bill2(t.g / t.cur.rate)} <small>at ${t.cur.rate}</small></div>` : ""}${t.pl ? `<div class="sl-small">Price list: ${slipEsc(t.pl.n)}</div>` : ""}</div>`;
 const slipSign = () =>
   `<div class="sl-sign"><div><span>Guest name</span><i></i></div><div><span>Signature</span><i></i></div></div>`;
 const slipTill = B =>
@@ -9843,19 +11709,21 @@ function guestBillHTML(d, B = slipBiz()) {
 }
 /** d as above, plus paid (payment rows), change, fiscal (CU lines and QR), credit (needs a signature). */
 function receiptHTML(d, B = slipBiz()) {
-  return `<div class="slip">${slipHead("Receipt", d.dept, B)}${slipMeta([
-    ["Invoice", d.no],
-    ["Covers", d.covers],
-    ["Served by", d.waiter],
-    ["Table", d.label],
-    ["Guest", d.guest || "N/A"],
-    ["Room", d.room],
-    ["Date / time", slipNow(), 1]
-  ])}${slipMoneyRows(d.lines.map(x => ({ ...x, showTax: 1 })))}${slipTotals(d.t)}<div class="sl-paid"><h5>Paid by</h5>${d.paid || ""}${d.change > 0 ? slipRow("Change", bill2(d.change)) : ""}</div>${d.credit ? slipSign() : ""}<div class="sl-fiscal">${d.fiscal || ""}</div>${slipTill(B)}<div class="sl-thanks">${slipEsc(B.thanks || "Thank you for dining with us.")}</div>${slipFoot()}</div>`;
+  return `<div class="slip">${slipHead("Receipt", d.dept, B)}${d.reprint ? `<div class="sl-copy">Reprint · copy ${d.reprint}</div>` : ""}${slipMeta(
+    [
+      ["Invoice", d.no],
+      ["Covers", d.covers],
+      ["Served by", d.waiter],
+      ["Table", d.label],
+      ["Guest", d.guest || "N/A"],
+      ["Room", d.room],
+      ["Date / time", d.at || slipNow(), 1]
+    ]
+  )}${slipMoneyRows(d.lines.map(x => ({ ...x, showTax: 1 })))}${slipTotals(d.t)}<div class="sl-paid"><h5>Paid by</h5>${d.paid || ""}${d.change > 0 ? slipRow("Change", bill2(d.change)) : ""}</div>${d.credit ? slipSign() : ""}<div class="sl-fiscal">${d.fiscal || ""}</div>${slipTill(B)}<div class="sl-thanks">${slipEsc(B.thanks || "Thank you for dining with us.")}</div>${slipFoot()}</div>`;
 }
 /** Where an item is prepared: a bar's whole order is the bar's; elsewhere drinks go to the bar. */
-const orderStation = (it, dept) =>
-  (OUTLET_INFO[dept] || {}).type === "Bar" ||
+const orderStation = it =>
+  (OUTLET_INFO[it.d] || {}).type === "Bar" ||
   /drink|beverage|beer|wine|spirit|whisk|gin\b|vodka|rum\b|cocktail|soda|juice|liquor|\bbar\b/i.test(
     it.c
   )
@@ -9878,17 +11746,46 @@ function orderSlipHTML(station, d) {
     .map(x => `<div><b>${x.q}</b><span>${slipEsc(x.n)}</span></div>`)
     .join("")}</div>${d.note ? `<div class="sl-note">Note: ${slipEsc(d.note)}</div>` : ""}</div>`;
 }
-/** One slip per station, so a table's food and drinks print separately. */
-function orderSlips(round, d) {
-  const by = { Kitchen: [], Bar: [] };
+/** Tells the station that got the order to stop: the same layout, so it can't be mistaken for anything else. */
+function voidSlipHTML(station, d) {
+  return `<div class="slip sl-order sl-void"><div class="sl-ot">Void Alert</div><div class="sl-round">${station} · do not prepare</div>${slipMeta(
+    [
+      ["Bill no", d.no],
+      ["Table", d.label],
+      ["Waiter", d.waiter],
+      ["Voided by", d.by],
+      ["Guest", d.guest || "N/A"],
+      ["Room", d.room],
+      ["Date / time", slipNow(), 1]
+    ]
+  )}<div class="sl-make">${d.lines
+    .map(x => `<div><b>${x.q}</b><span>${slipEsc(x.n)}</span></div>`)
+    .join(
+      ""
+    )}</div><div class="sl-note">Reason: ${slipEsc(d.why)}</div>${d.whole ? '<div class="sl-round">Whole bill cancelled</div>' : ""}</div>`;
+}
+/** One ticket per station and printer: { station, printer, d, html }. Each item follows its own sale point. */
+function orderTickets(round, d, slip = orderSlipHTML) {
+  const T = new Map();
   Object.entries(round).forEach(([id, q]) => {
-    const it = get(id);
-    by[orderStation(it, d.dept)].push({ q, n: it.n });
+    const it = get(id),
+      station = orderStation(it),
+      printer = stationPrinter(it.d, station),
+      key = station + "|" + (printer ? printer.n : "");
+    if (!T.has(key)) T.set(key, { station, printer, lines: [] });
+    T.get(key).lines.push({ q, n: it.n });
   });
-  return ["Kitchen", "Bar"]
-    .filter(s => by[s].length)
-    .map(s => orderSlipHTML(s, { ...d, lines: by[s] }))
-    .join("");
+  return [...T.values()]
+    .sort((a, b) => (a.station < b.station ? 1 : -1))
+    .map(x => {
+      const full = { ...d, lines: x.lines };
+      return {
+        station: x.station,
+        printer: x.printer,
+        d: full,
+        html: slip(x.station, full)
+      };
+    });
 }
 function exchangeSlipHTML(d) {
   return `<div class="slip sl-order"><div class="sl-ot">Exchange</div>${slipMeta([
@@ -9908,12 +11805,14 @@ function rcPrint() {
     st.id = "pgStyle";
     document.head.appendChild(st);
   }
-  st.textContent = "@page{margin:0}";
+  const a4 = !!$("#rc .sl-a4");
+  st.textContent = a4 ? "@page{size:A4;margin:12mm}" : "@page{margin:0}";
   r.classList.add("prc");
+  r.classList.toggle("a4", a4);
   addEventListener(
     "afterprint",
     () => {
-      r.classList.remove("prc");
+      r.classList.remove("prc", "a4");
       st.textContent = "";
     },
     { once: true }
@@ -9921,6 +11820,644 @@ function rcPrint() {
   window.print();
 }
 $("#rcPrint").onclick = rcPrint;
+// ---- sending tickets to their own printers, through the master server ----
+// A browser cannot choose a printer without its print dialog, so tickets go to POST /api/print/ticket,
+// which talks to the network printer. If that fails the slip stays on screen to print by hand.
+const printServer = () =>
+  (FD_SETTINGS.printUrl || `http://${location.hostname || "localhost"}:4000`).replace(/\/$/, "");
+/** Which printer takes a station's tickets for a sale point: the printer, or undefined. */
+const stationPrinter = (point, station) => {
+  const name = ((FD_SETTINGS.printRoutes || {})[point] || {})[
+    station === "Bar" ? "bar" : "kitchen"
+  ];
+  return (FD_SETTINGS.printers || []).find(p => p.n === name);
+};
+async function printTicket(printer, lines) {
+  const ctl = new AbortController(),
+    t = setTimeout(() => ctl.abort(), 7000);
+  try {
+    const r = await fetch(printServer() + "/api/print/ticket", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        ...(FD_SETTINGS.printKey ? { "x-print-key": FD_SETTINGS.printKey } : {})
+      },
+      body: JSON.stringify({ printer: { ip: printer.ip, port: printer.port }, lines }),
+      signal: ctl.signal
+    });
+    if (r.ok) return "";
+    const e = await r.json().catch(() => ({}));
+    return (e.error && e.error.message) || "The printer did not answer.";
+  } catch (e) {
+    return "The print server could not be reached.";
+  } finally {
+    clearTimeout(t);
+  }
+}
+/** The order ticket as printer text: same content as the slip, in plain type. */
+function orderTicketLines(station, d) {
+  const row = (l, v) => ({ t: `${l}: ${v === "" || v === undefined || v === null ? "-" : v}` });
+  return [
+    { t: `${station.toUpperCase()} ORDER`, big: true, bold: true, center: true },
+    ...(d.round > 1 ? [{ t: `ROUND ${d.round}`, bold: true, center: true }] : []),
+    { t: "" },
+    row("Bill no", d.no),
+    row("Table", d.label),
+    row("Covers", d.covers),
+    row("Waiter", d.waiter),
+    row("Guest", d.guest || "N/A"),
+    row("Room", d.room),
+    row("Date/time", slipNow()),
+    ...(d.rider ? [row("Rider", `${d.rider.n} ${d.rider.p} ${d.rider.a}`)] : []),
+    { t: "------------------------------------------" },
+    ...d.lines.map(x => ({ t: `${x.q} x ${x.n}`, bold: true, big: true })),
+    { t: "------------------------------------------" },
+    ...(d.note ? [{ t: `NOTE: ${d.note}`, bold: true }] : [])
+  ];
+}
+/** The void alert as printer text. */
+function voidTicketLines(station, d) {
+  const row = (l, v) => ({ t: `${l}: ${v || "-"}` });
+  return [
+    { t: "*** VOID ALERT ***", big: true, bold: true, center: true },
+    { t: `${station.toUpperCase()} - DO NOT PREPARE`, bold: true, center: true },
+    { t: "" },
+    row("Bill no", d.no),
+    row("Table", d.label),
+    row("Waiter", d.waiter),
+    row("Voided by", d.by),
+    row("Guest", d.guest || "N/A"),
+    row("Room", d.room),
+    row("Date/time", slipNow()),
+    { t: "------------------------------------------" },
+    ...d.lines.map(x => ({ t: `VOID ${x.q} x ${x.n}`, bold: true, big: true })),
+    { t: "------------------------------------------" },
+    { t: `REASON: ${d.why}`, bold: true },
+    ...(d.whole ? [{ t: "WHOLE BILL CANCELLED", bold: true, center: true }] : [])
+  ];
+}
+/** After an order is sent or voided: each ticket to its printer, with the result shown on the popup. */
+async function printOrderTickets(tickets, lines = orderTicketLines, word = "order") {
+  const box = $("#rcPrinted");
+  const show = (html, ok) => {
+    if (box) {
+      box.innerHTML = html;
+      box.className = "sl-scr " + (ok ? "ok" : "bad");
+    }
+  };
+  const routed = tickets.filter(x => x.printer);
+  if (!routed.length) return;
+  show("Sending to the printers…", true);
+  const R = await Promise.all(
+    routed.map(async x => ({
+      ...x,
+      err: await printTicket(x.printer, lines(x.station, x.d))
+    }))
+  );
+  const bad = R.filter(x => x.err);
+  // Print then gives only what didn't reach its printer, so the kitchen doesn't get a ticket twice.
+  if (bad.length) {
+    const slips = [...document.querySelectorAll("#rc .slip")];
+    R.filter(x => !x.err).forEach(x =>
+      slips[tickets.findIndex(y => y.d === x.d)].classList.add("sl-sent")
+    );
+  }
+  show(
+    R.map(
+      x =>
+        `${x.station} ${word} → ${slipEsc(x.printer.n)}: ${x.err ? "not printed. " + slipEsc(x.err) : "printed"}`
+    ).join("<br>") + (bad.length ? "<br><b>Press Print to print it here instead.</b>" : ""),
+    !bad.length
+  );
+}
+// ---- Bill options: discount, void, merge, split ----
+// Every option needs a Manager or Super Cashier: signed in, or typing their PIN. Each change goes in BILLLOG
+// (Reports → Bill Options Log) with who authorized it and why. Only open bills can change; paid ones cannot.
+const BILLLOG = [];
+const BILL_AUTH = ["Manager", "Super Cashier"];
+const BOPT = {
+  disc: [
+    "Apply discount",
+    '<path d="M19 5 5 19"/><circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="17" r="2.5"/>'
+  ],
+  void: ["Void items", '<path d="M6 6l12 12M18 6 6 18"/>'],
+  merge: [
+    "Merge bills",
+    '<path d="M3 12h6M6 9l3 3-3 3M21 12h-6M18 9l-3 3 3 3"/><path d="M12 5v14"/>'
+  ],
+  split: ["Split bill", '<path d="M9 12H3M6 9l-3 3 3 3M15 12h6M18 9l3 3-3 3"/><path d="M12 5v14"/>']
+};
+let bopt = null, // { act, by, bill, ...form }
+  boptScope = null, // bills highlighted in Select: the options work on these
+  boptFails = 0,
+  boptLock = 0;
+const boptEl = id => $("#bop" + id);
+const billHas = () => Object.keys(cart).length > 0;
+/** The sale on the guest check, as a bill. */
+const draftBill = () => ({
+  draft: true,
+  no: $("#fBill").value,
+  label: $("#fTable").value || "This sale",
+  guest: $("#fGuest").value,
+  covers: $("#fCov").value,
+  room: $("#fRoom").value,
+  dept: billPlace(cart),
+  lines: cart
+});
+const billAdj = b => (b.draft ? cartAdj : b);
+const billTot = b => totals(b.lines, billAdj(b));
+function boptLog(act, b, why, detail, amt, extra) {
+  BILLLOG.push({
+    at: new Date().toISOString(),
+    act,
+    no: b.no,
+    label: b.label,
+    dept: b.dept,
+    waiter: b.waiter || (user ? user.n : ""),
+    by: bopt.by,
+    user: user ? user.n : "",
+    why: why || "",
+    detail: detail || "",
+    amt: amt === undefined ? billTot(b).g : amt,
+    points: billPoints(b.lines),
+    ...extra
+  });
+  if (BILLLOG.length > 3000) BILLLOG.splice(0, BILLLOG.length - 3000);
+}
+function boptDone(msg) {
+  try {
+    bosave();
+  } catch (e) {}
+  bopt = null;
+  $("#mBopt").classList.remove("show");
+  drawCart();
+  if ($("#mSel").classList.contains("show")) selRender();
+  fsNote(msg);
+}
+
+// ---------------------------------------------------------------- the circle
+$("#billBtn").onclick = () => boptWheel(null);
+function boptWheel(scope) {
+  boptScope = scope;
+  boptEl("Box").classList.remove("bop-void", "bop-split");
+  const K = Object.keys(BOPT);
+  bopt = null;
+  $("#bopWheel").innerHTML =
+    K.map((k, i) => {
+      const a = (-90 + (360 / K.length) * i) * (Math.PI / 180);
+      return `<button class="bw-i" data-bo="${k}" style="left:${(50 + 33 * Math.cos(a)).toFixed(2)}%;top:${(50 + 33 * Math.sin(a)).toFixed(2)}%"><i class="bw-ic"><svg viewBox="0 0 24 24">${BOPT[k][1]}</svg></i><span>${BOPT[k][0]}</span></button>`;
+    }).join("") +
+    '<div class="bw-t">Bill options</div><button class="bw-c" data-close aria-label="Close">✕</button>' +
+    (scope ? `<div class="bw-for">${scope.map(o => slipEsc(o.label)).join(", ")}</div>` : "");
+  $("#bopWheel").style.display = "";
+  boptEl("Box").style.display = "none";
+  $("#mBopt").classList.add("show");
+}
+/** Bills an option can work on. */
+function boptBills(act) {
+  if (boptScope && act !== "merge") return boptScope.filter(o => orders.includes(o));
+  const L = visOrders();
+  return act === "merge" || act === "split" || !billHas() || cur ? L : [draftBill(), ...L];
+}
+function boptStart(act) {
+  if (!boptScope && cur && billHas()) return fsNote("Send the new items first.");
+  const L = boptBills(act);
+  if (act === "merge") {
+    if (orders.length < 2) return fsNote("Merging needs two open bills.");
+  } else if (!L.length)
+    return fsNote("There is no bill to change. Add items or send an order first.");
+  bopt = { act };
+  $("#bopWheel").style.display = "none";
+  boptEl("Box").style.display = "";
+  if (user && BILL_AUTH.includes(user.role)) {
+    bopt.by = user.n;
+    return boptChoose();
+  }
+  boptEl("Body").innerHTML =
+    `<h3>${BOPT[act][0]}</h3><p class="stk">A Manager or Super Cashier needs to authorize this.</p>
+  <input id="bopPin" type="password" inputmode="numeric" autocomplete="off" placeholder="Authorizing PIN"><div class="bop-msg" id="bopMsg"></div>
+  <div class="row"><button class="mini" data-close>Cancel</button><button class="chip on" data-bg="auth">Continue</button></div>`;
+  $("#bopPin").focus();
+}
+function boptAuth() {
+  const m = $("#bopMsg");
+  if (Date.now() < boptLock) return (m.textContent = "Too many tries. Wait 30 seconds.");
+  const u = USERS.find(x => BILL_AUTH.includes(x.role) && x.pin === $("#bopPin").value);
+  if (!u) {
+    $("#bopPin").value = "";
+    $("#bopPin").focus();
+    if (++boptFails >= 5) {
+      boptLock = Date.now() + 3e4;
+      boptFails = 0;
+    }
+    return (m.textContent = "That PIN cannot authorize this.");
+  }
+  boptFails = 0;
+  bopt.by = u.n;
+  boptChoose();
+}
+function boptChoose() {
+  if (bopt.act === "merge") return boptMergeForm();
+  const L = boptBills(bopt.act);
+  if (L.length === 1) return boptOpen(L[0]);
+  boptEl("Body").innerHTML =
+    `<h3>${BOPT[bopt.act][0]}</h3><p class="stk">Which bill?</p><div class="bop-list">${L.map(
+      (b, i) =>
+        `<button class="bop-b" data-bb="${i}"><span><b>${slipEsc(b.label)}</b> · ${slipEsc(b.dept)}<small>${b.draft ? "Not sent yet" : slipEsc(b.no)} · ${cnt(b.lines)} items</small></span><b>${KES(billTot(b).g)}</b></button>`
+    ).join("")}</div><div class="row"><button class="mini" data-close>Cancel</button></div>`;
+}
+function boptOpen(b) {
+  bopt.bill = b;
+  ({
+    disc: boptDiscForm,
+    void: boptVoidForm,
+    split: boptSplitForm
+  })[bopt.act]();
+}
+const boptTop = () =>
+  `<h3>${BOPT[bopt.act][0]}</h3><p class="stk"><b>${slipEsc(bopt.bill.label)}</b> · ${slipEsc(bopt.bill.dept)} · ${slipEsc(bopt.bill.no)} · authorized by ${slipEsc(bopt.by)}</p>`;
+const boptFoot = lbl =>
+  `<div class="bop-msg" id="bopMsg"></div><div class="row"><button class="mini" data-close>Cancel</button><button class="chip on" data-bg="save">${lbl}</button></div>`;
+const boptMsg = t => void ($("#bopMsg").textContent = t);
+/** Cooked food can't go back on the shelf, so kitchens and restaurants default to no. */
+const boptBackDefault = b =>
+  Object.keys(b.lines).every(
+    id => !["Kitchen", "Restaurant"].includes((OUTLET_INFO[get(id).d] || {}).type)
+  );
+
+// ---------------------------------------------------------------- discount
+function boptDiscForm() {
+  const a = billAdj(bopt.bill).disc;
+  bopt.type = bopt.type || (a ? a.type : "pct");
+  boptEl("Body").innerHTML = `${boptTop()}
+  <div class="tabs"><button class="chip ${bopt.type === "pct" ? "on" : ""}" data-bt="pct">Percent</button><button class="chip ${bopt.type === "amt" ? "on" : ""}" data-bt="amt">KES amount</button></div>
+  <label>${bopt.type === "pct" ? "Discount (%)" : "Discount (KES)"}<input id="bopVal" type="number" min="0" step="any" value="${a && a.type === bopt.type ? a.v : ""}" placeholder="0 removes the discount"></label>
+  <label>Reason<input id="bopWhy" value="${slipEsc(a ? a.why : "")}" placeholder="e.g. Loyal guest"></label>
+  <div class="status" id="bopSum"></div>${boptFoot("Apply")}`;
+  boptDiscSum();
+}
+const boptDiscValue = () => ({ type: bopt.type, v: parseFloat(boptEl("Val").value) || 0 });
+function boptDiscSum() {
+  const b = bopt.bill,
+    d = boptDiscValue(),
+    t = totals(b.lines, { ...billAdj(b), disc: d.v > 0 ? d : null });
+  boptEl("Sum").textContent = `${KES(t.sub)} − ${KES(t.disc)} = ${KES(t.g)}`;
+}
+function boptDiscSave() {
+  const b = bopt.bill,
+    d = boptDiscValue(),
+    why = boptEl("Why").value.trim(),
+    sub = totals(b.lines, { ...billAdj(b), disc: null }).sub,
+    raw = parseFloat(boptEl("Val").value);
+  if (!d.v && !billAdj(b).disc && !(raw < 0)) return boptMsg("Enter the discount.");
+  if (raw < 0) return boptMsg("The discount cannot be below zero.");
+  if (d.type === "pct" && d.v > 100) return boptMsg("A discount cannot be more than 100%.");
+  if (d.type === "amt" && d.v > sub)
+    return boptMsg(`A discount cannot be more than the bill (${KES(sub)}).`);
+  if (d.v > 0 && !why) return boptMsg("Enter the reason for the discount.");
+  const A = billAdj(b),
+    before = billTot(b).g;
+  A.disc = d.v > 0 ? { ...d, why, by: bopt.by } : null;
+  const t = billTot(b);
+  boptLog(
+    d.v > 0 ? "Discount" : "Discount removed",
+    b,
+    why,
+    d.v > 0 ? (d.type === "pct" ? d.v + "%" : "KES " + bill2(d.v)) : "",
+    t.g - before
+  );
+  boptDone(
+    d.v > 0
+      ? `Discount applied. ${b.label} is now ${KES(t.g)}.`
+      : `Discount removed from ${b.label}.`
+  );
+}
+
+// ---------------------------------------------------------------- void
+const VOID_REASONS = [
+  "Customer changed",
+  "Item spoilt",
+  "Item not available",
+  "Price error on system",
+  "Wrong order",
+  "Double entry",
+  "Erroneous entry",
+  "Goods returned"
+];
+function boptVoidForm() {
+  const b = bopt.bill;
+  bopt.vq = Object.fromEntries(Object.keys(b.lines).map(id => [id, 0]));
+  boptEl("Box").classList.add("bop-void");
+  boptEl("Body").innerHTML = `${boptTop()}
+  <div class="bv-wrap"><table class="bv-t"><thead><tr><th>Selected</th><th>Code</th><th>Description</th><th class="n">Qty</th><th class="n">Price</th><th class="n">Total</th></tr>
+  <tr class="bv-f"><td colspan="6"><input id="bopVF" placeholder="Filter items" autocomplete="off"></td></tr></thead><tbody id="bopVRows"></tbody></table></div>
+  <div class="bv-sum"><label class="bop-c"><input type="checkbox" id="bopVAll"> Select all</label><div id="bopVSum"></div></div>
+  <div class="bv-rs">${VOID_REASONS.map(r => `<button class="bv-r" data-vw="${r}">${r}</button>`).join("")}</div>
+  <label>Void reason<textarea id="bopWhy" rows="2" placeholder="Tap a reason above or type your own"></textarea></label>
+  ${b.draft ? "" : `<label class="bop-c"><input type="checkbox" id="bopBack" ${boptBackDefault(b) ? "checked" : ""}> Return voided items to stock</label>`}
+  <div class="bop-msg" id="bopMsg"></div>
+  <div class="bv-go"><button class="bv-void" data-bg="save">Void items</button><button class="bv-close" data-close>Close</button></div>`;
+  boptVoidRows();
+}
+/** What stays on the bill once the ticked quantities are gone. */
+const boptVoidLeft = () => {
+  const L = { ...bopt.bill.lines };
+  Object.entries(bopt.vq).forEach(([id, q]) => {
+    if (q >= L[id]) delete L[id];
+    else if (q) L[id] -= q;
+  });
+  return L;
+};
+function boptVoidRows() {
+  const b = bopt.bill,
+    A = billAdj(b),
+    f = boptEl("VF").value.trim().toLowerCase(),
+    ids = Object.keys(b.lines);
+  $("#bopVRows").innerHTML =
+    ids
+      .filter(id => !f || `${id} ${get(id).n}`.toLowerCase().includes(f))
+      .map(id => {
+        const it = get(id),
+          n = b.lines[id],
+          v = bopt.vq[id],
+          p = itemPrice(it, A);
+        return `<tr class="${v ? "on" : ""}" data-vr="${id}"><td><input type="checkbox" tabindex="-1" ${v ? "checked" : ""}></td><td>${slipEsc(id)}</td><td class="d">${slipEsc(it.n)}</td><td class="n">${
+          v && n > 1
+            ? `<span class="qc"><button data-vs="${id}" data-d="-1" ${v <= 1 ? "disabled" : ""}>−</button><b>${v}</b><button data-vs="${id}" data-d="1" ${v >= n ? "disabled" : ""}>+</button></span><small>of ${n}</small>`
+            : n
+        }</td><td class="n">${bill2(p)}</td><td class="n">${bill2(p * n)}</td></tr>`;
+      })
+      .join("") || '<tr><td colspan="6" class="bv-none">No items match.</td></tr>';
+  const qty = Object.values(bopt.vq).reduce((a, q) => a + q, 0),
+    all = ids.every(id => bopt.vq[id] >= b.lines[id]),
+    g = billTot(b).g;
+  boptEl("VAll").checked = all;
+  $("#bopVSum").innerHTML =
+    `<span>Bill total <b>${KES(g)}</b></span><span class="${qty ? "bv-out" : ""}">Voiding <b>${KES(g - totals(boptVoidLeft(), A).g)}</b>${qty ? ` · ${qty} item${qty > 1 ? "s" : ""}${all ? ", whole bill" : ""}` : ""}</span>`;
+}
+const boptVoidChips = () =>
+  document
+    .querySelectorAll(".bv-r")
+    .forEach(c => c.classList.toggle("on", c.dataset.vw === boptEl("Why").value));
+function boptVoidSave() {
+  const b = bopt.bill,
+    V = Object.entries(bopt.vq).filter(([, q]) => q > 0),
+    why = boptEl("Why").value.trim(),
+    back = !b.draft && boptEl("Back").checked;
+  if (!V.length) return boptMsg("Tick the items to void.");
+  if (!why) return boptMsg("Tap or type the reason for voiding.");
+  const before = billTot(b).g,
+    left = boptVoidLeft(),
+    whole = !Object.keys(left).length,
+    voided = Object.fromEntries(V),
+    by = bopt.by,
+    A = billAdj(b),
+    gone = before - totals(left, A).g,
+    list = V.reduce((a, [id, q]) => a + itemPrice(get(id), A) * q, 0),
+    // Each item's share of what came off the bill, so a discounted bill adds up.
+    share = list ? gone / list : 0;
+  boptLog(
+    "Void",
+    b,
+    why,
+    (whole ? "Whole bill: " : "") +
+      V.map(([id, q]) => `${q} ${get(id).n}`).join(", ") +
+      (b.draft ? " · not sent" : back ? " · back in stock" : " · not back in stock"),
+    -gone,
+    {
+      whole,
+      items: V.map(([id, q]) => ({
+        n: get(id).n,
+        q,
+        d: get(id).d,
+        amt: itemPrice(get(id), A) * q * share
+      }))
+    }
+  );
+  // Nothing on a sale that wasn't sent has reached the kitchen or the bar, so no alert.
+  if (b.draft) {
+    if (whole) resetSale();
+    else V.forEach(([id, q]) => (q >= cart[id] ? delete cart[id] : (cart[id] -= q)));
+    return boptDone(whole ? "Sale voided." : "Items voided.");
+  }
+  if (back) V.forEach(([id, q]) => itemStockMove(get(id), -q));
+  b.lines = left;
+  if (whole) {
+    orders.splice(orders.indexOf(b), 1);
+    if (cur === b) cur = null;
+  }
+  boptDone(whole ? `${b.label} voided.` : `Items voided. ${b.label} is now ${KES(billTot(b).g)}.`);
+  const tickets = orderTickets(
+    voided,
+    {
+      no: b.no,
+      label: b.label,
+      guest: b.guest,
+      room: b.room,
+      waiter: b.waiter,
+      by,
+      why,
+      whole
+    },
+    voidSlipHTML
+  );
+  showRc(
+    tickets.map(x => x.html).join("") + '<div class="sl-scr" id="rcPrinted"></div>',
+    null,
+    "Close"
+  );
+  printOrderTickets(tickets, voidTicketLines, "void alert");
+}
+
+// ---------------------------------------------------------------- merge
+function boptMergeForm() {
+  // Whoever authorizes decides what can be merged: a Manager's PIN opens every waiter's bills.
+  const by = USERS.find(u => u.n === bopt.by),
+    me = user ? user.n : "",
+    L = billsFor(by, by.d).sort((a, b) => (b.waiter === me) - (a.waiter === me));
+  if (L.length < 2) {
+    $("#mBopt").classList.remove("show");
+    return fsNote("Merging needs two open bills.");
+  }
+  boptEl("Body").innerHTML =
+    `<h3>Merge bills</h3><p class="stk">Tick the bills to combine. They become one bill under the first one ticked, and it stays with that bill's waiter. Authorized by ${slipEsc(bopt.by)}.</p>
+  <div class="bop-list">${L.map(
+    o =>
+      `<label class="bop-b"><span><input type="checkbox" data-bm="${slipEsc(o.no)}" ${boptScope && boptScope.includes(o) ? "checked" : ""}> <b>${slipEsc(o.label)}</b> · ${slipEsc(o.dept)}<small>${slipEsc(o.no)} · ${cnt(o.lines)} items · ${slipEsc(o.waiter || "No waiter")}</small></span><b>${KES(totals(o.lines, o).g)}</b></label>`
+  ).join("")}</div>${boptFoot("Merge bills")}`;
+  bopt.order = (boptScope || []).map(o => o.no);
+}
+function boptMergeSave() {
+  const L = bopt.order.map(no => orders.find(o => o.no === no)).filter(Boolean),
+    key = o =>
+      JSON.stringify([o.pl && o.pl.n, o.cur && o.cur.c, o.disc && [o.disc.type, o.disc.v]]);
+  if (L.length < 2) return boptMsg("Tick at least two bills.");
+  if (new Set(L.map(key)).size > 1)
+    return boptMsg(
+      "These bills have different discounts, price lists or currencies. Make them the same first."
+    );
+  const [T, ...rest] = L,
+    amt = L.some(o => o.disc && o.disc.type === "amt");
+  if (amt) return boptMsg("Remove the KES discount first, then apply it to the merged bill.");
+  const was = rest.map(o => `${o.label} (${o.no}, ${o.waiter})`).join(", "),
+    mixed = rest.some(o => o.waiter !== T.waiter);
+  rest.forEach(o => {
+    Object.entries(o.lines).forEach(([id, q]) => (T.lines[id] = (T.lines[id] || 0) + q));
+    const c = parseInt(T.covers, 10) || 0,
+      d = parseInt(o.covers, 10) || 0;
+    if (c || d) T.covers = String(c + d);
+    T.guest = T.guest || o.guest;
+    T.room = T.room || o.room;
+    T.rider = T.rider || o.rider;
+    T.rounds = Math.max(T.rounds, o.rounds);
+    orders.splice(orders.indexOf(o), 1);
+    if (cur === o) cur = null;
+  });
+  boptLog("Merge", T, "", "Merged " + was);
+  boptDone(
+    `Merged into ${T.label}: ${KES(totals(T.lines, T).g)}.` +
+      (mixed ? ` It stays with ${T.waiter}.` : "")
+  );
+}
+
+// ---------------------------------------------------------------- split
+function boptSplitForm() {
+  const b = bopt.bill;
+  bopt.q = bopt.q || Object.fromEntries(Object.keys(b.lines).map(id => [id, 0]));
+  const lbl = boptEl("Nm") ? boptEl("Nm").value : b.label + " /2",
+    ids = Object.keys(b.lines),
+    moved = Object.fromEntries(ids.filter(id => bopt.q[id] > 0).map(id => [id, bopt.q[id]])),
+    left = Object.fromEntries(
+      ids.filter(id => bopt.q[id] < b.lines[id]).map(id => [id, b.lines[id] - bopt.q[id]])
+    ),
+    whole = !Object.keys(left).length,
+    row = (id, q, side) =>
+      `<div class="bs-i"><button class="bs-m" data-bs="${id}" data-d="${side}"><b>${q}</b><span>${slipEsc(get(id).n)}</span><i>${side > 0 ? "→" : "←"}</i></button>${q > 1 ? `<button class="bs-all" data-bs="${id}" data-d="${side * q}">All</button>` : ""}</div>`;
+  boptEl("Box").classList.add("bop-split");
+  boptEl("Body").innerHTML =
+    `${boptTop()}<p class="stk">Tap an item to move it to the new bill. Tap it there to bring it back.</p>
+  <div class="bs-pair"><div class="bs-p"><div class="bs-h"><small>Old bill</small><b>${slipEsc(b.label)}</b></div><div class="bs-r">${
+    Object.keys(left)
+      .map(id => row(id, left[id], 1))
+      .join("") || '<div class="bs-e">Nothing left on this bill.</div>'
+  }</div><div class="bs-t"><span>Total</span><b>${KES(totals(left, b).g)}</b></div></div>
+  <div class="bs-p bs-new"><label class="bs-h"><small>New bill</small><input id="bopNm" value="${slipEsc(lbl)}"></label><div class="bs-r">${
+    Object.keys(moved)
+      .map(id => row(id, moved[id], -1))
+      .join("") || '<div class="bs-e">Zero bill. Tap items on the old bill to move them here.</div>'
+  }</div><div class="bs-t"><span>Total</span><b id="bopNewT">${KES(totals(moved, whole ? b : boptSplitTerms(b)).g)}</b></div></div></div>
+  ${whole ? `<div class="status">Everything is moving, so ${slipEsc(b.label)} will close.</div>` : ""}${boptFoot("Split bill")}`;
+}
+/** A KES discount stays on the old bill; a percentage applies to both. */
+const boptSplitTerms = b => ({ ...b, disc: b.disc && b.disc.type === "pct" ? b.disc : null });
+function boptSplitSave() {
+  const b = bopt.bill,
+    label = boptEl("Nm").value.trim(),
+    M = Object.entries(bopt.q).filter(([, q]) => q > 0);
+  if (!M.length) return boptMsg("Move at least one item to the new bill.");
+  if (!label) return boptMsg("Enter the name of the new bill.");
+  if (orders.some(o => o.dept === b.dept && o.label.toLowerCase() === label.toLowerCase()))
+    return boptMsg(`${b.dept} already has an open bill called ${label}.`);
+  const whole = M.length === Object.keys(b.lines).length && M.every(([id, q]) => q >= b.lines[id]),
+    n = {
+      no: "ORD-" + String(ono++).padStart(3, "0"),
+      label,
+      dept: b.dept,
+      lines: {},
+      rounds: b.rounds,
+      at: new Date(),
+      guest: b.guest,
+      covers: "",
+      room: b.room,
+      rider: b.rider,
+      waiter: b.waiter,
+      pl: b.pl,
+      cur: b.cur,
+      disc: whole ? b.disc : boptSplitTerms(b).disc
+    };
+  M.forEach(([id, q]) => {
+    n.lines[id] = q;
+    if (q >= b.lines[id]) delete b.lines[id];
+    else b.lines[id] -= q;
+  });
+  orders.push(n);
+  if (whole) {
+    orders.splice(orders.indexOf(b), 1);
+    if (cur === b) cur = null;
+  }
+  boptLog(
+    "Split",
+    b,
+    "",
+    `Moved to ${n.no} ${n.label}: ` +
+      M.map(([id, q]) => `${q} ${get(id).n}`).join(", ") +
+      (whole ? ` · ${b.no} closed` : ""),
+    -totals(n.lines, n).g,
+    { points: [...new Set([...billPoints(b.lines), ...billPoints(n.lines)])] }
+  );
+  boptDone(
+    whole
+      ? `All moved to ${n.label}: ${KES(totals(n.lines, n).g)}. ${b.label} closed.`
+      : `Split: ${b.label} ${KES(totals(b.lines, b).g)}, ${n.label} ${KES(totals(n.lines, n).g)}.`
+  );
+}
+
+// ---------------------------------------------------------------- clicks
+$("#mBopt").addEventListener("click", e => {
+  const b = e.target.closest("button,input[data-bm]");
+  if (e.target.id === "mBopt") return e.target.classList.remove("show");
+  if (e.target.id === "bopVAll") {
+    Object.keys(bopt.vq).forEach(id => (bopt.vq[id] = e.target.checked ? bopt.bill.lines[id] : 0));
+    return boptVoidRows();
+  }
+  const row = e.target.closest("[data-vr]");
+  if (row && !b) {
+    const id = row.dataset.vr;
+    bopt.vq[id] = bopt.vq[id] ? 0 : bopt.bill.lines[id];
+    return boptVoidRows();
+  }
+  if (!b) return;
+  const d = b.dataset;
+  if (d.bo) return boptStart(d.bo);
+  if (d.vs) {
+    bopt.vq[d.vs] += +d.d;
+    return boptVoidRows();
+  }
+  if (d.vw) {
+    boptEl("Why").value = d.vw;
+    return boptVoidChips();
+  }
+  if (d.bb !== undefined) return boptOpen(boptBills(bopt.act)[+d.bb]);
+  if (d.bg === "auth") return boptAuth();
+  if (d.bs) {
+    bopt.q[d.bs] = Math.max(0, bopt.q[d.bs] + +d.d);
+    return boptSplitForm();
+  }
+  if (d.bt) {
+    bopt.type = d.bt;
+    return boptDiscForm();
+  }
+  if (d.bm) {
+    bopt.order = bopt.order.filter(x => x !== d.bm);
+    if (b.checked) bopt.order.push(d.bm);
+    return;
+  }
+  if (d.bg === "save")
+    return {
+      disc: boptDiscSave,
+      void: boptVoidSave,
+      merge: boptMergeSave,
+      split: boptSplitSave
+    }[bopt.act]();
+});
+$("#mBopt").addEventListener("input", e => {
+  if (e.target.id === "bopVal") boptDiscSum();
+  if (e.target.id === "bopVF") boptVoidRows();
+  if (e.target.id === "bopWhy" && bopt.act === "void") boptVoidChips();
+});
+$("#mBopt").addEventListener("keydown", e => {
+  if (e.key === "Enter" && e.target.id === "bopPin") boptAuth();
+});
 // ---- cashier PIN login (module entry) ----
 const USERS = [
   { n: "Wanjiru Kamau", pin: "1234", d: ["Bar", "Kitchen"] },
@@ -9946,12 +12483,13 @@ function loginAs(u) {
   user = u;
   DEPTS = u.d.filter(posSells);
   if (!DEPTS.length) DEPTS = [ALLD.filter(posSells)[0] || ALLD[0]];
-  dept = DEPTS[0];
+  dept = DEPTS.length > 1 ? ALLP : DEPTS[0];
+  spTab = DEPTS[0];
   cart = {};
   pin = "";
   pdraw();
   const p = u.n.split(" ");
-  $("#cname").textContent = p[0] + " " + p[1][0] + ".";
+  $("#cname").textContent = p[1] ? p[0] + " " + p[1][0] + "." : p[0];
   $("#login").style.display = "none";
   pmsg("Enter your PIN, or swipe your staff card.");
   posAccess();
@@ -10462,6 +13000,7 @@ setInterval(tick, 30000);
             <div id="vSub" style="display: none"></div>
             <div id="vHome">
               <div class="hello">
+                <div class="hero-x hero-mono" id="hMono" aria-hidden="true"></div>
                 <div>
                   <h1 id="hi">Welcome</h1>
                   <p id="dt"></p>
@@ -10477,6 +13016,7 @@ setInterval(tick, 30000);
                     <svg class="i"><use href="#i-plus" /></svg>Stock request
                   </button>
                 </div>
+                <div class="hero-x hero-figs" id="hFigs"></div>
               </div>
               <div class="card" id="dayBar" style="margin-bottom: 14px"></div>
               <div class="h2">
@@ -10509,8 +13049,10 @@ setInterval(tick, 30000);
                       <div class="cs" id="tc"></div>
                     </div>
                     <div class="lgd">
-                      <span><i style="background: #1d5c8a"></i>This period</span
-                      ><span><i style="background: #f2a43a"></i>Previous period</span>
+                      <span><i style="background: var(--tr1, var(--c1))"></i>This period</span
+                      ><span
+                        ><i style="background: var(--tr2, var(--acc))"></i>Previous period</span
+                      >
                     </div>
                   </div>
                   <div id="trend"></div>
@@ -10910,7 +13452,7 @@ function shDraw(msg) {
     const c = shiftCalc(sh),
       pays = pOf(sh),
       ac = parseFloat(shAct),
-      pend = orders.reduce((a, o) => a + totals(o.lines).g, 0);
+      pend = orders.reduce((a, o) => a + totals(o.lines, o).g, 0);
     h += `<div class="shm-rib">${rb("refresh", "refresh", "Refresh shift data")}${rb("close", "close", "Close shift")}${rb("closeday", "day", "Close shift and day", "st")}${rb("summary", "sum", "Shift summary")}${rb("salesrep", "rep", "Sales report")}${rb("payout", "pay", "Cash payout")}</div>
   <div class="shm-grid"><div style="display:grid;gap:14px;min-width:0"><div class="shc"><div class="shf"><span>Shift no</span><input readonly value="${sh.id}"><span>Shift date</span><input readonly value="${new Date(sh.openedAt).toLocaleDateString("en-GB")}"><span>Shift time</span><input readonly value="${hm(sh.openedAt)}"><span>Cashier name</span><input readonly value="${hx(sh.user)}"></div></div>
   <div class="shc"><h4>Payments received</h4><table class="sht"><tr><th>Paymode</th><th>Currency</th><th class="n">Amount</th></tr><tr><td>CASH</td><td>KSH</td><td class="n">${R2(c.cash)}</td></tr><tr><td>M-PESA</td><td>KSH</td><td class="n">${R2(c.mpesa)}</td></tr><tr><td>CREDIT</td><td>KSH</td><td class="n">${R2(c.credit)}</td></tr><tr class="tt"><td colspan="2">Total</td><td class="n">${R2(c.cash + c.mpesa + c.credit)}</td></tr></table></div>
@@ -13293,6 +15835,9 @@ function bosave() {
         LP: LPOS,
         VN: VENDORS,
         VP: VPAYS,
+        BL: BILLLOG,
+        OR: orders,
+        ON: ono,
         IS: ISSUES,
         PD: PRODS,
         ST: STORES,
@@ -13353,6 +15898,18 @@ window.bosave = bosave;
     VENDORS.push(...(s.VN || []));
     VPAYS.length = 0;
     VPAYS.push(...(s.VP || []));
+    BILLLOG.length = 0;
+    BILLLOG.push(...(s.BL || []));
+    // Open orders: a line whose product has since gone is dropped, so one bad line can't stop the POS.
+    orders.length = 0;
+    (s.OR || []).forEach(o => {
+      o.at = new Date(o.at);
+      Object.keys(o.lines || {}).forEach(id => {
+        if (!ITEMS.some(i => String(i.id) === id)) delete o.lines[id];
+      });
+      if (Object.keys(o.lines || {}).length) orders.push(o);
+    });
+    ono = Math.max(ono, s.ON || 1);
     ISSUES.length = 0;
     ISSUES.push(...(s.IS || []));
     PRODS.length = 0;
@@ -13598,6 +16155,34 @@ function kpis() {
     return `<div class="k"><div class="l"><span>${l}</span>${I(ic, "var(--mute)")}</div><div class="v">${fm(c)}</div><div class="d ${has ? (good ? "u" : "dn") : ""}">${has ? `${up ? "▲" : "▼"} ${Math.abs(pc).toFixed(1)}% <span>vs previous period</span>` : `<span>${p === null ? "Live balance" : "No previous data"}</span>`}</div>${f ? spark(ser(0, f), good) : ""}</div>`;
   }).join("");
 }
+/** The banner's headline figures (Five Star theme). */
+function heroBar() {
+  const rv = a => sum(a, s => s.g),
+    now = rv(sel(0)),
+    was = rv(sel(1)),
+    occ = ROOMS.filter(r => roomStatus(r) === "occ").length,
+    wait = APPR.length + apCount(),
+    fig = (l, v, s, id) =>
+      `<div><span>${l}</span><b ${id ? `id="${id}"` : ""}>${v}</b><small>${s}</small></div>`,
+    ch = was > 0 ? ((now - was) / was) * 100 : null;
+  $("#hMono").textContent = (FD_SETTINGS.name || "K").trim()[0];
+  $("#hFigs").innerHTML =
+    fig(
+      "Revenue · " + PL[per],
+      KES(now),
+      ch === null
+        ? "No earlier period to compare"
+        : `${ch >= 0 ? "▲" : "▼"} ${Math.abs(ch).toFixed(1)}% on the period before`,
+      "heroFig"
+    ) +
+    fig(
+      "Occupancy",
+      (ROOMS.length ? Math.round((occ / ROOMS.length) * 100) : 0) + "%",
+      `${occ} of ${ROOMS.length} rooms`
+    ) +
+    fig("Open bills", orders.length, KES(orders.reduce((a, o) => a + totals(o.lines, o).g, 0))) +
+    fig("Approvals", wait, wait ? "Waiting for a decision" : "Nothing waiting");
+}
 function mods() {
   const M = [
     [
@@ -13647,7 +16232,13 @@ function mods() {
     ],
     ["Accounting", "book", "#2f9e75", "Next build", "Ledgers and tax"],
     ["M-Pesa & eTIMS", "phone", "#12804a", "Next build", "Sync and invoices"],
-    ["Reports", "chart", "#2b7bb9", "14 reports", "Sales, staff, items, payments"],
+    [
+      "Reports",
+      "chart",
+      "#2b7bb9",
+      Object.keys(REP).length + " reports",
+      "Sales, staff, items, payments"
+    ],
     ["Settings", "gear", "#7d8da1", "Bills and receipts", "Hotel details and till number"]
   ];
   $("#mods").innerHTML = M.map(
@@ -13692,12 +16283,12 @@ function trend() {
   const bars = cur
       .map(
         (v, i) =>
-          `<rect x="${x(i) - bw / 2}" y="${y(v)}" width="${bw}" height="${H - B - y(v)}" rx="3" fill="url(#tg)"><title>${lab(i)}: ${KES(v)}</title></rect>`
+          `<rect x="${x(i) - bw / 2}" y="${y(v)}" width="${bw}" height="${H - B - y(v)}" rx="4" style="fill:var(--tr1,url(#tg))"/><rect class="hit" x="${x(i) - (W - L - 6) / n / 2}" y="${T}" width="${(W - L - 6) / n}" height="${H - T - B}" data-tip="${esc(lab(i))}: ${KES(v)} · before ${KES(prev[i])}"/>`
       )
       .join(""),
     pl = prev.map((v, i) => (i ? "L" : "M") + x(i).toFixed(1) + " " + y(v).toFixed(1)).join("");
   $("#trend").innerHTML =
-    `<svg class="ch" viewBox="0 0 ${W} ${H}"><defs><linearGradient id="tg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--c2)"/><stop offset="1" style="stop-color:var(--c1)"/></linearGradient></defs>${g}${bars}<path d="${pl}" fill="none" stroke="var(--acc)" stroke-width="2.2" stroke-dasharray="5 4"/></svg>`;
+    `<svg class="ch" viewBox="0 0 ${W} ${H}"><defs><linearGradient id="tg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--c2)"/><stop offset="1" style="stop-color:var(--c1)"/></linearGradient></defs>${g}${bars}<path d="${pl}" fill="none" style="stroke:var(--tr2,var(--acc))" stroke-width="2" stroke-dasharray="5 4" pointer-events="none"/></svg>`;
   $("#tc").textContent = KES(sum(cur, v => v)) + " in the " + PL[per] + " · " + br.toLowerCase();
   $("#pl").textContent = br + " · " + PL[per];
 }
@@ -13708,15 +16299,23 @@ function donut() {
     T = 2 * Math.PI * R;
   let o = 0;
   $("#mt").textContent = ad ? "Sales by department" : "Sales by category";
-  const m = grp(sel(0), s =>
+  const every = grp(sel(0), s =>
       ad ? [[s.dept, s.g]] : s.lines.map(l => [(get(l.id) || {}).c || "Other", l.p * l.q])
-    ).slice(0, 6),
-    tot = sum(m, x => x[1]);
+    ),
+    // More than six fold into Other, so the shares still add up to the whole.
+    top = every.length > 6 ? every.slice(0, 5) : every,
+    rest = sum(every.slice(top.length), x => x[1]),
+    m = rest ? [...top, ["Other", rest]] : top,
+    tot = sum(m, x => x[1]),
+    // A colour stays with its department or category when the period changes the ranking.
+    key = ad ? ALLD : [...new Set(ITEMS.map(i => i.c))],
+    slots = top.map(x => x[0]).sort((a, b) => key.indexOf(a) - key.indexOf(b)),
+    col = n => (slots.includes(n) ? C[slots.indexOf(n)] : "var(--mute)");
   $("#donut").innerHTML = tot
     ? `<svg class="ch" viewBox="0 0 200 200" style="max-width:220px;margin:0 auto"><g transform="rotate(-90 100 100)">${m
-        .map(([n, v], i) => {
+        .map(([n, v]) => {
           const l = (v / tot) * T,
-            s = `<circle cx="100" cy="100" r="${R}" fill="none" stroke="${C[i]}" stroke-width="30" stroke-dasharray="${l} ${T - l}" stroke-dashoffset="${-o}"><title>${esc(n)}: ${Math.round((v / tot) * 100)}%</title></circle>`;
+            s = `<circle cx="100" cy="100" r="${R}" fill="none" stroke="${col(n)}" stroke-width="26" stroke-dasharray="${Math.max(l - 2, 0.5)} ${T - Math.max(l - 2, 0.5)}" stroke-dashoffset="${-o}" data-tip="${esc(n)}: ${KES(v)} · ${Math.round((v / tot) * 100)}%"/>`;
           o += l;
           return s;
         })
@@ -13727,12 +16326,29 @@ function donut() {
   $("#dl").innerHTML = tot
     ? m
         .map(
-          ([n, v], i) =>
-            `<span><i style="background:${C[i]}"></i>${esc(n)} ${Math.round((v / tot) * 100)}%</span>`
+          ([n, v]) =>
+            `<span><i style="background:${col(n)}"></i>${esc(n)} ${Math.round((v / tot) * 100)}%</span>`
         )
         .join("")
     : "";
 }
+// One hover note for both charts.
+const chTip = document.createElement("div");
+chTip.className = "ch-tip";
+chTip.hidden = true;
+$("#bo").appendChild(chTip);
+["#trend", "#donut"].forEach(s => {
+  const el = $(s);
+  el.addEventListener("mousemove", e => {
+    const t = e.target.closest("[data-tip]");
+    chTip.hidden = !t;
+    if (!t) return;
+    chTip.textContent = t.dataset.tip;
+    chTip.style.left = Math.min(e.clientX + 14, innerWidth - 270) + "px";
+    chTip.style.top = e.clientY + 14 + "px";
+  });
+  el.addEventListener("mouseleave", () => (chTip.hidden = true));
+});
 function insights() {
   const L = [],
     lo = Object.keys(stock)
@@ -13946,7 +16562,283 @@ const items = L => {
 const pc = (a, b) => (b ? ((a / b) * 100).toFixed(1) : "0.0"),
   G = L => sum(L, s => s.g),
   dt = s => hhmm(s.at) + " " + s.at.toLocaleDateString("en-GB");
+/** Bill options log entries in the report's dates and sale point, newest first. */
+const billLog = acts => {
+  const A = new Date(rf + "T00:00:00").getTime(),
+    B = new Date(rt + "T23:59:59").getTime();
+  return BILLLOG.filter(x => {
+    const t = new Date(x.at).getTime();
+    return (
+      t >= A &&
+      t <= B &&
+      (!acts || acts.includes(x.act)) &&
+      (rd === "All" || logPoints(x).includes(rd))
+    );
+  })
+    .slice()
+    .reverse();
+};
+const logPoints = x =>
+  x.items
+    ? [...new Set(x.items.map(l => l.d))]
+    : x.points && x.points.length
+      ? x.points
+      : String(x.dept || "").split(", ");
+const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
+const logHead = t => `${t} · ${rf} to ${rt} · ${rd === "All" ? "all sale points" : rd}`;
+const voidRows = () => billLog(["Void"]);
+/** What a void took off, limited to the chosen sale point. Older entries only kept a total. */
+const voidParts = x =>
+  (x.items || [{ n: x.detail.split(" · ")[0], q: 0, d: x.dept, amt: -x.amt }]).filter(
+    l => rd === "All" || l.d === rd
+  );
+const voidItemsText = P => P.map(l => (l.q ? `${l.q} ${l.n}` : l.n)).join(", ");
+const voidTotal = R => sum(R, x => sum(voidParts(x), l => l.amt));
+// ---- printing a report: A4 landscape or an 80mm roll ----
+let rpSize = "a4";
+const printTools = k =>
+  `<span class="rp-size"><label><input type="radio" name="rpSize" data-rsz="a4" ${rpSize === "a4" ? "checked" : ""}> A4 size</label><label><input type="radio" name="rpSize" data-rsz="80" ${rpSize === "80" ? "checked" : ""}> Thermal paper (80mm)</label></span><button class="chip on" data-a="rep_print" data-k="${k}">Print</button>`;
+const printedBy = () => `Printed ${new Date().toLocaleString("en-GB")} by ${esc(boUser.n)}`;
+function tablePrint(title, head, c, r, f) {
+  const name = x => (x[0] === "#" ? x.slice(1) : x),
+    num = i => (c[i][0] === "#" ? ' class="n"' : "");
+  if (rpSize === "a4")
+    return stPrint(
+      title,
+      `<div class="st-doc"><div class="st-head"><div>${esc(FD_SETTINGS.name)}</div><h2>${esc(title)}</h2></div><div class="st-foot"><span>${esc(head)}</span></div>
+ <table class="st-t"><thead><tr>${c.map((x, i) => `<th${num(i)}>${esc(name(x))}</th>`).join("")}</tr></thead><tbody>${r.map(x => `<tr>${x.map((v, i) => `<td${num(i)}>${esc(v)}</td>`).join("")}</tr>`).join("")}${f ? `<tr class="st-tot">${f.map((v, i) => `<td${num(i)}>${esc(v)}</td>`).join("")}</tr>` : ""}</tbody></table>
+ <div class="st-foot"><span>${printedBy()}</span></div></div>`
+    );
+  // A roll is too narrow for wide tables, so each record prints as its own short block.
+  const block = (x, tot) =>
+      `<div class="b${tot ? " t" : ""}">${x.map((v, i) => (v === "" || v === null || v === undefined ? "" : `<div><span>${esc(name(c[i]))}</span><b>${esc(v)}</b></div>`)).join("")}</div>`,
+    w = window.open("", "_blank");
+  if (!w) return toast("Allow pop-ups to print.");
+  w.document.write(
+    `<!DOCTYPE html><html><head><title>${esc(title)}</title><style>@page{size:80mm auto;margin:0}body{width:72mm;margin:0 auto;padding:4mm 0;font:11px/1.35 Arial,sans-serif;color:#000}h1{margin:0;font-size:14px;text-align:center}h2{margin:3px 0;padding:3px 0;border-top:2px solid #000;border-bottom:2px solid #000;font-size:12px;text-align:center;text-transform:uppercase}.h,.p{font-size:10px;text-align:center}.b{padding:4px 0;border-bottom:1px dashed #000}.b div{display:flex;justify-content:space-between;gap:8px}.b b{text-align:right;font-weight:600}.t{border-bottom:3px double #000;font-weight:700}.p{margin-top:6px}</style></head><body><h1>${esc(FD_SETTINGS.name)}</h1><h2>${esc(title)}</h2><div class="h">${esc(head)}</div>${r.map(x => block(x)).join("")}${f ? block(f, 1) : ""}<div class="p">${printedBy()}</div></body></html>`
+  );
+  w.document.close();
+  w.focus();
+  w.print();
+}
+function repPrint(k) {
+  let title, c, r, f, head;
+  if (k === "rooms") {
+    [c, r, f] = rrData(hrr);
+    title = RRL[hrr];
+    head = ["rv", "pay", "rt", "gl"].includes(hrr) ? rrRange().join(" to ") : "Live position";
+  } else {
+    let h;
+    title = REP[rp][0];
+    const L = rs();
+    [c, r, f, , h] = REP[rp][1](L);
+    head =
+      h ||
+      `${L.length} bills · ${KES(G(L))} · ${rf} to ${rt} · ${rd === "All" ? "all sale points" : rd}`;
+  }
+  if (!r.length) return toast("There is nothing to print for these dates.");
+  tablePrint(title, head, c, r, f);
+}
+
+// ---- Bills Report: every settled bill, one line each; double-click to reprint ----
+const billF = { cashier: "All", pay: "All", net: false, col: {} };
+const billCols = () => [
+  "Bill Date",
+  "Bill Time",
+  "Bill Number",
+  "Table Number",
+  "Waiter Name",
+  "Cashier Name",
+  "Sale Point Name",
+  "Guest Name",
+  "Account/Room",
+  ...(billF.net ? ["#Net Amount"] : []),
+  "#Bill Total"
+];
+/** A bill served from several sale points is several sales with one number. */
+function billGroups() {
+  const o = {};
+  rs().forEach(s => {
+    const b = (o[s.no] = o[s.no] || {
+      no: s.no,
+      at: s.at,
+      label: s.label || "",
+      waiter: s.waiter || s.user,
+      cashier: s.user,
+      guest: s.guest || "N/A",
+      room: s.room || "",
+      pts: [],
+      net: 0,
+      g: 0,
+      mx: {}
+    });
+    b.pts.push(s.dept);
+    b.net += s.net;
+    b.g += s.g;
+    Object.entries(s.mx || {}).forEach(([m, v]) => (b.mx[m] = (b.mx[m] || 0) + v));
+  });
+  return Object.values(o)
+    .filter(
+      b =>
+        (billF.cashier === "All" || b.cashier === billF.cashier) &&
+        (billF.pay === "All" || b.mx[billF.pay] > 0)
+    )
+    .sort((a, b) => a.at - b.at);
+}
+const billRow = b => [
+  b.at.toLocaleDateString("en-GB"),
+  b.at.toLocaleTimeString("en-US"),
+  b.no,
+  b.label,
+  b.waiter,
+  b.cashier,
+  b.pts.join(", "),
+  b.guest,
+  b.room,
+  ...(billF.net ? [m2(b.net)] : []),
+  m2(b.g)
+];
+const billShown = () => {
+  const C = billCols();
+  return billGroups().filter(b => {
+    const r = billRow(b);
+    return C.every((x, i) => {
+      const w = (billF.col[x] || "").trim().toLowerCase();
+      return !w || String(r[i]).toLowerCase().includes(w);
+    });
+  });
+};
+const billTotals = B => ({ net: sum(B, b => b.net), g: sum(B, b => b.g) });
+function billsGrid(c, r, none) {
+  const opt = (L, v) =>
+      L.map(
+        ([k, n]) => `<option value="${esc(k)}" ${k === v ? "selected" : ""}>${esc(n)}</option>`
+      ).join(""),
+    who = [...new Set(SALES.map(s => s.user))].sort(),
+    t = billTotals(billShown()),
+    G2 = billGroups();
+  return `<div class="bl-bar"><label>Cashier name<select data-bf="cashier">${opt(
+    [["All", "All cashiers"], ...who.map(x => [x, x])],
+    billF.cashier
+  )}</select></label><label>Paymode<select data-bf="pay">${opt(
+    [["All", "All paymodes"], ...Object.entries(MN)],
+    billF.pay
+  )}</select></label><label class="bl-net"><input type="checkbox" data-bf="net" ${billF.net ? "checked" : ""}> Show net amount on bills</label><span class="bl-hint">Double-click a bill to reprint it</span></div>
+ <div class="bl-wrap"><table class="bl-t"><thead><tr>${c.map(x => `<th class="${x[0] === "#" ? "n" : ""}">${esc(x.replace("#", ""))}</th>`).join("")}</tr>
+ <tr class="bl-f">${c.map(x => `<td><input data-bc="${esc(x)}" value="${esc(billF.col[x] || "")}" placeholder="Filter" aria-label="Filter ${esc(x.replace("#", ""))}"></td>`).join("")}</tr></thead>
+ <tbody>${
+   G2.map(b => {
+     const x = billRow(b);
+     return `<tr data-bill="${esc(b.no)}" ${r.some(y => y[2] === b.no) ? "" : "hidden"}>${x.map((v, i) => `<td class="${c[i][0] === "#" ? "n" : ""}">${esc(v)}</td>`).join("")}</tr>`;
+   }).join("") || `<tr><td colspan="${c.length}"><div class="empty">${none}</div></td></tr>`
+ }</tbody></table></div>
+ <div class="bl-tot"><span id="blCnt">${plural(r.length, "bill")}</span>${billF.net ? `<span>Net <b id="blNet">${m2(t.net)}</b></span>` : ""}<span>Totals <b id="blG">${m2(t.g)}</b></span></div>`;
+}
+/** Typing in a column filter keeps the cursor where it is, so rows are hidden rather than redrawn. */
+function billFilter(col, v) {
+  billF.col[col] = v;
+  const B = billShown(),
+    S = new Set(B.map(b => b.no)),
+    t = billTotals(B);
+  document
+    .querySelectorAll("#vSub [data-bill]")
+    .forEach(tr => (tr.hidden = !S.has(tr.dataset.bill)));
+  $("#blCnt").textContent = plural(B.length, "bill");
+  $("#blG").textContent = m2(t.g);
+  if ($("#blNet")) $("#blNet").textContent = m2(t.net);
+}
+/** The bill as it was paid, on the paper chosen above, marked as a copy. */
+function billReprint(no) {
+  const S = SALES.filter(s => s.no === no);
+  if (!S.length) return;
+  const A = S[0],
+    keep = (S.find(s => s.slip) || {}).slip,
+    lines = S.flatMap(s => s.lines),
+    money = k => sum(S, s => s[k] || 0),
+    paid = {};
+  S.forEach(s => Object.entries(s.mx || {}).forEach(([m, v]) => (paid[m] = (paid[m] || 0) + v)));
+  A.copies = (A.copies || 0) + 1;
+  const html = receiptHTML({
+    no,
+    dept: S.map(s => s.dept).join(", "),
+    label: A.label,
+    guest: A.guest,
+    covers: A.covers,
+    room: A.room,
+    waiter: A.waiter || A.user,
+    at: slipStamp(A.at),
+    reprint: A.copies,
+    lines: lines.map(l => ({ q: l.q, n: l.n, p: l.p, t: l.t })),
+    t: {
+      sub: sum(lines, l => l.p * l.q),
+      disc: money("disc"),
+      net: money("net"),
+      tax: money("tax"),
+      g: money("g"),
+      cur: keep && keep.cur,
+      pl: A.pl ? { n: A.pl } : null
+    },
+    paid:
+      keep && keep.paid
+        ? keep.paid
+        : Object.entries(paid)
+            .map(([m, v]) => slipRow(MN[m] || m, bill2(v)))
+            .join(""),
+    change: keep ? keep.change : 0,
+    credit: keep ? keep.credit : !!paid.credit,
+    fiscal: keep
+      ? `CU serial: ${keep.cu}<br>CU invoice no: ${keep.inv}${qr(no + keep.cu)}Scan to verify on KRA eTIMS<br>(demo QR)`
+      : ""
+  });
+  BILLLOG.push({
+    at: new Date().toISOString(),
+    act: "Reprint",
+    no,
+    label: A.label,
+    dept: S.map(s => s.dept).join(", "),
+    waiter: A.waiter || A.user,
+    by: boUser.n,
+    user: boUser.n,
+    why: "",
+    detail: `Copy ${A.copies} · ${rpSize === "a4" ? "A4" : "80mm"}`,
+    amt: 0,
+    points: S.map(s => s.dept)
+  });
+  bosave();
+  showRc(
+    rpSize === "a4" ? html.replace('class="slip"', 'class="slip sl-a4"') : html,
+    null,
+    "Close"
+  );
+}
 const REP = {
+  bills: [
+    "Bills Report",
+    () => {
+      const B = billShown(),
+        t = billTotals(B),
+        c = billCols();
+      return [
+        c,
+        B.map(billRow),
+        [
+          "Total",
+          plural(B.length, "bill"),
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ...(billF.net ? [m2(t.net)] : []),
+          m2(t.g)
+        ],
+        "No bills for these dates and filters.",
+        logHead("Bills")
+      ];
+    }
+  ],
   sc: [
     "Sales and Costs Report",
     L => {
@@ -13980,6 +16872,204 @@ const REP = {
         .map(([d, a]) => [d, a.length, m2(sum(a, s => s.net)), m2(sum(a, s => s.tax)), m2(G(a))]),
       ["Total", L.length, m2(sum(L, s => s.net)), m2(sum(L, s => s.tax)), m2(G(L))]
     ]
+  ],
+  blog: [
+    "Bill Options Log",
+    () => {
+      const R = billLog();
+      return [
+        [
+          "Date",
+          "Bill",
+          "Table",
+          "Sale point",
+          "Action",
+          "Details",
+          "Reason",
+          "Authorized by",
+          "Till user",
+          "#Change (KES)"
+        ],
+        R.map(x => [
+          new Date(x.at).toLocaleString("en-GB"),
+          x.no,
+          x.label,
+          x.dept,
+          x.act,
+          x.detail,
+          x.why,
+          x.by,
+          x.user,
+          m2(x.amt)
+        ]),
+        null,
+        R.length ? "" : "Nothing was changed through Bill options in these dates.",
+        logHead(plural(R.length, "change"))
+      ];
+    }
+  ],
+  vdep: [
+    "Voided Bills by Department",
+    () => {
+      const R = voidRows(),
+        rows = [];
+      by(
+        R.flatMap(x => voidParts(x).map(l => ({ x, l }))),
+        p => p.l.d
+      )
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .forEach(([d, P]) => {
+          by(P, p => p.x.at + "|" + p.x.no).forEach(([, a]) => {
+            const x = a[0].x;
+            rows.push([
+              d,
+              new Date(x.at).toLocaleString("en-GB"),
+              x.no,
+              x.label,
+              x.waiter || "",
+              voidItemsText(a.map(p => p.l)),
+              x.why,
+              x.by,
+              m2(sum(a, p => p.l.amt))
+            ]);
+          });
+          rows.push(["Total " + d, "", "", "", "", "", "", "", m2(sum(P, p => p.l.amt))]);
+        });
+      return [
+        [
+          "Department",
+          "Date",
+          "Bill",
+          "Table",
+          "Waiter",
+          "Items voided",
+          "Reason",
+          "Authorized by",
+          "#Value (KES)"
+        ],
+        rows,
+        ["Total", "", "", "", "", "", "", "", m2(voidTotal(R))],
+        R.length ? "" : "No voided bills in these dates.",
+        logHead(plural(R.length, "void") + " · " + KES(voidTotal(R)))
+      ];
+    }
+  ],
+  vall: [
+    "All Voided Bills",
+    () => {
+      const R = voidRows();
+      return [
+        [
+          "Date",
+          "Bill",
+          "Table",
+          "Department",
+          "Waiter",
+          "Items voided",
+          "Voided",
+          "Stock",
+          "Reason",
+          "Authorized by",
+          "Till user",
+          "#Value (KES)"
+        ],
+        R.map(x => {
+          const P = voidParts(x);
+          return [
+            new Date(x.at).toLocaleString("en-GB"),
+            x.no,
+            x.label,
+            [...new Set(P.map(l => l.d))].join(", "),
+            x.waiter || "",
+            voidItemsText(P),
+            x.items && !x.whole ? "Part of bill" : "Whole bill",
+            x.detail
+              .split(" · ")
+              .pop()
+              .replace(/^./, c => c.toUpperCase()),
+            x.why,
+            x.by,
+            x.user,
+            m2(sum(P, l => l.amt))
+          ];
+        }),
+        ["Total", plural(R.length, "void"), "", "", "", "", "", "", "", "", "", m2(voidTotal(R))],
+        R.length ? "" : "No voided bills in these dates.",
+        logHead(plural(R.length, "void") + " · " + KES(voidTotal(R)))
+      ];
+    }
+  ],
+  dlog: [
+    "Discount Report",
+    () => {
+      const R = billLog(["Discount", "Discount removed"]),
+        T = sum(R, x => -x.amt);
+      return [
+        [
+          "Date",
+          "Bill",
+          "Table",
+          "Sale point",
+          "Waiter",
+          "Discount",
+          "Reason",
+          "Authorized by",
+          "Till user",
+          "#Amount (KES)"
+        ],
+        R.map(x => [
+          new Date(x.at).toLocaleString("en-GB"),
+          x.no,
+          x.label,
+          logPoints(x).join(", "),
+          x.waiter || "",
+          x.act === "Discount" ? x.detail : "Removed",
+          x.why,
+          x.by,
+          x.user,
+          m2(-x.amt)
+        ]),
+        ["Total", plural(R.length, "change"), "", "", "", "", "", "", "", m2(T)],
+        R.length ? "" : "No discounts were given in these dates.",
+        logHead(plural(R.length, "change") + " · " + KES(T))
+      ];
+    }
+  ],
+  msp: [
+    "Merged & Split Bills",
+    () => {
+      const R = billLog(["Merge", "Split"]),
+        n = a => R.filter(x => x.act === a).length;
+      return [
+        [
+          "Date",
+          "Action",
+          "Bill",
+          "Table",
+          "Sale point",
+          "Waiter",
+          "Details",
+          "Authorized by",
+          "Till user",
+          "#Value (KES)"
+        ],
+        R.map(x => [
+          new Date(x.at).toLocaleString("en-GB"),
+          x.act === "Merge" ? "Merged" : "Split",
+          x.no,
+          x.label,
+          logPoints(x).join(", "),
+          x.waiter || "",
+          x.detail,
+          x.by,
+          x.user,
+          m2(Math.abs(x.amt))
+        ]),
+        null,
+        R.length ? "" : "No bills were merged or split in these dates.",
+        logHead(n("Merge") + " merged · " + n("Split") + " split")
+      ];
+    }
   ],
   ds: [
     "Discounted Sales Report",
@@ -14126,7 +17216,7 @@ const V = {
   rep() {
     const [t, fn] = REP[rp],
       L = rs(),
-      [c, r, f, note] = fn(L);
+      [c, r, f, note, head] = fn(L);
     return `<div style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start"><div class="pn" style="flex:1 1 230px;max-width:300px"><h4>Sales reports</h4>${Object.entries(
       REP
     )
@@ -14136,8 +17226,8 @@ const V = {
       )
       .join("")}</div>
  <div class="pn" style="flex:3 1 420px"><h4>${t}</h4><div class="fr" style="align-items:center"><input type="date" data-f="rf" value="${rf}"><input type="date" data-f="rt" value="${rt}"><select data-f="rd">${["All", ...ALLD].map(d => `<option ${d === rd ? "selected" : ""}>${d}</option>`).join("")}</select>${rp === "com" ? `<input type="number" step="any" data-f="rc" value="${rcm}" title="Commission rate %" placeholder="Rate %">` : ""}</div>
- <div class="fr"><button class="mini" data-q="0">Today</button><button class="mini" data-q="6">Last 7 days</button><button class="mini" data-q="29">Last 30 days</button></div>
- <div style="color:var(--mute);font-size:12px">${L.length} bills · ${KES(G(L))} · ${rf} to ${rt} · ${rd === "All" ? "all sale points" : rd}</div>${tb(c, r, f)}${note ? `<div class="stk">${note}</div>` : ""}</div></div>`;
+ <div class="fr"><button class="mini" data-q="0">Today</button><button class="mini" data-q="6">Last 7 days</button><button class="mini" data-q="29">Last 30 days</button>${printTools("rep")}</div>
+ <div style="color:var(--mute);font-size:12px">${head || `${L.length} bills · ${KES(G(L))} · ${rf} to ${rt} · ${rd === "All" ? "all sale points" : rd}`}</div>${rp === "bills" ? billsGrid(c, r, note) : head ? tb(c, r, f, note) : tb(c, r, f)}${note && !head ? `<div class="stk">${note}</div>` : ""}</div></div>`;
   },
   sales() {
     const A = sel(0),
@@ -14180,8 +17270,8 @@ const V = {
    .join("")}</table></div>`;
   },
   staff() {
-    return `<div class="pn"><h4>Add staff</h4><div class="fr"><input id="su" placeholder="First Last"><select id="sr"><option>Waiter</option><option>Cashier</option><option>Manager</option></select><input id="up" inputmode="numeric" placeholder="PIN (4 to 6 digits)"><button class="chip on" data-a="addu">Add</button></div></div>
- <div class="pn tw"><table class="t"><tr><th>Name</th><th>Role</th><th>PIN</th><th>Card ID</th><th>Sale points</th></tr>${USERS.map((u, i) => `<tr><td>${esc(u.n)}</td><td><select data-ur="${i}">${["Waiter", "Cashier", "Manager"].map(r => `<option ${u.role === r ? "selected" : ""}>${r}</option>`).join("")}</select></td><td><input value="${u.pin}" data-up="${i}" inputmode="numeric" style="max-width:100px"></td><td><input value="${esc(u.card || "")}" data-uk="${i}" placeholder="Click, then swipe" style="max-width:140px"></td><td>${ALLD.map(d => `<label style="margin-right:10px"><input type="checkbox" style="width:auto;min-width:0" data-ud="${i}" value="${d}" ${u.d.includes(d) ? "checked" : ""}> ${d}</label>`).join("")}</td></tr>`).join("")}</table></div><div class="pn"><h4>Back Office accounts</h4><div class="stk">Back Office signs in with a username and password. Passwords are stored as hashes on this device.</div><div class="fr"><input id="mn" placeholder="Full name"><input id="mu" placeholder="Username"><input id="mp" type="password" placeholder="Password (6+ characters)"><button class="chip on" data-a="addm">Add account</button></div><div class="tw"><table class="t"><tr><th>Name</th><th>Username</th><th>New password</th><th></th></tr>${ADM.map((a, i) => `<tr><td>${esc(a.n)}</td><td>${esc(a.u)}</td><td><input type="password" id="np_${i}" placeholder="New password"></td><td><div class="fr"><button class="mini" data-a="pwm" data-i="${i}">Change</button>${ADM.length > 1 ? `<button class="mini" data-a="delm" data-i="${i}">Remove</button>` : ""}</div></td></tr>`).join("")}</table></div></div>`;
+    return `<div class="pn"><h4>Add staff</h4><div class="fr"><input id="su" placeholder="First Last"><select id="sr"><option>Waiter</option><option>Cashier</option><option>Super Cashier</option><option>Manager</option></select><input id="up" inputmode="numeric" placeholder="PIN (4 to 6 digits)"><button class="chip on" data-a="addu">Add</button></div></div>
+ <div class="pn tw"><table class="t"><tr><th>Name</th><th>Role</th><th>PIN</th><th>Card ID</th><th>Sale points</th></tr>${USERS.map((u, i) => `<tr><td>${esc(u.n)}</td><td><select data-ur="${i}">${["Waiter", "Cashier", "Super Cashier", "Manager"].map(r => `<option ${u.role === r ? "selected" : ""}>${r}</option>`).join("")}</select></td><td><input value="${u.pin}" data-up="${i}" inputmode="numeric" style="max-width:100px"></td><td><input value="${esc(u.card || "")}" data-uk="${i}" placeholder="Click, then swipe" style="max-width:140px"></td><td>${ALLD.map(d => `<label style="margin-right:10px"><input type="checkbox" style="width:auto;min-width:0" data-ud="${i}" value="${d}" ${u.d.includes(d) ? "checked" : ""}> ${d}</label>`).join("")}</td></tr>`).join("")}</table></div><div class="pn"><h4>Back Office accounts</h4><div class="stk">Back Office signs in with a username and password. Passwords are stored as hashes on this device.</div><div class="fr"><input id="mn" placeholder="Full name"><input id="mu" placeholder="Username"><input id="mp" type="password" placeholder="Password (6+ characters)"><button class="chip on" data-a="addm">Add account</button></div><div class="tw"><table class="t"><tr><th>Name</th><th>Username</th><th>New password</th><th></th></tr>${ADM.map((a, i) => `<tr><td>${esc(a.n)}</td><td>${esc(a.u)}</td><td><input type="password" id="np_${i}" placeholder="New password"></td><td><div class="fr"><button class="mini" data-a="pwm" data-i="${i}">Change</button>${ADM.length > 1 ? `<button class="mini" data-a="delm" data-i="${i}">Remove</button>` : ""}</div></td></tr>`).join("")}</table></div></div>`;
   },
   cred() {
     return `<div class="pn"><h4>Add credit customer</h4><div class="fr"><input id="cn" placeholder="Customer name"><input id="cc" type="number" placeholder="Credit limit"><button class="chip on" data-a="addc">Add</button></div></div>
@@ -14493,7 +17583,7 @@ function roomsReportHTML() {
       ""
     )}</div></div>${q.map(([k, n]) => `<button class="btn ${k === hrr ? "p" : ""}" data-rr="${k}" style="flex:none">${n}</button>`).join("")}<button class="btn a" data-rr="fd" style="flex:none">Open Front Desk</button></div>
  <div style="margin-bottom:12px">${roomsKpiHTML()}</div>
- <h3>${RRL[hrr]}</h3><div class="cs">${["rv", "pay", "rt", "gl"].includes(hrr) ? rrRange().join(" to ") : "Live position"}</div>${tb(cols, rows, foot, "Nothing to show for this report and period.")}`;
+ <div class="fr" style="align-items:center;justify-content:space-between"><h3 style="margin:0">${RRL[hrr]}</h3><span>${printTools("rooms")}</span></div><div class="cs">${["rv", "pay", "rt", "gl"].includes(hrr) ? rrRange().join(" to ") : "Live position"}</div>${tb(cols, rows, foot, "Nothing to show for this report and period.")}`;
 }
 function roomsCard() {
   $("#rooms").innerHTML = roomsKpiHTML(); // dashboard: the summary cards only
@@ -16037,6 +19127,7 @@ document.addEventListener("keydown", e => {
 });
 $("#vSub").oninput = e => {
   const s = e.target.dataset;
+  if (s.bc !== undefined) return billFilter(s.bc, e.target.value);
   if (s.ph !== undefined) {
     STKT.phys[s.ph] = e.target.value;
     updMaster();
@@ -18631,7 +21722,8 @@ function spRefreshPos() {
   if (user) {
     DEPTS = user.d.filter(posSells);
     if (!DEPTS.length) DEPTS = [ALLD.filter(posSells)[0] || ALLD[0]];
-    if (!DEPTS.includes(dept)) dept = DEPTS[0];
+    if (dept !== ALLP && !DEPTS.includes(dept)) dept = DEPTS[0];
+    if (dept === ALLP && DEPTS.length < 2) dept = DEPTS[0];
   }
   try {
     drawDepts();
@@ -19285,7 +22377,7 @@ let spDel = null; // the place the delete popup is open for
 /** What stops the delete, and what the delete would change. */
 function spDeleteCheck(o) {
   const stock = Object.keys(ING).filter(k => Math.abs(have(o, k)) > 1e-9),
-    bills = orders.filter(x => x.dept === o).length,
+    bills = orders.filter(x => billPoints(x.lines).includes(o)).length,
     reqs = REQS.filter(r => r.dept === o && (isOpenReq(r) || r.status === AWAIT)).length,
     notes = ISSUES.filter(x => x.status === AWAIT && (x.to === o || x.from === o)).length,
     recipes = ITEMS.filter(i => i.from === o && i.d !== o),
@@ -20371,7 +23463,42 @@ function recAct(a, b) {
   }
 }
 // ---- Settings: the hotel details printed on guest bills and receipts ----
-invF.hs = { name: FD_SETTINGS.name };
+invF.hs = {
+  name: FD_SETTINGS.name,
+  pl: (FD_SETTINGS.priceLists || []).map(p => `${p.n} = ${p.pct}`).join("\n"),
+  cur: (FD_SETTINGS.currencies || []).map(c => `${c.c} = ${c.rate}`).join("\n"),
+  printers: (FD_SETTINGS.printers || []).map(p => `${p.n} = ${p.ip}:${p.port}`).join("\n"),
+  printUrl: FD_SETTINGS.printUrl || "",
+  printKey: FD_SETTINGS.printKey || ""
+};
+// Which printer each sale point's kitchen and bar tickets go to. Dots can't be in these field keys.
+const routeKey = (point, st) => encodeURIComponent(point).replace(/\./g, "%2E") + "|" + st;
+invF.hsr = {};
+Object.entries(FD_SETTINGS.printRoutes || {}).forEach(([pt, r]) => {
+  invF.hsr[routeKey(pt, "kitchen")] = r.kitchen || "";
+  invF.hsr[routeKey(pt, "bar")] = r.bar || "";
+});
+function printersHTML() {
+  const L = FD_SETTINGS.printers || [],
+    sel = (pt, st) =>
+      `<select data-iv="hsr.${routeKey(pt, st)}"><option value="">Print by hand</option>${L.map(p => `<option ${invF.hsr[routeKey(pt, st)] === p.n ? "selected" : ""}>${esc(p.n)}</option>`).join("")}</select>`;
+  return `<div class="pn"><h4>Printers</h4><div class="stk">Orders go straight to these printers when they are sent. Network printers only (they have an IP address, normally port 9100).</div>
+  <div class="fr"><label>Printers, one per line: name = address<textarea data-iv="hs.printers" rows="4" placeholder="Kitchen = 192.168.1.50">${esc(invF.hs.printers)}</textarea></label><div style="display:grid;gap:6px;align-content:start">${L.map((p, i) => `<button class="mini" data-a="hs_test" data-i="${i}">Test ${esc(p.n)}</button>`).join("") || '<span class="stk">Save printers to test them and choose them below.</span>'}</div></div>
+  ${
+    L.length
+      ? `<div class="tw"><table class="t"><tr><th>Sale point</th><th>Kitchen orders print on</th><th>Bar orders print on</th></tr>${ALLD.filter(
+          posSells
+        )
+          .map(
+            pt =>
+              `<tr><td>${esc(pt)}</td><td>${sel(pt, "kitchen")}</td><td>${sel(pt, "bar")}</td></tr>`
+          )
+          .join("")}</table></div>`
+      : ""
+  }
+  <details><summary class="stk">Other terminals</summary><div class="fr"><label>Print server<input data-iv="hs.printUrl" value="${esc(invF.hs.printUrl)}" placeholder="http://${esc(location.hostname || "localhost")}:4000"></label><label>Print key (PRINT_KEY on the server)<input type="password" autocomplete="off" data-iv="hs.printKey" value="${esc(invF.hs.printKey)}"></label></div></details>
+  <div class="fr" style="justify-content:flex-end"><button class="chip on" style="flex:none" data-a="hs_save">Save printers</button></div></div>`;
+}
 const SET_SAMPLE = {
   no: "NBO-001042",
   dept: "Main Restaurant",
@@ -20421,12 +23548,61 @@ V.settings = () => {
   <div class="fr"><label>Hotel name<input data-iv="hs.name" value="${esc(invF.hs.name)}"></label>${f("Postal address", "addr", "e.g. P.O. Box 123-80100, Mombasa")}${f("Email", "email")}</div>
   <div class="fr">${f("Telephone", "phone")}${f("KRA PIN", "pin")}${f("Till number", "till", "e.g. 4565515-NOBLE TIDE")}</div>
   <div class="fr">${f("Website", "web")}${f("Thank-you line on receipts", "thanks", "Thank you for dining with us.")}<button class="chip on" style="flex:none;align-self:end" data-a="hs_save">Save details</button></div></div>
+ ${printersHTML()}
  <div class="set-prev" id="setPrev">${settingsPreviewHTML()}</div>`;
 };
-function settingsAct(a) {
+async function settingsAct(a, b) {
+  if (a === "test") {
+    const p = FD_SETTINGS.printers[+b.dataset.i];
+    toast("Testing " + p.n + "…");
+    const err = await printTicket(p, [
+      { t: "TEST TICKET", big: true, bold: true, center: true },
+      { t: p.n, center: true },
+      { t: slipNow(), center: true }
+    ]);
+    return toast(err ? p.n + ": " + err : p.n + " printed.");
+  }
   if (a !== "save") return;
   const name = invF.hs.name.trim();
   if (!name) return toast("Enter the hotel name.");
+  const lines = s =>
+      s
+        .split("\n")
+        .map(x => x.trim())
+        .filter(Boolean),
+    priceLists = [],
+    currencies = [];
+  for (const l of lines(invF.hs.pl)) {
+    const m = l.match(/^(.+?)\s*=\s*([+-]?\d+(?:\.\d+)?)\s*%?$/);
+    if (!m || +m[2] <= -100) return toast(`Price list "${l}" should look like Happy Hour = -20`);
+    priceLists.push({ n: m[1], pct: +m[2] });
+  }
+  for (const l of lines(invF.hs.cur)) {
+    const m = l.match(/^([A-Za-z]{3})\s*=\s*(\d+(?:\.\d+)?)$/);
+    if (!m || !(+m[2] > 0)) return toast(`Currency "${l}" should look like USD = 130`);
+    currencies.push({ c: m[1].toUpperCase(), rate: +m[2] });
+  }
+  const printers = [];
+  for (const l of lines(invF.hs.printers)) {
+    const m = l.match(/^(.+?)\s*=\s*(\d{1,3}(?:\.\d{1,3}){3})(?::(\d+))?$/),
+      port = m ? +(m[3] || 9100) : 0;
+    if (!m || port < 9100 || port > 9109)
+      return toast(`Printer "${l}" should look like Kitchen = 192.168.1.50`);
+    if (printers.some(p => p.n.toLowerCase() === m[1].toLowerCase()))
+      return toast(`There are two printers called ${m[1]}.`);
+    printers.push({ n: m[1], ip: m[2], port });
+  }
+  FD_SETTINGS.printers = printers;
+  FD_SETTINGS.printRoutes = Object.fromEntries(
+    ALLD.filter(posSells).map(pt => [
+      pt,
+      { kitchen: invF.hsr[routeKey(pt, "kitchen")] || "", bar: invF.hsr[routeKey(pt, "bar")] || "" }
+    ])
+  );
+  FD_SETTINGS.printUrl = invF.hs.printUrl.trim();
+  FD_SETTINGS.printKey = invF.hs.printKey.trim();
+  FD_SETTINGS.priceLists = priceLists;
+  FD_SETTINGS.currencies = currencies;
   FD_SETTINGS.name = name;
   FD_SETTINGS.biz = Object.fromEntries(
     Object.entries(invF.vh).map(([k, x]) => [k, String(x).trim()])
@@ -20580,6 +23756,11 @@ $("#vSub").onclick = e => {
       .forEach(b => b.classList.toggle("on", b.dataset.p === p));
     return all();
   }
+  const billTr = e.target.closest("[data-bill]");
+  if (billTr) {
+    document.querySelectorAll("#vSub tr.on[data-bill]").forEach(x => x.classList.remove("on"));
+    return billTr.classList.add("on");
+  }
   const roomTab = e.target.closest("[data-rr]");
   if (roomTab) return rrAct(roomTab);
   const rr = e.target.closest("[data-r]");
@@ -20598,6 +23779,7 @@ $("#vSub").onclick = e => {
   const a = b.dataset.a,
     v = id => $("#" + id).value.trim(),
     num = id => parseFloat($("#" + id).value);
+  if (a === "rep_print") return repPrint(b.dataset.k);
   if (a === "addm" || a === "pwm" || a === "delm") {
     admAct(a, b);
     return;
@@ -20666,7 +23848,7 @@ $("#vSub").onclick = e => {
     return;
   }
   if (a.slice(0, 3) === "hs_") {
-    settingsAct(a.slice(3));
+    settingsAct(a.slice(3), b);
     return;
   }
   if (a.slice(0, 3) === "ap_") {
@@ -20746,6 +23928,10 @@ $("#vSub").onclick = e => {
   bosave();
   all();
 };
+$("#vSub").ondblclick = e => {
+  const b = e.target.closest("[data-bill]");
+  if (b) billReprint(b.dataset.bill);
+};
 $("#vSub").onchange = e => {
   const t = e.target,
     s = t.dataset;
@@ -20792,6 +23978,11 @@ $("#vSub").onchange = e => {
     // Selling point request or transfer: units for the chosen item.
     $("#" + (s.spunit || "spr_u")).innerHTML = rcUnitOpts(t.value, "buy");
     return;
+  }
+  if (s.rsz) return void (rpSize = s.rsz);
+  if (s.bf) {
+    billF[s.bf] = s.bf === "net" ? t.checked : t.value;
+    return all();
   }
   if (s.rcq !== undefined) return rcQtyChange(t, +s.rcq);
   if (s.rcall !== undefined) {
@@ -20980,12 +24171,15 @@ function greet(n) {
       day: "numeric",
       month: "long",
       year: "numeric"
-    }) + " · Mwangaza Supermart, Nairobi CBD";
+    }) +
+    " · " +
+    FD_SETTINGS.name;
 }
 function all() {
   render();
   dayBar();
   roomsCard();
+  heroBar();
   $("#kl").textContent = br + " · " + PL[per];
   kpis();
   mods();
@@ -20997,6 +24191,7 @@ function all() {
 }
 
 const PALS = [
+    ["five", "Five Star", "#241b12", "#c7a25a"],
     ["ocean", "Ocean", "#1d5c8a", "#f2a43a"],
     ["emerald", "Emerald", "#0f8a6d", "#f5b942"],
     ["sunset", "Sunset", "#e4572e", "#ffb703"],
@@ -21005,9 +24200,12 @@ const PALS = [
     ["graphite", "Graphite", "#4a5a6e", "#4cc9f0"]
   ],
   TK = "kaytia_theme";
-let TH = { pal: "ocean", mode: "auto" };
+let TH = { pal: "five", mode: "auto" };
 try {
   TH = Object.assign(TH, JSON.parse(localStorage.getItem(TK) || "{}"));
+  // Ocean used to be the default, so it moves to Five Star once. Choosing Ocean later sticks.
+  if (!TH.v && TH.pal === "ocean") TH.pal = "five";
+  TH.v = 2;
 } catch (e) {}
 function thApply() {
   const r = document.documentElement;

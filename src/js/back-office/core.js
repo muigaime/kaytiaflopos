@@ -102,6 +102,9 @@ function bosave() {
         LP: LPOS,
         VN: VENDORS,
         VP: VPAYS,
+        BL: BILLLOG,
+        OR: orders,
+        ON: ono,
         IS: ISSUES,
         PD: PRODS,
         ST: STORES,
@@ -162,6 +165,18 @@ window.bosave = bosave;
     VENDORS.push(...(s.VN || []));
     VPAYS.length = 0;
     VPAYS.push(...(s.VP || []));
+    BILLLOG.length = 0;
+    BILLLOG.push(...(s.BL || []));
+    // Open orders: a line whose product has since gone is dropped, so one bad line can't stop the POS.
+    orders.length = 0;
+    (s.OR || []).forEach(o => {
+      o.at = new Date(o.at);
+      Object.keys(o.lines || {}).forEach(id => {
+        if (!ITEMS.some(i => String(i.id) === id)) delete o.lines[id];
+      });
+      if (Object.keys(o.lines || {}).length) orders.push(o);
+    });
+    ono = Math.max(ono, s.ON || 1);
     ISSUES.length = 0;
     ISSUES.push(...(s.IS || []));
     PRODS.length = 0;

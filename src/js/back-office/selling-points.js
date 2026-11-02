@@ -265,7 +265,8 @@ function spRefreshPos() {
   if (user) {
     DEPTS = user.d.filter(posSells);
     if (!DEPTS.length) DEPTS = [ALLD.filter(posSells)[0] || ALLD[0]];
-    if (!DEPTS.includes(dept)) dept = DEPTS[0];
+    if (dept !== ALLP && !DEPTS.includes(dept)) dept = DEPTS[0];
+    if (dept === ALLP && DEPTS.length < 2) dept = DEPTS[0];
   }
   try {
     drawDepts();
@@ -919,7 +920,7 @@ let spDel = null; // the place the delete popup is open for
 /** What stops the delete, and what the delete would change. */
 function spDeleteCheck(o) {
   const stock = Object.keys(ING).filter(k => Math.abs(have(o, k)) > 1e-9),
-    bills = orders.filter(x => x.dept === o).length,
+    bills = orders.filter(x => billPoints(x.lines).includes(o)).length,
     reqs = REQS.filter(r => r.dept === o && (isOpenReq(r) || r.status === AWAIT)).length,
     notes = ISSUES.filter(x => x.status === AWAIT && (x.to === o || x.from === o)).length,
     recipes = ITEMS.filter(i => i.from === o && i.d !== o),

@@ -32,6 +32,9 @@ kaytia-pos-backoffice/
 │     │  ├─ payment.js                    cash / M-Pesa / credit payment, receipt QR
 │     │  ├─ orders.js                     send order now, bill later, open orders
 │     │  ├─ exchange.js                   swap one item for another
+│     │  ├─ slips.js      guest bill, receipt, kitchen and bar order slips
+│     │  ├─ printers.js   sends order tickets to their printers through the server
+│     │  ├─ bill-options.js  edit, discount, void, merge, split, price list, currency
 │     │  ├─ login-session.js              cashier PIN login, card swipe, fullscreen, exit
 │     │  └─ shift-screen.js               POS shift management screen
 │     ├─ shared/

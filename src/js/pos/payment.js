@@ -8,7 +8,7 @@ const CU = [
 ];
 const c2 = n => Math.round(n * 100),
   MN = { cash: "Cash", mpesa: "M-Pesa", credit: "Credit" };
-const payDue = () => (payT ? payT.reduce((a, o) => a + totals(o.lines).g, 0) : totals().g);
+const payDue = () => (payT ? payT.reduce((a, o) => a + totals(o.lines, o).g, 0) : totals().g);
 const payBal = () => (c2(payDue()) - c2(pays.reduce((a, p) => a + p.amt, 0))) / 100;
 function openPay(tg) {
   if (!shiftOk()) return;
@@ -25,7 +25,11 @@ function openPay(tg) {
 }
 function renderPay() {
   $("#pTotal").textContent = KES(payDue());
-  $("#pBills").textContent = payT ? payT.map(o => o.label).join(" · ") : "Direct sale · " + dept;
+  const payBill = !payT ? cartAdj : payT.length === 1 ? payT[0] : null,
+    payCur = payBill && payBill.cur;
+  $("#pBills").textContent =
+    (payT ? payT.map(o => o.label).join(" · ") : "Direct sale · " + billPlace(cart)) +
+    (payCur ? ` · ${payCur.c} ${bill2(payDue() / payCur.rate)} at ${payCur.rate}` : "");
   $("#pList").innerHTML = pays
     .map(
       (p, i) =>
@@ -119,7 +123,8 @@ $("#pOk").onclick = () => {
             covers: $("#fCov").value,
             room: $("#fRoom").value,
             dept,
-            lines: { ...cart }
+            lines: { ...cart },
+            ...cartAdj
           }
         ]
       : payT;
@@ -128,7 +133,7 @@ $("#pOk").onclick = () => {
     gsum = 0;
   const chv = pays.reduce((a, p) => a + (p.chg || 0), 0);
   targets.forEach((o, bi) => {
-    const t = totals(o.lines),
+    const t = totals(o.lines, o),
       no = "NBO-" + pad(rno),
       lines = Object.entries(o.lines).map(([id, n]) => ({ it: get(id), q: n })),
       used = {};
@@ -153,37 +158,72 @@ $("#pOk").onclick = () => {
         );
       }
     }
-    SALES.push({
-      no,
-      at: new Date(),
-      dept: o.dept,
-      label: o.label,
-      user: user ? user.n : "",
-      net: t.net,
-      tax: t.tax,
-      g: t.g,
-      lines: lines.map(({ it, q: n }) => ({ id: it.id, n: it.n, q: n, p: it.p, t: it.t })),
-      mx
+    const cu = "KRACU0100" + Math.floor(1000 + Math.random() * 8999),
+      inv = rno - 1000,
+      change = bi === targets.length - 1 ? chv : 0,
+      credit = pays.some(p => p.m === "credit"),
+      waiter = o.waiter || (user ? user.n : "");
+    const shares = billPoints(o.lines);
+    let leftMx = { ...mx },
+      leftG = t.g,
+      leftTax = t.tax,
+      leftDisc = t.disc;
+    shares.forEach((d, si) => {
+      const part = Object.fromEntries(Object.entries(o.lines).filter(([id]) => get(id).d === d)),
+        pt = totals(part, { ...o, disc: null }),
+        last = si === shares.length - 1,
+        k = t.sub ? pt.sub / t.sub : 1,
+        cents = n => Math.round(n * 100) / 100,
+        g = last ? leftG : cents(t.g * k),
+        tax = last ? leftTax : cents(t.tax * k),
+        dd = last ? leftDisc : cents(t.disc * k),
+        pmx = {};
+      Object.keys(mx).forEach(m => {
+        pmx[m] = last ? leftMx[m] : cents(mx[m] * k);
+        leftMx[m] -= pmx[m];
+      });
+      leftG -= g;
+      leftTax -= tax;
+      leftDisc -= dd;
+      SALES.push({
+        no,
+        at: new Date(),
+        dept: d,
+        label: o.label,
+        user: user ? user.n : "",
+        waiter,
+        guest: o.guest,
+        covers: o.covers,
+        room: o.room,
+        ...(si === 0 ? { slip: { paid: al.join(""), change, credit, cu, inv, cur: t.cur } } : {}),
+        net: g - tax,
+        tax,
+        g,
+        lines: lines
+          .filter(({ it }) => it.d === d)
+          .map(({ it, q: n }) => ({ id: it.id, n: it.n, q: n, p: itemPrice(it, o), t: it.t })),
+        disc: dd,
+        pl: t.pl ? t.pl.n : "",
+        mx: pmx
+      });
     });
     try {
       bosave();
     } catch (e) {}
-    const cu = "KRACU0100" + Math.floor(1000 + Math.random() * 8999),
-      inv = rno - 1000;
     rno++;
     html += receiptHTML({
       no,
-      dept: o.dept,
+      dept: billPlace(o.lines),
       label: o.label,
       guest: o.guest,
       covers: o.covers,
       room: o.room,
-      waiter: user ? user.n : "",
-      lines: lines.map(({ it, q: n }) => ({ q: n, n: it.n, p: it.p, t: it.t })),
+      waiter,
+      lines: lines.map(({ it, q: n }) => ({ q: n, n: it.n, p: itemPrice(it, o), t: it.t })),
       t,
       paid: al.join(""),
-      change: bi === targets.length - 1 ? chv : 0,
-      credit: pays.some(p => p.m === "credit"),
+      change,
+      credit,
       fiscal: `CU serial: ${cu}<br>CU invoice no: ${inv}${qr(no + cu)}Scan to verify on KRA eTIMS<br>(demo QR)`
     });
   });

@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="css/front-desk.css" />
     <link rel="stylesheet" href="css/back-office-pages.css" />
     <link rel="stylesheet" href="css/pos-five-star.css" />
+    <link rel="stylesheet" href="css/back-office-five-star.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -132,6 +133,7 @@
           <span class="fill"></span><button class="b" id="newSale">New sale</button
           ><button class="b" id="qtyBtn">QTY</button>
         </div>
+        <div class="sp-tabs" id="spTabs"></div>
         <div class="items" id="grid"></div>
         <div class="botb">
           <button class="b" id="chSP">Change sale point</button
@@ -184,7 +186,8 @@
           ><button class="act a3" id="settleBtn">Settle bill</button
           ><button class="act a4" id="ordBtn">Open orders</button
           ><button class="act a5" id="codeBtn">Change code</button
-          ><button class="act a6" id="lock">Log out</button>
+          ><button class="act a6" id="lock">Log out</button
+          ><button class="act a7" id="billBtn">Bill options</button>
         </div>
       </section>
     </div>
@@ -205,8 +208,10 @@
         <div id="selList"></div>
         <div class="sfoot">
           <div class="stot" id="selTot"></div>
+          <div class="row" id="selOne"></div>
           <div class="row">
-            <button class="chip" id="selChg">Charge selected</button
+            <button class="chip" id="selOpt">Bill options</button
+            ><button class="chip" id="selChg">Charge selected</button
             ><button class="chip on" id="selChgAll">Charge all</button>
           </div>
         </div>
@@ -328,6 +333,13 @@
     </div>
 
     <!-- POS: receipt, send order, open orders -->
+    <div class="modal" id="mBopt">
+      <div class="bop-wheel" id="bopWheel"></div>
+      <div class="box bop-box" id="bopBox"><div id="bopBody"></div></div>
+    </div>
+    <div class="modal" id="mView">
+      <div class="box view-box"><div id="viewBody"></div></div>
+    </div>
     <div class="modal" id="mRc">
       <div class="box">
         <div class="rcpt" id="rc"></div>
@@ -459,6 +471,8 @@
     <script src="js/pos/orders.js"></script>
     <script src="js/pos/exchange.js"></script>
     <script src="js/pos/slips.js"></script>
+    <script src="js/pos/printers.js"></script>
+    <script src="js/pos/bill-options.js"></script>
     <script src="js/pos/login-session.js"></script>
 
     <!-- ==================== Start menu (POS / Back Office / Front Desk) ==================== -->
@@ -678,6 +692,7 @@
             <div id="vSub" style="display: none"></div>
             <div id="vHome">
               <div class="hello">
+                <div class="hero-x hero-mono" id="hMono" aria-hidden="true"></div>
                 <div>
                   <h1 id="hi">Welcome</h1>
                   <p id="dt"></p>
@@ -693,6 +708,7 @@
                     <svg class="i"><use href="#i-plus" /></svg>Stock request
                   </button>
                 </div>
+                <div class="hero-x hero-figs" id="hFigs"></div>
               </div>
               <div class="card" id="dayBar" style="margin-bottom: 14px"></div>
               <div class="h2">
@@ -725,8 +741,10 @@
                       <div class="cs" id="tc"></div>
                     </div>
                     <div class="lgd">
-                      <span><i style="background: #1d5c8a"></i>This period</span
-                      ><span><i style="background: #f2a43a"></i>Previous period</span>
+                      <span><i style="background: var(--tr1, var(--c1))"></i>This period</span
+                      ><span
+                        ><i style="background: var(--tr2, var(--acc))"></i>Previous period</span
+                      >
                     </div>
                   </div>
                   <div id="trend"></div>

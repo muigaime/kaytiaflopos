@@ -10,7 +10,7 @@ const avail = it =>
     ...Object.entries(it.r).map(([k, v]) => Math.floor((STK[itemLoc(it)][k] || 0) / v + 1e-9))
   );
 const inCart = id => cart[id] || 0;
-let catSel = "All",
+let catSel = "",
   nextQty = 1,
   selId = null,
   kmsg = "",
@@ -19,19 +19,50 @@ let catSel = "All",
   qBuf = "";
 const get = id => ITEMS.find(i => i.id == id),
   pad = (n, l = 6) => String(n).padStart(l, "0");
+// A waiter ticked for several sale points works in them side by side (dept = ALLP): the tabs on top
+// choose whose menu shows, and the order keeps building across them.
+let spTab = "";
+const onMenu = i => (dept === ALLP ? i.d === spTab : i.d === dept);
+const shownPoint = () => (dept === ALLP ? spTab : dept);
+function drawTabs() {
+  if (dept === ALLP && !DEPTS.includes(spTab)) spTab = DEPTS[0];
+  $("#spTabs").innerHTML =
+    dept === ALLP
+      ? DEPTS.map(
+          d => `<button class="sp-tab ${d === spTab ? "on" : ""}" data-t="${d}">${d}</button>`
+        ).join("")
+      : "";
+}
+function showTab(d) {
+  spTab = d;
+  catSel = "";
+  drawDepts();
+  renderCats();
+  drawGrid();
+}
+$("#spTabs").onclick = e => {
+  const b = e.target.closest("[data-t]");
+  if (b) showTab(b.dataset.t);
+};
 function drawDepts() {
-  $("#posOutlet").textContent = dept;
-  $("#spBtn").textContent = dept;
-  $("#hSP").textContent = dept;
+  drawTabs();
+  $("#posOutlet").textContent = shownPoint();
+  $("#spBtn").textContent = shownPoint();
+  $("#hSP").textContent = shownPoint();
 }
 function drawCats() {
-  catSel = "All";
+  catSel = "";
   selId = null;
   renderCats();
 }
+/** This sale point's categories. The menu always shows one, the first until another is tapped. */
+function menuCats() {
+  const cs = [...new Set(ITEMS.filter(onMenu).map(i => i.c))];
+  if (!cs.includes(catSel)) catSel = cs[0] || "";
+  return cs;
+}
 function renderCats() {
-  const cs = ["All", ...new Set(ITEMS.filter(i => i.d === dept).map(i => i.c))];
-  $("#cats").innerHTML = cs
+  $("#cats").innerHTML = menuCats()
     .map(c => `<button class="cat ${c === catSel ? "on" : ""}" data-c="${c}">${c}</button>`)
     .join("");
 }
@@ -46,46 +77,68 @@ const hue = s => {
   return h;
 };
 function drawGrid() {
-  const list = ITEMS.filter(i => i.d === dept && (catSel === "All" || i.c === catSel));
-  // "All" reads like a menu: each category under its own heading.
-  let section = null;
+  menuCats();
   $("#grid").innerHTML =
-    (catSel === "All"
-      ? [...new Set(list.map(i => i.c))].flatMap(c => list.filter(i => i.c === c))
-      : list
-    )
+    ITEMS.filter(i => onMenu(i) && i.c === catSel)
       .map(i => {
         const a = avail(i) - inCart(i.id),
           n = inCart(i.id);
-        const head =
-          catSel === "All" && i.c !== section ? `<h3 class="ms">${(section = i.c)}</h3>` : "";
-        return `${head}<button class="it${n ? " has" : ""}" style="--h:${hue(i.c)}" data-i="${i.id}" title="${i.n.replace(/"/g, "&quot;")}" ${a <= 0 ? "disabled" : ""}>${n ? `<span class="in">${n}</span>` : ""}<span class="lw ${a <= 0 ? "out" : ""}">${a <= 0 && !n ? "Out of stock" : a < 10 && a > 0 ? a + " left" : ""}</span><span class="nm">${i.n}</span><span class="cg">${i.c}</span><span class="pr">${posMoney(i.p)}</span></button>`;
+        return `<button class="it${n ? " has" : ""}" style="--h:${hue(i.c)}" data-i="${i.id}" title="${i.n.replace(/"/g, "&quot;")}" ${a <= 0 ? "disabled" : ""}>${n ? `<span class="in">${n}</span>` : ""}<span class="lw ${a <= 0 ? "out" : ""}">${a <= 0 && !n ? "Out of stock" : a < 10 && a > 0 ? a + " left" : ""}</span><span class="nm">${i.n}</span><span class="cg">${i.c}</span><span class="pr">${posMoney(i.p)}</span></button>`;
       })
       .join("") || '<div class="empty">No items in this category.</div>';
 }
-function totals(c = cart) {
-  let g = 0,
+/** A bill's own terms: { pl: price list, disc: discount, cur: currency } (Bill options). */
+let cartAdj = {};
+const itemPrice = (it, a) =>
+  a && a.pl && a.pl.pct ? Math.round(it.p * (100 + a.pl.pct)) / 100 : it.p;
+function totals(c = cart, a = c === cart ? (cur ? { pl: cur.pl } : cartAdj) : null) {
+  let sub = 0,
     tax = 0;
   for (const [id, q] of Object.entries(c)) {
     const it = get(id),
-      l = it.p * q;
-    g += l;
+      l = itemPrice(it, a) * q;
+    sub += l;
     tax += (l * TAX[it.t]) / (100 + TAX[it.t]);
   }
-  return { g, tax, net: g - tax };
+  const d = a && a.disc,
+    disc = d ? Math.min(sub, d.type === "pct" ? Math.round(sub * d.v) / 100 : d.v) : 0,
+    k = sub ? (sub - disc) / sub : 1;
+  // VAT falls with the discount, so what is charged still includes the right tax.
+  return {
+    g: sub - disc,
+    tax: tax * k,
+    net: sub - disc - tax * k,
+    sub,
+    disc,
+    pl: a && a.pl,
+    cur: a && a.cur
+  };
 }
 function drawCart() {
-  const ids = Object.keys(cart);
+  const ids = Object.keys(cart),
+    adj = cur ? { pl: cur.pl } : cartAdj;
+  if (!ids.length) cartAdj = {};
   $("#lines").innerHTML =
     ids
       .map(id => {
         const it = get(id),
           q = cart[id];
-        return `<div class="tr ${id == selId ? "sel" : ""}" data-r="${id}"><span class="qc"><button data-m="${id}">−</button>${q}<button data-p="${id}">+</button></span><span>${it.n}</span><span class="n">${bill2(it.p)}</span><span class="n">${bill2(it.p * q)}</span></div>`;
+        return `<div class="tr ${id == selId ? "sel" : ""}" data-r="${id}"><span class="qc"><button data-m="${id}">−</button>${q}<button data-p="${id}">+</button></span><span>${it.n}</span><span class="n">${bill2(itemPrice(it, adj))}</span><span class="n">${bill2(itemPrice(it, adj) * q)}</span></div>`;
       })
       .join("") ||
     `<div class="empty" style="padding:24px 8px">${cur ? "Adding to " + cur.label + ". Tap items to add." : "Tap an item to start an order."}</div>`;
   const t = totals();
+  if (ids.length && (t.disc || t.pl || t.cur))
+    $("#lines").insertAdjacentHTML(
+      "beforeend",
+      `<div class="tr-adj">${[
+        t.pl && "Price list: " + t.pl.n,
+        t.disc && "Discount: -" + bill2(t.disc),
+        t.cur && `${t.cur.c} ${bill2(t.g / t.cur.rate)}`
+      ]
+        .filter(Boolean)
+        .join(" · ")}</div>`
+    );
   $("#tNet").textContent = bill2(t.net);
   $("#tTax").textContent = bill2(t.tax);
   $("#tGross").textContent = bill2(t.g);
@@ -102,6 +155,7 @@ function drawCart() {
   $("#kmBtn").textContent = kmsg ? "Kitchen msg ✓" : "Kitchen msg";
   $("#riderBtn").textContent = rider ? "Rider ✓" : "Rider details";
   drawGrid();
+  ordersKeep();
 }
 function add(id, d = 1) {
   const it = get(id),
@@ -173,14 +227,15 @@ $("#cancelBtn").onclick = e => {
 };
 $("#spBtn").onclick = $("#chSP").onclick = () => {
   $("#spList").innerHTML = DEPTS.map(
-    d => `<button class="chip ${d === dept ? "on" : ""}" data-d="${d}">${d}</button>`
+    d => `<button class="chip ${d === shownPoint() ? "on" : ""}" data-d="${d}">${d}</button>`
   ).join("");
   $("#mSP").classList.add("show");
 };
 $("#spList").onclick = e => {
   const d = e.target.dataset.d;
   if (!d) return;
-  if (d !== dept) {
+  if (dept === ALLP) showTab(d);
+  else if (d !== dept) {
     const had = Object.keys(cart).length;
     dept = d;
     resetSale();
@@ -222,34 +277,42 @@ $("#qtyBtn").onclick = () => {
   else qOpen("next", "Quantity for the next item");
 };
 let selSet = new Set();
-const myBills = () => {
-  const w = user ? user.n : "";
-  return orders.filter(o => o.waiter === w);
-};
+const myBills = () =>
+  visOrders().sort((a, b) => a.no.localeCompare(b.no, undefined, { numeric: true }));
 function selRender() {
   const L = myBills(),
-    w = user ? user.n : "",
-    tot = L.reduce((a, o) => a + totals(o.lines).g, 0),
+    w = seesAllBills(user) ? "all waiters" : user ? user.n : "",
+    tot = L.reduce((a, o) => a + totals(o.lines, o).g, 0),
     ch = L.filter(o => selSet.has(o.no)),
-    ct = ch.reduce((a, o) => a + totals(o.lines).g, 0);
+    ct = ch.reduce((a, o) => a + totals(o.lines, o).g, 0);
   $("#selT").textContent = "Pending bills · " + w;
+  const cell = (v, c = "") => `<span class="${c}" title="${slipEsc(v)}">${slipEsc(v)}</span>`;
   $("#selList").innerHTML = L.length
-    ? `<div class="sr sh"><label><input type="checkbox" id="selAll" ${ch.length === L.length ? "checked" : ""}> All</label><span>Bill</span><span class="n">Amount</span><span></span></div>` +
+    ? `<div class="sr sh"><label><input type="checkbox" id="selAll" ${ch.length === L.length ? "checked" : ""}></label><span>Bill no</span><span>Table no</span><span>Waiter</span><span>Guest name</span><span>Date</span><span>Time</span><span>Curr</span><span class="n">Amount</span><span>S point</span></div>` +
       L.map(
         o =>
-          `<div class="sr"><label><input type="checkbox" data-s="${o.no}" ${selSet.has(o.no) ? "checked" : ""}></label><span><b>${o.label}</b> · ${o.dept}<br><small>${o.no} · ${cnt(o.lines)} items · ${hhmm(o.at)}</small><br><small>${Object.entries(
-            o.lines
-          )
-            .map(([id, q]) => q + "× " + get(id).n)
-            .join(
-              ", "
-            )}</small></span><span class="n"><b>${KES(totals(o.lines).g)}</b></span><span class="ra"><button class="mini" data-oa="add" data-o="${o.no}">Add</button><button class="mini" data-oa="bill" data-o="${o.no}">Bill</button><button class="mini" data-oa="swap" data-o="${o.no}">Swap</button><button class="chip on" data-oa="pay" data-o="${o.no}">Charge</button></span></div>`
+          `<div class="sr ${selSet.has(o.no) ? "on" : ""}" data-row="${o.no}"><label><input type="checkbox" data-s="${o.no}" ${selSet.has(o.no) ? "checked" : ""}></label>${cell(o.no, "sr-no")}<span class="sr-t" title="${slipEsc(o.label)}"><b>${slipEsc(o.label)}</b></span>${cell(o.waiter || "–")}${cell(o.guest || "N/A")}${cell(o.at.toLocaleDateString("en-GB"))}${cell(o.at.toLocaleTimeString("en-GB"))}${cell("KES", "sr-cur")}<span class="n"><b>${bill2(totals(o.lines, o).g)}</b></span>${cell(billPlace(o.lines))}</div>`
       ).join("")
     : '<div class="empty">No pending bills for ' + w + ".</div>";
+  // These work on one bill: highlight exactly one.
+  const one = ch.length === 1 ? ch[0].no : "";
+  $("#selOne").innerHTML = [
+    ["view", "View"],
+    ["add", "Add items"],
+    ["bill", "Print bill"],
+    ["swap", "Swap"]
+  ]
+    .map(
+      ([a, l]) =>
+        `<button class="chip" data-oa="${a}" data-o="${one}" ${one ? "" : "disabled"}>${l}</button>`
+    )
+    .join("");
   $("#selTot").innerHTML =
     `<span>Selected ${ch.length} · ${KES(ct)}</span><span>ALL ${L.length} · ${KES(tot)}</span>`;
   $("#selChg").textContent = `Charge selected (${ch.length})`;
   $("#selChg").disabled = !ch.length;
+  $("#selOpt").textContent = `Bill options (${ch.length})`;
+  $("#selOpt").disabled = !ch.length;
   $("#selChgAll").disabled = !L.length;
 }
 function selOpen() {
@@ -268,11 +331,45 @@ $("#selList").onchange = e => {
   }
   selRender();
 };
-$("#selList").onclick = e => {
+$("#selOne").onclick = e => {
   const a = e.target.dataset.oa;
-  if (!a) return;
+  if (!a || !e.target.dataset.o) return;
+  if (a === "view") return orderView(orders.find(o => o.no === e.target.dataset.o));
   if (a === "add") $("#mSel").classList.remove("show");
   $("#ordList").onclick(e);
+};
+$("#selList").onclick = e => {
+  // Tapping anywhere on a bill highlights it; the tick box looks after itself.
+  const r = e.target.closest("[data-row]");
+  if (!r || e.target.closest("label")) return;
+  const no = r.dataset.row;
+  selSet.has(no) ? selSet.delete(no) : selSet.add(no);
+  selRender();
+};
+/** What is inside an order, without changing anything. */
+function orderView(o) {
+  if (!o) return;
+  const t = totals(o.lines, o),
+    ppl = o.waiter ? o.waiter : "–",
+    row = (l, v) => (v ? `<div><span>${l}</span><b>${slipEsc(v)}</b></div>` : "");
+  $("#viewBody").innerHTML = `<h3>Order ${slipEsc(o.no)}</h3>
+  <div class="view-meta">${row("Table", o.label)}${row("Sale point", billPlace(o.lines))}${row("Waiter", ppl)}${row("Guest", o.guest)}${row("Covers", o.covers)}${row("Room", o.room)}${row("Sent", hhmm(o.at))}${row("Rounds", String(o.rounds))}${o.rider ? row("Rider", o.rider.n + " " + o.rider.p) : ""}</div>
+  <div class="view-lines"><table><tr><th>Qty</th><th>Item</th><th class="n">Price</th><th class="n">Total</th></tr>${slipLines(
+    o.lines,
+    o
+  )
+    .map(
+      x =>
+        `<tr><td>${x.q}</td><td>${slipEsc(x.n)}</td><td class="n">${bill2(x.p)}</td><td class="n">${bill2(x.p * x.q)}</td></tr>`
+    )
+    .join("")}</table></div>
+  <div class="view-tots">${t.disc ? slipRow("Subtotal", bill2(t.sub)) + slipRow("Discount", "-" + bill2(t.disc)) : ""}${slipRow("Net", bill2(t.net))}${slipRow("VAT", bill2(t.tax))}<div class="view-total"><span>Total</span><span>${KES(t.g)}</span></div>${t.pl ? `<small>Price list: ${slipEsc(t.pl.n)}</small>` : ""}${t.cur ? `<small>${slipEsc(t.cur.c)} ${bill2(t.g / t.cur.rate)}</small>` : ""}</div>
+  <div class="row"><button class="chip on" data-close>Close</button></div>`;
+  $("#mView").classList.add("show");
+}
+$("#selOpt").onclick = () => {
+  const L = myBills().filter(o => selSet.has(o.no));
+  if (L.length) boptWheel(L);
 };
 $("#selChg").onclick = () => {
   const L = myBills().filter(o => selSet.has(o.no));
@@ -287,7 +384,7 @@ $("#selChgAll").onclick = () => {
 function findList() {
   const q = $("#fq").value.toLowerCase();
   $("#fr").innerHTML =
-    ITEMS.filter(i => i.d === dept && i.n.toLowerCase().includes(q))
+    ITEMS.filter(i => inPoint(i, dept) && i.n.toLowerCase().includes(q))
       .map(
         i =>
           `<button class="mini" style="width:100%;text-align:left;margin-bottom:6px;padding:10px" data-i="${i.id}">${i.n} · ${i.p.toFixed(2)}</button>`
@@ -314,7 +411,7 @@ $("#osk").innerHTML = OSK.map(
 ).join("");
 function findEnter() {
   const f = ITEMS.filter(
-    i => i.d === dept && i.n.toLowerCase().includes($("#fq").value.trim().toLowerCase())
+    i => inPoint(i, dept) && i.n.toLowerCase().includes($("#fq").value.trim().toLowerCase())
   );
   if (f.length === 1) {
     const q = nextQty;
@@ -409,14 +506,14 @@ $("#printBtn").onclick = () => {
     showRc(
       guestBillHTML({
         no: $("#fBill").value,
-        dept,
+        dept: billPlace(cart),
         label: $("#fTable").value || "Walk-in",
         guest: $("#fGuest").value,
         covers: $("#fCov").value,
         room: $("#fRoom").value,
         waiter: user ? user.n : "",
         rider,
-        lines: slipLines(cart),
+        lines: slipLines(cart, cartAdj),
         t: totals()
       }),
       null,
