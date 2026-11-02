@@ -8,7 +8,15 @@ const avail = it =>
   Math.min(
     ...Object.entries(it.r).map(([k, v]) => Math.floor((STK[itemLoc(it)][k] || 0) / v + 1e-9))
   );
-const inCart = id => cart[id] || 0;
+const ACC_MARK = "^";
+const isAccLine = id => String(id).split("~")[1] === ACC_MARK;
+/** How many of this product are on the order, across all its modifier choices. */
+const inCart = id => {
+  const base = String(id).split("~")[0];
+  return Object.entries(cart).reduce((a, [k, q]) => (k.split("~")[0] === base ? a + q : a), 0);
+};
+/** The most this line can hold: what's in stock, less the product's other lines. */
+const lineMax = id => avail(get(id)) - (inCart(id) - (cart[id] || 0));
 let catSel = "",
   nextQty = 1,
   selId = null,
@@ -58,12 +66,28 @@ function draftRelease() {
   if (user) orderNoBack(user.n, draft.ord);
   draft = null;
 }
-const get = id => ITEMS.find(i => i.id == id),
+/** A product, or for a modifier line ("12~Cold") that product under the line's own name. */
+const get = id => {
+    const [base, ...picks] = String(id).split("~"),
+      it = ITEMS.find(i => i.id == base);
+    if (!it || !picks.length) return it;
+    // An accompaniment line: free on the bill, and it still uses the item's own stock.
+    if (picks[0] === ACC_MARK) {
+      const main = ITEMS.find(i => i.id == picks[1]);
+      return {
+        ...it,
+        id: String(id),
+        n: main ? `${it.n} (with ${main.n})` : `${it.n} (accompaniment)`,
+        p: 0
+      };
+    }
+    return { ...it, id: String(id), n: `${it.n} (${picks.join(", ")})` };
+  },
   pad = (n, l = 6) => String(n).padStart(l, "0");
 // A waiter ticked for several sale points works in them side by side (dept = ALLP): the tabs on top
 // choose whose menu shows, and the order keeps building across them.
 let spTab = "";
-const onMenu = i => (dept === ALLP ? i.d === spTab : i.d === dept);
+const onMenu = i => i.sell !== "acc" && (dept === ALLP ? i.d === spTab : i.d === dept);
 const shownPoint = () => (dept === ALLP ? spTab : dept);
 function drawTabs() {
   if (dept === ALLP && !DEPTS.includes(spTab)) spTab = DEPTS[0];
@@ -165,7 +189,7 @@ function drawCart() {
       .map(id => {
         const it = get(id),
           q = cart[id];
-        return `<div class="tr ${id == selId ? "sel" : ""}" data-r="${id}"><span class="qc"><button data-m="${id}">−</button>${q}<button data-p="${id}">+</button></span><span>${it.n}</span><span class="n">${bill2(itemPrice(it, adj))}</span><span class="n">${bill2(itemPrice(it, adj) * q)}</span></div>`;
+        return `<div class="tr ${id == selId ? "sel" : ""}" data-r="${id}"><span class="qc"><button data-m="${id}">−</button>${q}${isAccLine(id) ? "" : `<button data-p="${id}">+</button>`}</span><span>${it.n}</span><span class="n">${bill2(itemPrice(it, adj))}</span><span class="n">${bill2(itemPrice(it, adj) * q)}</span></div>`;
       })
       .join("") ||
     `<div class="empty" style="padding:24px 8px">${cur ? "Adding to " + cur.label + ". Tap items to add." : "Tap an item to start an order."}</div>`;
@@ -202,12 +226,31 @@ function drawCart() {
   drawGrid();
   ordersKeep();
 }
+/** Sides are attached to their main item: when it comes down, they come down with it. */
+function accFollow(id) {
+  if (isAccLine(id)) return;
+  const base = String(id).split("~")[0];
+  const left = Object.entries(cart).reduce(
+    (a, [k, q]) => (!isAccLine(k) && k.split("~")[0] === base ? a + q : a),
+    0
+  );
+  Object.keys(cart).forEach(k => {
+    if (isAccLine(k) && k.split("~")[2] === base) {
+      if (left <= 0) delete cart[k];
+      else if (cart[k] > left) cart[k] = left;
+    }
+  });
+}
 function add(id, d = 1) {
-  const it = get(id),
-    n = inCart(id) + d;
-  if (n <= 0) delete cart[id];
-  else {
-    const m = avail(it);
+  const n = (cart[id] || 0) + d;
+  if (n <= 0) {
+    delete cart[id];
+    accFollow(id);
+  } else if (d < 0) {
+    cart[id] = n;
+    accFollow(id);
+  } else {
+    const m = lineMax(id);
     if (m <= 0) return;
     cart[id] = Math.min(n, m);
     draftStart();
@@ -246,7 +289,7 @@ $("#grid").onclick = e => {
   if (!b) return;
   const q = nextQty;
   nextQty = 1;
-  add(b.dataset.i, q);
+  pickItem(b.dataset.i, q);
 };
 $("#cats").onclick = e => {
   const c = e.target.dataset.c;
@@ -299,7 +342,8 @@ $("#qk").onclick = e => {
       drawCart();
     } else if (selId && cart[selId]) {
       if (n <= 0) delete cart[selId];
-      else cart[selId] = Math.min(n, avail(get(selId)));
+      // A free line can come down but not go up by hand.
+      else cart[selId] = Math.min(n, isAccLine(selId) ? cart[selId] : lineMax(selId));
       drawCart();
     }
     return;
@@ -420,7 +464,7 @@ $("#selChgAll").onclick = () => {
 function findList() {
   const q = $("#fq").value.toLowerCase();
   $("#fr").innerHTML =
-    ITEMS.filter(i => inPoint(i, dept) && i.n.toLowerCase().includes(q))
+    ITEMS.filter(i => i.sell !== "acc" && inPoint(i, dept) && i.n.toLowerCase().includes(q))
       .map(
         i =>
           `<button class="mini" style="width:100%;text-align:left;margin-bottom:6px;padding:10px" data-i="${i.id}">${i.n} · ${i.p.toFixed(2)}</button>`
@@ -447,12 +491,15 @@ $("#osk").innerHTML = OSK.map(
 ).join("");
 function findEnter() {
   const f = ITEMS.filter(
-    i => inPoint(i, dept) && i.n.toLowerCase().includes($("#fq").value.trim().toLowerCase())
+    i =>
+      i.sell !== "acc" &&
+      inPoint(i, dept) &&
+      i.n.toLowerCase().includes($("#fq").value.trim().toLowerCase())
   );
   if (f.length === 1) {
     const q = nextQty;
     nextQty = 1;
-    add(f[0].id, q);
+    pickItem(f[0].id, q);
     $("#mFind").classList.remove("show");
   } else fsNote(f.length ? "Several items match. Tap the one you want." : "No item matches.");
 }
@@ -476,7 +523,7 @@ $("#fr").onclick = e => {
   if (!b) return;
   const q = nextQty;
   nextQty = 1;
-  add(b.dataset.i, q);
+  pickItem(b.dataset.i, q);
   $("#mFind").classList.remove("show");
 };
 const KM = ["Rush", "No onions", "Extra spicy", "No salt", "Allergy: nuts", "Well done"];

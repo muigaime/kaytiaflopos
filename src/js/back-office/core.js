@@ -181,7 +181,7 @@ window.bosave = bosave;
     (s.OR || []).forEach(o => {
       o.at = new Date(o.at);
       Object.keys(o.lines || {}).forEach(id => {
-        if (!ITEMS.some(i => String(i.id) === id)) delete o.lines[id];
+        if (!get(id)) delete o.lines[id];
       });
       if (Object.keys(o.lines || {}).length) orders.push(o);
     });

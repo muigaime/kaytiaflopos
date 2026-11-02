@@ -37,6 +37,10 @@ $("#vSub").onclick = e => {
   if (a.slice(0, 3) === "ws_") return wsAct(a, b);
   if (a.slice(0, 3) === "tb_") return tbAct(a, b);
   if (a.slice(0, 4) === "psu_") return psuAct(a, b);
+  if (a.slice(0, 4) === "mod_") return modAct(a, b);
+  if (a.slice(0, 4) === "acc_") return accAct(a, b);
+  if (a.slice(0, 4) === "cat_") return catAct(a, b);
+  if (a.slice(0, 4) === "grp_") return grpAct(a, b);
   if (a.slice(0, 4) === "lic_") return licAct(a);
   if (ACT_RIGHTS[a] && !boCan(ACT_RIGHTS[a])) return boDenied();
   if (a.slice(0, 3) === "ur_") return urAct(a, b);

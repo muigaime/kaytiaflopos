@@ -38,6 +38,7 @@ V.settings = () => {
       optsHTML("POS options", "These apply to every waiter and cashier straight away.", OPT_POS),
     tax: () => `<div class="pn"><h4>Tax setup</h4><div class="stk">Menu prices include tax. Each item is set to VAT, Tax C, both or no tax when it's created. A new rate applies to bills paid from now on, and past reports keep the rate they were paid at.</div>
   <div class="fr" style="align-items:end"><label>VAT (%)<input data-iv="hs.taxB" inputmode="decimal" value="${esc(invF.hs.taxB)}"></label><label>Tax C (%)<input data-iv="hs.taxC" inputmode="decimal" value="${esc(invF.hs.taxC)}"></label><button class="chip on" style="flex:none" data-a="hs_tax">Save tax rates</button></div></div>`,
+    cats: categoriesHTML,
     printers: () => machinesHTML() + printerSetupHTML() + printersHTML()
   };
   return setTabsHTML() + panels[setTab]();

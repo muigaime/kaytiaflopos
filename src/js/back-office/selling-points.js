@@ -1,15 +1,7 @@
 // ---- selling points: bars, restaurants and kitchens that sell on the POS ----
 // A selling point gets stock from a store (requisition / issue) and sells products made from that stock.
 // Creating one, or adding a product to one, shows on the POS straight away.
-const SP_TYPES = [
-  "Bar",
-  "Restaurant",
-  "Kitchen",
-  "Cafe",
-  "Room service",
-  MATERIALS,
-  "Other"
-];
+const SP_TYPES = ["Bar", "Restaurant", "Kitchen", "Cafe", "Room service", MATERIALS, "Other"];
 let spSel = null;
 invF.spf = { name: "", type: "Bar", store: STORES[0] };
 invF.spp = { k: "", q: "1", name: "", cat: "", price: "", tax: "B" };
@@ -122,11 +114,10 @@ function itemSpNewPopup(F) {
   <header class="itm-h"><div><h3>New product for ${esc(sp)}</h3><p>Sold at ${esc(sp)}</p></div><button class="itm-x" data-a="inv_itcancel" aria-label="Close">✕</button></header>
   <div class="itm-b" id="itBody">
    <section class="itm-s"><h4>Product</h4>
-    <datalist id="itCatL">${cats.map(c => `<option value="${esc(c)}">`).join("")}</datalist>
     <div class="itm-g itm-g4">
      <label>Product name<input data-iv="it.name" id="itName" value="${esc(F.name)}" placeholder="e.g. Chapati"></label>
      <label>Selling price (KES)<input data-iv="it.spPrice" type="number" min="0" step="any" value="${esc(F.spPrice)}" placeholder="${itemSpLink(F) ? "Needed" : "Empty = stock only"}"></label>
-     <label>Category<input data-iv="it.spCat" list="itCatL" value="${esc(F.spCat)}" placeholder="${esc(spInfo(sp).type)}"></label>
+     <label>Category<input data-iv="it.spCat" list="prodCatL" value="${esc(F.spCat)}" placeholder="${esc(spInfo(sp).type)}"></label>
      <label>Tax<select data-iv="it.spTax">${taxChoices()
        .map(([v, l]) => `<option value="${v}" ${v === F.spTax ? "selected" : ""}>${l}</option>`)
        .join("")}</select></label>
@@ -281,6 +272,7 @@ function outletsView() {
   }).join("");
   return `<div class="pn"><h4>Create a selling point</h4><div class="fr"><label>Name<input data-iv="spf.name" value="${esc(F.name)}" placeholder="e.g. Pool Bar, Main Restaurant"></label><label>Type<select data-iv="spf.type">${opts(SP_TYPES, F.type)}</select></label><label>Gets stock from<select data-iv="spf.store">${opts(STORES, F.store)}</select></label><button class="chip on" data-a="sp_add">Create selling point</button></div><div class="stk">A new selling point shows on the POS straight away. Managers can sell there; choose other staff under Manage.</div></div>
  <div class="pn tw"><h4>Selling points (${ALLD.length})</h4><table class="t"><tr><th>Selling point</th><th>Type</th><th>Gets stock from</th><th class="n">Products</th><th class="n">Items in stock</th><th class="n">Sales today (KES)</th><th class="n">Staff</th><th></th></tr>${rows}</table></div>
+ ${categoriesHTML()}
  ${spSel && ALLD.includes(spSel) ? spDetail(spSel) : ""}${itemPopupIfOpen()}${stModalIfOpen()}${apModalIfOpen()}${spDeleteModal()}${speModal()}`;
 }
 
@@ -305,7 +297,7 @@ function spDetail(o) {
   <div class="fr"><label>Made from stock item<select data-iv="spp.k">${keys.map(k => `<option value="${k}" ${k === P.k ? "selected" : ""}>${esc(itemInfo(k).name)} (${esc(itemInfo(k).uom)})</option>`).join("")}</select></label>
    <label>Uses per sale<input data-iv="spp.q" type="number" min="0" step="any" value="${esc(P.q)}"></label>
    <label>Product name<input data-iv="spp.name" value="${esc(P.name)}" placeholder="Same as the stock item"></label>
-   <label>Category<input data-iv="spp.cat" value="${esc(P.cat)}" placeholder="e.g. Beer, Mains"></label>
+   <label>Category<input data-iv="spp.cat" list="prodCatL" value="${esc(P.cat)}" placeholder="e.g. Beer, Mains"></label>
    <label>Selling price (KES)<input data-iv="spp.price" type="number" min="0" step="any" value="${esc(P.price)}"></label>
    <label>Tax<select data-iv="spp.tax">${taxChoices()
      .map(([v, l]) => `<option value="${v}" ${v === P.tax ? "selected" : ""}>${l}</option>`)
@@ -867,12 +859,14 @@ function speModal() {
     <div class="itm-g itm-g4">
      <label>Product name<input data-iv="spe.name" value="${esc(F.name)}"></label>
      <label>Selling price (KES)<input data-iv="spe.price" type="number" min="0" step="any" value="${esc(F.price)}"></label>
-     <label>Category<input data-iv="spe.cat" value="${esc(F.cat)}"></label>
+     <label>Category<input data-iv="spe.cat" list="prodCatL" value="${esc(F.cat)}"></label>
      <label>Tax<select data-iv="spe.tax">${taxChoices()
        .map(([v, l]) => `<option value="${v}" ${v === F.tax ? "selected" : ""}>${l}</option>`)
        .join("")}</select></label>
     </div>
    </section>
+   <section class="itm-s"><h4>Modifiers</h4><div class="mod-cell">${modCell(i)}</div></section>
+   <section class="itm-s"><h4>Accompaniments</h4><div class="mod-cell">${accCell(i)}</div></section>
    <section class="itm-s"><h4>Each sale deducts from</h4>
     <div class="grn-modes it-ways">${ways.map(([w, l, s]) => `<button class="grn-mode ${F.way === w ? "on" : ""}" data-a="sp_pway" data-w="${w}"><b>${l}</b><span>${s}</span></button>`).join("")}</div>
     ${source}

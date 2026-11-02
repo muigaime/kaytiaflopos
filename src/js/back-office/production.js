@@ -356,7 +356,7 @@ function recipesHTML() {
    <label>Sold at<select data-iv="rcp.sp">${opts(S, F.sp)}</select></label>
    ${recipeFromField("rcp.from", F.from)}</div>
   <div class="fr"><label>Selling price (KES)<input data-iv="rcp.price" type="number" min="0" step="any" value="${esc(F.price)}"></label>
-   <label>Category<input data-iv="rcp.cat" value="${esc(F.cat)}" placeholder="e.g. Mains"></label>
+   <label>Category<input data-iv="rcp.cat" list="prodCatL" value="${esc(F.cat)}" placeholder="e.g. Mains"></label>
    <label>Tax<select data-iv="rcp.tax">${taxChoices()
      .map(([v, l]) => `<option value="${v}" ${v === F.tax ? "selected" : ""}>${l}</option>`)
      .join("")}</select></label></div>
@@ -490,7 +490,7 @@ function itemMadeSection(F, sp) {
     <div class="itm-g itm-g4">
      <label>${recipe ? "Sold at" : "Goes to"}<select data-iv="it.madeSp">${opts(S, F.madeSp)}</select></label>
      <label>Selling price (KES)<input data-iv="it.spPrice" type="number" min="0" step="any" value="${esc(F.spPrice)}" placeholder="${recipe ? "Needed" : "Empty = stock only"}"></label>
-     <label>Category<input data-iv="it.spCat" value="${esc(F.spCat)}" placeholder="e.g. Mains"></label>
+     <label>Category<input data-iv="it.spCat" list="prodCatL" value="${esc(F.spCat)}" placeholder="e.g. Mains"></label>
      <label>Tax<select data-iv="it.spTax">${taxChoices()
        .map(([v, l]) => `<option value="${v}" ${v === F.spTax ? "selected" : ""}>${l}</option>`)
        .join("")}</select></label>

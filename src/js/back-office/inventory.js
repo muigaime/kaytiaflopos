@@ -258,6 +258,7 @@ const RAIL = [
   ["stores", "Stores", "home"],
   ["appr", "Approvals", "shield"],
   ["items", "Item setup", "plus"],
+  ["cats", "Categories", "book"],
   ["master", "Stock Master", "box"],
   ["req", "Requisitions", "book"],
   ["issue", "Issue", "cart", "store"],
@@ -678,7 +679,7 @@ function itemDatalists() {
       `<datalist id="${id}">${L.map(x => `<option value="${esc(x)}">`).join("")}</datalist>`,
     groups = [
       ...new Set([
-        ...ITEM_GROUPS,
+        ...groupList(),
         ...Object.values(INGU)
           .map(u => u.group)
           .filter(Boolean)
@@ -728,7 +729,7 @@ function itemPopup(F, editing, lockUom) {
        M === "recipe"
          ? ""
          : `<label>Item code<input data-iv="it.code" value="${esc(F.code)}" placeholder="${editing ? "" : nextItemCode()}"></label>
-     <label>Item group<input data-iv="it.group" list="grpL" value="${esc(F.group)}" placeholder="e.g. Beverages"></label>`
+     <label>Category<input data-iv="it.group" list="grpL" value="${esc(F.group)}" placeholder="e.g. Beverages"></label>`
      }
     </div>
     <div class="itm-hint" id="itDup"></div>
@@ -817,7 +818,7 @@ function sdSync(f) {
   all();
 }
 function itemsTable(keys) {
-  return `<div class="pn tw"><h4>Items in the Stock Master (${keys.length})</h4><table class="t"><tr><th>Code</th><th>Item</th><th>Group</th><th>VAT / tax</th><th>Unit</th><th>Buying unit</th><th class="n">Buying price</th><th class="n">Cost / unit</th><th class="n">In stores</th><th class="n">At selling points</th><th></th></tr>${keys
+  return `<div class="pn tw"><h4>Items in the Stock Master (${keys.length})</h4><table class="t"><tr><th>Code</th><th>Item</th><th>Category</th><th>VAT / tax</th><th>Unit</th><th>Buying unit</th><th class="n">Buying price</th><th class="n">Cost / unit</th><th class="n">In stores</th><th class="n">At selling points</th><th></th></tr>${keys
     .map(k => {
       const u = itemInfo(k),
         all = tot(k),
@@ -830,6 +831,7 @@ function invView() {
   const B = {
     stores: storesHTML,
     items: itemsHTML,
+    cats: storeCatsHTML,
     master: masterHTML,
     req: reqHTML,
     issue: issHTML,

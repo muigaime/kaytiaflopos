@@ -656,3 +656,290 @@
   letter-spacing: 0.24em;
   text-transform: uppercase;
 }
+/* Modifiers: the choices on the POS, and their setup */
+.mod-os {
+  display: grid;
+  max-height: 52vh;
+  overflow: auto;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin: 12px 0;
+}
+.mod-o {
+  min-height: 72px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.mod-o:hover,
+.mod-o:focus-visible {
+  border-color: var(--brass, #c7a25a);
+  background: var(--tint);
+}
+.mod-r {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.mod-rh {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.mod-rh > b {
+  font-size: 13px;
+}
+.mod-cs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: end;
+  gap: 8px;
+  margin-top: 8px;
+}
+.mod-r label {
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+}
+.mod-r input {
+  width: 100%;
+}
+.mod-cell {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+/* Product categories: one line each, so a long list stays short */
+.cat-panel {
+  padding: 0 !important;
+  overflow: hidden;
+}
+.cat-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 24px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(100deg, rgba(199, 162, 90, 0.2), rgba(199, 162, 90, 0) 70%);
+}
+.cat-head h4 {
+  margin: 0 0 2px;
+  font-size: 16px;
+}
+.cat-head p {
+  margin: 0;
+  color: var(--mute);
+  font-size: 12px;
+}
+.cat-add {
+  display: flex;
+  flex: 1 1 420px;
+  justify-content: flex-end;
+  gap: 8px;
+  max-width: 640px;
+}
+.cat-add input {
+  flex: 1 1 150px;
+  min-width: 0;
+  padding: 9px 12px;
+}
+.cat-add button {
+  flex: none;
+  white-space: nowrap;
+}
+.cat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(460px, 1fr));
+  align-items: start;
+  gap: 6px;
+  max-height: 340px;
+  overflow: auto;
+  padding: 10px 16px 12px;
+}
+.cat-grid > [hidden] {
+  display: none;
+}
+.cat-nomatch {
+  grid-column: 1 / -1;
+}
+.cat-card {
+  border: 1px solid var(--line);
+  border-left: 4px solid hsl(var(--h) 52% 42%);
+  border-radius: 7px;
+  background: var(--card);
+}
+.cat-card:hover {
+  background: var(--tint);
+}
+.cat-card.on {
+  border-color: var(--brass, #c7a25a);
+  border-left-color: var(--brass, #c7a25a);
+}
+.cat-line {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  padding: 5px 7px;
+}
+.cat-mark {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: hsl(var(--h) 52% 42%);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
+.cat-line h5 {
+  flex: 0 1 auto;
+  max-width: 38%;
+  margin: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 13.5px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cat-mods {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--mute);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.cat-group {
+  display: inline-flex;
+  flex: none;
+  gap: 3px;
+}
+.cat-group i {
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--tint);
+  color: var(--ink);
+  font-style: normal;
+  font-weight: 600;
+}
+.cat-btns {
+  display: flex;
+  flex: none;
+  gap: 4px;
+}
+.cat-b {
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.cat-b:hover {
+  border-color: var(--brass, #c7a25a);
+}
+.cat-del {
+  color: var(--bad);
+}
+.cat-del:hover {
+  border-color: var(--bad);
+}
+.cat-go {
+  border-color: var(--brass, #c7a25a);
+  background: var(--brass, #c7a25a);
+  color: #1c1408;
+}
+.cat-q {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 6px;
+  padding: 8px 10px;
+  border-top: 1px solid var(--line);
+  font-size: 12.5px;
+}
+.cat-q label,
+.cat-q span,
+.cat-q input {
+  flex: 1 1 180px;
+}
+.cat-q label {
+  display: grid;
+  gap: 4px;
+}
+/* Inventory: categories for store products */
+.grp-list {
+  margin: 0;
+  border: 0;
+}
+.grp-list table.t td {
+  padding-top: 7px;
+  padding-bottom: 7px;
+}
+.grp-list input {
+  width: min(320px, 100%);
+}
+.grp-act {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 6px;
+}
+.grp-to {
+  display: grid;
+  gap: 3px;
+  font-size: 12px;
+  text-align: left;
+}
+tr[data-grp].on td {
+  background: var(--tint);
+}
+/* Accompaniments */
+.mod-o small {
+  display: block;
+  color: var(--bad);
+  font-size: 11px;
+  font-weight: 600;
+}
+.mod-o:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.mod-none {
+  border-style: dashed;
+  color: var(--mute);
+  font-weight: 600;
+}
+.acc-n {
+  display: inline-grid !important;
+  gap: 4px;
+}
+.acc-n input {
+  width: 110px;
+}
+.acc-cell {
+  font-size: 12px;
+}

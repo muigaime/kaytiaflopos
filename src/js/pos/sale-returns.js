@@ -79,7 +79,7 @@ function retRows() {
         const i = b.info[id],
           n = b.lines[id],
           v = bopt.vq[id];
-        return `<tr class="${v ? "on" : ""}" data-vr="${id}"><td><input type="checkbox" tabindex="-1" ${v ? "checked" : ""}></td><td>${slipEsc(id)}</td><td class="d">${slipEsc(i.n)}</td><td class="n">${
+        return `<tr class="${v ? "on" : ""}" data-vr="${id}"><td><input type="checkbox" tabindex="-1" ${v ? "checked" : ""}></td><td>${slipEsc(String(id).split("~")[0])}</td><td class="d">${slipEsc(i.n)}</td><td class="n">${
           v && n > 1
             ? `<span class="qc"><button data-vs="${id}" data-d="-1" ${v <= 1 ? "disabled" : ""}>−</button><b>${v}</b><button data-vs="${id}" data-d="1" ${v >= n ? "disabled" : ""}>+</button></span><small>of ${n}</small>`
             : n

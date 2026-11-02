@@ -864,7 +864,7 @@ const REP = {
         s.lines.forEach(l => {
           const key = l.id + "|" + s.dept,
             r = (o[key] = o[key] || {
-              code: l.id || "",
+              code: String(l.id || "").split("~")[0],
               n: l.n,
               grp: (get(l.id) || {}).c || "Other",
               src: s.dept,
@@ -928,7 +928,7 @@ const REP = {
           const it = get(l.id),
             key = l.id + "|" + s.dept,
             r = (o[key] = o[key] || {
-              code: l.id || "",
+              code: String(l.id || "").split("~")[0],
               n: l.n,
               grp: (it || {}).c || "Other",
               src: s.dept,
@@ -1378,14 +1378,14 @@ const V = {
     return `<div class="pn"><div class="so-bar"><label class="so-q">Search orders<input data-sq value="${esc(F.q)}" placeholder="Bill or order number, table, waiter, guest or item" autocomplete="off"></label><label>From<input type="date" data-sf="from" value="${esc(F.from)}"></label><label>To<input type="date" data-sf="to" value="${esc(F.to)}"></label>${on ? '<button class="mini" data-a="sales_clear">Back to current</button>' : ""}</div><div id="salesList">${salesList()}</div></div>`;
   },
   prod() {
-    return `<div class="pn"><h4>Add product</h4><div class="fr"><input id="pn" placeholder="Name"><select id="pd">${ALLD.map(d => `<option>${d}</option>`).join("")}</select><input id="pc" placeholder="Category"><input id="pp" type="number" placeholder="Price KES"><select id="pt">${taxChoices()
+    return `<div class="pn"><h4>Add product</h4><div class="fr"><input id="pn" placeholder="Name"><select id="pd">${ALLD.map(d => `<option>${d}</option>`).join("")}</select><input id="pc" list="prodCatL" placeholder="Category"><input id="pp" type="number" placeholder="Price KES"><select id="pt">${taxChoices()
       .map(([v, l]) => `<option value="${v}">${l}</option>`)
       .join("")}</select><select id="pi">${Object.keys(ING)
       .map(k => `<option value="${k}">${esc(ING[k])}</option>`)
       .join(
         ""
       )}</select><input id="pq" type="number" placeholder="Stock used per sale"><button class="chip on" data-a="addp">Add</button></div></div>
- <div class="pn tw"><table class="t"><tr><th>Item</th><th>Sale point</th><th>Category</th><th>VAT</th><th>Price (KES)</th><th class="n">Can sell</th></tr>${ITEMS.map(i => `<tr><td>${esc(i.n)}</td><td>${i.d}</td><td>${esc(i.c)}</td><td>${i.t}</td><td><input type="number" value="${i.p}" data-pr="${i.id}"></td><td class="n">${avail(i)}</td></tr>`).join("")}</table></div>`;
+ <div class="pn tw"><table class="t"><tr><th>Item</th><th>Sale point</th><th>Category</th><th>VAT</th><th>Price (KES)</th><th class="n">Can sell</th><th>Modifiers</th><th>Accompaniments</th></tr>${ITEMS.map(i => `<tr><td>${esc(i.n)}</td><td>${i.d}</td><td>${esc(i.c)}</td><td>${i.t}</td><td><input type="number" value="${i.p}" data-pr="${i.id}"></td><td class="n">${avail(i)}</td><td>${modCell(i)}</td><td>${accCell(i)}</td></tr>`).join("")}</table></div>`;
   },
   inv() {
     return `<div class="pn"><h4>New ingredient</h4><div class="fr"><input id="gn" placeholder="Name and unit, e.g. Tomato (g)"><input id="gq" type="number" placeholder="Opening stock"><button class="chip on" data-a="addg">Add</button></div></div>

@@ -261,6 +261,7 @@ const TAB_RIGHTS = {
     stores: "inv.stores",
     appr: "inv.approve",
     items: "inv.items",
+    cats: "inv.items",
     master: "inv.master",
     req: "inv.req",
     issue: "inv.issue",

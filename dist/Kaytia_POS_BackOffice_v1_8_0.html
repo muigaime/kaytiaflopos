@@ -11960,6 +11960,293 @@ body > .modal select:focus {
   letter-spacing: 0.24em;
   text-transform: uppercase;
 }
+/* Modifiers: the choices on the POS, and their setup */
+.mod-os {
+  display: grid;
+  max-height: 52vh;
+  overflow: auto;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin: 12px 0;
+}
+.mod-o {
+  min-height: 72px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.mod-o:hover,
+.mod-o:focus-visible {
+  border-color: var(--brass, #c7a25a);
+  background: var(--tint);
+}
+.mod-r {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.mod-rh {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.mod-rh > b {
+  font-size: 13px;
+}
+.mod-cs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: end;
+  gap: 8px;
+  margin-top: 8px;
+}
+.mod-r label {
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+}
+.mod-r input {
+  width: 100%;
+}
+.mod-cell {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+/* Product categories: one line each, so a long list stays short */
+.cat-panel {
+  padding: 0 !important;
+  overflow: hidden;
+}
+.cat-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 24px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(100deg, rgba(199, 162, 90, 0.2), rgba(199, 162, 90, 0) 70%);
+}
+.cat-head h4 {
+  margin: 0 0 2px;
+  font-size: 16px;
+}
+.cat-head p {
+  margin: 0;
+  color: var(--mute);
+  font-size: 12px;
+}
+.cat-add {
+  display: flex;
+  flex: 1 1 420px;
+  justify-content: flex-end;
+  gap: 8px;
+  max-width: 640px;
+}
+.cat-add input {
+  flex: 1 1 150px;
+  min-width: 0;
+  padding: 9px 12px;
+}
+.cat-add button {
+  flex: none;
+  white-space: nowrap;
+}
+.cat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(460px, 1fr));
+  align-items: start;
+  gap: 6px;
+  max-height: 340px;
+  overflow: auto;
+  padding: 10px 16px 12px;
+}
+.cat-grid > [hidden] {
+  display: none;
+}
+.cat-nomatch {
+  grid-column: 1 / -1;
+}
+.cat-card {
+  border: 1px solid var(--line);
+  border-left: 4px solid hsl(var(--h) 52% 42%);
+  border-radius: 7px;
+  background: var(--card);
+}
+.cat-card:hover {
+  background: var(--tint);
+}
+.cat-card.on {
+  border-color: var(--brass, #c7a25a);
+  border-left-color: var(--brass, #c7a25a);
+}
+.cat-line {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  padding: 5px 7px;
+}
+.cat-mark {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: hsl(var(--h) 52% 42%);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
+.cat-line h5 {
+  flex: 0 1 auto;
+  max-width: 38%;
+  margin: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 13.5px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cat-mods {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--mute);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.cat-group {
+  display: inline-flex;
+  flex: none;
+  gap: 3px;
+}
+.cat-group i {
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--tint);
+  color: var(--ink);
+  font-style: normal;
+  font-weight: 600;
+}
+.cat-btns {
+  display: flex;
+  flex: none;
+  gap: 4px;
+}
+.cat-b {
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.cat-b:hover {
+  border-color: var(--brass, #c7a25a);
+}
+.cat-del {
+  color: var(--bad);
+}
+.cat-del:hover {
+  border-color: var(--bad);
+}
+.cat-go {
+  border-color: var(--brass, #c7a25a);
+  background: var(--brass, #c7a25a);
+  color: #1c1408;
+}
+.cat-q {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 6px;
+  padding: 8px 10px;
+  border-top: 1px solid var(--line);
+  font-size: 12.5px;
+}
+.cat-q label,
+.cat-q span,
+.cat-q input {
+  flex: 1 1 180px;
+}
+.cat-q label {
+  display: grid;
+  gap: 4px;
+}
+/* Inventory: categories for store products */
+.grp-list {
+  margin: 0;
+  border: 0;
+}
+.grp-list table.t td {
+  padding-top: 7px;
+  padding-bottom: 7px;
+}
+.grp-list input {
+  width: min(320px, 100%);
+}
+.grp-act {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 6px;
+}
+.grp-to {
+  display: grid;
+  gap: 3px;
+  font-size: 12px;
+  text-align: left;
+}
+tr[data-grp].on td {
+  background: var(--tint);
+}
+/* Accompaniments */
+.mod-o small {
+  display: block;
+  color: var(--bad);
+  font-size: 11px;
+  font-weight: 600;
+}
+.mod-o:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.mod-none {
+  border-style: dashed;
+  color: var(--mute);
+  font-weight: 600;
+}
+.acc-n {
+  display: inline-grid !important;
+  gap: 4px;
+}
+.acc-n input {
+  width: 110px;
+}
+.acc-cell {
+  font-size: 12px;
+}
 </style>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -12203,6 +12490,18 @@ body > .modal select:focus {
         <div class="row">
           <button class="mini" data-close>Cancel</button
           ><button class="chip on" id="exGo">Authorize swap</button>
+        </div>
+      </div>
+    </div>
+    <datalist id="prodCatL"></datalist>
+    <div class="modal" id="mMod">
+      <div class="box" style="max-width: 560px">
+        <h3 id="modT"></h3>
+        <div class="stk" id="modS"></div>
+        <div class="mod-os" id="modO"></div>
+        <div class="row">
+          <button class="mini" data-close>Cancel</button
+          ><button class="mini" id="modBack">← Back</button>
         </div>
       </div>
     </div>
@@ -13656,7 +13955,15 @@ const avail = it =>
   Math.min(
     ...Object.entries(it.r).map(([k, v]) => Math.floor((STK[itemLoc(it)][k] || 0) / v + 1e-9))
   );
-const inCart = id => cart[id] || 0;
+const ACC_MARK = "^";
+const isAccLine = id => String(id).split("~")[1] === ACC_MARK;
+/** How many of this product are on the order, across all its modifier choices. */
+const inCart = id => {
+  const base = String(id).split("~")[0];
+  return Object.entries(cart).reduce((a, [k, q]) => (k.split("~")[0] === base ? a + q : a), 0);
+};
+/** The most this line can hold: what's in stock, less the product's other lines. */
+const lineMax = id => avail(get(id)) - (inCart(id) - (cart[id] || 0));
 let catSel = "",
   nextQty = 1,
   selId = null,
@@ -13706,12 +14013,28 @@ function draftRelease() {
   if (user) orderNoBack(user.n, draft.ord);
   draft = null;
 }
-const get = id => ITEMS.find(i => i.id == id),
+/** A product, or for a modifier line ("12~Cold") that product under the line's own name. */
+const get = id => {
+    const [base, ...picks] = String(id).split("~"),
+      it = ITEMS.find(i => i.id == base);
+    if (!it || !picks.length) return it;
+    // An accompaniment line: free on the bill, and it still uses the item's own stock.
+    if (picks[0] === ACC_MARK) {
+      const main = ITEMS.find(i => i.id == picks[1]);
+      return {
+        ...it,
+        id: String(id),
+        n: main ? `${it.n} (with ${main.n})` : `${it.n} (accompaniment)`,
+        p: 0
+      };
+    }
+    return { ...it, id: String(id), n: `${it.n} (${picks.join(", ")})` };
+  },
   pad = (n, l = 6) => String(n).padStart(l, "0");
 // A waiter ticked for several sale points works in them side by side (dept = ALLP): the tabs on top
 // choose whose menu shows, and the order keeps building across them.
 let spTab = "";
-const onMenu = i => (dept === ALLP ? i.d === spTab : i.d === dept);
+const onMenu = i => i.sell !== "acc" && (dept === ALLP ? i.d === spTab : i.d === dept);
 const shownPoint = () => (dept === ALLP ? spTab : dept);
 function drawTabs() {
   if (dept === ALLP && !DEPTS.includes(spTab)) spTab = DEPTS[0];
@@ -13813,7 +14136,7 @@ function drawCart() {
       .map(id => {
         const it = get(id),
           q = cart[id];
-        return `<div class="tr ${id == selId ? "sel" : ""}" data-r="${id}"><span class="qc"><button data-m="${id}">−</button>${q}<button data-p="${id}">+</button></span><span>${it.n}</span><span class="n">${bill2(itemPrice(it, adj))}</span><span class="n">${bill2(itemPrice(it, adj) * q)}</span></div>`;
+        return `<div class="tr ${id == selId ? "sel" : ""}" data-r="${id}"><span class="qc"><button data-m="${id}">−</button>${q}${isAccLine(id) ? "" : `<button data-p="${id}">+</button>`}</span><span>${it.n}</span><span class="n">${bill2(itemPrice(it, adj))}</span><span class="n">${bill2(itemPrice(it, adj) * q)}</span></div>`;
       })
       .join("") ||
     `<div class="empty" style="padding:24px 8px">${cur ? "Adding to " + cur.label + ". Tap items to add." : "Tap an item to start an order."}</div>`;
@@ -13850,12 +14173,31 @@ function drawCart() {
   drawGrid();
   ordersKeep();
 }
+/** Sides are attached to their main item: when it comes down, they come down with it. */
+function accFollow(id) {
+  if (isAccLine(id)) return;
+  const base = String(id).split("~")[0];
+  const left = Object.entries(cart).reduce(
+    (a, [k, q]) => (!isAccLine(k) && k.split("~")[0] === base ? a + q : a),
+    0
+  );
+  Object.keys(cart).forEach(k => {
+    if (isAccLine(k) && k.split("~")[2] === base) {
+      if (left <= 0) delete cart[k];
+      else if (cart[k] > left) cart[k] = left;
+    }
+  });
+}
 function add(id, d = 1) {
-  const it = get(id),
-    n = inCart(id) + d;
-  if (n <= 0) delete cart[id];
-  else {
-    const m = avail(it);
+  const n = (cart[id] || 0) + d;
+  if (n <= 0) {
+    delete cart[id];
+    accFollow(id);
+  } else if (d < 0) {
+    cart[id] = n;
+    accFollow(id);
+  } else {
+    const m = lineMax(id);
     if (m <= 0) return;
     cart[id] = Math.min(n, m);
     draftStart();
@@ -13894,7 +14236,7 @@ $("#grid").onclick = e => {
   if (!b) return;
   const q = nextQty;
   nextQty = 1;
-  add(b.dataset.i, q);
+  pickItem(b.dataset.i, q);
 };
 $("#cats").onclick = e => {
   const c = e.target.dataset.c;
@@ -13947,7 +14289,8 @@ $("#qk").onclick = e => {
       drawCart();
     } else if (selId && cart[selId]) {
       if (n <= 0) delete cart[selId];
-      else cart[selId] = Math.min(n, avail(get(selId)));
+      // A free line can come down but not go up by hand.
+      else cart[selId] = Math.min(n, isAccLine(selId) ? cart[selId] : lineMax(selId));
       drawCart();
     }
     return;
@@ -14068,7 +14411,7 @@ $("#selChgAll").onclick = () => {
 function findList() {
   const q = $("#fq").value.toLowerCase();
   $("#fr").innerHTML =
-    ITEMS.filter(i => inPoint(i, dept) && i.n.toLowerCase().includes(q))
+    ITEMS.filter(i => i.sell !== "acc" && inPoint(i, dept) && i.n.toLowerCase().includes(q))
       .map(
         i =>
           `<button class="mini" style="width:100%;text-align:left;margin-bottom:6px;padding:10px" data-i="${i.id}">${i.n} · ${i.p.toFixed(2)}</button>`
@@ -14095,12 +14438,15 @@ $("#osk").innerHTML = OSK.map(
 ).join("");
 function findEnter() {
   const f = ITEMS.filter(
-    i => inPoint(i, dept) && i.n.toLowerCase().includes($("#fq").value.trim().toLowerCase())
+    i =>
+      i.sell !== "acc" &&
+      inPoint(i, dept) &&
+      i.n.toLowerCase().includes($("#fq").value.trim().toLowerCase())
   );
   if (f.length === 1) {
     const q = nextQty;
     nextQty = 1;
-    add(f[0].id, q);
+    pickItem(f[0].id, q);
     $("#mFind").classList.remove("show");
   } else fsNote(f.length ? "Several items match. Tap the one you want." : "No item matches.");
 }
@@ -14124,7 +14470,7 @@ $("#fr").onclick = e => {
   if (!b) return;
   const q = nextQty;
   nextQty = 1;
-  add(b.dataset.i, q);
+  pickItem(b.dataset.i, q);
   $("#mFind").classList.remove("show");
 };
 const KM = ["Rush", "No onions", "Extra spicy", "No salt", "Allergy: nuts", "Well done"];
@@ -15404,6 +15750,100 @@ $("#exBtn").onclick = () => {
   selOpen();
   fsNote("Tap Swap on a bill to swap its items.");
 };
+// ---- modifiers: tapping a product asks its options in order, such as Cold or Warm, then Sprite or Coke ----
+// Each combination is its own line on a bill, keyed "12~Cold~Sprite", so it prints and reports by name.
+let modT = null,
+  accT = null;
+/** A product's options: its own, or else those set for its whole category. */
+const itemMods = it => {
+  const own = (it && it.mods) || [];
+  return own.length ? own : (it && (FD_SETTINGS.catMods || {})[it.c]) || [];
+};
+/** A tap on a product: straight onto the order, or through its options first. */
+function pickItem(id, q) {
+  const it = get(id);
+  if (!itemMods(it).length) return pickDone(id, q, it);
+  accT = null;
+  modT = { id, q, it, picks: [] };
+  modDraw();
+  $("#mMod").classList.add("show");
+}
+function modDraw() {
+  const G = itemMods(modT.it),
+    at = modT.picks.length,
+    g = G[at];
+  $("#modT").textContent = modT.it.n;
+  $("#modS").textContent =
+    `Option ${at + 1} of ${G.length}` + (modT.picks.length ? ` · ${modT.picks.join(", ")}` : "");
+  $("#modO").innerHTML = g.o
+    .map(x => `<button class="mod-o" data-mo="${slipEsc(x)}">${slipEsc(x)}</button>`)
+    .join("");
+  $("#modBack").style.display = at ? "" : "none";
+}
+$("#modO").onclick = e => {
+  const ac = e.target.closest("[data-ac]");
+  if (ac) return accPick(ac.dataset.ac);
+  const b = e.target.closest("[data-mo]");
+  if (!b) return;
+  modT.picks.push(b.dataset.mo);
+  if (modT.picks.length < itemMods(modT.it).length) return modDraw();
+  $("#mMod").classList.remove("show");
+  pickDone([modT.id, ...modT.picks].join("~"), modT.q, modT.it);
+};
+$("#modBack").onclick = () => {
+  modT.picks.pop();
+  modDraw();
+};
+// ---- accompaniments: a food item can ask what goes with it, at zero price ----
+const isFoodItem = it => orderStation(it) === "Kitchen";
+const accUsable = it => it.sell === "both" || it.sell === "acc";
+/** A food item that sells with accompaniments. */
+const accAsks = it => isFoodItem(it) && !!(it.accAsk || (it.accs || []).length);
+/** Every item marked as an accompaniment, except the main item itself. */
+const accSides = it =>
+  ITEMS.filter(x => accUsable(x) && String(x.id) !== String(it.id).split("~")[0]);
+/** The item is on the order. If it's a food item with accompaniments, ask for them next. */
+function pickDone(id, q, it) {
+  add(id, q);
+  const L = accAsks(it) ? accSides(it) : [];
+  if (!L.length) return;
+  accT = {
+    it,
+    q,
+    L,
+    left: Math.min(it.accN || 1, L.length),
+    n: Math.min(it.accN || 1, L.length),
+    got: []
+  };
+  accDraw();
+  $("#mMod").classList.add("show");
+}
+function accDraw() {
+  $("#modT").textContent = accT.it.n;
+  $("#modS").textContent =
+    accT.n > 1
+      ? `Choose accompaniment ${accT.n - accT.left + 1} of ${accT.n} · no charge`
+      : "Choose an accompaniment · no charge";
+  $("#modO").innerHTML =
+    accT.L.map(x => {
+      const left = avail(x) - inCart(x.id);
+      return `<button class="mod-o" data-ac="${x.id}" ${left < accT.q ? "disabled" : ""}>${slipEsc(x.n)}${left < accT.q ? "<small>Out of stock</small>" : ""}</button>`;
+    }).join("") +
+    `<button class="mod-o mod-none" data-ac="">${accT.got.length ? "That's all" : "No accompaniment"}</button>`;
+  $("#modBack").style.display = "none";
+}
+function accPick(id) {
+  if (id) {
+    // The line remembers its main item, and shows it on the bill.
+    add([id, ACC_MARK, String(accT.it.id).split("~")[0]].join("~"), accT.q);
+    accT.got.push(id);
+    accT.L = accT.L.filter(x => String(x.id) !== id);
+    accT.left--;
+  }
+  if (id && accT.left > 0 && accT.L.length) return accDraw();
+  $("#mMod").classList.remove("show");
+  accT = null;
+}
 // ---- printed slips: guest bill, receipt after clearing a bill, kitchen / bar order ----
 // 80mm paper. Thermal printers only print black, so the look comes from type and rules, never from colour.
 // Hotel details come from Back Office → Settings (FD_SETTINGS.name and FD_SETTINGS.biz).
@@ -16227,7 +16667,7 @@ function boptVoidRows() {
           n = b.lines[id],
           v = bopt.vq[id],
           p = itemPrice(it, A);
-        return `<tr class="${v ? "on" : ""}" data-vr="${id}"><td><input type="checkbox" tabindex="-1" ${v ? "checked" : ""}></td><td>${slipEsc(id)}</td><td class="d">${slipEsc(it.n)}</td><td class="n">${
+        return `<tr class="${v ? "on" : ""}" data-vr="${id}"><td><input type="checkbox" tabindex="-1" ${v ? "checked" : ""}></td><td>${slipEsc(String(id).split("~")[0])}</td><td class="d">${slipEsc(it.n)}</td><td class="n">${
           v && n > 1
             ? `<span class="qc"><button data-vs="${id}" data-d="-1" ${v <= 1 ? "disabled" : ""}>−</button><b>${v}</b><button data-vs="${id}" data-d="1" ${v >= n ? "disabled" : ""}>+</button></span><small>of ${n}</small>`
             : n
@@ -16711,7 +17151,7 @@ function retRows() {
         const i = b.info[id],
           n = b.lines[id],
           v = bopt.vq[id];
-        return `<tr class="${v ? "on" : ""}" data-vr="${id}"><td><input type="checkbox" tabindex="-1" ${v ? "checked" : ""}></td><td>${slipEsc(id)}</td><td class="d">${slipEsc(i.n)}</td><td class="n">${
+        return `<tr class="${v ? "on" : ""}" data-vr="${id}"><td><input type="checkbox" tabindex="-1" ${v ? "checked" : ""}></td><td>${slipEsc(String(id).split("~")[0])}</td><td class="d">${slipEsc(i.n)}</td><td class="n">${
           v && n > 1
             ? `<span class="qc"><button data-vs="${id}" data-d="-1" ${v <= 1 ? "disabled" : ""}>−</button><b>${v}</b><button data-vs="${id}" data-d="1" ${v >= n ? "disabled" : ""}>+</button></span><small>of ${n}</small>`
             : n
@@ -20523,7 +20963,7 @@ window.bosave = bosave;
     (s.OR || []).forEach(o => {
       o.at = new Date(o.at);
       Object.keys(o.lines || {}).forEach(id => {
-        if (!ITEMS.some(i => String(i.id) === id)) delete o.lines[id];
+        if (!get(id)) delete o.lines[id];
       });
       if (Object.keys(o.lines || {}).length) orders.push(o);
     });
@@ -20931,6 +21371,7 @@ const TAB_RIGHTS = {
     stores: "inv.stores",
     appr: "inv.approve",
     items: "inv.items",
+    cats: "inv.items",
     master: "inv.master",
     req: "inv.req",
     issue: "inv.issue",
@@ -22433,7 +22874,7 @@ const REP = {
         s.lines.forEach(l => {
           const key = l.id + "|" + s.dept,
             r = (o[key] = o[key] || {
-              code: l.id || "",
+              code: String(l.id || "").split("~")[0],
               n: l.n,
               grp: (get(l.id) || {}).c || "Other",
               src: s.dept,
@@ -22497,7 +22938,7 @@ const REP = {
           const it = get(l.id),
             key = l.id + "|" + s.dept,
             r = (o[key] = o[key] || {
-              code: l.id || "",
+              code: String(l.id || "").split("~")[0],
               n: l.n,
               grp: (it || {}).c || "Other",
               src: s.dept,
@@ -22947,14 +23388,14 @@ const V = {
     return `<div class="pn"><div class="so-bar"><label class="so-q">Search orders<input data-sq value="${esc(F.q)}" placeholder="Bill or order number, table, waiter, guest or item" autocomplete="off"></label><label>From<input type="date" data-sf="from" value="${esc(F.from)}"></label><label>To<input type="date" data-sf="to" value="${esc(F.to)}"></label>${on ? '<button class="mini" data-a="sales_clear">Back to current</button>' : ""}</div><div id="salesList">${salesList()}</div></div>`;
   },
   prod() {
-    return `<div class="pn"><h4>Add product</h4><div class="fr"><input id="pn" placeholder="Name"><select id="pd">${ALLD.map(d => `<option>${d}</option>`).join("")}</select><input id="pc" placeholder="Category"><input id="pp" type="number" placeholder="Price KES"><select id="pt">${taxChoices()
+    return `<div class="pn"><h4>Add product</h4><div class="fr"><input id="pn" placeholder="Name"><select id="pd">${ALLD.map(d => `<option>${d}</option>`).join("")}</select><input id="pc" list="prodCatL" placeholder="Category"><input id="pp" type="number" placeholder="Price KES"><select id="pt">${taxChoices()
       .map(([v, l]) => `<option value="${v}">${l}</option>`)
       .join("")}</select><select id="pi">${Object.keys(ING)
       .map(k => `<option value="${k}">${esc(ING[k])}</option>`)
       .join(
         ""
       )}</select><input id="pq" type="number" placeholder="Stock used per sale"><button class="chip on" data-a="addp">Add</button></div></div>
- <div class="pn tw"><table class="t"><tr><th>Item</th><th>Sale point</th><th>Category</th><th>VAT</th><th>Price (KES)</th><th class="n">Can sell</th></tr>${ITEMS.map(i => `<tr><td>${esc(i.n)}</td><td>${i.d}</td><td>${esc(i.c)}</td><td>${i.t}</td><td><input type="number" value="${i.p}" data-pr="${i.id}"></td><td class="n">${avail(i)}</td></tr>`).join("")}</table></div>`;
+ <div class="pn tw"><table class="t"><tr><th>Item</th><th>Sale point</th><th>Category</th><th>VAT</th><th>Price (KES)</th><th class="n">Can sell</th><th>Modifiers</th><th>Accompaniments</th></tr>${ITEMS.map(i => `<tr><td>${esc(i.n)}</td><td>${i.d}</td><td>${esc(i.c)}</td><td>${i.t}</td><td><input type="number" value="${i.p}" data-pr="${i.id}"></td><td class="n">${avail(i)}</td><td>${modCell(i)}</td><td>${accCell(i)}</td></tr>`).join("")}</table></div>`;
   },
   inv() {
     return `<div class="pn"><h4>New ingredient</h4><div class="fr"><input id="gn" placeholder="Name and unit, e.g. Tomato (g)"><input id="gq" type="number" placeholder="Opening stock"><button class="chip on" data-a="addg">Add</button></div></div>
@@ -23632,6 +24073,7 @@ const RAIL = [
   ["stores", "Stores", "home"],
   ["appr", "Approvals", "shield"],
   ["items", "Item setup", "plus"],
+  ["cats", "Categories", "book"],
   ["master", "Stock Master", "box"],
   ["req", "Requisitions", "book"],
   ["issue", "Issue", "cart", "store"],
@@ -24052,7 +24494,7 @@ function itemDatalists() {
       `<datalist id="${id}">${L.map(x => `<option value="${esc(x)}">`).join("")}</datalist>`,
     groups = [
       ...new Set([
-        ...ITEM_GROUPS,
+        ...groupList(),
         ...Object.values(INGU)
           .map(u => u.group)
           .filter(Boolean)
@@ -24102,7 +24544,7 @@ function itemPopup(F, editing, lockUom) {
        M === "recipe"
          ? ""
          : `<label>Item code<input data-iv="it.code" value="${esc(F.code)}" placeholder="${editing ? "" : nextItemCode()}"></label>
-     <label>Item group<input data-iv="it.group" list="grpL" value="${esc(F.group)}" placeholder="e.g. Beverages"></label>`
+     <label>Category<input data-iv="it.group" list="grpL" value="${esc(F.group)}" placeholder="e.g. Beverages"></label>`
      }
     </div>
     <div class="itm-hint" id="itDup"></div>
@@ -24191,7 +24633,7 @@ function sdSync(f) {
   all();
 }
 function itemsTable(keys) {
-  return `<div class="pn tw"><h4>Items in the Stock Master (${keys.length})</h4><table class="t"><tr><th>Code</th><th>Item</th><th>Group</th><th>VAT / tax</th><th>Unit</th><th>Buying unit</th><th class="n">Buying price</th><th class="n">Cost / unit</th><th class="n">In stores</th><th class="n">At selling points</th><th></th></tr>${keys
+  return `<div class="pn tw"><h4>Items in the Stock Master (${keys.length})</h4><table class="t"><tr><th>Code</th><th>Item</th><th>Category</th><th>VAT / tax</th><th>Unit</th><th>Buying unit</th><th class="n">Buying price</th><th class="n">Cost / unit</th><th class="n">In stores</th><th class="n">At selling points</th><th></th></tr>${keys
     .map(k => {
       const u = itemInfo(k),
         all = tot(k),
@@ -24204,6 +24646,7 @@ function invView() {
   const B = {
     stores: storesHTML,
     items: itemsHTML,
+    cats: storeCatsHTML,
     master: masterHTML,
     req: reqHTML,
     issue: issHTML,
@@ -27214,15 +27657,7 @@ function apAct(a, b) {
 // ---- selling points: bars, restaurants and kitchens that sell on the POS ----
 // A selling point gets stock from a store (requisition / issue) and sells products made from that stock.
 // Creating one, or adding a product to one, shows on the POS straight away.
-const SP_TYPES = [
-  "Bar",
-  "Restaurant",
-  "Kitchen",
-  "Cafe",
-  "Room service",
-  MATERIALS,
-  "Other"
-];
+const SP_TYPES = ["Bar", "Restaurant", "Kitchen", "Cafe", "Room service", MATERIALS, "Other"];
 let spSel = null;
 invF.spf = { name: "", type: "Bar", store: STORES[0] };
 invF.spp = { k: "", q: "1", name: "", cat: "", price: "", tax: "B" };
@@ -27335,11 +27770,10 @@ function itemSpNewPopup(F) {
   <header class="itm-h"><div><h3>New product for ${esc(sp)}</h3><p>Sold at ${esc(sp)}</p></div><button class="itm-x" data-a="inv_itcancel" aria-label="Close">✕</button></header>
   <div class="itm-b" id="itBody">
    <section class="itm-s"><h4>Product</h4>
-    <datalist id="itCatL">${cats.map(c => `<option value="${esc(c)}">`).join("")}</datalist>
     <div class="itm-g itm-g4">
      <label>Product name<input data-iv="it.name" id="itName" value="${esc(F.name)}" placeholder="e.g. Chapati"></label>
      <label>Selling price (KES)<input data-iv="it.spPrice" type="number" min="0" step="any" value="${esc(F.spPrice)}" placeholder="${itemSpLink(F) ? "Needed" : "Empty = stock only"}"></label>
-     <label>Category<input data-iv="it.spCat" list="itCatL" value="${esc(F.spCat)}" placeholder="${esc(spInfo(sp).type)}"></label>
+     <label>Category<input data-iv="it.spCat" list="prodCatL" value="${esc(F.spCat)}" placeholder="${esc(spInfo(sp).type)}"></label>
      <label>Tax<select data-iv="it.spTax">${taxChoices()
        .map(([v, l]) => `<option value="${v}" ${v === F.spTax ? "selected" : ""}>${l}</option>`)
        .join("")}</select></label>
@@ -27494,6 +27928,7 @@ function outletsView() {
   }).join("");
   return `<div class="pn"><h4>Create a selling point</h4><div class="fr"><label>Name<input data-iv="spf.name" value="${esc(F.name)}" placeholder="e.g. Pool Bar, Main Restaurant"></label><label>Type<select data-iv="spf.type">${opts(SP_TYPES, F.type)}</select></label><label>Gets stock from<select data-iv="spf.store">${opts(STORES, F.store)}</select></label><button class="chip on" data-a="sp_add">Create selling point</button></div><div class="stk">A new selling point shows on the POS straight away. Managers can sell there; choose other staff under Manage.</div></div>
  <div class="pn tw"><h4>Selling points (${ALLD.length})</h4><table class="t"><tr><th>Selling point</th><th>Type</th><th>Gets stock from</th><th class="n">Products</th><th class="n">Items in stock</th><th class="n">Sales today (KES)</th><th class="n">Staff</th><th></th></tr>${rows}</table></div>
+ ${categoriesHTML()}
  ${spSel && ALLD.includes(spSel) ? spDetail(spSel) : ""}${itemPopupIfOpen()}${stModalIfOpen()}${apModalIfOpen()}${spDeleteModal()}${speModal()}`;
 }
 
@@ -27518,7 +27953,7 @@ function spDetail(o) {
   <div class="fr"><label>Made from stock item<select data-iv="spp.k">${keys.map(k => `<option value="${k}" ${k === P.k ? "selected" : ""}>${esc(itemInfo(k).name)} (${esc(itemInfo(k).uom)})</option>`).join("")}</select></label>
    <label>Uses per sale<input data-iv="spp.q" type="number" min="0" step="any" value="${esc(P.q)}"></label>
    <label>Product name<input data-iv="spp.name" value="${esc(P.name)}" placeholder="Same as the stock item"></label>
-   <label>Category<input data-iv="spp.cat" value="${esc(P.cat)}" placeholder="e.g. Beer, Mains"></label>
+   <label>Category<input data-iv="spp.cat" list="prodCatL" value="${esc(P.cat)}" placeholder="e.g. Beer, Mains"></label>
    <label>Selling price (KES)<input data-iv="spp.price" type="number" min="0" step="any" value="${esc(P.price)}"></label>
    <label>Tax<select data-iv="spp.tax">${taxChoices()
      .map(([v, l]) => `<option value="${v}" ${v === P.tax ? "selected" : ""}>${l}</option>`)
@@ -28080,12 +28515,14 @@ function speModal() {
     <div class="itm-g itm-g4">
      <label>Product name<input data-iv="spe.name" value="${esc(F.name)}"></label>
      <label>Selling price (KES)<input data-iv="spe.price" type="number" min="0" step="any" value="${esc(F.price)}"></label>
-     <label>Category<input data-iv="spe.cat" value="${esc(F.cat)}"></label>
+     <label>Category<input data-iv="spe.cat" list="prodCatL" value="${esc(F.cat)}"></label>
      <label>Tax<select data-iv="spe.tax">${taxChoices()
        .map(([v, l]) => `<option value="${v}" ${v === F.tax ? "selected" : ""}>${l}</option>`)
        .join("")}</select></label>
     </div>
    </section>
+   <section class="itm-s"><h4>Modifiers</h4><div class="mod-cell">${modCell(i)}</div></section>
+   <section class="itm-s"><h4>Accompaniments</h4><div class="mod-cell">${accCell(i)}</div></section>
    <section class="itm-s"><h4>Each sale deducts from</h4>
     <div class="grn-modes it-ways">${ways.map(([w, l, s]) => `<button class="grn-mode ${F.way === w ? "on" : ""}" data-a="sp_pway" data-w="${w}"><b>${l}</b><span>${s}</span></button>`).join("")}</div>
     ${source}
@@ -28595,7 +29032,7 @@ function recipesHTML() {
    <label>Sold at<select data-iv="rcp.sp">${opts(S, F.sp)}</select></label>
    ${recipeFromField("rcp.from", F.from)}</div>
   <div class="fr"><label>Selling price (KES)<input data-iv="rcp.price" type="number" min="0" step="any" value="${esc(F.price)}"></label>
-   <label>Category<input data-iv="rcp.cat" value="${esc(F.cat)}" placeholder="e.g. Mains"></label>
+   <label>Category<input data-iv="rcp.cat" list="prodCatL" value="${esc(F.cat)}" placeholder="e.g. Mains"></label>
    <label>Tax<select data-iv="rcp.tax">${taxChoices()
      .map(([v, l]) => `<option value="${v}" ${v === F.tax ? "selected" : ""}>${l}</option>`)
      .join("")}</select></label></div>
@@ -28729,7 +29166,7 @@ function itemMadeSection(F, sp) {
     <div class="itm-g itm-g4">
      <label>${recipe ? "Sold at" : "Goes to"}<select data-iv="it.madeSp">${opts(S, F.madeSp)}</select></label>
      <label>Selling price (KES)<input data-iv="it.spPrice" type="number" min="0" step="any" value="${esc(F.spPrice)}" placeholder="${recipe ? "Needed" : "Empty = stock only"}"></label>
-     <label>Category<input data-iv="it.spCat" value="${esc(F.spCat)}" placeholder="e.g. Mains"></label>
+     <label>Category<input data-iv="it.spCat" list="prodCatL" value="${esc(F.spCat)}" placeholder="e.g. Mains"></label>
      <label>Tax<select data-iv="it.spTax">${taxChoices()
        .map(([v, l]) => `<option value="${v}" ${v === F.spTax ? "selected" : ""}>${l}</option>`)
        .join("")}</select></label>
@@ -29264,6 +29701,7 @@ V.settings = () => {
       optsHTML("POS options", "These apply to every waiter and cashier straight away.", OPT_POS),
     tax: () => `<div class="pn"><h4>Tax setup</h4><div class="stk">Menu prices include tax. Each item is set to VAT, Tax C, both or no tax when it's created. A new rate applies to bills paid from now on, and past reports keep the rate they were paid at.</div>
   <div class="fr" style="align-items:end"><label>VAT (%)<input data-iv="hs.taxB" inputmode="decimal" value="${esc(invF.hs.taxB)}"></label><label>Tax C (%)<input data-iv="hs.taxC" inputmode="decimal" value="${esc(invF.hs.taxC)}"></label><button class="chip on" style="flex:none" data-a="hs_tax">Save tax rates</button></div></div>`,
+    cats: categoriesHTML,
     printers: () => machinesHTML() + printerSetupHTML() + printersHTML()
   };
   return setTabsHTML() + panels[setTab]();
@@ -29543,6 +29981,7 @@ const SET_TABS = [
   ["hotel", "Hotel and logos"],
   ["bills", "Bills and receipts"],
   ["pos", "POS options"],
+  ["cats", "Categories"],
   ["tax", "Tax"],
   ["printers", "Printers"]
 ];
@@ -29761,6 +30200,424 @@ function generalAct(a, b) {
     return all();
   }
 }
+// ---- Products: modifiers on one product, or on a whole category ----
+const MOD_MAX = 5;
+let modE = null;
+const catMods = () => FD_SETTINGS.catMods || (FD_SETTINGS.catMods = {});
+const modText = G => G.map(g => g.o.join(", ")).join(" → ");
+/** A product's modifiers in the Products list, and where they come from. */
+function modCell(i) {
+  const own = (i.mods || []).length,
+    cat = (catMods()[i.c] || []).length;
+  return `${own ? esc(modText(i.mods)) : cat ? `<small>From category: ${esc(modText(catMods()[i.c]))}</small>` : "–"} <button class="mini" data-a="mod_item" data-id="${i.id}">${own ? "Edit" : "Add"}</button>`;
+}
+const MOD_CHOICES = 3,
+  MOD_CHOICES_MAX = 12;
+const modRow = (o = []) => ({
+  o: [...o, ...Array(Math.max(0, MOD_CHOICES - o.length)).fill("")]
+});
+function modDraw() {
+  const old = document.querySelector("#modEd");
+  if (old) old.remove();
+  if (!modE) return;
+  const F = modE;
+  $("#vSub").insertAdjacentHTML(
+    "beforeend",
+    `<div class="modal show" id="modEd" style="z-index:63"><div class="box itm">
+  <header class="itm-h"><div><h3>Modifiers · ${esc(F.title)}</h3><p>${F.kind === "cat" ? "For every product in this category." : "For this product only."}</p></div><button class="itm-x" data-a="mod_close" aria-label="Close">✕</button></header>
+  <div class="itm-b"><section class="itm-s">
+   <label class="set-opt"><input type="checkbox" id="modOn" data-a="mod_on" ${F.on ? "checked" : ""}><span>Use modifiers<small>The POS asks each option in order before adding the item.</small></span></label>
+   ${
+     F.on
+       ? F.rows
+           .map(
+             (r, i) =>
+               `<div class="mod-r" data-mr="${i}"><div class="mod-rh"><b>Option ${i + 1}</b><button class="mini" data-a="mod_rm" data-i="${i}" aria-label="Remove option ${i + 1}">Remove</button></div><div class="mod-cs">${r.o
+                 .map(
+                   (c, j) =>
+                     `<label>Choice ${j + 1}<input data-mc maxlength="30" value="${esc(c)}" placeholder="${i ? ["Sprite", "Coke", "Fanta"][j] || "" : ["Cold", "Warm", "Hot"][j] || ""}" autocomplete="off"></label>`
+                 )
+                 .join(
+                   ""
+                 )}${r.o.length < MOD_CHOICES_MAX ? `<button class="mini" data-a="mod_more" data-i="${i}">Add a choice</button>` : ""}</div></div>`
+           )
+           .join("") +
+         (F.rows.length < MOD_MAX
+           ? `<button class="mini" style="margin-top:10px" data-a="mod_add">Add option ${F.rows.length + 1}</button>`
+           : "")
+       : ""
+   }
+  </section></div>
+  <footer class="itm-f"><button class="mini" data-a="mod_close">Cancel</button><button class="chip on" data-a="mod_save">Save modifiers</button></footer></div></div>`
+  );
+}
+/** What's in the boxes now, kept while options are added or removed. */
+function modRead() {
+  const rows = [...document.querySelectorAll("#modEd [data-mr]")];
+  if (rows.length)
+    modE.rows = rows.map(r => ({
+      o: [...r.querySelectorAll("[data-mc]")].map(c => c.value)
+    }));
+  modE.on = $("#modOn").checked;
+}
+function modOpen(kind, key, title, G) {
+  modE = {
+    kind,
+    key,
+    title,
+    on: G.length > 0,
+    rows: G.length ? G.map(g => modRow(g.o)) : [modRow()]
+  };
+  modDraw();
+}
+function modSave() {
+  modRead();
+  const G = [];
+  if (modE.on)
+    for (let i = 0; i < modE.rows.length; i++) {
+      const r = modE.rows[i],
+        // A line on a bill keeps its choices joined with ~, so that can't be part of one.
+        o = [...new Set(r.o.map(x => x.replace(/~/g, "").trim()).filter(Boolean))];
+      if (o.length) G.push({ o });
+    }
+  if (modE.on && !G.length) return toast("Add at least one choice, or untick Use modifiers.");
+  if (modE.kind === "cat") {
+    if (G.length) catMods()[modE.key] = G;
+    else delete catMods()[modE.key];
+  } else {
+    const it = ITEMS.find(x => x.id === modE.key);
+    if (G.length) it.mods = G;
+    else delete it.mods;
+  }
+  bosave();
+  const who = modE.title;
+  modE = null;
+  toast(G.length ? `Modifiers saved for ${who}.` : `Modifiers removed from ${who}.`);
+  all();
+}
+function modAct(a, b) {
+  if (!boCan("prod.manage")) return boDenied();
+  if (a === "mod_cat")
+    return modOpen("cat", b.dataset.c, b.dataset.c, catMods()[b.dataset.c] || []);
+  if (a === "mod_item") {
+    const it = ITEMS.find(x => x.id === +b.dataset.id);
+    return modOpen("item", it.id, it.n, it.mods || []);
+  }
+  if (a === "mod_close") {
+    modE = null;
+    return modDraw();
+  }
+  if (a === "mod_save") return modSave();
+  modRead();
+  if (a === "mod_add") modE.rows.push(modRow());
+  if (a === "mod_more") modE.rows[+b.dataset.i].o.push("");
+  if (a === "mod_rm") modE.rows.splice(+b.dataset.i, 1);
+  if (!modE.rows.length) modE.rows.push(modRow());
+  modDraw();
+}
+// ---- Products: how an item sells, and whether a food item asks for accompaniments ----
+let accE = null;
+const ACC_SELL = [
+  ["normal", "Sold normally"],
+  ["both", "Sold normally and as an accompaniment"],
+  ["acc", "Only as an accompaniment"]
+];
+/** A product's accompaniment setup in the Products list. */
+function accCell(i) {
+  const text =
+    [
+      accAsks(i) ? "Sells with accompaniments" : "",
+      i.sell === "acc" ? "Accompaniment only" : i.sell === "both" ? "Also an accompaniment" : ""
+    ]
+      .filter(Boolean)
+      .join(" · ") || "–";
+  return `<span class="acc-cell">${esc(text)}</span> <button class="mini" data-a="acc_open" data-id="${i.id}" aria-label="Accompaniments for ${esc(i.n)}">Set</button>`;
+}
+function accDraw() {
+  const old = document.querySelector("#accEd");
+  if (old) old.remove();
+  if (!accE) return;
+  const F = accE,
+    it = ITEMS.find(x => x.id === F.id),
+    food = isFoodItem(it),
+    C = accSides(it);
+  $("#vSub").insertAdjacentHTML(
+    "beforeend",
+    `<div class="modal show" id="accEd" style="z-index:63"><div class="box itm">
+  <header class="itm-h"><div><h3>Accompaniments · ${esc(it.n)}</h3><p>Sold at ${esc(it.d)}</p></div><button class="itm-x" data-a="acc_close" aria-label="Close">✕</button></header>
+  <div class="itm-b">
+   <section class="itm-s"><h4>How this item sells</h4><div class="itm-g"><label>Sold<select id="accSell">${ACC_SELL.map(([v, l]) => `<option value="${v}" ${F.sell === v ? "selected" : ""}>${l}</option>`).join("")}</select></label></div><div class="itm-hint">Mark sides like Ugali or Chips here. As an accompaniment they go on the bill at no cost and still use their own stock. "Only as an accompaniment" takes them off the POS menu.</div></section>
+   <section class="itm-s"><h4>Main item</h4>${
+     food
+       ? `<label class="set-opt"><input type="checkbox" id="accOn" data-a="acc_on" ${F.on ? "checked" : ""}><span>Sell with accompaniments<small>When this is sold, the POS asks for an accompaniment and attaches it at no cost.</small></span></label>${
+           F.on
+             ? `<div class="itm-hint">${C.length ? `The POS will offer: <b>${esc(C.map(x => x.n).join(", "))}</b>` : "No item is marked as an accompaniment yet. Open a side like Ugali here and change how it sells."}</div><label class="acc-n">How many the guest can choose<input id="accN" type="number" min="1" max="5" value="${esc(F.n)}"></label>`
+             : ""
+         }`
+       : '<div class="stk">Only food items sell with accompaniments. This one is made at the bar.</div>'
+   }</section>
+  </div>
+  <footer class="itm-f"><button class="mini" data-a="acc_close">Cancel</button><button class="chip on" data-a="acc_save">Save</button></footer></div></div>`
+  );
+}
+function accRead() {
+  accE.sell = $("#accSell").value;
+  const on = $("#accOn");
+  if (on) accE.on = on.checked;
+  const n = $("#accN");
+  if (n) accE.n = n.value;
+}
+function accSave() {
+  accRead();
+  const it = ITEMS.find(x => x.id === accE.id),
+    n = parseInt(accE.n, 10);
+  delete it.accs;
+  if (accE.on && isFoodItem(it)) {
+    if (!(n >= 1 && n <= 5)) return toast("The guest can choose from 1 to 5.");
+    it.accAsk = true;
+    it.accN = n;
+  } else {
+    delete it.accAsk;
+    delete it.accN;
+  }
+  if (accE.sell === "normal") delete it.sell;
+  else it.sell = accE.sell;
+  accE = null;
+  bosave();
+  toast(`Saved for ${it.n}.`);
+  all();
+}
+function accAct(a, b) {
+  if (!boCan("prod.manage")) return boDenied();
+  if (a === "acc_open") {
+    const it = ITEMS.find(x => x.id === +b.dataset.id);
+    accE = { id: it.id, sell: it.sell || "normal", on: accAsks(it), n: String(it.accN || 1) };
+    return accDraw();
+  }
+  if (a === "acc_close") {
+    accE = null;
+    return accDraw();
+  }
+  if (a === "acc_save") return accSave();
+  if (a === "acc_on") {
+    accRead();
+    accDraw();
+  }
+}
+// ---- Product categories: the POS menu's categories, to add, rename, delete and give modifiers ----
+// Selling points and Settings show the same screen. Deleting never removes a product:
+// anything still in that category moves to another one first.
+let catE = null;
+const catRight = () => boCan("prod.manage") || boCan("sp.manage") || boCan("set.manage");
+const catSaved = () => FD_SETTINGS.cats || (FD_SETTINGS.cats = []);
+const prodCats = () =>
+  [...new Set([...ITEMS.map(i => i.c), ...catSaved(), ...Object.keys(catMods())])].sort((a, b) =>
+    a.localeCompare(b)
+  );
+/** Stock groups offered when setting up an item. */
+const groupList = () =>
+  [
+    ...new Set([
+      ...(FD_SETTINGS.itemGroups || ITEM_GROUPS),
+      ...Object.keys(ING)
+        .map(k => itemInfo(k).group)
+        .filter(Boolean)
+    ])
+  ].sort((a, b) => a.localeCompare(b));
+const catNameOf = el => el.value.trim().replace(/\s+/g, " ");
+const catTaken = (name, not) =>
+  prodCats().some(x => x !== not && x.toLowerCase() === name.toLowerCase());
+let catQ = "";
+const catHit = c => c.toLowerCase().includes(catQ.trim().toLowerCase());
+/** One line for each category, so a long list stays short. It opens up only to rename or delete. */
+function catCard(c) {
+  const on = catE && catE.key === c,
+    M = catMods()[c] || [],
+    can = catRight(),
+    n = ITEMS.filter(i => i.c === c).length;
+  let more = "";
+  if (on && catE.mode === "edit")
+    more = `<div class="cat-q"><input id="catName" maxlength="40" value="${esc(c)}" aria-label="New name for ${esc(c)}" autocomplete="off"><button class="cat-b cat-go" data-a="cat_save">Save</button><button class="cat-b" data-a="cat_no">Cancel</button></div>`;
+  if (on && catE.mode === "del") {
+    const others = prodCats().filter(x => x !== c);
+    more =
+      n && !others.length
+        ? `<div class="cat-q"><span>There's no other category to move its products to. Rename it instead.</span><button class="cat-b" data-a="cat_no">Close</button></div>`
+        : `<div class="cat-q">${n ? `<label>Move its ${n === 1 ? "product" : `${n} products`} to<select id="catTo">${others.map(x => `<option>${esc(x)}</option>`).join("")}</select></label>` : "<span>Delete this category?</span>"}<button class="cat-b cat-del" data-a="cat_del">${n ? "Move and delete" : "Delete"}</button><button class="cat-b" data-a="cat_no">Cancel</button></div>`;
+  }
+  return `<article class="cat-card ${on ? "on" : ""}" data-cat="${esc(c)}" style="--h:${hue(c)}" ${catHit(c) ? "" : "hidden"}>
+   <div class="cat-line"><span class="cat-mark" aria-hidden="true">${esc(c.charAt(0).toUpperCase())}</span><h5 title="${esc(c)}">${esc(c)}</h5>
+   <div class="cat-mods" title="${esc(modText(M))}">${M.length ? M.map(g => `<span class="cat-group">${g.o.map(x => `<i>${esc(x)}</i>`).join("")}</span>`).join('<b aria-hidden="true">→</b>') : ""}</div>
+   <div class="cat-btns">${boCan("prod.manage") ? `<button class="cat-b" data-a="mod_cat" data-c="${esc(c)}" aria-label="Modifiers for ${esc(c)}">Modifiers</button>` : ""}${can ? `<button class="cat-b" data-a="cat_edit" data-k="${esc(c)}" aria-label="Rename ${esc(c)}">Rename</button><button class="cat-b cat-del" data-a="cat_ask" data-k="${esc(c)}" aria-label="Delete ${esc(c)}">Delete</button>` : ""}</div></div>
+   ${more}
+  </article>`;
+}
+function categoriesHTML() {
+  const P = prodCats();
+  return `<section class="pn cat-panel"><header class="cat-head"><div><h4>Product categories (${P.length})</h4><p>A new category shows on the POS menu once it has a product.</p></div><div class="cat-add"><input id="catFind" value="${esc(catQ)}" placeholder="Search categories" aria-label="Search categories" autocomplete="off">${
+    catRight()
+      ? `<input id="catNew" maxlength="40" placeholder="New category" aria-label="New category name" autocomplete="off"><button class="chip on" data-a="cat_add">Add category</button>`
+      : ""
+  }</div></header>${
+    P.length
+      ? `<div class="cat-grid">${P.map(catCard).join("")}<div class="empty cat-nomatch" ${P.some(catHit) ? "hidden" : ""}>No category matches.</div></div>`
+      : '<div class="empty">No categories yet. Add the first one above.</div>'
+  }</section>`;
+}
+function catAdd() {
+  const name = catNameOf($("#catNew"));
+  if (!name) return toast("Enter a category name.");
+  if (catTaken(name)) return toast(`${name} is already on the list.`);
+  catSaved().push(name);
+  bosave();
+  toast(`${name} added.`);
+  all();
+}
+function catRename() {
+  const key = catE.key,
+    name = catNameOf($("#catName"));
+  if (!name) return toast("Enter a name.");
+  if (name !== key) {
+    if (catTaken(name, key))
+      return toast(`${name} already exists. Use Delete to move everything into it.`);
+    ITEMS.forEach(i => i.c === key && (i.c = name));
+    if (catMods()[key]) {
+      catMods()[name] = catMods()[key];
+      delete catMods()[key];
+    }
+    FD_SETTINGS.cats = catSaved()
+      .filter(x => x !== key)
+      .concat(name);
+  }
+  catE = null;
+  bosave();
+  toast(`Saved as ${name}.`);
+  all();
+}
+function catDelete() {
+  const key = catE.key,
+    box = $("#catTo");
+  if (box) ITEMS.forEach(i => i.c === key && (i.c = box.value));
+  delete catMods()[key];
+  FD_SETTINGS.cats = catSaved().filter(x => x !== key);
+  catE = null;
+  bosave();
+  toast(`${key} deleted.`);
+  all();
+}
+function catAct(a, b) {
+  if (!catRight()) return boDenied();
+  if (a === "cat_add") return catAdd();
+  if (a === "cat_save" && catE) return catRename();
+  if (a === "cat_del" && catE) return catDelete();
+  catE = a === "cat_no" ? null : { key: b.dataset.k, mode: a === "cat_edit" ? "edit" : "del" };
+  all();
+  if (a === "cat_edit") $("#catName").focus();
+}
+document.addEventListener("keydown", e => {
+  if (e.key !== "Enter") return;
+  if (e.target.id === "catNew") catAct("cat_add");
+  if (e.target.id === "catName") catAct("cat_save");
+});
+// Category boxes on product forms offer the whole list.
+document.addEventListener("focusin", e => {
+  if (e.target.getAttribute && e.target.getAttribute("list") === "prodCatL")
+    $("#prodCatL").innerHTML = prodCats()
+      .map(c => `<option value="${esc(c)}">`)
+      .join("");
+});
+document.addEventListener("input", e => {
+  if (e.target.id !== "catFind") return;
+  catQ = e.target.value;
+  const L = [...document.querySelectorAll(".cat-card")];
+  L.forEach(c => (c.hidden = !catHit(c.dataset.cat)));
+  const none = document.querySelector(".cat-nomatch");
+  if (none) none.hidden = L.some(c => !c.hidden);
+});
+
+// ---- Inventory: the categories store products belong to ----
+let grpE = null;
+const grpRight = () => boCan("inv.items");
+const grpItems = g => Object.keys(ING).filter(k => itemInfo(k).group === g);
+const grpTaken = (name, not) =>
+  groupList().some(x => x !== not && x.toLowerCase() === name.toLowerCase());
+function grpRow(g) {
+  const on = grpE && grpE.key === g,
+    n = grpItems(g).length,
+    can = grpRight();
+  let act = can
+    ? `<button class="cat-b" data-a="grp_edit" data-k="${esc(g)}" aria-label="Edit ${esc(g)}">Edit</button><button class="cat-b cat-del" data-a="grp_ask" data-k="${esc(g)}" aria-label="Delete ${esc(g)}">Delete</button>`
+    : "";
+  let name = `<b>${esc(g)}</b>`;
+  if (on && grpE.mode === "edit") {
+    name = `<input id="grpName" maxlength="40" value="${esc(g)}" aria-label="New name for ${esc(g)}" autocomplete="off">`;
+    act = `<button class="cat-b cat-go" data-a="grp_save">Save</button><button class="cat-b" data-a="grp_no">Cancel</button>`;
+  }
+  if (on && grpE.mode === "del") {
+    const others = groupList().filter(x => x !== g);
+    act =
+      n && !others.length
+        ? `<span class="stk">There's no other category to move these to.</span><button class="cat-b" data-a="grp_no">Close</button>`
+        : `${n ? `<label class="grp-to">Move ${n === 1 ? "its item" : `${n} items`} to<select id="grpTo">${others.map(x => `<option>${esc(x)}</option>`).join("")}</select></label>` : '<span class="stk">Delete this?</span>'}<button class="cat-b cat-del" data-a="grp_del">${n ? "Move and delete" : "Delete"}</button><button class="cat-b" data-a="grp_no">Cancel</button>`;
+  }
+  return `<tr class="${on ? "on" : ""}" data-grp="${esc(g)}"><td>${name}</td><td class="n"><span class="grp-act">${act}</span></td></tr>`;
+}
+function storeCatsHTML() {
+  const G = groupList();
+  return `<section class="pn cat-panel"><header class="cat-head"><div><h4>Categories for store products (${G.length})</h4><p>The categories you choose from when setting up a stock item.</p></div>${
+    grpRight()
+      ? `<div class="cat-add"><input id="grpNew" maxlength="40" placeholder="New category" aria-label="New category name" autocomplete="off"><button class="chip on" data-a="grp_add">Add category</button></div>`
+      : ""
+  }</header>${
+    G.length
+      ? `<div class="tw grp-list"><table class="t"><tr><th>Category</th><th></th></tr>${G.map(grpRow).join("")}</table></div>`
+      : '<div class="empty">No categories yet. Add the first one above.</div>'
+  }</section>`;
+}
+function grpAct(a, b) {
+  if (!grpRight()) return boDenied();
+  const list = not => groupList().filter(x => x !== not),
+    move = (from, to) => grpItems(from).forEach(k => (INGU[k] = { ...itemInfo(k), group: to })),
+    done = msg => {
+      grpE = null;
+      bosave();
+      toast(msg);
+      all();
+    };
+  if (a === "grp_add") {
+    const name = catNameOf($("#grpNew"));
+    if (!name) return toast("Enter a category name.");
+    if (grpTaken(name)) return toast(`${name} is already on the list.`);
+    FD_SETTINGS.itemGroups = [...groupList(), name];
+    return done(`${name} added.`);
+  }
+  if (a === "grp_save" && grpE) {
+    const key = grpE.key,
+      name = catNameOf($("#grpName"));
+    if (!name) return toast("Enter a name.");
+    if (name === key) return done(`Saved as ${name}.`);
+    if (grpTaken(name, key))
+      return toast(`${name} already exists. Use Delete to move everything into it.`);
+    move(key, name);
+    FD_SETTINGS.itemGroups = [...list(key), name];
+    return done(`Saved as ${name}.`);
+  }
+  if (a === "grp_del" && grpE) {
+    const key = grpE.key,
+      box = $("#grpTo");
+    if (box) move(key, box.value);
+    FD_SETTINGS.itemGroups = list(key);
+    return done(`${key} deleted.`);
+  }
+  grpE = a === "grp_no" ? null : { key: b.dataset.k, mode: a === "grp_edit" ? "edit" : "del" };
+  all();
+  if (a === "grp_edit") $("#grpName").focus();
+}
+document.addEventListener("keydown", e => {
+  if (e.key !== "Enter") return;
+  if (e.target.id === "grpNew") grpAct("grp_add");
+  if (e.target.id === "grpName") grpAct("grp_save");
+});
 // ---- Waiter setup: every POS user (waiter, cashier, super cashier, manager), and what each may do ----
 const POS_ROLES = ["Waiter", "Cashier", "Super Cashier", "Manager"];
 const wsBlank = () => ({
@@ -30372,6 +31229,10 @@ $("#vSub").onclick = e => {
   if (a.slice(0, 3) === "ws_") return wsAct(a, b);
   if (a.slice(0, 3) === "tb_") return tbAct(a, b);
   if (a.slice(0, 4) === "psu_") return psuAct(a, b);
+  if (a.slice(0, 4) === "mod_") return modAct(a, b);
+  if (a.slice(0, 4) === "acc_") return accAct(a, b);
+  if (a.slice(0, 4) === "cat_") return catAct(a, b);
+  if (a.slice(0, 4) === "grp_") return grpAct(a, b);
   if (a.slice(0, 4) === "lic_") return licAct(a);
   if (ACT_RIGHTS[a] && !boCan(ACT_RIGHTS[a])) return boDenied();
   if (a.slice(0, 3) === "ur_") return urAct(a, b);

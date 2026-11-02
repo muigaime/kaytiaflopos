@@ -3,6 +3,7 @@ const SET_TABS = [
   ["hotel", "Hotel and logos"],
   ["bills", "Bills and receipts"],
   ["pos", "POS options"],
+  ["cats", "Categories"],
   ["tax", "Tax"],
   ["printers", "Printers"]
 ];
