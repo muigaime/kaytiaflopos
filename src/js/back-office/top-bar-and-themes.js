@@ -117,7 +117,7 @@ function greet(n) {
   $("#hi").textContent =
     (h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening") + ", " + n;
   $("#dt").textContent =
-    new Date().toLocaleDateString("en-GB", {
+    bizNow().toLocaleDateString("en-GB", {
       weekday: "long",
       day: "numeric",
       month: "long",
@@ -131,6 +131,7 @@ function all() {
   dayBar();
   roomsCard();
   heroBar();
+  licBar();
   $("#kl").textContent = br + " · " + PL[per];
   kpis();
   mods();

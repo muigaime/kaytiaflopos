@@ -255,7 +255,7 @@ function vsStatementHTML() {
     .map(([r, l]) => `<button class="mini" data-a="vs_rng" data-rng="${r}">${l}</button>`)
     .join("")}<i></i>
    <button class="mini" data-a="vs_paynow">${I("wal")}Record payment</button>
-   <button class="chip on" data-a="vs_print" ${bad ? "disabled" : ""}>${I("book")}Print statement</button></div>
+   <button class="mini xl-btn" style="flex:none" data-a="rep_xlsxpage" data-title="Vendor statement" data-like="vs_print">Export to Excel</button><button class="chip on" data-a="vs_print" ${bad ? "disabled" : ""}>${I("book")}Print statement</button></div>
   <details class="vs-lh"><summary>Letterhead on statements</summary>
    <div class="fr"><label>Postal address<input data-iv="vh.addr" value="${esc(H.addr)}" placeholder="e.g. P.O. Box 123-80100, Mombasa"></label><label>Phone<input data-iv="vh.phone" value="${esc(H.phone)}"></label><label>Email<input data-iv="vh.email" value="${esc(H.email)}"></label></div>
    <div class="fr"><label>Website<input data-iv="vh.web" value="${esc(H.web)}"></label><label>Business KRA PIN<input data-iv="vh.pin" value="${esc(H.pin)}"></label><button class="chip on" data-a="vs_hsave">Save letterhead</button></div>

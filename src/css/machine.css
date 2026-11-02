@@ -1,0 +1,658 @@
+/* ==================== This machine: the first screen on a new computer ==================== */
+#macGate {
+  position: fixed;
+  inset: 0;
+  z-index: 190000;
+  display: none;
+  place-items: center;
+  overflow: auto;
+  padding: 20px;
+  background: radial-gradient(circle at 50% 0, #4a3925 0, #241b12 46%, #120e0a 100%);
+}
+#macGate.show {
+  display: grid;
+}
+.mac-card {
+  display: grid;
+  gap: 12px;
+  width: min(480px, 100%);
+  padding: 30px 34px;
+  border: 1px solid #c7a25a;
+  border-top: 3px solid #c7a25a;
+  border-radius: 8px;
+  background: #fffdf8;
+  color: #241b12;
+  box-shadow: 0 34px 80px rgba(0, 0, 0, 0.6);
+  font:
+    14px/1.5 "Schibsted Grotesk",
+    Arial,
+    sans-serif;
+}
+.mac-b {
+  font-size: 15px;
+  font-weight: 700;
+}
+.mac-b em {
+  color: #8a6a2c;
+}
+.mac-card h2 {
+  margin: 0;
+  font-size: 24px;
+}
+.mac-card p {
+  margin: 0;
+  color: #5b4d3b;
+}
+.mac-card label {
+  display: grid;
+  gap: 5px;
+  font-weight: 600;
+}
+.mac-card input {
+  padding: 11px 12px;
+  border: 1px solid #b9a98c;
+  border-radius: 6px;
+  background: #fff;
+  color: #241b12;
+  font: inherit;
+}
+.mac-known {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.mac-known small {
+  width: 100%;
+  color: #5b4d3b;
+}
+.mac-pick {
+  padding: 6px 12px;
+  border: 1px solid #c7a25a;
+  border-radius: 6px;
+  background: transparent;
+  color: #241b12;
+  font: inherit;
+  cursor: pointer;
+}
+#macMsg {
+  min-height: 18px;
+  color: #a4342a;
+  font-weight: 600;
+}
+#macGo {
+  padding: 12px;
+  border: 0;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #e3c98e, #c7a25a);
+  color: #1c1408;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+/* Settings: the machines list and the printer setup grid */
+.mac-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+.mac-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+.mac-chip.me {
+  border-color: var(--brass, #c7a25a);
+  font-weight: 700;
+}
+.mac-chip small {
+  color: var(--mute);
+  font-weight: 400;
+}
+.psu-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.psu-head h4 {
+  margin: 0 0 3px;
+}
+.psu-acts {
+  display: flex;
+  flex: none;
+  gap: 8px;
+}
+.psu-acts button {
+  flex: none;
+}
+.psu-card {
+  margin-top: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.psu-card > header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+  border-left: 3px solid var(--brass, #c7a25a);
+}
+.psu-card h5 {
+  margin: 0 0 2px;
+  font-size: 15px;
+  font-weight: 700;
+}
+.psu-card p {
+  margin: 0;
+  color: var(--mute);
+  font-size: 12.5px;
+}
+.psu-card .tw {
+  margin: 0;
+  border: 0;
+}
+.psu-t th[scope="row"] {
+  min-width: 130px;
+  font-weight: 600;
+  text-align: left;
+}
+.psu-t select {
+  width: 100%;
+  min-width: 96px;
+}
+.psu-t .psu-s {
+  width: 92px;
+}
+.psu-t td,
+.psu-t th {
+  vertical-align: middle;
+}
+.psu-net summary {
+  cursor: pointer;
+}
+.psu-net summary h4 {
+  display: inline;
+  margin: 0;
+}
+.psu-net summary .stk {
+  display: block;
+  margin: 3px 0 0 16px;
+}
+.psu-bad {
+  color: var(--bad);
+  font-weight: 700;
+}
+.psu-t button:disabled,
+.psu-t select:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+/* Settings: tabs, logos, payment methods and options */
+.set-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+.set-tabs button {
+  padding: 10px 16px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: var(--mute);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.set-tabs button:hover {
+  color: var(--ink);
+}
+.set-tabs button.on {
+  border-bottom-color: var(--brass, #c7a25a);
+  color: var(--ink);
+}
+.set-logos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+.set-logo {
+  display: flex;
+  gap: 14px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.set-logo-box {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 130px;
+  height: 90px;
+  border: 1px dashed var(--line);
+  border-radius: 6px;
+  background: #fff;
+  color: #6b5d4a;
+  font-size: 12px;
+}
+.set-logo-box img {
+  width: 100%;
+  height: 100%;
+}
+.set-logo h5 {
+  margin: 0 0 2px;
+  font-size: 14px;
+  font-weight: 700;
+}
+.set-logo p {
+  margin: 0 0 9px;
+  color: var(--mute);
+  font-size: 12.5px;
+}
+.set-logo-acts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.set-file {
+  display: inline-block;
+  cursor: pointer;
+}
+.set-file:focus-within {
+  outline: 2px solid var(--brass, #c7a25a);
+}
+.set-file input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+.set-fit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin-top: 14px;
+  font-weight: 600;
+}
+.set-fit label {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  font-weight: 400;
+}
+.set-fit input,
+.set-opt input {
+  width: auto;
+  margin: 0;
+}
+.set-opts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2px 18px;
+  margin-top: 10px;
+}
+.set-opt {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 9px 4px;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+}
+.set-opt input {
+  flex: none;
+  margin-top: 3px;
+}
+.set-opt small {
+  display: block;
+  color: var(--mute);
+  font-size: 12px;
+}
+.set-pm {
+  margin-top: 8px;
+}
+/* Reports: Export to Excel */
+.xl-btn {
+  border-color: #1d6f42 !important;
+  color: #1d6f42 !important;
+  font-weight: 700;
+}
+[data-theme="dark"] .xl-btn {
+  border-color: #5fc48a !important;
+  color: #5fc48a !important;
+}
+/* POS: a waiter's My shift screen */
+.ms-go {
+  width: 100%;
+  padding: 16px;
+  font-size: 16px;
+}
+.ms-acts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 10px;
+}
+.ms-acts button {
+  flex: none;
+  min-width: 140px;
+}
+.ms-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px;
+  margin: 12px 0;
+}
+.ms-t {
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--card);
+}
+.ms-t span,
+.ms-t small {
+  display: block;
+  color: var(--mute);
+  font-size: 12px;
+}
+.ms-t b {
+  display: block;
+  margin-top: 3px;
+  color: var(--ink);
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
+}
+.ms-chart {
+  margin: 0;
+}
+.ms-chart figcaption {
+  margin-bottom: 8px;
+  color: var(--ink);
+  font-weight: 600;
+}
+.ms-bars {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  height: 170px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 26px;
+}
+.ms-col {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  height: 100%;
+  outline-offset: -2px;
+}
+.ms-bar {
+  width: min(34px, 60%);
+  border-radius: 4px 4px 0 0;
+  background: var(--brass-lo);
+}
+.ms-col:hover .ms-bar,
+.ms-col:focus-visible .ms-bar {
+  filter: brightness(0.85);
+}
+.ms-val {
+  margin-bottom: 3px;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.ms-day {
+  position: absolute;
+  bottom: -22px;
+  color: var(--mute);
+  font-size: 12px;
+}
+.ms-col.now .ms-day {
+  color: var(--ink);
+  font-weight: 700;
+}
+.ms-tip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  z-index: 3;
+  display: none;
+  min-width: 124px;
+  padding: 7px 9px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--card);
+  color: var(--mute);
+  font-size: 12px;
+  white-space: nowrap;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+  transform: translate(-50%, 34px);
+}
+.ms-tip b {
+  display: block;
+  color: var(--ink);
+}
+.ms-col:hover .ms-tip,
+.ms-col:focus-visible .ms-tip {
+  display: block;
+}
+.ms-tbl summary {
+  color: var(--mute);
+  font-size: 12px;
+  cursor: pointer;
+}
+/* Waiter's money note */
+.ms-note {
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.ms-note h5 {
+  margin: 0 0 2px;
+  font-size: 14px;
+}
+.ms-nr {
+  display: grid;
+  grid-template-columns: minmax(180px, 2fr) minmax(110px, 1fr) minmax(100px, 1fr) auto;
+  align-items: end;
+  gap: 8px;
+  margin-top: 8px;
+}
+.ms-nr label {
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+}
+.ms-nr input,
+.ms-nr select {
+  width: 100%;
+}
+.pay-money {
+  margin: 0 0 10px;
+  padding: 9px 12px;
+  border: 1px dashed var(--brass-lo);
+  border-radius: 8px;
+}
+.pay-money h4 {
+  margin: 0 0 5px;
+  font-size: 13px;
+}
+.pay-money h4 small {
+  color: var(--mute);
+  font-weight: 400;
+}
+.pay-mb + .pay-mb {
+  margin-top: 6px;
+}
+.pay-mr {
+  display: grid;
+  grid-template-columns: 1fr auto 70px;
+  gap: 10px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.pay-mr em {
+  color: var(--mute);
+  font-style: normal;
+  font-weight: 700;
+  text-align: right;
+}
+.pay-mr em.paid {
+  color: var(--ok);
+}
+/* Select: push to cashier */
+#selPush:empty {
+  display: none;
+}
+#selPush > button {
+  width: 100%;
+}
+.sel-push {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 8px;
+}
+.sel-push label {
+  display: grid;
+  flex: 1;
+  gap: 4px;
+  min-width: 220px;
+}
+#selPush .sel-push button {
+  flex: none;
+  width: auto;
+  min-width: 120px;
+}
+.ms-to {
+  display: grid;
+  gap: 4px;
+  margin-top: 8px;
+  font-size: 12px;
+}
+/* Swap: the stamp on an order, which has to read on a black and white printer */
+.slip .sl-stamp {
+  width: fit-content;
+  margin: 0 auto 8px;
+  padding: 4px 16px;
+  border: 3px solid #111;
+  border-radius: 4px;
+  color: #111;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  transform: rotate(-4deg);
+}
+#exAuth {
+  margin-top: 8px;
+}
+#exAuth input {
+  width: 100%;
+}
+/* Reprint: the PIN opens over Back Office */
+#mRp {
+  z-index: 71;
+}
+#mRp input {
+  width: 100%;
+  margin-top: 8px;
+}
+/* A bill printed again: strong green over the red of a printed bill */
+.ord.printed.rep,
+.tr-b.printed.rep,
+#bopBody .bop-b.printed.rep,
+#mSel .sr.printed.rep:not(.sh) {
+  border-color: #0b7a3b;
+  background: #0b7a3b;
+  box-shadow: none;
+  color: #fff;
+  font-weight: 800;
+}
+.ord.printed.rep .h,
+.ord.printed.rep .m,
+.ord.printed.rep .m b,
+.tr-b.printed.rep small,
+.tr-b.printed.rep em,
+#bopBody .bop-b.printed.rep small,
+#mSel .sr.printed.rep small,
+#mSel .sr.printed.rep b,
+#mSel .sr.printed.rep span {
+  color: #fff;
+}
+#mSel .sr.printed.rep.on {
+  outline: 3px solid var(--brass, #c7a25a);
+  outline-offset: -3px;
+}
+.pay-bills label.printed.rep {
+  color: #0b7a3b;
+  font-weight: 800;
+}
+#fBill.printed.rep {
+  border-color: #0b7a3b;
+  color: #0b7a3b;
+  font-weight: 800;
+}
+/* The Kaytia Flow mark, the same as the Back Office side menu */
+.kf-brand {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+.kf-brand .kf-m {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 1px solid #c7a25a;
+  border-radius: 50%;
+  outline: 1px solid #c7a25a;
+  outline-offset: 2px;
+  color: #e3c98e;
+  font:
+    500 23px/1 "Playfair Display",
+    Georgia,
+    "Times New Roman",
+    serif;
+}
+.kf-brand .kf-t {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+.kf-brand .kf-t b {
+  color: #f6efe0;
+  font:
+    500 25px/1.1 "Playfair Display",
+    Georgia,
+    "Times New Roman",
+    serif;
+  white-space: nowrap;
+}
+.kf-brand .kf-t em {
+  color: #e3c98e;
+  font-style: italic;
+}
+.kf-brand .kf-t small {
+  color: #c7a25a;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}

@@ -78,25 +78,30 @@ function groupPay(g, method, amt, ci) {
   }
   if (!shiftOk()) return "__shift";
   if (method === "account") CU[ci].owes += amt;
-  let left = amt;
+  let left = amt,
+    pos = 0;
   R.forEach(r => {
     const a = Math.min(left, folioOf(r).bal);
     if (a > 0.0001) {
       r.pays.push({ at: new Date().toISOString(), method, amt: a, by: user.n, grp: g.id });
+      pos += posCut(r, a);
       left -= a;
     }
   });
   SALES.push({
     no: "FD-" + String(SALES.length + 1).padStart(4, "0"),
     at: new Date(),
+    bd: bizDate(),
     dept: "Front Desk",
     label: "Group " + g.name,
     user: user.n,
-    net: amt,
+    net: amt - pos,
     tax: 0,
-    g: amt,
-    lines: [{ id: 0, n: "Group " + g.name + " (" + groupPayerName(g) + ")", q: 1, p: amt, t: "C" }],
-    mx: { [method === "account" ? "credit" : method]: amt }
+    g: amt - pos,
+    lines: [
+      { id: 0, n: "Group " + g.name + " (" + groupPayerName(g) + ")", q: 1, p: amt - pos, t: "A" }
+    ],
+    mx: { [method === "account" ? "credit" : method]: amt, ...(pos > 0 ? { room: -pos } : {}) }
   });
   sync();
   return "";

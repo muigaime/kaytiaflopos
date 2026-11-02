@@ -32,12 +32,32 @@ $("#vSub").onclick = e => {
     v = id => $("#" + id).value.trim(),
     num = id => parseFloat($("#" + id).value);
   if (a === "rep_print") return repPrint(b.dataset.k);
+  if (a === "rep_xlsx") return repXlsx(b.dataset.k);
+  if (a === "rep_xlsxpage") return pageXlsx(b);
   if (a.slice(0, 3) === "ws_") return wsAct(a, b);
+  if (a.slice(0, 3) === "tb_") return tbAct(a, b);
+  if (a.slice(0, 4) === "psu_") return psuAct(a, b);
+  if (a.slice(0, 4) === "lic_") return licAct(a);
   if (ACT_RIGHTS[a] && !boCan(ACT_RIGHTS[a])) return boDenied();
   if (a.slice(0, 3) === "ur_") return urAct(a, b);
   if (a === "dstart" || a === "dend") {
     const r = a === "dstart" ? dayStart(boUser.n) : dayEnd(boUser.n);
-    toast(r || (a === "dstart" ? "Day started." : "Day ended."));
+    toast(r || (a === "dstart" ? `New day started: ${dateGB(bizDate())}.` : "Day ended."));
+    return all();
+  }
+  if (a === "sfloat") {
+    const sh = openShifts()[+b.dataset.i],
+      fl = parseFloat($("#sf_" + b.dataset.i).value);
+    if (!sh) return;
+    if (!(fl >= 0)) return toast("Enter the float (0 or more).");
+    Object.assign(sh, { float: fl, floatBy: boUser.n });
+    bosave();
+    toast(`${sh.user}'s float is now ${KES(fl)}.`);
+    return all();
+  }
+  if (a === "sauth" || a === "sdecl") {
+    const r = shiftAuthAnswer(b.dataset.id, a === "sauth", boUser.n);
+    toast(r || (a === "sauth" ? "Authorised. The waiter can start the shift." : "Declined."));
     return all();
   }
   if (a === "pshift") {
@@ -72,8 +92,9 @@ $("#vSub").onclick = e => {
     return;
   }
   if (a === "sstart") {
-    const u = v("shU"),
-      r = shiftStart(u, parseFloat($("#shF").value), boUser.n);
+    const u = v("shU");
+    if (!u) return toast("Choose who the shift is for.");
+    const r = shiftStart(u, parseFloat($("#shF").value), boUser.n);
     toast(r || "Shift started for " + u + ".");
     return all();
   }
@@ -222,6 +243,13 @@ $("#vSub").onchange = e => {
     return;
   }
   if (s.rsz) return void (rpSize = s.rsz);
+  if (s.tbn !== undefined) return tbRename(t);
+  if (s.psx) return psuChange(t);
+  if (s.setc) return settingsChange(t);
+  if (s.rpsel !== undefined) {
+    rp = t.value;
+    return all();
+  }
   if (s.urg !== undefined) {
     urRole = t.value;
     return all();
@@ -276,6 +304,9 @@ $("#vSub").onchange = e => {
     if (s.f === "rf") rf = v;
     else if (s.f === "rt") rt = v;
     else if (s.f === "rd") rd = v;
+    else if (s.f === "tf") rtf = v;
+    else if (s.f === "tt") rtt = v;
+    else if (s.f === "tw") rtw = v;
     else rcm = parseFloat(v) || 0;
     return all();
   } else return;

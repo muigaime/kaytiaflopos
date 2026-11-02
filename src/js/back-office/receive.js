@@ -87,7 +87,7 @@ const rcExact = text => {
 const RC_MODES = [
   ["lpo", "Against purchase order", "Receive what was ordered on an LPO"],
   ["direct", "Direct receive", "Into a store · vendor optional"],
-  ["sp", "Direct to selling point", "Straight into a bar, kitchen or shop"]
+  ["sp", "Direct to selling point", "Straight into a bar, kitchen or restaurant"]
 ];
 const RC_MODE_LABEL = { lpo: "LPO", direct: "Direct", sp: "Selling point" };
 const openLposAll = () =>
@@ -207,7 +207,7 @@ function recvHTML() {
    <label>Units<select id="rcUnits" data-iv="rc.eUnits">${R.eK ? rcUnitOpts(R.eK, R.eUnits) : ""}</select></label>
    <label>Quantity<input id="rcQty" data-iv="rc.eQty" type="number" min="0" step="any" value="${esc(R.eQty)}"></label>
    <label>Unit price<input id="rcPrice" data-iv="rc.ePrice" type="number" min="0" step="any" value="${esc(R.ePrice)}"></label>
-   <label>VAT %<input data-iv="rc.eTax" type="number" min="0" step="any" value="${esc(R.eTax)}"></label>
+   <label>VAT %<input id="rcTaxBox" data-iv="rc.eTax" type="number" min="0" step="any" value="${esc(R.eTax)}"></label>
    <label>Batch no<input data-iv="rc.eBatch" value="${esc(R.eBatch)}"></label>
    <label>Expiry<input type="date" data-iv="rc.eExp" value="${esc(R.eExp)}"></label>
    <label>Line total<input id="rcTotal" readonly></label>
@@ -291,6 +291,9 @@ function rcPick(k, redraw = true) {
   const R = invF.rc,
     u = itemInfo(k);
   R.eK = k;
+  R.eTax = String(itemTaxRate(k));
+  const taxBox = $("#rcTaxBox");
+  if (taxBox) taxBox.value = R.eTax;
   R.eName = u.name;
   R.eUnits = rcIsBuy(k, "buy") ? "buy" : "uom";
   R.ePrice = u.buyPrice ? String(R.eUnits === "buy" ? +u.buyPrice : +u.buyPrice / +u.perBuy) : "";
@@ -319,7 +322,7 @@ function rcLoadLpo(p) {
         unitPrice: isBuy ? x.price : x.price / +u.perBuy,
         qty: due,
         lpoMax: due,
-        taxRate: RC_TAX,
+        taxRate: itemTaxRate(x.k),
         batch: "",
         expiry: "",
         sel: false,
@@ -569,7 +572,7 @@ function rcAct(a, b) {
         units: u.uom,
         unitPrice: +u.perBuy ? +u.buyPrice / +u.perBuy : 0,
         qty: Math.round(short * 1000) / 1000,
-        taxRate: RC_TAX,
+        taxRate: itemTaxRate(k),
         batch: "",
         expiry: "",
         sel: false

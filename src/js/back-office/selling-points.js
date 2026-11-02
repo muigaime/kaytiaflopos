@@ -1,11 +1,10 @@
-// ---- selling points: bars, restaurants, kitchens and shops that sell on the POS ----
+// ---- selling points: bars, restaurants and kitchens that sell on the POS ----
 // A selling point gets stock from a store (requisition / issue) and sells products made from that stock.
 // Creating one, or adding a product to one, shows on the POS straight away.
 const SP_TYPES = [
   "Bar",
   "Restaurant",
   "Kitchen",
-  "Shop",
   "Cafe",
   "Room service",
   MATERIALS,
@@ -21,12 +20,6 @@ const spInfo = o => OUTLET_INFO[o] || { type: "Other", store: STORES[0] };
 const spCanSell = i =>
   Math.min(...Object.entries(i.r).map(([k, v]) => Math.floor(have(i.from || i.d, k) / v + 1e-9)));
 const spCost = i => Object.entries(i.r).reduce((a, [k, v]) => a + cst(k) * v, 0);
-
-const SP_TAX = [
-  ["B", "B · VAT 16%"],
-  ["A", "A · Exempt"],
-  ["C", "C · Zero-rated"]
-];
 
 // ---- a new stock item created from a selling point (Manage → + New item) ----
 // The item goes into the Stock Master like any other. The popup can also put it on this selling point's
@@ -134,7 +127,9 @@ function itemSpNewPopup(F) {
      <label>Product name<input data-iv="it.name" id="itName" value="${esc(F.name)}" placeholder="e.g. Chapati"></label>
      <label>Selling price (KES)<input data-iv="it.spPrice" type="number" min="0" step="any" value="${esc(F.spPrice)}" placeholder="${itemSpLink(F) ? "Needed" : "Empty = stock only"}"></label>
      <label>Category<input data-iv="it.spCat" list="itCatL" value="${esc(F.spCat)}" placeholder="${esc(spInfo(sp).type)}"></label>
-     <label>VAT<select data-iv="it.spTax">${SP_TAX.map(([v, l]) => `<option value="${v}" ${v === F.spTax ? "selected" : ""}>${l}</option>`).join("")}</select></label>
+     <label>Tax<select data-iv="it.spTax">${taxChoices()
+       .map(([v, l]) => `<option value="${v}" ${v === F.spTax ? "selected" : ""}>${l}</option>`)
+       .join("")}</select></label>
     </div>
     <div class="itm-hint" id="itDup"></div>
    </section>
@@ -312,9 +307,9 @@ function spDetail(o) {
    <label>Product name<input data-iv="spp.name" value="${esc(P.name)}" placeholder="Same as the stock item"></label>
    <label>Category<input data-iv="spp.cat" value="${esc(P.cat)}" placeholder="e.g. Beer, Mains"></label>
    <label>Selling price (KES)<input data-iv="spp.price" type="number" min="0" step="any" value="${esc(P.price)}"></label>
-   <label>VAT<select data-iv="spp.tax">${SP_TAX.map(
-     ([v, l]) => `<option value="${v}" ${v === P.tax ? "selected" : ""}>${l}</option>`
-   ).join("")}</select></label></div>
+   <label>Tax<select data-iv="spp.tax">${taxChoices()
+     .map(([v, l]) => `<option value="${v}" ${v === P.tax ? "selected" : ""}>${l}</option>`)
+     .join("")}</select></label></div>
   <div class="stk" id="sppInfo"></div>
   <button class="chip on" data-a="sp_addprod">Add product</button></div>
 
@@ -873,7 +868,9 @@ function speModal() {
      <label>Product name<input data-iv="spe.name" value="${esc(F.name)}"></label>
      <label>Selling price (KES)<input data-iv="spe.price" type="number" min="0" step="any" value="${esc(F.price)}"></label>
      <label>Category<input data-iv="spe.cat" value="${esc(F.cat)}"></label>
-     <label>VAT<select data-iv="spe.tax">${SP_TAX.map(([v, l]) => `<option value="${v}" ${v === F.tax ? "selected" : ""}>${l}</option>`).join("")}</select></label>
+     <label>Tax<select data-iv="spe.tax">${taxChoices()
+       .map(([v, l]) => `<option value="${v}" ${v === F.tax ? "selected" : ""}>${l}</option>`)
+       .join("")}</select></label>
     </div>
    </section>
    <section class="itm-s"><h4>Each sale deducts from</h4>

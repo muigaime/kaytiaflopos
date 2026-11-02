@@ -1434,6 +1434,9 @@
 .itm-g5 {
   grid-template-columns: repeat(5, minmax(0, 1fr));
 }
+.itm-g6 {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
 .itm-gn {
   grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr);
 }
@@ -1509,6 +1512,7 @@
   color: #fff;
 }
 @media (max-width: 720px) {
+  .itm-g6,
   .itm-g5 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1743,6 +1747,19 @@
 }
 #bo .bl-t tbody tr.ret td {
   color: var(--bad);
+}
+/* A bill whose receipt has been reprinted stands out, on any theme. */
+#bo .bl-t tbody tr.rep td {
+  background: #0b7a3b;
+  color: #fff;
+  font-weight: 800;
+}
+#bo .so-r.rep > summary,
+#bo .so-r.rep > summary small,
+#bo .so-r.rep > summary b {
+  background: #0b7a3b;
+  color: #fff;
+  font-weight: 800;
 }
 
 /* Sales & Orders */
@@ -2233,4 +2250,235 @@
   border-radius: 6px;
   background: rgba(199, 162, 90, 0.1);
   font-size: 14px;
+}
+
+/* Reports with a heading block and summaries below */
+#bo .rp-pick {
+  flex: 1 1 100%;
+}
+#bo .rp-pick label {
+  display: grid;
+  gap: 3px;
+  max-width: 340px;
+  color: var(--mute);
+  font-size: 12px;
+}
+#bo .rp-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  margin-bottom: 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+#bo .rp-meta > div {
+  display: grid;
+  gap: 2px;
+  padding: 8px 12px;
+  border-right: 1px solid var(--line);
+}
+#bo .rp-meta > div:last-child {
+  border-right: 0;
+}
+#bo .rp-meta span {
+  color: var(--mute);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+#bo .rp-below {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+  margin-top: 18px;
+}
+#bo .rp-below h4 {
+  margin: 0 0 6px;
+}
+
+/* ---------------------------------------------------------------- Periodic Sales Report in colour */
+#bo .rp-meta.colour {
+  border: 0;
+  background: linear-gradient(100deg, #3d2f20, #1f1812);
+  color: #f6efe0;
+}
+#bo .rp-meta.colour > div {
+  border-color: rgba(199, 162, 90, 0.4);
+}
+#bo .rp-meta.colour span {
+  color: #e3c98e;
+}
+#bo .rp-colour table.t {
+  border-collapse: collapse;
+}
+#bo .rp-colour th {
+  background: #241b12;
+  color: #f6efe0;
+}
+#bo .rp-colour th:nth-child(9) {
+  background: #e3c98e;
+  color: #241b12;
+}
+#bo .rp-colour th:nth-child(10) {
+  background: #2b6cc4;
+  color: #fff;
+}
+#bo .rp-colour th:nth-child(11) {
+  background: #b5570f;
+  color: #fff;
+}
+#bo .rp-colour th:nth-child(12) {
+  background: #0e7a68;
+  color: #fff;
+}
+#bo .rp-colour tr:nth-child(odd) td {
+  background: rgba(199, 162, 90, 0.07);
+}
+#bo .rp-colour tr td:nth-child(9) {
+  background: rgba(199, 162, 90, 0.24);
+  font-weight: 600;
+}
+#bo .rp-colour tr td:nth-child(10) {
+  background: rgba(43, 108, 196, 0.13);
+}
+#bo .rp-colour tr td:nth-child(11) {
+  background: rgba(208, 106, 30, 0.14);
+}
+#bo .rp-colour tr td:nth-child(12) {
+  background: rgba(18, 148, 127, 0.15);
+  font-weight: 600;
+}
+#bo .rp-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 8px;
+}
+#bo .rp-tile {
+  --k: #b0841a;
+  display: grid;
+  gap: 3px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--k);
+  border-radius: 6px;
+  background: var(--card);
+}
+#bo .rp-tile.mp {
+  --k: #12947f;
+}
+#bo .rp-tile.ca {
+  --k: #b0841a;
+}
+#bo .rp-tile.pq {
+  --k: #2b6cc4;
+}
+#bo .rp-tile.cr {
+  --k: #8147b5;
+}
+#bo .rp-tile.co {
+  --k: #d06a1e;
+}
+#bo .rp-tile span,
+#bo .rp-sums span {
+  color: var(--mute);
+  font-size: 12px;
+  font-weight: 600;
+}
+#bo .rp-tile b {
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+}
+#bo .rp-tile i {
+  display: block;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--chip);
+}
+#bo .rp-tile u {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--k);
+}
+#bo .rp-tile small {
+  color: var(--mute);
+  font-size: 11px;
+}
+#bo .rp-sums {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+#bo .rp-sums > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+#bo .rp-sums b {
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+}
+#bo .rp-sums .big {
+  border-color: #241b12;
+  background: #241b12;
+}
+#bo .rp-sums .big span {
+  color: #e3c98e;
+}
+#bo .rp-sums .big b {
+  color: #f6efe0;
+}
+
+#bo .rp-tile.rm {
+  --k: #c2452d;
+}
+
+#bo .rp-time {
+  display: grid;
+  gap: 2px;
+  color: var(--mute);
+  font-size: 12px;
+}
+
+/* Tables */
+#bo .tb-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+}
+#bo .tb-c {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+#bo .tb-c input {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  padding: 6px 8px;
+  border: 0;
+  background: transparent;
+  font-weight: 600;
+}
+#bo .tb-c button {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: none;
+  color: var(--mute);
+  cursor: pointer;
+}
+#bo .tb-c button:hover {
+  border-color: var(--bad);
+  color: var(--bad);
 }

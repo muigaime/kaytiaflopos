@@ -21,6 +21,8 @@
     <link rel="stylesheet" href="css/back-office-pages.css" />
     <link rel="stylesheet" href="css/pos-five-star.css" />
     <link rel="stylesheet" href="css/back-office-five-star.css" />
+    <link rel="stylesheet" href="css/license.css" />
+    <link rel="stylesheet" href="css/machine.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -33,7 +35,6 @@
     <script src="js/shared/error-banner.js"></script>
 
     <!-- The company logo, kept once here: Start, Back Office and Front Desk screens copy it. -->
-    <img id="logoSrc" src="assets/logo.png" alt="" hidden />
 
     <!-- POS: full screen lock (a Manager PIN is needed to leave) -->
     <div id="fsGate">
@@ -96,7 +97,7 @@
             ><span class="swt">Swipe staff card</span></button
           ><button id="swd" class="swd" type="button">Demo swipe</button
           ><span class="stk" style="font-size: 12px; color: var(--mute); flex-basis: 100%"
-            >Demo PINs: 1234 Wanjiru (Bar, Kitchen) · 5678 Otieno (Supermarket) · 0000 Manager
+            >Demo PINs: 1234 Wanjiru (Bar, Kitchen) · 5678 Otieno (Kitchen) · 0000 Manager
             (all). Demo cards: KT0001, KT0002, KT0003.</span
           >
         </div>
@@ -115,7 +116,7 @@
     <div class="pos">
       <nav class="rail">
         <div class="mk"><i class="hotelMark"></i><span class="hotelName"></span></div>
-        <button id="spBtn" aria-label="Sale point"></button>
+        <div id="spBtn" aria-label="Sale point"></div>
         <div class="cats" id="cats"></div>
         <div class="rtools">
           <button class="b sm" id="fsb">⛶ Maximise</button
@@ -136,8 +137,7 @@
         <div class="sp-tabs" id="spTabs"></div>
         <div class="items" id="grid"></div>
         <div class="botb">
-          <button class="b" id="chSP">Change sale point</button
-          ><button class="b" id="kmBtn">Kitchen msg</button
+          <button class="b" id="kmBtn">Kitchen msg</button
           ><button class="b" id="selBtn">Select</button><button class="b" id="findBtn">Find</button>
         </div>
       </section>
@@ -148,12 +148,15 @@
           </div>
           <div class="rh2">Guest check · <span id="hSP"></span></div>
           <div class="fm">
-            <label>Bill no</label><input id="fBill" readonly /><label>Table</label
-            ><input id="fTable" placeholder="e.g. T4" /> <label>Guest</label
-            ><input id="fGuest" /><label>Bill date</label><input id="fBdate" readonly />
-            <label>Waiter</label><input id="fWaiter" readonly /><label>Currency</label
-            ><input value="KES" readonly /> <label>Time</label><input id="fDT" readonly /><label
-              >Covers</label
+            <label>Bill no</label><input id="fBill" readonly placeholder="Press New sale" /><label
+              >Table</label
+            ><input id="fTable" list="tblL" placeholder="e.g. T4" autocomplete="off" /><datalist
+              id="tblL"
+            ></datalist>
+            <label>Guest</label><input id="fGuest" /><label>Bill date</label
+            ><input id="fBdate" readonly /> <label>Waiter</label
+            ><input id="fWaiter" readonly /><label>Currency</label><input value="KES" readonly />
+            <label>Time</label><input id="fDT" readonly /><label>Covers</label
             ><input id="fCov" type="number" inputmode="numeric" min="0" /><label>Room</label
             ><input id="fRoom" />
           </div>
@@ -168,7 +171,7 @@
             <div class="tt">
               <span>Net total</span>
               <div class="val" id="tNet">.00</div>
-              <span>VAT</span>
+              <span id="vatL">VAT</span>
               <div class="val" id="tTax">.00</div>
               <span class="gl">Gross total</span>
               <div class="val gv" id="tGross">.00</div>
@@ -176,7 +179,7 @@
             <div class="ml">
               <button class="b sm" id="cancelBtn">Cancel</button
               ><button class="b sm" id="riderBtn">Rider details</button
-              ><button class="b sm" id="exBtn">⇄ Exchange</button>
+              ><button class="b sm" id="exBtn">⇄ Swap</button>
             </div>
           </div>
         </div>
@@ -192,13 +195,6 @@
       </section>
     </div>
     <!-- ==================== POS: modals ==================== -->
-    <div class="modal" id="mSP">
-      <div class="box">
-        <h3>Change sale point</h3>
-        <div class="tabs" id="spList" style="flex-wrap: wrap"></div>
-        <button class="mini" data-close>Close</button>
-      </div>
-    </div>
     <div class="modal" id="mSel">
       <div class="box">
         <div class="shead">
@@ -209,6 +205,7 @@
         <div class="sfoot">
           <div class="stot" id="selTot"></div>
           <div class="row" id="selOne"></div>
+          <div class="row" id="selPush"></div>
           <div class="row">
             <button class="chip" id="selOpt">Bill options</button
             ><button class="chip" id="selChg">Charge selected</button
@@ -219,24 +216,28 @@
     </div>
     <div class="modal" id="mEx">
       <div class="box" style="max-width: 680px">
-        <h3 id="exT">Exchange items</h3>
+        <h3 id="exT">Swap items</h3>
         <div class="stk">1. Item to replace</div>
         <div class="exg" id="exOld"></div>
         <div class="row" id="exQ" style="align-items: center; justify-content: space-between"></div>
-        <div class="stk">2. Replace with</div>
+        <div class="stk">2. Replace with an item of the same price</div>
         <div class="tabs" id="exCats" style="flex-wrap: wrap"></div>
         <div class="exg" id="exNew" style="max-height: 26vh; overflow: auto"></div>
-        <div id="exSent" style="display: none">
+        <div id="exSent">
           <div class="stk">Reason</div>
           <div class="tabs" id="exReasons" style="flex-wrap: wrap"></div>
-          <label style="display: flex; gap: 8px; align-items: center; margin-top: 8px"
+          <label id="exBackRow" style="display: flex; gap: 8px; align-items: center; margin-top: 8px"
             ><input type="checkbox" id="exBack" /> Return the old item to stock</label
           >
         </div>
         <div class="status" id="exSum"></div>
+        <div id="exAuth">
+          <input id="exPin" type="password" inputmode="numeric" autocomplete="off" placeholder="Manager or Super Cashier PIN to authorize" aria-label="Authorizing PIN" />
+          <div class="bop-msg" id="exMsg" role="alert"></div>
+        </div>
         <div class="row">
           <button class="mini" data-close>Cancel</button
-          ><button class="chip on" id="exGo">Confirm exchange</button>
+          ><button class="chip on" id="exGo">Authorize swap</button>
         </div>
       </div>
     </div>
@@ -312,24 +313,7 @@
       </div>
     </div>
     <div class="modal" id="mPay">
-      <div class="box">
-        <h3 id="pTitle">Payment</h3>
-        <div class="big" id="pTotal"></div>
-        <div class="stk" id="pBills" style="text-align: center"></div>
-        <div id="pList"></div>
-        <div class="status" id="pBal"></div>
-        <div class="tabs">
-          <button class="chip on" data-m="cash">Cash</button
-          ><button class="chip" data-m="mpesa">M-Pesa STK</button
-          ><button class="chip" data-m="credit">Customer credit</button>
-        </div>
-        <div id="pBody"></div>
-        <button class="chip" id="pAdd">Add payment</button>
-        <div class="row">
-          <button class="mini" id="pCancel">Cancel</button
-          ><button class="chip on" id="pOk">Complete</button>
-        </div>
-      </div>
+      <div class="box pay-box"><div id="pWrap"></div></div>
     </div>
 
     <!-- POS: receipt, send order, open orders -->
@@ -339,6 +323,18 @@
     </div>
     <div class="modal" id="mView">
       <div class="box view-box"><div id="viewBody"></div></div>
+    </div>
+    <div class="modal" id="mRp">
+      <div class="box" style="max-width: 380px">
+        <h3 id="rpT">Reprint receipt</h3>
+        <div class="stk" id="rpNote"></div>
+        <input id="rpPin" type="password" inputmode="numeric" autocomplete="off" placeholder="Authorizing PIN" aria-label="Authorizing PIN" />
+        <div class="bop-msg" id="rpMsg" role="alert"></div>
+        <div class="row">
+          <button class="mini" data-close>Cancel</button
+          ><button class="chip on" id="rpGo">Authorize reprint</button>
+        </div>
+      </div>
     </div>
     <div class="modal" id="mRc">
       <div class="box">
@@ -393,7 +389,7 @@
             <div><b>Guest folios</b><span>Bills and payments</span></div>
             <div><b>Housekeeping</b><span>Rooms, always ready</span></div>
           </div>
-          <div class="fl-pw"><img alt="Kaytia Tech Services" /></div>
+          <div class="kf-brand"><span class="kf-m" aria-hidden="true">K</span><span class="kf-t"><b>Kaytia <em>Flow</em></b><small>Front Desk</small></span></div>
           <small>Front Desk · Kaytia Flow · v1.8.0</small>
         </div>
       </div>
@@ -465,6 +461,10 @@
     <div id="shPrint"></div>
 
     <!-- Script group 1: POS. Keep the order; the build merges each group into one script block. -->
+    <script src="js/shared/license.js"></script>
+    <script src="js/shared/machine.js"></script>
+    <script src="js/shared/xlsx.js"></script>
+    <script src="js/shared/business-day.js"></script>
     <script src="js/pos/catalog-stock.js"></script>
     <script src="js/pos/cart-sale.js"></script>
     <script src="js/pos/payment.js"></script>
@@ -473,6 +473,7 @@
     <script src="js/pos/slips.js"></script>
     <script src="js/pos/printers.js"></script>
     <script src="js/pos/bill-options.js"></script>
+    <script src="js/pos/bill-transfer.js"></script>
     <script src="js/pos/sale-returns.js"></script>
     <script src="js/pos/waiter-rights.js"></script>
     <script src="js/pos/login-session.js"></script>
@@ -480,8 +481,8 @@
     <!-- ==================== Start menu (POS / Back Office / Front Desk) ==================== -->
     <div id="start">
       <div class="lbrand">
-        <div class="lglogo"><img alt="Kaytia Tech Services" /></div>
-        <h2>Everything your store needs.<br /><em>One smart place.</em></h2>
+        <div class="kf-brand"><span class="kf-m" aria-hidden="true">K</span><span class="kf-t"><b>Kaytia <em>Flow</em></b></span></div>
+        <h2>Everything your hotel needs.<br /><em>One smart place.</em></h2>
         <p>
           Sell at the counter, then watch sales, stock and staff update in the Back Office, all from
           the same system.
@@ -489,7 +490,7 @@
         <div class="sfloat">
           <div class="fc c1">
             <svg viewBox="0 0 24 24"><path d="M3 4h3l2 11h10l2-8H7M9 20h.01M17 20h.01" /></svg
-            ><b>Sell</b><span>One fast till for bar, kitchen and shop</span>
+            ><b>Sell</b><span>One fast till for bar, kitchen and restaurant</span>
           </div>
           <div class="fc c2">
             <svg viewBox="0 0 24 24"><path d="M12 3l8 4v10l-8 4-8-4V7zM4 7l8 4 8-4M12 11v10" /></svg
@@ -498,7 +499,7 @@
           <div class="fc c3">
             <svg viewBox="0 0 24 24">
               <path d="M5 4h11a3 3 0 013 3v13H8a3 3 0 01-3-3zM5 17a3 3 0 013-3h11" /></svg
-            ><b>Report</b><span>14 sales reports at your fingertips</span>
+            ><b>Report</b><span>18 sales reports at your fingertips</span>
           </div>
         </div>
         <small>Kaytia Flow · Developed by Kaytia Tech Services · POS Software · POS Hardware</small>
@@ -507,6 +508,7 @@
         <div class="lcard">
           <h3 id="stHi">Good evening,</h3>
           <p class="ls">Welcome to Kaytia Flow. Where would you like to start?</p>
+          <div class="lic-chip" id="stLic"></div>
           <button class="opt" data-go="pos">
             <span class="oi"
               ><svg viewBox="0 0 24 24">
@@ -548,9 +550,9 @@
       <!-- Back Office: login -->
       <div id="boLogin">
         <div class="lbrand">
-          <div class="lglogo"><img alt="Kaytia Tech Services" /></div>
+          <div class="kf-brand"><span class="kf-m" aria-hidden="true">K</span><span class="kf-t"><b>Kaytia <em>Flow</em></b><small>Back Office</small></span></div>
           <h2>Know your numbers.<br /><em>Run the day.</em></h2>
-          <p>Sales, stock, staff and credit for Mwangaza Supermart, together in one Back Office.</p>
+          <p>Sales, stock, staff and credit for your hotel, together in one Back Office.</p>
           <div class="lpv">
             <div class="hd"><b>Today at a glance</b><span>Live from your POS</span></div>
             <div class="lbars">
@@ -564,7 +566,7 @@
               ><i style="height: 96%; animation-delay: 1.06s"></i>
             </div>
             <div class="lchips">
-              <span>14 sales reports</span><span>Stock alerts</span><span>Credit tracking</span>
+              <span>18 sales reports</span><span>Stock alerts</span><span>Credit tracking</span>
             </div>
           </div>
           <div class="lsec">
@@ -716,6 +718,7 @@
                 </div>
                 <div class="hero-x hero-figs" id="hFigs"></div>
               </div>
+              <div id="licBar"></div>
               <div class="card" id="dayBar" style="margin-bottom: 14px"></div>
               <div class="h2">
                 <h2>Rooms report</h2>
@@ -879,8 +882,8 @@
     </div>
 
     <!-- Script group 2: business day + shifts -->
-    <script src="js/shared/business-day.js"></script>
     <script src="js/pos/shift-screen.js"></script>
+    <script src="js/pos/waiter-shift.js"></script>
 
     <!-- Script group 3: Front Desk -->
     <script src="js/front-desk/data.js"></script>
@@ -909,8 +912,12 @@
     <script src="js/back-office/selling-points.js" data-private></script>
     <script src="js/back-office/production.js" data-private></script>
     <script src="js/back-office/settings.js" data-private></script>
+    <script src="js/back-office/printer-setup.js" data-private></script>
+    <script src="js/back-office/general-setup.js" data-private></script>
     <script src="js/back-office/waiter-setup.js" data-private></script>
     <script src="js/back-office/users-and-roles.js" data-private></script>
+    <script src="js/back-office/license-page.js" data-private></script>
+    <script src="js/back-office/tables.js" data-private></script>
     <script src="js/back-office/navigation.js" data-private></script>
     <script src="js/back-office/demo-data.js" data-private></script>
     <script src="js/back-office/page-actions.js" data-private></script>

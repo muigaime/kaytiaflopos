@@ -56,11 +56,12 @@ const BO_RIGHTS = [
   ["rep.bills", "View the Bills Report.", "REPORTS", "BILLS"],
   ["rep.control", "View void, discount, return, merge and split reports.", "REPORTS", "CONTROL"],
   ["rep.staff", "View staff and commission reports.", "REPORTS", "STAFF"],
-  ["rep.print", "Print reports.", "REPORTS", "PRINTING"],
+  ["rep.print", "Print and export reports.", "REPORTS", "PRINTING"],
   ["fin.menu", "See the Accounting, Expenses and M-Pesa menus.", "FINANCE", "ACCESS"],
   ["ws.manage", "Create and edit waiters.", "ADMINISTRATION", "STAFF"],
   ["users.manage", "Manage back office users and role rights.", "ADMINISTRATION", "SECURITY"],
-  ["set.manage", "Change hotel details, printers and settings.", "ADMINISTRATION", "SETTINGS"]
+  ["set.manage", "Change hotel details, printers and settings.", "ADMINISTRATION", "SETTINGS"],
+  ["tables.manage", "Create and edit tables and takeaways.", "POINT OF SALE", "TABLES"]
 ].map(([k, d, m, g], i) => ({ k, d, m, g, id: i + 1, num: 301 + i }));
 const SUPER = "Super Admin";
 const ALL_KEYS = BO_RIGHTS.map(r => r.k);
@@ -86,6 +87,7 @@ const ROLE_DEFAULTS = {
   ],
   Supervisor: [
     "pos.open",
+    "tables.manage",
     "sales.view",
     "sales.reprint",
     "shift.view",
@@ -233,6 +235,7 @@ const PAGE_RIGHTS = {
     "inv.reports"
   ],
   "Selling points": ["sp.view"],
+  Tables: ["tables.manage"],
   "Recipes & Production": ["rec.view"],
   "Recipe & Production Report": ["rec.report"],
   Accounting: ["fin.menu"],
@@ -246,7 +249,8 @@ const PAGE_RIGHTS = {
   "Room reports": ["rep.rooms"],
   "Audit log": ["users.manage"],
   "Users & roles": ["users.manage"],
-  Settings: ["set.manage"]
+  Settings: ["set.manage"],
+  License: ["users.manage"]
 };
 const boPageOk = n => {
   const L = PAGE_RIGHTS[String(n).replace("&amp;", "&")];
@@ -286,6 +290,9 @@ const ACT_RIGHTS = {
   dstart: "shift.day",
   dend: "shift.day",
   sstart: "shift.manage",
+  sauth: "shift.manage",
+  sfloat: "shift.manage",
+  sdecl: "shift.manage",
   send: "shift.manage",
   addc: "cust.manage",
   pay: "cust.pay",
@@ -321,13 +328,13 @@ const ACT_RIGHTS = {
   rec_rdel: "rec.recipes"
 };
 const boDenied = () => toast("Your role doesn't include this. Ask your administrator.");
-const REP_CONTROL = ["rets", "blog", "vdep", "vall", "dlog", "msp", "ds"];
+const REP_CONTROL = ["cmp", "rets", "swp", "blog", "vall", "dlog", "msp"];
 const repRight = (k, title) =>
   k === "bills"
     ? "rep.bills"
     : REP_CONTROL.includes(k)
       ? "rep.control"
-      : /staff|waiter|commission/i.test(title)
+      : /staff|waiter|commission|tips/i.test(title)
         ? "rep.staff"
         : "rep.sales";
 /** Fits the Back Office to who has just signed in. */

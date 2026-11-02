@@ -89,7 +89,8 @@ function mods() {
       ROOMS.filter(r => roomStatus(r) === "occ").length + " of " + ROOMS.length + " rooms occupied",
       "Bookings and guest bills"
     ],
-    ["Products", "box", "#c8553d", ITEMS.length + " items", "Prices and VAT classes"],
+    ["Products", "box", "#c8553d", ITEMS.length + " items", "Prices and tax"],
+    ["Tables", "pos", "#3a8fb7", TBL.length + " on the list", "Tables and takeaways"],
     [
       "Inventory",
       "box",
@@ -288,6 +289,16 @@ function insights() {
       "Sold " + top[1] + " units in the " + PL[per] + ".",
       "See sales",
       "go:Sales & Orders"
+    ]);
+  const asks = shiftAuths().filter(x => x.status === "wait").length;
+  if (asks)
+    L.push([
+      "i",
+      "pos",
+      asks + " waiter" + (asks === 1 ? "" : "s") + " waiting for shift authorisation",
+      "They have pending bills and need Back Office to agree before starting a shift.",
+      "Open Shifts & Day",
+      "go:Shifts & Day"
     ]);
   if (orders.length)
     L.push([

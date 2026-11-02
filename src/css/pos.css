@@ -992,15 +992,6 @@ input:focus {
   text-transform: none;
   position: relative;
 }
-#spBtn::after {
-  content: "▾";
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--amber);
-  font-size: 12px;
-}
 .cats {
   gap: 4px;
 }

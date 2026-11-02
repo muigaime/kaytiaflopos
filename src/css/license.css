@@ -1,0 +1,182 @@
+/* ==================== License: the lock screen, and the notes around the app ==================== */
+#licLock {
+  position: fixed;
+  inset: 0;
+  z-index: 200000;
+  display: none;
+  place-items: center;
+  overflow: auto;
+  padding: 20px;
+  background: radial-gradient(circle at 50% 0, #4a3925 0, #241b12 46%, #120e0a 100%);
+  color: #241b12;
+}
+#licLock.show {
+  display: grid;
+}
+#licLock .lic-card {
+  display: grid;
+  gap: 10px;
+  width: min(520px, 100%);
+  padding: 30px 34px;
+  border: 1px solid #c7a25a;
+  border-top: 3px solid #c7a25a;
+  border-radius: 8px;
+  background: #fffdf8;
+  box-shadow: 0 34px 80px rgba(0, 0, 0, 0.6);
+  font:
+    14px/1.5 "Schibsted Grotesk",
+    Arial,
+    sans-serif;
+}
+#licLock .lic-m {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin: 0 auto;
+  border: 1px solid #c7a25a;
+  border-radius: 50%;
+  outline: 1px solid #c7a25a;
+  outline-offset: 3px;
+  color: #9c7a36;
+  font:
+    500 26px/1 "Playfair Display",
+    Georgia,
+    serif;
+}
+#licLock .lic-b {
+  margin-top: 4px;
+  text-align: center;
+  font:
+    500 23px/1.2 "Playfair Display",
+    Georgia,
+    serif;
+}
+#licLock .lic-b em {
+  color: #9c7a36;
+}
+#licLock h2 {
+  margin: 8px 0 0;
+  text-align: center;
+  font:
+    500 25px/1.2 "Playfair Display",
+    Georgia,
+    serif;
+}
+#licLock p {
+  margin: 0;
+  color: #5c5043;
+  text-align: center;
+}
+#licLock .lic-safe {
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: #f4eee2;
+  font-size: 13px;
+}
+#licLock label {
+  display: grid;
+  gap: 4px;
+  margin-top: 4px;
+  color: #75695a;
+  font-size: 12px;
+  font-weight: 600;
+}
+#licLock input,
+#licLock textarea {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e2d9c8;
+  border-radius: 6px;
+  background: #fff;
+  color: #241b12;
+  font:
+    13px/1.4 ui-monospace,
+    Consolas,
+    monospace;
+}
+#licLock #licCode {
+  color: #241b12;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-align: center;
+}
+#licLock small {
+  color: #75695a;
+  text-align: center;
+}
+#licMsg {
+  min-height: 18px;
+  color: #a4342a;
+  font-size: 13px;
+  text-align: center;
+}
+#licGo {
+  min-height: 50px;
+  border: 0;
+  border-radius: 6px;
+  background: linear-gradient(170deg, #e3c98e, #b58a3c);
+  color: #1c1408;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.lic-chip {
+  color: #9c7a36;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
+.lic-chip:empty {
+  display: none;
+}
+#bo .lic-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 14px;
+  margin-bottom: 14px;
+  padding: 10px 16px;
+  border: 1px solid #c7a25a;
+  border-radius: 6px;
+  background: rgba(199, 162, 90, 0.14);
+  font-weight: 600;
+}
+#bo .lic-st > div {
+  display: grid;
+  gap: 2px;
+}
+#bo .lic-st span {
+  color: #9c7a36;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+#bo .lic-st b {
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+#bo[data-pal="five"] .lic-st b {
+  font-family: var(--serif);
+  font-weight: 500;
+}
+#bo .lic-st small {
+  color: var(--mute);
+}
+#bo .lic-code {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+#bo .lic-code input {
+  flex: 0 1 280px;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}

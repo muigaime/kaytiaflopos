@@ -1,8 +1,9 @@
 // ---- data windows (current and previous period) ----
 const D = 864e5,
+  // "Today" is the business date.
   d0 = () => {
-    const d = new Date();
-    return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+    const [y, m, n] = bizDate().split("-").map(Number);
+    return new Date(y, m - 1, n).getTime();
   },
   nD = () => (per === "today" ? 1 : +per);
 const rngOf = p => {
@@ -11,7 +12,7 @@ const rngOf = p => {
 };
 const sel = p => {
   const [a, b] = rngOf(p);
-  return SALES.filter(s => s.at >= a && s.at < b && (br === BRS[0] || s.dept === br));
+  return SALES.filter(s => saleAt(s) >= a && saleAt(s) < b && (br === BRS[0] || s.dept === br));
 };
 const ser = (p, f) => {
   const n = per === "today" ? 12 : +per,
@@ -21,7 +22,7 @@ const ser = (p, f) => {
     const i =
       per === "today"
         ? Math.min(11, Math.max(0, s.at.getHours() - 8))
-        : Math.min(n - 1, Math.max(0, Math.floor((s.at - a) / D)));
+        : Math.min(n - 1, Math.max(0, Math.floor((saleAt(s) - a) / D)));
     o[i] += f(s);
   });
   return o;
@@ -54,6 +55,7 @@ const NAV = [
       ["Products", "box"],
       ["Inventory", "box"],
       ["Selling points", "pos"],
+      ["Tables", "pos"],
       ["Recipes &amp; Production", "chef"],
       ["Recipe &amp; Production Report", "chart"]
     ]
@@ -87,7 +89,8 @@ const NAV = [
     "System",
     [
       ["Users &amp; roles", "users"],
-      ["Settings", "gear"]
+      ["Settings", "gear"],
+      ["License", "shield"]
     ]
   ]
 ];

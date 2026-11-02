@@ -98,11 +98,15 @@ const UOMS = [
     "Beverages",
     "Spirits",
     "Food",
-    "Groceries",
+    "Dry goods",
     "Cleaning",
     "Packaging",
     "Other"
   ];
+/** An item's tax, from Item setup. Items saved before this option are VAT, the way receiving treated them. */
+const itemTax = k => itemInfo(k).tax || "B";
+const itemTaxRate = k => TAX[itemTax(k)];
+const itemTaxLabel = k => (taxChoices().find(x => x[0] === itemTax(k)) || [])[1] || "";
 /** Item setup details. Items made before Item setup existed get defaults from their name, e.g. "Whiskey (ml)" -> ml. */
 const itemInfo = k => {
   if (INGU[k]) return INGU[k];
@@ -524,7 +528,7 @@ function posHTML() {
     val += v;
     return [iN(k), ...LOCS.map(l => fq(have(l, k))), fq(t), m2(cst(k)), m2(v)];
   });
-  return `<div class="pn tw"><div class="fr" style="align-items:center;justify-content:space-between"><h4 style="margin:0">Stock position report</h4><button class="chip on" style="flex:none" data-a="st_posprint">Print</button></div>${tb(["Item", ...LOCS.map(l => "#" + l), "#Total", "#Unit cost", "#Value"], rows, ["Total stock value", ...LOCS.map(() => ""), "", "", m2(val)])}</div>`;
+  return `<div class="pn tw"><div class="fr" style="align-items:center;justify-content:space-between"><h4 style="margin:0">Stock position report</h4><span class="fr" style="flex:none;margin:0"><button class="mini xl-btn" style="flex:none" data-a="rep_xlsxpage" data-title="Stock position report" data-like="st_posprint">Export to Excel</button><button class="chip on" style="flex:none" data-a="st_posprint">Print</button></span></div>${tb(["Item", ...LOCS.map(l => "#" + l), "#Total", "#Unit cost", "#Value"], rows, ["Total stock value", ...LOCS.map(() => ""), "", "", m2(val)])}</div>`;
 }
 // ---- stores ----
 const storeValue = l => Object.keys(ING).reduce((a, k) => a + Math.max(0, have(l, k)) * cst(k), 0);
@@ -734,12 +738,15 @@ function itemPopup(F, editing, lockUom) {
      M
        ? itemMadeSection(F, sp)
        : `<section class="itm-s"><h4>Units and cost</h4>
-    <div class="itm-g itm-g5">
+    <div class="itm-g itm-g6">
      <label>Unit of measure<input data-iv="it.uom" list="uomL" value="${esc(F.uom)}" placeholder="pcs, kg, ml" ${lockUom ? 'disabled title="This item already has stock or history, so its unit cannot change."' : ""}></label>
      <label>Buying unit<input data-iv="it.buyUnit" list="buyL" value="${esc(F.buyUnit)}" placeholder="e.g. Crate"></label>
      <label>Units per buying unit<input data-iv="it.perBuy" type="number" min="0" step="any" value="${esc(F.perBuy)}" placeholder="e.g. 24"></label>
      <label>Buying price (KES)<input data-iv="it.buyPrice" type="number" min="0" step="any" value="${esc(F.buyPrice)}" placeholder="Optional"></label>
      <label>Reorder level<input data-iv="it.reorder" type="number" min="0" step="any" value="${esc(F.reorder)}" placeholder="Optional"></label>
+     <label>VAT / tax<select data-iv="it.tax">${taxChoices()
+       .map(([v, l]) => `<option value="${v}" ${v === F.tax ? "selected" : ""}>${l}</option>`)
+       .join("")}</select></label>
     </div>
     <div class="itm-hint">Cost per unit: <b id="itCost"></b>${lockUom ? " · The unit is fixed because this item already has stock or history." : ""}</div>
    </section>`
@@ -777,7 +784,7 @@ function sendPanel(S, keys) {
       S,
       prod
         ? { name: prod.n, price: String(prod.p), per: String(prod.r[S.k]), tax: prod.t }
-        : { name: "", price: "", per: "1", tax: "B" }
+        : { name: "", price: "", per: "1", tax: itemTax(S.k) }
     );
   }
   return `<div class="pn" id="sdPanel"><h4>Send stock to a selling point</h4>
@@ -794,7 +801,9 @@ function sendPanel(S, keys) {
   <div class="fr"><label>Product name<input data-iv="sd.name" value="${esc(S.name)}" placeholder="${esc(u ? u.name : "")}" ${prod ? "disabled" : ""}></label>
    <label>Selling price (KES)<input data-iv="sd.price" type="number" min="0" step="any" value="${esc(S.price)}" placeholder="${prod ? "" : "Empty = stock only"}"></label>
    <label>One sale uses (${esc(u ? u.uom : "units")})<input data-iv="sd.per" type="number" min="0" step="any" value="${esc(S.per)}" ${prod ? "disabled" : ""}></label>
-   <label>VAT<select data-iv="sd.tax" ${prod ? "disabled" : ""}>${SP_TAX.map(([v, l]) => `<option value="${v}" ${v === S.tax ? "selected" : ""}>${l}</option>`).join("")}</select></label></div>`
+   <label>Tax<select data-iv="sd.tax" ${prod ? "disabled" : ""}>${taxChoices()
+     .map(([v, l]) => `<option value="${v}" ${v === S.tax ? "selected" : ""}>${l}</option>`)
+     .join("")}</select></label></div>`
   }
   <div class="stk" id="sdInfo"></div>
   <button class="chip on" data-a="inv_itsend">Send to ${esc(S.sp)}</button></div>`;
@@ -808,12 +817,12 @@ function sdSync(f) {
   all();
 }
 function itemsTable(keys) {
-  return `<div class="pn tw"><h4>Items in the Stock Master (${keys.length})</h4><table class="t"><tr><th>Code</th><th>Item</th><th>Group</th><th>Unit</th><th>Buying unit</th><th class="n">Buying price</th><th class="n">Cost / unit</th><th class="n">In stores</th><th class="n">At selling points</th><th></th></tr>${keys
+  return `<div class="pn tw"><h4>Items in the Stock Master (${keys.length})</h4><table class="t"><tr><th>Code</th><th>Item</th><th>Group</th><th>VAT / tax</th><th>Unit</th><th>Buying unit</th><th class="n">Buying price</th><th class="n">Cost / unit</th><th class="n">In stores</th><th class="n">At selling points</th><th></th></tr>${keys
     .map(k => {
       const u = itemInfo(k),
         all = tot(k),
         inStores = STORES.reduce((a, l) => a + have(l, k), 0);
-      return `<tr ${k === invF.itLast ? 'style="outline:2px solid #2ec4b6"' : ""}><td>${esc(u.code || "-")}</td><td>${esc(u.name)}</td><td>${esc(u.group || "")}</td><td>${esc(u.uom)}</td><td>${esc(buyLabel(u))}</td><td class="n">${m2(u.buyPrice)}</td><td class="n">${m2(cst(k))}</td><td class="n">${fq(inStores)}</td><td class="n ${all - inStores < 0 ? "neg" : ""}">${fq(all - inStores)}</td><td><div class="fr" style="flex-wrap:nowrap"><button class="mini" data-a="inv_itedit" data-k="${k}">Edit</button><button class="mini" data-a="inv_itpick" data-k="${k}">Send to selling point</button></div></td></tr>`;
+      return `<tr ${k === invF.itLast ? 'style="outline:2px solid #2ec4b6"' : ""}><td>${esc(u.code || "-")}</td><td>${esc(u.name)}</td><td>${esc(u.group || "")}</td><td>${esc(itemTaxLabel(k))}</td><td>${esc(u.uom)}</td><td>${esc(buyLabel(u))}</td><td class="n">${m2(u.buyPrice)}</td><td class="n">${m2(cst(k))}</td><td class="n">${fq(inStores)}</td><td class="n ${all - inStores < 0 ? "neg" : ""}">${fq(all - inStores)}</td><td><div class="fr" style="flex-wrap:nowrap"><button class="mini" data-a="inv_itedit" data-k="${k}">Edit</button><button class="mini" data-a="inv_itpick" data-k="${k}">Send to selling point</button></div></td></tr>`;
     })
     .join("")}</table></div>`;
 }
@@ -996,6 +1005,7 @@ const blankItemForm = (store = STORES[0]) => ({
   perBuy: "1",
   buyPrice: "",
   reorder: "",
+  tax: "B",
   store,
   qty: "",
   sup: "",
@@ -1069,7 +1079,8 @@ function itemSave() {
     uom,
     buyUnit,
     perBuy,
-    buyPrice: price
+    buyPrice: price,
+    tax: F.tax
   };
   ING[k] = name + " (" + uom + ")";
   if (!editing) {
@@ -1272,7 +1283,8 @@ function invAct(a, b) {
       buyUnit: u.buyUnit,
       perBuy: String(u.perBuy),
       buyPrice: String(u.buyPrice),
-      reorder: RO[d.k] !== undefined ? String(RO[d.k]) : ""
+      reorder: RO[d.k] !== undefined ? String(RO[d.k]) : "",
+      tax: itemTax(d.k)
     };
     invT = "items";
     return itOpened();
@@ -1490,12 +1502,17 @@ $("#vSub").oninput = e => {
     if (p === "it") itSrcSync(f); // selling-points.js
     if (p === "it" || p === "sd") itPreview();
     if (p === "sd") sdSync(f);
+    if (p === "spp" && f === "k" && invF.spp.k) {
+      // A new product starts with its stock item's tax. It can still be changed here.
+      invF.spp.tax = itemTax(invF.spp.k);
+      const tx = document.querySelector('[data-iv="spp.tax"]');
+      if (tx) tx.value = invF.spp.tax;
+    }
     if (p === "spp") spPreview();
     if (p === "spr" && f === "store") all(); // show the new store's quantities
     if (p === "rc") rcSync(f); // direct receive (receive.js)
     if (p === "vs") vsSync(f); // vendor statement (vendors.js)
     if (p === "pr" || p === "rcp" || p === "recb" || p === "recr") prSync(p, f);
-    if (p === "vh" || p === "hs") settingsPreview(); // settings.js
     if (p === "spe") speSync(f); // editing a selling point product (selling-points.js) // Recipes & Production (production.js)
   }
 };

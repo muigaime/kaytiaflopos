@@ -5,90 +5,57 @@ invF.hs = {
   cur: (FD_SETTINGS.currencies || []).map(c => `${c.c} = ${c.rate}`).join("\n"),
   printers: (FD_SETTINGS.printers || []).map(p => `${p.n} = ${p.ip}:${p.port}`).join("\n"),
   printUrl: FD_SETTINGS.printUrl || "",
-  printKey: FD_SETTINGS.printKey || ""
+  printKey: FD_SETTINGS.printKey || "",
+  taxB: String(TAX.B),
+  taxC: String(TAX.C)
 };
-// Which printer each sale point's kitchen and bar tickets go to. Dots can't be in these field keys.
-const routeKey = (point, st) => encodeURIComponent(point).replace(/\./g, "%2E") + "|" + st;
-invF.hsr = {};
-Object.entries(FD_SETTINGS.printRoutes || {}).forEach(([pt, r]) => {
-  invF.hsr[routeKey(pt, "kitchen")] = r.kitchen || "";
-  invF.hsr[routeKey(pt, "bar")] = r.bar || "";
-});
 function printersHTML() {
-  const L = FD_SETTINGS.printers || [],
-    sel = (pt, st) =>
-      `<select data-iv="hsr.${routeKey(pt, st)}"><option value="">Print by hand</option>${L.map(p => `<option ${invF.hsr[routeKey(pt, st)] === p.n ? "selected" : ""}>${esc(p.n)}</option>`).join("")}</select>`;
-  return `<div class="pn"><h4>Printers</h4><div class="stk">Orders go straight to these printers when they are sent. Network printers only (they have an IP address, normally port 9100).</div>
-  <div class="fr"><label>Printers, one per line: name = address<textarea data-iv="hs.printers" rows="4" placeholder="Kitchen = 192.168.1.50">${esc(invF.hs.printers)}</textarea></label><div style="display:grid;gap:6px;align-content:start">${L.map((p, i) => `<button class="mini" data-a="hs_test" data-i="${i}">Test ${esc(p.n)}</button>`).join("") || '<span class="stk">Save printers to test them and choose them below.</span>'}</div></div>
-  ${
-    L.length
-      ? `<div class="tw"><table class="t"><tr><th>Sale point</th><th>Kitchen orders print on</th><th>Bar orders print on</th></tr>${ALLD.filter(
-          posSells
-        )
-          .map(
-            pt =>
-              `<tr><td>${esc(pt)}</td><td>${sel(pt, "kitchen")}</td><td>${sel(pt, "bar")}</td></tr>`
-          )
-          .join("")}</table></div>`
-      : ""
-  }
-  <details><summary class="stk">Other terminals</summary><div class="fr"><label>Print server<input data-iv="hs.printUrl" value="${esc(invF.hs.printUrl)}" placeholder="http://${esc(location.hostname || "localhost")}:4000"></label><label>Print key (PRINT_KEY on the server)<input type="password" autocomplete="off" data-iv="hs.printKey" value="${esc(invF.hs.printKey)}"></label></div></details>
-  <div class="fr" style="justify-content:flex-end"><button class="chip on" style="flex:none" data-a="hs_save">Save printers</button></div></div>`;
-}
-const SET_SAMPLE = {
-  no: "01042",
-  ord: 12,
-  dept: "Main Restaurant",
-  label: "T4",
-  covers: "2",
-  waiter: "Waiter name",
-  guest: "",
-  room: "",
-  lines: [
-    { q: 1, n: "Grilled Tilapia", p: 1450, t: "B" },
-    { q: 2, n: "Dawa Cocktail", p: 850, t: "B" }
-  ],
-  t: { net: 2706.9, tax: 443.1, g: 3150 }
-};
-const setDraft = () => ({ ...invF.vh, name: invF.hs.name });
-function settingsPreviewHTML() {
-  const B = setDraft();
-  return (
-    guestBillHTML(SET_SAMPLE, B) +
-    receiptHTML(
-      {
-        ...SET_SAMPLE,
-        paid: slipRow("Cash", bill2(3200)),
-        change: 50,
-        fiscal: "CU details and the eTIMS QR print here"
-      },
-      B
-    ) +
-    orderSlipHTML("Kitchen", {
-      ...SET_SAMPLE,
-      lines: [{ q: 1, n: "Grilled Tilapia" }],
-      note: "No chilli"
-    }) +
-    orderSlipHTML("Bar", { ...SET_SAMPLE, lines: [{ q: 2, n: "Dawa Cocktail" }] })
-  );
-}
-/** Update the samples while typing (no redraw, so the cursor stays put). */
-function settingsPreview() {
-  const el = $("#setPrev");
-  if (el) el.innerHTML = settingsPreviewHTML();
+  const L = FD_SETTINGS.printers || [];
+  return `<div class="pn"><details class="psu-net"><summary><h4>Network printers and print server</h4><span class="stk">Only for printers with their own IP address, or terminals that print through another computer.</span></summary>
+  <div class="fr"><label>Printers, one per line: name = address<textarea data-iv="hs.printers" rows="4" placeholder="Kitchen = 192.168.1.50">${esc(invF.hs.printers)}</textarea></label><div style="display:grid;gap:6px;align-content:start">${L.map((p, i) => `<button class="mini" data-a="hs_test" data-i="${i}">Test ${esc(p.n)}</button>`).join("")}</div></div>
+  <div class="fr"><label>Print server<input data-iv="hs.printUrl" value="${esc(invF.hs.printUrl)}" placeholder="http://${esc(location.hostname || "localhost")}:4000"></label><label>Print key (PRINT_KEY on the server)<input type="password" autocomplete="off" data-iv="hs.printKey" value="${esc(invF.hs.printKey)}"></label></div>
+  <div class="fr" style="justify-content:flex-end"><button class="chip on" style="flex:none" data-a="hs_save">Save network printers</button></div></details></div>`;
 }
 V.settings = () => {
   const H = invF.vh,
     f = (l, k, ph = "") =>
       `<label>${l}<input data-iv="vh.${k}" value="${esc(H[k] || "")}" placeholder="${ph}"></label>`;
-  return `<div class="pn"><h4>Bills and receipts</h4><div class="stk">Printed at the top of every guest bill and receipt. Kitchen and bar orders carry no hotel details.</div>
+  const panels = {
+    hotel:
+      () => `<div class="pn"><h4>Hotel details</h4><div class="stk">Printed at the top of every guest bill and receipt. Kitchen and bar orders carry no hotel details.</div>
   <div class="fr"><label>Hotel name<input data-iv="hs.name" value="${esc(invF.hs.name)}"></label>${f("Postal address", "addr", "e.g. P.O. Box 123-80100, Mombasa")}${f("Email", "email")}</div>
   <div class="fr">${f("Telephone", "phone")}${f("KRA PIN", "pin")}${f("Till number", "till", "e.g. 4565515-NOBLE TIDE")}</div>
   <div class="fr">${f("Website", "web")}${f("Thank-you line on receipts", "thanks", "Thank you for dining with us.")}<button class="chip on" style="flex:none;align-self:end" data-a="hs_save">Save details</button></div></div>
- ${printersHTML()}
- <div class="set-prev" id="setPrev">${settingsPreviewHTML()}</div>`;
+ ${logosHTML()}`,
+    bills: () =>
+      payMethodsHTML() +
+      optsHTML(
+        "Bill and receipt options",
+        "These apply to every guest bill and receipt from now on.",
+        OPT_BILLS
+      ),
+    pos: () =>
+      optsHTML("POS options", "These apply to every waiter and cashier straight away.", OPT_POS),
+    tax: () => `<div class="pn"><h4>Tax setup</h4><div class="stk">Menu prices include tax. Each item is set to VAT, Tax C, both or no tax when it's created. A new rate applies to bills paid from now on, and past reports keep the rate they were paid at.</div>
+  <div class="fr" style="align-items:end"><label>VAT (%)<input data-iv="hs.taxB" inputmode="decimal" value="${esc(invF.hs.taxB)}"></label><label>Tax C (%)<input data-iv="hs.taxC" inputmode="decimal" value="${esc(invF.hs.taxC)}"></label><button class="chip on" style="flex:none" data-a="hs_tax">Save tax rates</button></div></div>`,
+    printers: () => machinesHTML() + printerSetupHTML() + printersHTML()
+  };
+  return setTabsHTML() + panels[setTab]();
 };
+function taxSave() {
+  const B = parseFloat(invF.hs.taxB),
+    C = parseFloat(invF.hs.taxC);
+  if (!(B >= 0 && B <= 100) || !(C >= 0 && C <= 100))
+    return toast("Tax rates should be between 0 and 100.");
+  FD_SETTINGS.tax = { B, C };
+  taxApply();
+  bosave();
+  toast("Tax rates saved. New bills will use them.");
+  all();
+}
 async function settingsAct(a, b) {
+  if (a === "tax") return taxSave();
+  if (["tab", "logorm", "payadd", "paydel"].includes(a)) return generalAct(a, b);
   if (a === "test") {
     const p = FD_SETTINGS.printers[+b.dataset.i];
     toast("Testing " + p.n + "…");
@@ -130,12 +97,6 @@ async function settingsAct(a, b) {
     printers.push({ n: m[1], ip: m[2], port });
   }
   FD_SETTINGS.printers = printers;
-  FD_SETTINGS.printRoutes = Object.fromEntries(
-    ALLD.filter(posSells).map(pt => [
-      pt,
-      { kitchen: invF.hsr[routeKey(pt, "kitchen")] || "", bar: invF.hsr[routeKey(pt, "bar")] || "" }
-    ])
-  );
   FD_SETTINGS.printUrl = invF.hs.printUrl.trim();
   FD_SETTINGS.printKey = invF.hs.printKey.trim();
   FD_SETTINGS.priceLists = priceLists;

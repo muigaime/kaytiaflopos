@@ -1,4 +1,6 @@
 node_modules/
 .DS_Store
 server/.env
+# The license signing key: anyone holding it can unlock any client
+tools/license-private-key.json
 server/src/generated/

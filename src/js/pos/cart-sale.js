@@ -2,7 +2,6 @@ let dept = "Bar",
   cart = {},
   held = [],
   rno = 1,
-  method = "cash",
   payRef = null;
 // 1e-9: quantities such as 0.1 must not lose a whole portion to rounding (0.3 / 0.1 = 2.9999…).
 const avail = it =>
@@ -18,11 +17,46 @@ let catSel = "",
   qMode = "next",
   qBuf = "";
 /** Bill numbers run on for ever. Order numbers start again with each staff shift. */
-const nextBill = () => pad(rno++, 5);
+// A number only stays taken once a bill has been used. One given back is the next to go out.
+const FREE_BILLS = [];
+const nextBill = () =>
+  FREE_BILLS.length ? FREE_BILLS.sort((a, b) => +a - +b).shift() : pad(rno++, 5);
+function billNoBack(no) {
+  if (+no === rno - 1) rno--;
+  else if (!FREE_BILLS.includes(no)) FREE_BILLS.push(no);
+}
+function orderNoBack(name, ord, opened) {
+  const sh = shiftOf(name);
+  if (!sh || !ord || (opened && new Date(opened) < new Date(sh.openedAt))) return;
+  if (sh.ono === ord) sh.ono--;
+  else (sh.ofree = sh.ofree || []).push(ord);
+}
 function nextOrder(name) {
   const sh = shiftOf(name);
+  if (sh && sh.ofree && sh.ofree.length) return sh.ofree.sort((a, b) => a - b).shift();
   if (sh) return (sh.ono = (sh.ono || 0) + 1);
   return orders.reduce((a, o) => Math.max(a, o.ord || 0), 0) + 1;
+}
+/** The sale on the screen holds its numbers from New sale (or its first item) until it is sent or paid. */
+let draft = null;
+function draftStart() {
+  if (cur || draft) return "";
+  const stop = newBillBlock();
+  if (stop) return stop;
+  draft = { no: nextBill(), ord: nextOrder(user ? user.n : "") };
+  return "";
+}
+function draftTake() {
+  const d = draft || { no: nextBill(), ord: nextOrder(user ? user.n : "") };
+  draft = null;
+  return d;
+}
+/** Nothing was sold on these numbers, so the next sale uses them and the sequence has no gap. */
+function draftRelease() {
+  if (!draft) return;
+  billNoBack(draft.no);
+  if (user) orderNoBack(user.n, draft.ord);
+  draft = null;
 }
 const get = id => ITEMS.find(i => i.id == id),
   pad = (n, l = 6) => String(n).padStart(l, "0");
@@ -122,6 +156,7 @@ function totals(c = cart, a = c === cart ? (cur ? { pl: cur.pl } : cartAdj) : nu
   };
 }
 function drawCart() {
+  $("#vatL").textContent = taxName();
   const ids = Object.keys(cart),
     adj = cur ? { pl: cur.pl } : cartAdj;
   if (!ids.length) cartAdj = {};
@@ -149,15 +184,18 @@ function drawCart() {
   $("#tNet").textContent = bill2(t.net);
   $("#tTax").textContent = bill2(t.tax);
   $("#tGross").textContent = bill2(t.g);
-  $("#sendBtn").disabled = !ids.length;
+  $("#sendBtn").disabled = !ids.length && !(draft && !cur);
+  $("#sendBtn").textContent = !ids.length && draft && !cur ? "Open empty bill" : "Send order";
   $("#ordBtn").textContent = `Open orders (${visOrders().length})`;
-  $("#fBill").value = cur ? cur.no : pad(rno, 5);
+  $("#fBill").value = cur ? cur.no : draft ? draft.no : "";
+  $("#fBill").classList.toggle("printed", !!(cur || draft || {}).printed);
+  $("#fBill").classList.toggle("rep", !!(cur || draft || {}).billCopies);
   if (cur) $("#fTable").value = cur.label;
   $("#fTable").disabled = !!cur;
   $("#fWaiter").value = user ? user.n : "";
-  $("#fDT").value = new Date().toLocaleString("en-KE");
-  $("#fBdate").value = new Date().toLocaleDateString("en-GB");
-  $("#hDate").textContent = new Date().toLocaleDateString("en-GB");
+  $("#fDT").value = bizNow().toLocaleString("en-KE");
+  $("#fBdate").value = dateGB(bizDate());
+  $("#hDate").textContent = dateGB(bizDate());
   $("#qtyBtn").textContent = nextQty > 1 ? "QTY ×" + nextQty : "QTY";
   $("#kmBtn").textContent = kmsg ? "Kitchen msg ✓" : "Kitchen msg";
   $("#riderBtn").textContent = rider ? "Rider ✓" : "Rider details";
@@ -172,6 +210,7 @@ function add(id, d = 1) {
     const m = avail(it);
     if (m <= 0) return;
     cart[id] = Math.min(n, m);
+    draftStart();
   }
   drawCart();
 }
@@ -190,6 +229,9 @@ function tapConfirm(btn, fn, msg) {
   }, 2500);
 }
 function resetSale() {
+  cartSwaps = [];
+  // A printed number has been seen by a guest, so it isn't used again.
+  if (draft && draft.printed) draft = null;
   cart = {};
   cur = null;
   kmsg = "";
@@ -224,34 +266,19 @@ $("#lines").onclick = e => {
     drawCart();
   }
 };
+function newSale() {
+  resetSale();
+  const stop = draftStart();
+  if (stop) fsNote(stop);
+  drawCart();
+}
 $("#newSale").onclick = e => {
   Object.keys(cart).length || cur
-    ? tapConfirm(e.currentTarget, resetSale, "CLEAR? TAP AGAIN")
-    : resetSale();
+    ? tapConfirm(e.currentTarget, newSale, "CLEAR? TAP AGAIN")
+    : newSale();
 };
 $("#cancelBtn").onclick = e => {
   if (Object.keys(cart).length || cur) tapConfirm(e.currentTarget, resetSale, "TAP AGAIN");
-};
-$("#spBtn").onclick = $("#chSP").onclick = () => {
-  $("#spList").innerHTML = DEPTS.map(
-    d => `<button class="chip ${d === shownPoint() ? "on" : ""}" data-d="${d}">${d}</button>`
-  ).join("");
-  $("#mSP").classList.add("show");
-};
-$("#spList").onclick = e => {
-  const d = e.target.dataset.d;
-  if (!d) return;
-  if (dept === ALLP) showTab(d);
-  else if (d !== dept) {
-    const had = Object.keys(cart).length;
-    dept = d;
-    resetSale();
-    drawDepts();
-    drawCats();
-    drawCart();
-    if (had) fsNote("Order cleared: sale point changed.");
-  }
-  $("#mSP").classList.remove("show");
 };
 function qOpen(mode, title) {
   qMode = mode;
@@ -298,7 +325,7 @@ function selRender() {
     ? `<div class="sr sh"><label><input type="checkbox" id="selAll" ${ch.length === L.length ? "checked" : ""}></label><span>Bill no</span><span>Table no</span><span>Waiter</span><span>Guest name</span><span>Date</span><span>Time</span><span>Curr</span><span class="n">Amount</span><span>S point</span></div>` +
       L.map(
         o =>
-          `<div class="sr ${selSet.has(o.no) ? "on" : ""}" data-row="${o.no}"><label><input type="checkbox" data-s="${o.no}" ${selSet.has(o.no) ? "checked" : ""}></label><span class="sr-no" title="Bill ${slipEsc(o.no)}, order ${slipEsc(o.ord)}">${slipEsc(o.no)}<small>Order ${slipEsc(o.ord)}</small></span><span class="sr-t" title="${slipEsc(o.label)}"><b>${slipEsc(o.label)}</b></span>${cell(o.waiter || "–")}${cell(o.guest || "N/A")}${cell(o.at.toLocaleDateString("en-GB"))}${cell(o.at.toLocaleTimeString("en-GB"))}${cell("KES", "sr-cur")}<span class="n"><b>${bill2(totals(o.lines, o).g)}</b></span>${cell(billPlace(o.lines))}</div>`
+          `<div class="sr ${selSet.has(o.no) ? "on" : ""} ${o.printed ? "printed" : ""} ${o.billCopies ? "rep" : ""}" data-row="${o.no}"><label><input type="checkbox" data-s="${o.no}" ${selSet.has(o.no) ? "checked" : ""}></label><span class="sr-no" title="Bill ${slipEsc(o.no)}, order ${slipEsc(o.ord)}">${slipEsc(o.no)}<small>Order ${slipEsc(o.ord)}${emptyTag(o)}</small></span><span class="sr-t" title="${slipEsc(o.label)}"><b>${slipEsc(o.label)}</b></span>${cell(o.waiter || "–")}${cell(o.guest || "N/A")}${cell(o.at.toLocaleDateString("en-GB"))}${cell(o.at.toLocaleTimeString("en-GB"))}${cell("KES", "sr-cur")}<span class="n"><b>${bill2(totals(o.lines, o).g)}</b></span>${cell(billWhere(o))}</div>`
       ).join("")
     : '<div class="empty">No pending bills for ' + w + ".</div>";
   // These work on one bill: highlight exactly one.
@@ -307,7 +334,7 @@ function selRender() {
     ["view", "View"],
     ["add", "Add items"],
     ["bill", "Print bill"],
-    ["swap", "Swap"]
+    ...(can("swap") ? [["swap", "Swap"]] : [])
   ]
     .map(
       ([a, l]) =>
@@ -321,9 +348,11 @@ function selRender() {
   $("#selOpt").textContent = `Bill options (${ch.length})`;
   $("#selOpt").disabled = !ch.length;
   $("#selChgAll").disabled = !L.length;
+  $("#selPush").innerHTML = selPushHTML(ch);
 }
 function selOpen() {
   selSet = new Set();
+  selPushOpen = false;
   selRender();
   $("#mSel").classList.add("show");
   $("#selList").scrollTop = 0;
@@ -360,7 +389,7 @@ function orderView(o) {
     ppl = o.waiter ? o.waiter : "–",
     row = (l, v) => (v ? `<div><span>${l}</span><b>${slipEsc(v)}</b></div>` : "");
   $("#viewBody").innerHTML = `<h3>Bill ${slipEsc(o.no)}</h3>
-  <div class="view-meta">${row("Order no", o.ord)}${row("Table", o.label)}${row("Sale point", billPlace(o.lines))}${row("Waiter", ppl)}${row("Guest", o.guest)}${row("Covers", o.covers)}${row("Room", o.room)}${row("Sent", hhmm(o.at))}${row("Rounds", String(o.rounds))}${o.rider ? row("Rider", o.rider.n + " " + o.rider.p) : ""}</div>
+  <div class="view-meta">${row("Order no", o.ord)}${row("Table", o.label)}${row("Sale point", billWhere(o))}${row("Waiter", ppl)}${row("Guest", o.guest)}${row("Covers", o.covers)}${row("Room", o.room)}${row("Sent", hhmm(o.at))}${row("Rounds", String(o.rounds))}${o.rider ? row("Rider", o.rider.n + " " + o.rider.p) : ""}</div>
   <div class="view-lines"><table><tr><th>Qty</th><th>Item</th><th class="n">Price</th><th class="n">Total</th></tr>${slipLines(
     o.lines,
     o
@@ -370,7 +399,7 @@ function orderView(o) {
         `<tr><td>${x.q}</td><td>${slipEsc(x.n)}</td><td class="n">${bill2(x.p)}</td><td class="n">${bill2(x.p * x.q)}</td></tr>`
     )
     .join("")}</table></div>
-  <div class="view-tots">${t.disc ? slipRow("Subtotal", bill2(t.sub)) + slipRow("Discount", "-" + bill2(t.disc)) : ""}${slipRow("Net", bill2(t.net))}${slipRow("VAT", bill2(t.tax))}<div class="view-total"><span>Total</span><span>${KES(t.g)}</span></div>${t.pl ? `<small>Price list: ${slipEsc(t.pl.n)}</small>` : ""}${t.cur ? `<small>${slipEsc(t.cur.c)} ${bill2(t.g / t.cur.rate)}</small>` : ""}</div>
+  <div class="view-tots">${t.disc ? slipRow("Subtotal", bill2(t.sub)) + slipRow("Discount", "-" + bill2(t.disc)) : ""}${slipRow("Net", bill2(t.net))}${slipRow(taxName(), bill2(t.tax))}<div class="view-total"><span>Total</span><span>${KES(t.g)}</span></div>${t.pl ? `<small>Price list: ${slipEsc(t.pl.n)}</small>` : ""}${t.cur ? `<small>${slipEsc(t.cur.c)} ${bill2(t.g / t.cur.rate)}</small>` : ""}</div>
   <div class="row"><button class="chip on" data-close>Close</button></div>`;
   $("#mView").classList.add("show");
 }
@@ -510,24 +539,35 @@ $("#settleBtn").onclick = () => {
 };
 $("#printBtn").onclick = () => {
   if (Object.keys(cart).length && !cur) {
-    showRc(
-      waiterCopies(
-        guestBillHTML({
-          no: $("#fBill").value,
-          dept: billPlace(cart),
-          label: $("#fTable").value || "Walk-in",
-          guest: $("#fGuest").value,
-          covers: $("#fCov").value,
-          room: $("#fRoom").value,
-          waiter: user ? user.n : "",
-          rider,
-          lines: slipLines(cart, cartAdj),
-          t: totals()
-        })
-      ),
-      null,
-      "Close"
-    );
+    if (posOpt("mustSend")) return fsNote("Send the order first, then print the bill.");
+    const print = by => {
+      if (draft) billMark(draft, by, user.n, cart);
+      drawCart();
+      showRc(
+        waiterCopies(
+          guestBillHTML({
+            pt: billPoints(cart)[0],
+            reprint: draft && draft.billCopies,
+            no: $("#fBill").value,
+            dept: billPlace(cart),
+            label: $("#fTable").value || "Walk-in",
+            guest: $("#fGuest").value,
+            covers: $("#fCov").value,
+            room: $("#fRoom").value,
+            waiter: user ? user.n : "",
+            rider,
+            lines: slipLines(cart, cartAdj),
+            t: totals()
+          })
+        ),
+        null,
+        "Close"
+      );
+      printSlips("GUEST BILL");
+    };
+    if (draft && draft.printed && !BILL_AUTH.includes(user.role))
+      return pinAsk("Reprint bill " + draft.no, PIN_REPRINT, print);
+    print(user.n);
   } else $("#ordBtn").click();
 };
 $("#lock").onclick = e => {

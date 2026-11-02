@@ -46,7 +46,7 @@ function wsEdit(u) {
       : Object.fromEntries(
           WAITER_RIGHTS.flatMap(([, L]) => L).map(([k]) => [
             k,
-            !["allBills", "disc", "void", "merge", "split", "addAll"].includes(k)
+            !["allBills", "disc", "void", "merge", "split", "addAll", "newDay"].includes(k)
           ])
         )
   };

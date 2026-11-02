@@ -1,0 +1,70 @@
+<!doctype html>
+<!-- Sample Kitchen Order. The system builds its real slips itself, so changing this file does not change what prints. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Kitchen Order template</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&amp;display=swap">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+html, body { margin: 0; background: #fff; }
+body { display: flex; justify-content: center; padding: 16px; }
+@media print { @page { margin: 0; } body { padding: 0; } }
+:root { --sl-serif: "Playfair Display", Georgia, "Times New Roman", serif; }
+.slip { --sl-serif: "Playfair Display", Georgia, "Times New Roman", serif; box-sizing: border-box; width: 100%; max-width: 302px; margin: 0px auto 14px; padding: 16px 14px; background: rgb(255, 254, 250); border: 1px solid rgb(227, 216, 195); color: rgb(17, 17, 17); font-style: normal; font-variant: lining-nums; font-size-adjust: none; font-language-override: normal; font-kerning: auto; font-optical-sizing: auto; font-feature-settings: normal; font-variation-settings: normal; font-weight: normal; font-stretch: normal; font-size: 12px; line-height: 1.45; font-family: "Schibsted Grotesk", Arial, Helvetica, sans-serif; text-align: left; }
+.slip .sl-head { text-align: center; }
+.slip .sl-crest { width: 42px; height: 42px; margin: 0px auto 7px; display: grid; place-items: center; border: 1px solid rgb(17, 17, 17); border-radius: 50%; outline: rgb(17, 17, 17) solid 1px; outline-offset: 2px; font: 500 21px/1 var(--sl-serif); }
+.slip .sl-name { font: 600 20px/1.2 var(--sl-serif); }
+.slip .sl-co { font-size: 11px; line-height: 1.35; }
+.slip .sl-orn { display: flex; align-items: center; gap: 8px; margin: 8px 0px 7px; font-size: 8px; }
+.slip .sl-orn i { flex: 1 1 0%; border-top: 1px solid rgb(17, 17, 17); }
+.slip .sl-title { font: 600 15px/1.2 var(--sl-serif); letter-spacing: 0.2em; text-transform: uppercase; }
+.slip .sl-sub { margin-top: 2px; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; }
+.slip .sl-meta { display: grid; grid-template-columns: 1.25fr 1fr; gap: 2px 10px; margin: 10px 0px 8px; font-size: 11.5px; }
+.slip .sl-meta div { display: flex; gap: 5px; min-width: 0px; }
+.slip .sl-meta .w { grid-column: 1 / -1; }
+.slip .sl-meta span { flex: 0 0 auto; }
+.slip .sl-meta span::after { content: ":"; }
+.slip .sl-meta b { min-width: 0px; font-weight: 600; overflow-wrap: anywhere; }
+.slip .sl-t { width: 100%; border-collapse: collapse; table-layout: auto; }
+.slip .sl-t th { padding: 4px 3px; border-top: 1px solid rgb(17, 17, 17); border-bottom: 1px solid rgb(17, 17, 17); font-size: 10.5px; letter-spacing: 0.08em; text-align: left; text-transform: uppercase; }
+.slip .sl-t td { padding: 5px 3px; border-bottom: 1px dotted rgb(17, 17, 17); vertical-align: top; }
+.slip .sl-t small { font-size: 9.5px; }
+.slip .n, .slip .sl-t th.n { text-align: right; white-space: nowrap; }
+.slip .sl-r, .slip .sl-paid .r, .slip .sl-total { display: flex; justify-content: space-between; gap: 10px; }
+.slip .sl-tots { margin-top: 6px; }
+.slip .sl-total { margin-top: 4px; padding: 5px 0px; border-top: 1px solid rgb(17, 17, 17); border-bottom: 3px double rgb(17, 17, 17); font-style: ; font-variant-ligatures: ; font-variant-caps: ; font-variant-east-asian: ; font-variant-alternates: ; font-variant-position: ; font-variant-emoji: ; font-weight: ; font-stretch: ; font-size: ; line-height: ; font-family: ; font-optical-sizing: ; font-size-adjust: ; font-kerning: ; font-feature-settings: ; font-variation-settings: ; font-language-override: ; font-variant-numeric: lining-nums; }
+.slip .sl-paid { margin-top: 10px; }
+.slip h5 { margin: 0px 0px 3px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.slip .sl-sign { display: grid; gap: 14px; margin-top: 18px; }
+.slip .sl-sign div { display: flex; align-items: flex-end; gap: 6px; }
+.slip .sl-sign span { flex: 0 0 auto; font-weight: 600; }
+.slip .sl-sign i { flex: 1 1 0%; border-bottom: 1px solid rgb(17, 17, 17); }
+.slip .sl-till { margin-top: 16px; padding: 7px 4px; border: 1px solid rgb(17, 17, 17); text-align: center; }
+.slip .sl-till span { display: block; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; }
+.slip .sl-till b { display: block; font-size: 15px; font-weight: 700; overflow-wrap: anywhere; }
+.slip .sl-fiscal { margin-top: 10px; font-size: 10.5px; text-align: center; }
+.slip .sl-fiscal .qr { margin: 5px auto; border-radius: 0px; }
+.slip .sl-thanks { margin-top: 12px; font: italic 500 14px/1.3 var(--sl-serif); text-align: center; }
+.slip .sl-small { margin-top: 8px; font-size: 10px; text-align: center; }
+.slip .sl-foot { margin-top: 10px; font-size: 10.5px; font-weight: 600; text-align: center; }
+.slip .sl-ot { padding: 7px 0px; border-top: 2px solid rgb(17, 17, 17); border-bottom: 2px solid rgb(17, 17, 17); font: 600 21px/1.15 var(--sl-serif); letter-spacing: 0.05em; text-align: center; text-transform: uppercase; }
+.slip .sl-round { margin-top: 4px; font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-align: center; text-transform: uppercase; }
+.slip .sl-make { border-top: 1px solid rgb(17, 17, 17); }
+.slip .sl-make div { display: flex; gap: 10px; padding: 6px 2px; border-bottom: 1px dotted rgb(17, 17, 17); font-size: 16px; font-weight: 600; line-height: 1.25; }
+.slip .sl-make b { flex: 0 0 auto; min-width: 26px; font-weight: 800; }
+.slip .sl-h { margin-top: 8px; }
+.slip .sl-note { margin-top: 8px; padding: 5px 7px; border: 1px solid rgb(17, 17, 17); font-size: 13px; font-weight: 700; }
+.slip .sl-fx { margin-top: 4px; font-weight: 600; text-align: right; }
+.view-tots .sl-r { display: flex; justify-content: space-between; }
+.slip.sl-void .sl-ot { border-color: rgb(0, 0, 0); background: rgb(0, 0, 0); color: rgb(255, 255, 255); print-color-adjust: exact; }
+.slip.sl-void .sl-make span { text-decoration: line-through; }
+.slip .sl-copy { margin-bottom: 6px; padding: 4px 0px; border-top: 1px dashed rgb(17, 17, 17); border-bottom: 1px dashed rgb(17, 17, 17); font-size: 11px; font-weight: 800; letter-spacing: 0.16em; text-align: center; text-transform: uppercase; }
+</style>
+</head>
+<body>
+<div class="slip sl-order"><div class="sl-ot">Kitchen Order</div><div class="sl-meta"><div class=""><span>Bill no</span><b>01042</b></div><div class=""><span>Order no</span><b>12</b></div><div class=""><span>Covers</span><b>2</b></div><div class=""><span>Waiter</span><b>Waiter name</b></div><div class=""><span>Table</span><b>T4</b></div><div class=""><span>Guest</span><b>N/A</b></div><div class=""><span>Room</span><b>–</b></div><div class="w"><span>Date / time</span><b>02/11/2026, 15:07:37</b></div></div><div class="sl-make"><div><b>1</b><span>Grilled Tilapia</span></div></div><div class="sl-note">Note: No chilli</div></div>
+</body>
+</html>

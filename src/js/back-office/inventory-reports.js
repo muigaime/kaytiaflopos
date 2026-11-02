@@ -193,7 +193,7 @@ function invReportHTML(kind) {
            .join("")}</select></label>`
        : ""
    }
-   <button class="mini" data-a="inv_rpcsv" data-k="${kind}">Export CSV</button><button class="chip on" data-a="inv_rpprint" data-k="${kind}">Print</button></div></div>
+   <button class="mini xl-btn" data-a="inv_rpxlsx" data-k="${kind}">Export to Excel</button><button class="chip on" data-a="inv_rpprint" data-k="${kind}">Print</button></div></div>
 
  <div class="pn"><div class="kstg">
   <div class="kst"><span>Total cost</span><b>KES ${m2(total)}</b></div>
@@ -261,52 +261,62 @@ function repRange(r) {
   invR[1] = t;
 }
 
-/** Download the report lines as CSV (opens in Excel). */
-function repCsv(kind) {
-  const rows = repFiltered(kind),
-    q = v => `"${String(v).replace(/"/g, '""')}"`,
-    head = [
-      "Date",
-      "Reference",
-      "Store",
-      REP_KINDS[kind].party,
-      "Item",
-      "Quantity",
-      "Unit",
-      "Unit cost",
-      "Cost",
-      "By"
-    ],
-    lines = rows.map(r =>
-      [
-        new Date(r.at).toLocaleString("en-GB"),
-        r.ref,
-        r.store,
-        r.party,
-        itemInfo(r.k).name,
-        +r.q.toFixed(3),
-        itemInfo(r.k).uom,
-        r.cost.toFixed(2),
-        r.value.toFixed(2),
-        r.by
-      ]
-        .map(q)
-        .join(",")
-    );
+/** The report lines as an Excel workbook. */
+function repExcel(kind) {
+  const K = REP_KINDS[kind],
+    rows = repFiltered(kind);
   if (!rows.length) return toast("Nothing to export in this range.");
-  const blob = new Blob(["﻿" + [head.map(q).join(","), ...lines].join("\r\n")], {
-      type: "text/csv"
-    }),
-    a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = `${kind === "pur" ? "purchases" : kind === "iss" ? "issues" : "damages"}-${invR[0]}_to_${invR[1]}.csv`;
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(() => {
-    URL.revokeObjectURL(a.href);
-    a.remove();
-  }, 1000);
-  toast(rows.length + " lines exported.");
+  XLSX.download(
+    {
+      company: FD_SETTINGS.name,
+      title: K.title,
+      head: `${invR[0]} to ${invR[1]} · ${invRep.store === "All" ? (kind === "pur" ? "All places" : "All stores") : invRep.store}`,
+      by: xlsxBy(),
+      sections: [
+        {
+          t: K.title,
+          c: [
+            "Date",
+            "Reference",
+            kind === "pur" ? "Place" : "Store",
+            K.party,
+            "Item",
+            "#Quantity",
+            "Unit",
+            "#Unit cost",
+            "#Cost",
+            "By"
+          ],
+          r: rows.map(r => [
+            new Date(r.at).toLocaleString("en-GB"),
+            r.ref,
+            r.store,
+            r.party,
+            itemInfo(r.k).name,
+            +r.q.toFixed(3),
+            itemInfo(r.k).uom,
+            r.cost.toFixed(2),
+            r.value.toFixed(2),
+            r.by
+          ]),
+          f: [
+            "Total",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            rows.reduce((a, r) => a + r.value, 0).toFixed(2),
+            ""
+          ]
+        }
+      ]
+    },
+    `${K.title}_${invR[0]}_to_${invR[1]}`
+  );
+  toast(K.title + " exported to Excel.");
 }
 
 /** The report on paper (same layout as the stock taking report; print rules are ST_CSS). */
@@ -405,7 +415,7 @@ function repPrintDoc(kind) {
 function repAct(a, d) {
   if (a === "rpby") invRep.by = d.b;
   else if (a === "rprange") repRange(d.rng);
-  else if (a === "rpcsv") return repCsv(d.k);
+  else if (a === "rpxlsx") return repExcel(d.k);
   else if (a === "rpprint") return stPrint(REP_KINDS[d.k].title, repPrintDoc(d.k));
   all();
 }

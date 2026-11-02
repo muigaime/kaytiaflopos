@@ -24,6 +24,7 @@ const billHas = () => Object.keys(cart).length > 0;
 /** The sale on the guest check, as a bill. */
 const draftBill = () => ({
   draft: true,
+  printed: !!(draft && draft.printed),
   no: $("#fBill").value,
   label: $("#fTable").value || "This sale",
   guest: $("#fGuest").value,
@@ -37,6 +38,7 @@ const billTot = b => totals(b.lines, billAdj(b));
 function boptLog(act, b, why, detail, amt, extra) {
   BILLLOG.push({
     at: new Date().toISOString(),
+    bd: bizDate(),
     act,
     no: b.no,
     label: b.label,
@@ -67,7 +69,8 @@ function boptDone(msg) {
 $("#billBtn").onclick = () => boptWheel(null);
 function boptWheel(scope) {
   boptScope = scope;
-  boptEl("Box").classList.remove("bop-void", "bop-split");
+  boptEl("Box").classList.remove("bop-void", "bop-tr");
+  tr = null;
   const K = Object.keys(BOPT);
   bopt = null;
   $("#bopWheel").innerHTML =
@@ -89,15 +92,17 @@ function boptBills(act) {
 }
 function boptStart(act) {
   if (!boptScope && cur && billHas()) return fsNote("Send the new items first.");
-  const L = boptBills(act);
-  if (act === "merge") {
-    if (orders.length < 2) return fsNote("Merging needs two open bills.");
-  } else if (!L.length)
+  const moving = act === "merge" || act === "split";
+  if (moving) {
+    if (orders.length < 2)
+      return fsNote("That needs two open bills. Ask the waiter to open a new bill.");
+  } else if (!boptBills(act).length)
     return fsNote("There is no bill to change. Add items or send an order first.");
   bopt = { act };
   $("#bopWheel").style.display = "none";
   boptEl("Box").style.display = "";
-  if (actsAlone(act)) {
+  // Whoever may see all bills moves them without a PIN.
+  if (actsAlone(act) || (moving && seesAllBills(user))) {
     bopt.by = user.n;
     return boptChoose();
   }
@@ -126,21 +131,20 @@ function boptAuth() {
 }
 function boptChoose() {
   if (bopt.act === "ret") return retForm();
-  if (bopt.act === "merge") return boptMergeForm();
+  if (bopt.act === "merge" || bopt.act === "split") return trOpen();
   const L = boptBills(bopt.act);
   if (L.length === 1) return boptOpen(L[0]);
   boptEl("Body").innerHTML =
     `<h3>${BOPT[bopt.act][0]}</h3><p class="stk">Which bill?</p><div class="bop-list">${L.map(
       (b, i) =>
-        `<button class="bop-b" data-bb="${i}"><span><b>${slipEsc(b.label)}</b> · ${slipEsc(b.dept)}<small>${b.draft ? "Not sent yet" : slipEsc(b.no)} · ${cnt(b.lines)} items</small></span><b>${KES(billTot(b).g)}</b></button>`
+        `<button class="bop-b ${b.printed ? "printed" : ""} ${b.billCopies ? "rep" : ""}" data-bb="${i}"><span><b>${slipEsc(b.label)}</b> · ${slipEsc(b.dept)}<small>${b.draft ? "Not sent yet" : slipEsc(b.no)} · ${cnt(b.lines)} items</small></span><b>${KES(billTot(b).g)}</b></button>`
     ).join("")}</div><div class="row"><button class="mini" data-close>Cancel</button></div>`;
 }
 function boptOpen(b) {
   bopt.bill = b;
   ({
     disc: boptDiscForm,
-    void: boptVoidForm,
-    split: boptSplitForm
+    void: boptVoidForm
   })[bopt.act]();
 }
 const boptTop = () =>
@@ -282,6 +286,18 @@ function boptVoidSave() {
     V = Object.entries(bopt.vq).filter(([, q]) => q > 0),
     why = boptEl("Why").value.trim(),
     back = !b.draft && boptEl("Back").checked;
+  // A bill opened and never used has nothing to void, so it just closes.
+  if (!b.draft && !Object.keys(b.lines).length) {
+    boptLog("Void", b, why || "Empty bill", "Empty bill closed · number used again", 0, {
+      whole: true,
+      items: []
+    });
+    orders.splice(orders.indexOf(b), 1);
+    billNoBack(b.no);
+    orderNoBack(b.waiter, b.ord, b.at);
+    if (cur === b) cur = null;
+    return boptDone(`Empty bill ${b.no} closed.`);
+  }
   if (!V.length) return boptMsg("Tick the items to void.");
   if (!why) return boptMsg("Tap or type the reason for voiding.");
   const before = billTot(b).g,
@@ -314,8 +330,10 @@ function boptVoidSave() {
   );
   // Nothing on a sale that wasn't sent has reached the kitchen or the bar, so no alert.
   if (b.draft) {
-    if (whole) resetSale();
-    else V.forEach(([id, q]) => (q >= cart[id] ? delete cart[id] : (cart[id] -= q)));
+    if (whole) {
+      draft = null; // the log keeps this number, so it isn't used again
+      resetSale();
+    } else V.forEach(([id, q]) => (q >= cart[id] ? delete cart[id] : (cart[id] -= q)));
     return boptDone(whole ? "Sale voided." : "Items voided.");
   }
   if (back) V.forEach(([id, q]) => itemStockMove(get(id), -q));
@@ -348,143 +366,9 @@ function boptVoidSave() {
   printOrderTickets(tickets, voidTicketLines, "void alert");
 }
 
-// ---------------------------------------------------------------- merge
-function boptMergeForm() {
-  // Whoever authorizes decides what can be merged: a Manager's PIN opens every waiter's bills.
-  const by = USERS.find(u => u.n === bopt.by),
-    me = user ? user.n : "",
-    L = billsFor(by, by.d).sort((a, b) => (b.waiter === me) - (a.waiter === me));
-  if (L.length < 2) {
-    $("#mBopt").classList.remove("show");
-    return fsNote("Merging needs two open bills.");
-  }
-  boptEl("Body").innerHTML =
-    `<h3>Merge bills</h3><p class="stk">Tick the bills to combine. They become one bill under the first one ticked, and it stays with that bill's waiter. Authorized by ${slipEsc(bopt.by)}.</p>
-  <div class="bop-list">${L.map(
-    o =>
-      `<label class="bop-b"><span><input type="checkbox" data-bm="${slipEsc(o.no)}" ${boptScope && boptScope.includes(o) ? "checked" : ""}> <b>${slipEsc(o.label)}</b> · ${slipEsc(o.dept)}<small>${slipEsc(o.no)} · ${cnt(o.lines)} items · ${slipEsc(o.waiter || "No waiter")}</small></span><b>${KES(totals(o.lines, o).g)}</b></label>`
-  ).join("")}</div>${boptFoot("Merge bills")}`;
-  bopt.order = (boptScope || []).map(o => o.no);
-}
-function boptMergeSave() {
-  const L = bopt.order.map(no => orders.find(o => o.no === no)).filter(Boolean),
-    key = o =>
-      JSON.stringify([o.pl && o.pl.n, o.cur && o.cur.c, o.disc && [o.disc.type, o.disc.v]]);
-  if (L.length < 2) return boptMsg("Tick at least two bills.");
-  if (new Set(L.map(key)).size > 1)
-    return boptMsg(
-      "These bills have different discounts, price lists or currencies. Make them the same first."
-    );
-  const [T, ...rest] = L,
-    amt = L.some(o => o.disc && o.disc.type === "amt");
-  if (amt) return boptMsg("Remove the KES discount first, then apply it to the merged bill.");
-  const was = rest.map(o => `${o.label} (${o.no}, ${o.waiter})`).join(", "),
-    mixed = rest.some(o => o.waiter !== T.waiter);
-  rest.forEach(o => {
-    Object.entries(o.lines).forEach(([id, q]) => (T.lines[id] = (T.lines[id] || 0) + q));
-    const c = parseInt(T.covers, 10) || 0,
-      d = parseInt(o.covers, 10) || 0;
-    if (c || d) T.covers = String(c + d);
-    T.guest = T.guest || o.guest;
-    T.room = T.room || o.room;
-    T.rider = T.rider || o.rider;
-    T.rounds = Math.max(T.rounds, o.rounds);
-    orders.splice(orders.indexOf(o), 1);
-    if (cur === o) cur = null;
-  });
-  boptLog("Merge", T, "", "Merged " + was);
-  boptDone(
-    `Merged into ${T.label}: ${KES(totals(T.lines, T).g)}.` +
-      (mixed ? ` It stays with ${T.waiter}.` : "")
-  );
-}
-
-// ---------------------------------------------------------------- split
-function boptSplitForm() {
-  const b = bopt.bill;
-  bopt.q = bopt.q || Object.fromEntries(Object.keys(b.lines).map(id => [id, 0]));
-  const lbl = boptEl("Nm") ? boptEl("Nm").value : b.label + " /2",
-    ids = Object.keys(b.lines),
-    moved = Object.fromEntries(ids.filter(id => bopt.q[id] > 0).map(id => [id, bopt.q[id]])),
-    left = Object.fromEntries(
-      ids.filter(id => bopt.q[id] < b.lines[id]).map(id => [id, b.lines[id] - bopt.q[id]])
-    ),
-    whole = !Object.keys(left).length,
-    row = (id, q, side) =>
-      `<div class="bs-i"><button class="bs-m" data-bs="${id}" data-d="${side}"><b>${q}</b><span>${slipEsc(get(id).n)}</span><i>${side > 0 ? "→" : "←"}</i></button>${q > 1 ? `<button class="bs-all" data-bs="${id}" data-d="${side * q}">All</button>` : ""}</div>`;
-  boptEl("Box").classList.add("bop-split");
-  boptEl("Body").innerHTML =
-    `${boptTop()}<p class="stk">Tap an item to move it to the new bill. Tap it there to bring it back.</p>
-  <div class="bs-pair"><div class="bs-p"><div class="bs-h"><small>Old bill</small><b>${slipEsc(b.label)}</b></div><div class="bs-r">${
-    Object.keys(left)
-      .map(id => row(id, left[id], 1))
-      .join("") || '<div class="bs-e">Nothing left on this bill.</div>'
-  }</div><div class="bs-t"><span>Total</span><b>${KES(totals(left, b).g)}</b></div></div>
-  <div class="bs-p bs-new"><label class="bs-h"><small>New bill</small><input id="bopNm" value="${slipEsc(lbl)}"></label><div class="bs-r">${
-    Object.keys(moved)
-      .map(id => row(id, moved[id], -1))
-      .join("") || '<div class="bs-e">Zero bill. Tap items on the old bill to move them here.</div>'
-  }</div><div class="bs-t"><span>Total</span><b id="bopNewT">${KES(totals(moved, whole ? b : boptSplitTerms(b)).g)}</b></div></div></div>
-  ${whole ? `<div class="status">Everything is moving, so ${slipEsc(b.label)} will close.</div>` : ""}${boptFoot("Split bill")}`;
-}
-/** A KES discount stays on the old bill; a percentage applies to both. */
-const boptSplitTerms = b => ({ ...b, disc: b.disc && b.disc.type === "pct" ? b.disc : null });
-function boptSplitSave() {
-  const b = bopt.bill,
-    label = boptEl("Nm").value.trim(),
-    M = Object.entries(bopt.q).filter(([, q]) => q > 0);
-  if (!M.length) return boptMsg("Move at least one item to the new bill.");
-  if (!label) return boptMsg("Enter the name of the new bill.");
-  if (orders.some(o => o.dept === b.dept && o.label.toLowerCase() === label.toLowerCase()))
-    return boptMsg(`${b.dept} already has an open bill called ${label}.`);
-  const whole = M.length === Object.keys(b.lines).length && M.every(([id, q]) => q >= b.lines[id]),
-    n = {
-      no: nextBill(),
-      ord: nextOrder(b.waiter),
-      label,
-      dept: b.dept,
-      lines: {},
-      rounds: b.rounds,
-      at: new Date(),
-      guest: b.guest,
-      covers: "",
-      room: b.room,
-      rider: b.rider,
-      waiter: b.waiter,
-      pl: b.pl,
-      cur: b.cur,
-      disc: whole ? b.disc : boptSplitTerms(b).disc
-    };
-  M.forEach(([id, q]) => {
-    n.lines[id] = q;
-    if (q >= b.lines[id]) delete b.lines[id];
-    else b.lines[id] -= q;
-  });
-  orders.push(n);
-  if (whole) {
-    orders.splice(orders.indexOf(b), 1);
-    if (cur === b) cur = null;
-  }
-  boptLog(
-    "Split",
-    b,
-    "",
-    `Moved to ${n.no} ${n.label}: ` +
-      M.map(([id, q]) => `${q} ${get(id).n}`).join(", ") +
-      (whole ? ` · ${b.no} closed` : ""),
-    -totals(n.lines, n).g,
-    { points: [...new Set([...billPoints(b.lines), ...billPoints(n.lines)])] }
-  );
-  boptDone(
-    whole
-      ? `All moved to ${n.label}: ${KES(totals(n.lines, n).g)}. ${b.label} closed.`
-      : `Split: ${b.label} ${KES(totals(b.lines, b).g)}, ${n.label} ${KES(totals(n.lines, n).g)}.`
-  );
-}
-
 // ---------------------------------------------------------------- clicks
 $("#mBopt").addEventListener("click", e => {
-  const b = e.target.closest("button,input[data-bm]");
+  const b = e.target.closest("button");
   if (e.target.id === "mBopt") return e.target.classList.remove("show");
   if (e.target.id === "bopVAll") {
     Object.keys(bopt.vq).forEach(id => (bopt.vq[id] = e.target.checked ? bopt.bill.lines[id] : 0));
@@ -509,26 +393,17 @@ $("#mBopt").addEventListener("click", e => {
   }
   if (d.bb !== undefined) return boptOpen(boptBills(bopt.act)[+d.bb]);
   if (d.bg === "auth") return boptAuth();
-  if (d.bs) {
-    bopt.q[d.bs] = Math.max(0, bopt.q[d.bs] + +d.d);
-    return boptSplitForm();
-  }
   if (d.bt) {
     bopt.type = d.bt;
     return boptDiscForm();
-  }
-  if (d.bm) {
-    bopt.order = bopt.order.filter(x => x !== d.bm);
-    if (b.checked) bopt.order.push(d.bm);
-    return;
   }
   if (d.bg === "save")
     return {
       disc: boptDiscSave,
       void: boptVoidSave,
       ret: retSave,
-      merge: boptMergeSave,
-      split: boptSplitSave
+      merge: trSave,
+      split: trSave
     }[bopt.act]();
 });
 $("#mBopt").addEventListener("input", e => {

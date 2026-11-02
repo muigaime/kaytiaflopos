@@ -21,7 +21,15 @@ function posAccess() {
 function shiftBadge() {
   const b = $("#shiftBtn"),
     sh = user && shiftOf(user.n);
-  b.textContent = !curDay() ? "Start day" : sh ? "● Shift open" : "Start shift";
+  b.textContent = !curDay() ? "Day closed" : sh ? "● Shift open" : "Start shift";
+  const ld = $("#ldate");
+  if (ld)
+    ld.textContent = onBizDate(bizDate()).toLocaleDateString("en-GB", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric"
+    });
   b.style.background = sh ? "#12804a" : "";
   b.style.color = sh ? "#fff" : "";
 }
@@ -45,16 +53,19 @@ function shiftOpen(msg) {
   $("#shMgr").classList.add("show");
 }
 function shDraw(msg) {
+  // Shift Management is for whoever counts a till. A waiter has My shift.
+  if (user && user.role === "Waiter") return msDraw(msg);
   const d = curDay(),
     sh = user && shiftOf(user.n);
   let h = `<div class="shm"><div class="shm-top"><h2>Shift Management</h2><button class="mini" data-sa="exit">Exit</button></div>${msg ? `<div class="status">${msg}</div>` : ""}`;
   if (shDone) h += shDone;
   else if (!d)
-    h += `<div class="shc"><h4>Business day</h4><div class="status bad">The day has not been started.</div><div class="stk">Cashiers cannot take payments until the day starts.</div><button class="chip on" data-sa="dstart">Start day</button></div>`;
+    h += `<div class="shc"><h4>Business day</h4><div class="status bad">The day has not been started.</div>${canDay() ? `<div class="stk">The new business date will be <b>${dateGB(nextBizDate())}</b>.</div><button class="chip on" data-sa="dstart">Start new day</button>` : `<div class="stk">Back Office or a cashier with the right has to start the new day. Your shift can start after that.</div>`}</div>`;
   else if (!user)
-    h += `<div class="shc"><div class="status ok">Day open since ${hm(d.openedAt)}</div><div class="stk">Sign in as a cashier to manage a shift.</div><button class="mini" data-sa="dend">End day</button></div>`;
+    h += `<div class="shc"><div class="status ok">Day open since ${hm(d.openedAt)}</div><div class="stk">Sign in as a cashier to manage a shift.</div></div>`;
+  else if (!sh && shiftHeld()) h += shiftHeldHTML();
   else if (!sh)
-    h += `<div class="shc"><h4>Start your shift</h4><div class="status ok">Day open since ${hm(d.openedAt)} · started by ${hx(d.openedBy)}</div><div class="shf"><span>Cashier</span><input readonly value="${hx(user.n)}"><span>Opening float (KES)</span><input id="shFloat" type="number" inputmode="decimal" placeholder="0.00"></div><button class="chip on" data-sa="sstart">Start my shift</button><div class="stk">${openShifts().length} shift(s) open today.</div><button class="mini" data-sa="dend">End day</button></div>`;
+    h += `<div class="shc"><h4>Start your shift</h4><div class="status ok">Business date ${dateGB(dayDate(d))} · started by ${hx(d.openedBy)}</div>${bizLateNote()}<div class="shf"><span>Cashier</span><input readonly value="${hx(user.n)}"><span>Opening float (KES)</span><input id="shFloat" type="number" inputmode="decimal" placeholder="0.00"></div><button class="chip on" data-sa="sstart">Start my shift</button><div class="stk">${openShifts().length} shift(s) open today.</div>${canDay() ? `<button class="mini" data-sa="dend">End day</button>` : ""}</div>`;
   else if (shView === "summary")
     h += `<div class="shc"><h4>Shift summary</h4>${shiftReport(sh, parseFloat(shAct), user.n)}<div class="row"><button class="mini" data-sa="back">← Back</button><button class="chip on" data-sa="printnow">Print summary</button></div></div>`;
   else if (shView === "bills") {
@@ -77,9 +88,9 @@ function shDraw(msg) {
       pays = pOf(sh),
       ac = parseFloat(shAct),
       pend = orders.reduce((a, o) => a + totals(o.lines, o).g, 0);
-    h += `<div class="shm-rib">${rb("refresh", "refresh", "Refresh shift data")}${rb("close", "close", "Close shift")}${rb("closeday", "day", "Close shift and day", "st")}${rb("summary", "sum", "Shift summary")}${rb("salesrep", "rep", "Sales report")}${rb("payout", "pay", "Cash payout")}</div>
+    h += `<div class="shm-rib">${rb("refresh", "refresh", "Refresh shift data")}${rb("close", "close", "Close shift")}${canDay() ? rb("closeday", "day", "Close shift and day", "st") : ""}${rb("summary", "sum", "Shift summary")}${rb("salesrep", "rep", "Sales report")}${rb("payout", "pay", "Cash payout")}</div>
   <div class="shm-grid"><div style="display:grid;gap:14px;min-width:0"><div class="shc"><div class="shf"><span>Shift no</span><input readonly value="${sh.id}"><span>Shift date</span><input readonly value="${new Date(sh.openedAt).toLocaleDateString("en-GB")}"><span>Shift time</span><input readonly value="${hm(sh.openedAt)}"><span>Cashier name</span><input readonly value="${hx(sh.user)}"></div></div>
-  <div class="shc"><h4>Payments received</h4><table class="sht"><tr><th>Paymode</th><th>Currency</th><th class="n">Amount</th></tr><tr><td>CASH</td><td>KSH</td><td class="n">${R2(c.cash)}</td></tr><tr><td>M-PESA</td><td>KSH</td><td class="n">${R2(c.mpesa)}</td></tr><tr><td>CREDIT</td><td>KSH</td><td class="n">${R2(c.credit)}</td></tr><tr class="tt"><td colspan="2">Total</td><td class="n">${R2(c.cash + c.mpesa + c.credit)}</td></tr></table></div>
+  <div class="shc"><h4>Payments received</h4><table class="sht"><tr><th>Paymode</th><th>Currency</th><th class="n">Amount</th></tr><tr><td>CASH</td><td>KSH</td><td class="n">${R2(c.cash)}</td></tr><tr><td>M-PESA</td><td>KSH</td><td class="n">${R2(c.mpesa)}</td></tr><tr><td>PDQ</td><td>KSH</td><td class="n">${R2(c.pdq)}</td></tr><tr><td>COMPLIMENTARY</td><td>KSH</td><td class="n">${R2(c.comp)}</td></tr><tr><td>ROOM</td><td>KSH</td><td class="n">${R2(c.room)}</td></tr><tr><td>CREDIT</td><td>KSH</td><td class="n">${R2(c.credit)}</td></tr><tr class="tt"><td colspan="2">Total</td><td class="n">${R2(c.cash + c.mpesa + c.pdq + c.comp + c.room + c.credit)}</td></tr></table></div>
   <div class="shc" id="poBox"><h4>Cash payouts (expenses) this shift</h4><div class="shp"><select id="poCat"><option>Supplies</option><option>Transport</option><option>Cleaning</option><option>Staff meal</option><option>Repairs</option><option>Other</option></select><input id="poDesc" placeholder="Description" autocomplete="off"><input id="poAmt" type="number" inputmode="decimal" placeholder="Amount"><button class="chip on" data-sa="padd">Add payout</button></div>${pays.length ? `<table class="sht"><tr><th>Time</th><th>Category</th><th>Description</th><th class="n">Amount</th><th></th></tr>${pays.map(x => `<tr><td>${hm(x.at)}</td><td>${hx(x.cat)}</td><td>${hx(x.desc)}</td><td class="n">${R2(x.amt)}</td><td><button class="mini" data-sa="pdel" data-id="${x.id}">✕</button></td></tr>`).join("")}<tr class="tt"><td colspan="3">Total paid out</td><td class="n">${R2(c.paid)}</td><td></td></tr></table>` : '<div class="stk">No payouts yet. Cash taken from the till for expenses is recorded here and deducted from expected cash.</div>'}</div></div>
   <div style="display:grid;gap:14px;min-width:0"><div class="shc"><div class="shf"><span>Total sales</span><input readonly value="${R2(c.gross)}"><span>Cash sales</span><input readonly value="${R2(c.cash)}"><span>Cash paid out</span><input readonly value="${R2(c.paid)}"><span>Opening float</span><input readonly value="${R2(sh.float)}"><span>Expected cash in till</span><input readonly value="${R2(c.expected)}"><span>Actual cash in till</span><input id="shAct" type="number" inputmode="decimal" placeholder="Count the drawer" value="${shAct}"><span>Cash variance</span><input id="shVar" readonly value="${ac >= 0 ? sg(ac - c.expected) : ""}"><label class="ck"><input type="checkbox" id="shTh" ${shOpt.thermal ? "checked" : ""}> Thermal (narrow) report</label><label class="ck"><input type="checkbox" id="shAuto" ${shOpt.auto ? "checked" : ""}> Auto print reports on closing</label><span>Pending total</span><input readonly value="${R2(pend)}"></div></div>
   <div class="shc"><div class="shf"><span>Gross sales</span><input readonly value="${R2(c.gross)}"><span>Taxes</span><input readonly value="${R2(c.tax)}"><span>Net sales</span><input readonly value="${R2(c.gross - c.tax)}"></div></div></div></div>`;
@@ -87,7 +98,30 @@ function shDraw(msg) {
   h += `</div>`;
   $("#shMgr").innerHTML = h;
 }
+/** Bills still pending, and Back Office hasn't agreed to this shift yet. */
+function shiftHeld() {
+  const x = shiftAuthOf(user.n);
+  return pendingOf(user.n).length > 0 && !(x && x.status === "ok");
+}
+/** The clock has moved on but the day hasn't been ended. */
+function bizLateNote() {
+  const today = ymdOf(new Date());
+  return bizDate() < today
+    ? `<div class="status bad">The system date is ${dateGB(bizDate())}, and today is ${dateGB(today)}. End the day and start a new one to change it.</div>`
+    : "";
+}
+function shiftHeldHTML() {
+  const P = pendingOf(user.n),
+    x = shiftAuthOf(user.n),
+    amt = P.reduce((a, o) => a + totals(o.lines, o).g, 0),
+    state =
+      x && x.status === "wait"
+        ? `<div class="status">Waiting for Back Office to authorise your shift.</div><button class="mini" data-sa="refresh">Check again</button>`
+        : `${x && x.status === "no" ? `<div class="status bad">${hx(x.by)} declined your request. Clear the bills, or ask again.</div>` : ""}<button class="chip on" data-sa="sreq">Ask Back Office to authorise</button>`;
+  return `<div class="shc"><h4>Start your shift</h4><div class="status bad">You have ${P.length} pending bill${P.length === 1 ? "" : "s"} · KES ${R2(amt)}</div><div class="stk">Back Office has to authorise your shift before you can start.</div><div style="overflow:auto"><table class="sht"><tr><th>Bill</th><th>Table</th><th class="n">Total</th></tr>${P.map(o => `<tr><td>${hx(o.no)}</td><td>${hx(o.label)}</td><td class="n">${R2(totals(o.lines, o).g)}</td></tr>`).join("")}</table></div>${state}</div>`;
+}
 function shClose(withDay) {
+  if (withDay && !canDay()) return shDraw("You don't have the right to end the day.");
   const sh = shiftOf(user.n),
     act = parseFloat($("#shAct").value);
   if (!(act >= 0)) return shDraw("Enter the actual cash counted in the till before closing.");
@@ -123,6 +157,7 @@ $("#shMgr").onclick = e => {
     return shiftBadge();
   }
   if (a === "refresh") return shDraw();
+  if (a.startsWith("ms_")) return msAct(a, b);
   if (a === "back") {
     shView = "main";
     return shDraw();
@@ -157,10 +192,18 @@ $("#shMgr").onclick = e => {
     return shDraw();
   }
   if (a === "dstart") {
+    if (!canDay()) return shDraw("You don't have the right to start the day.");
     const r = dayStart(by);
-    return shDraw(r || "Day started. You can now start shifts.");
+    shiftBadge();
+    drawCart();
+    return shDraw(r || `New day started. The business date is ${dateGB(bizDate())}.`);
+  }
+  if (a === "sreq") {
+    shiftAuthAsk(user.n);
+    return shDraw("Your request has gone to Back Office.");
   }
   if (a === "sstart") {
+    if (shiftHeld()) return shDraw();
     const r = shiftStart(user.n, parseFloat($("#shFloat").value), by);
     if (r) return shDraw(r);
     shiftBadge();
@@ -169,6 +212,7 @@ $("#shMgr").onclick = e => {
   if (a === "close") return shClose(false);
   if (a === "closeday") return shClose(true);
   if (a === "dend") {
+    if (!canDay()) return shDraw("You don't have the right to end the day.");
     const r = dayEnd(by);
     if (r) return shDraw(r);
     const d = DAYS[DAYS.length - 1];

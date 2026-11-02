@@ -29,7 +29,10 @@ const WAITER_RIGHTS = [
     [
       ["send", "Send Order", "Send orders to the kitchen and bar"],
       ["orderStatus", "Access Order Status", "Use the Open orders list"],
-      ["postAccount", "Post to Account", "Charge a customer's credit account"]
+      ["postAccount", "Post to Account", "Charge a customer's credit account"],
+      ["comp", "Give Complimentary", "Without a manager's PIN"],
+      ["postRoom", "Post to Room", "Charge a bill to a guest's room"],
+      ["swap", "Swap Items", "Same price only, and a manager's PIN is still needed"]
     ]
   ],
   [
@@ -38,13 +41,23 @@ const WAITER_RIGHTS = [
       ["stock", "View Stock Balance", "See how many are left on the menu"],
       ["switchSP", "Switch Sale Point", "Move between ticked sale points"]
     ]
+  ],
+  [
+    "Shift and day",
+    [
+      ["newDay", "Start and End the Day", "End the day and start a new day on the POS"],
+      [
+        "sendPending",
+        "Send Pending Bills to Cashier",
+        "Hand today's pending bills to a cashier before closing"
+      ]
+    ]
   ]
 ];
 /** Saved with the waiter, but no POS feature uses them yet. */
 const WAITER_RIGHTS_LATER = [
   ["edit", "Edit Bills"],
   ["listUsers", "List User Names"],
-  ["postRoom", "Post to Room"],
   ["preCancel", "Preorder Cancel"],
   ["pickPrice", "Pick Price List"],
   ["switchCur", "Switch Currency"],
@@ -60,10 +73,13 @@ const WAITER_DEFAULTS = [
   "send",
   "orderStatus",
   "stock",
-  "switchSP"
+  "switchSP",
+  "sendPending"
 ];
 const allowedAlways = u => !u || !u.perm || BILL_AUTH.includes(u.role);
 const can = k => allowedAlways(user) || !!user.perm[k];
+/** Only given when ticked in Waiter setup, even for staff from before that page. */
+const canDay = () => !!user && (BILL_AUTH.includes(user.role) || !!(user.perm && user.perm.newDay));
 /** Bill options: a waiter with this right acts alone; anyone else needs a PIN. */
 const actsAlone = k => !!user && (BILL_AUTH.includes(user.role) || !!(user.perm && user.perm[k]));
 const canAddTo = o => allowedAlways(user) || o.waiter === user.n || !!user.perm.addAll;
@@ -71,13 +87,13 @@ function applyRights() {
   [
     ["#sendBtn", "send"],
     ["#printBtn", "printGuest"],
+    ["#exBtn", "swap"],
     ["#settleBtn", "clear"],
     ["#ordBtn", "orderStatus"],
     ["#selBtn", "interim"],
     ["#billBtn", "functions"],
-    ["#chSP", "switchSP"],
-    ["#spBtn", "switchSP"],
-    ['#mPay [data-m="credit"]', "postAccount"]
+    ["#pAcct", "postAccount"],
+    ["#pRoom", "postRoom"]
   ].forEach(([s, k]) => {
     const el = $(s);
     if (el) el.style.display = can(k) ? "" : "none";
@@ -89,6 +105,6 @@ function newBillBlock() {
   if (!can("create")) return "You don't have the right to create bills.";
   const max = !allowedAlways(user) && user.maxPend;
   if (max > 0 && orders.filter(o => o.waiter === user.n).length >= max)
-    return `You have reached your limit of ${max} pending bills. Clear one first.`;
+    return `You have reached your limit of ${max} pending bill${max > 1 ? "s" : ""}. Clear one first.`;
   return "";
 }

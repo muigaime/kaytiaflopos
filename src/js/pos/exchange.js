@@ -1,11 +1,40 @@
-// ---- exchange items (swap one item for another) ----
+// ---- swap items: one item for another of the same price, with a right and a manager's PIN ----
 const REAS = ["Customer changed mind", "Wrong item served", "Spoiled / wasted", "Out of stock"];
 let ex = {};
+// Swaps on a sale that hasn't been sent yet. They're stamped on its order, and recorded, when it's sent.
+let cartSwaps = [];
+let exFails = 0,
+  exLock = 0;
+const swapText = x => `${x.q} x ${x.from} -> ${x.q} x ${x.to}`;
+/** Every swap goes in the log the Swapped Items Report reads. */
+function swapLog(o, x) {
+  BILLLOG.push({
+    at: new Date().toISOString(),
+    bd: bizDate(),
+    act: "Swap",
+    no: o.no,
+    label: o.label,
+    dept: billPlace(o.lines) || o.dept,
+    waiter: o.waiter,
+    by: x.by,
+    user: x.user,
+    why: x.reason,
+    detail: swapText(x),
+    amt: 0,
+    points: billPoints(o.lines),
+    from: x.from,
+    to: x.to,
+    q: x.q,
+    p: x.p,
+    back: !!x.back
+  });
+}
 const exLines = () => (ex.o ? ex.o.lines : cart),
   exDept = () => (ex.o ? (billPoints(ex.o.lines).length > 1 ? ALLP : ex.o.dept) : dept);
 function exOpen(o) {
+  if (!can("swap")) return fsNote("You don't have the right to swap items.");
   const L = o ? o.lines : cart;
-  if (!Object.keys(L).length) return fsNote("Nothing to exchange yet.");
+  if (!Object.keys(L).length) return fsNote("Nothing to swap yet.");
   ex = {
     o,
     old: !o && selId && L[selId] ? selId : null,
@@ -23,8 +52,8 @@ function exRender() {
   const L = exLines(),
     d = exDept();
   $("#exT").textContent = ex.o
-    ? "Exchange items · " + ex.o.label + " · " + d
-    : "Exchange items · current order";
+    ? "Swap items · " + ex.o.label + " · " + d
+    : "Swap items · current order";
   $("#exOld").innerHTML = Object.entries(L)
     .map(
       ([id, q]) =>
@@ -33,41 +62,39 @@ function exRender() {
     .join("");
   if (ex.old && ex.qty > L[ex.old]) ex.qty = L[ex.old];
   $("#exQ").innerHTML = ex.old
-    ? `<span>How many to exchange</span><div class="qc"><button data-eq="-1">−</button><b>${ex.qty}</b><button data-eq="1">+</button></div>`
+    ? `<span>How many to swap</span><div class="qc"><button data-eq="-1">−</button><b>${ex.qty}</b><button data-eq="1">+</button></div>`
     : '<span class="stk">Tap the item you want to replace.</span>';
-  const cats = ["All", ...new Set(ITEMS.filter(i => inPoint(i, d)).map(i => i.c))];
+  // Only items at the same price, so a swap never changes the bill.
+  const same = ex.old
+    ? ITEMS.filter(i => inPoint(i, d) && i.p === get(ex.old).p && String(i.id) !== String(ex.old))
+    : [];
+  if (ex.cat !== "All" && !same.some(i => i.c === ex.cat)) ex.cat = "All";
+  const cats = ["All", ...new Set(same.map(i => i.c))];
   $("#exCats").innerHTML = cats
     .map(c => `<button class="chip ${c === ex.cat ? "on" : ""}" data-ec="${c}">${c}</button>`)
     .join("");
-  $("#exNew").innerHTML = ITEMS.filter(
-    i => inPoint(i, d) && (ex.cat === "All" || i.c === ex.cat) && String(i.id) !== String(ex.old)
-  )
+  $("#exNew").innerHTML = same
+    .filter(i => ex.cat === "All" || i.c === ex.cat)
     .map(i => {
       const a = avail(i) - (ex.o ? 0 : inCart(i.id)),
         low = a < ex.qty;
       return `<button class="exi ${ex.nw == i.id ? "on" : ""}" data-en="${i.id}" ${low ? "disabled" : ""}><b>${i.n}</b><span>${KES(i.p)}${low ? " · low stock" : ""}</span></button>`;
     })
     .join("");
-  $("#exSent").style.display = ex.o ? "block" : "none";
-  if (ex.o) {
-    $("#exReasons").innerHTML = REAS.map(
-      r => `<button class="chip ${r === ex.reason ? "on" : ""}" data-er="${r}">${r}</button>`
-    ).join("");
-    $("#exBack").checked = !!ex.back;
-  }
+  if (ex.old && !same.length)
+    $("#exNew").innerHTML = '<div class="stk">No other item here has the same price.</div>';
+  $("#exReasons").innerHTML = REAS.map(
+    r => `<button class="chip ${r === ex.reason ? "on" : ""}" data-er="${r}">${r}</button>`
+  ).join("");
+  $("#exBackRow").style.display = ex.o ? "flex" : "none";
+  $("#exBack").checked = !!ex.back;
+  $("#exAuth").style.display = BILL_AUTH.includes(user.role) ? "none" : "";
   const ok = ex.old && ex.nw;
   let sum = "Pick the item to replace, then the new item.";
   if (ok) {
     const o = get(ex.old),
-      n = get(ex.nw),
-      df = (n.p - o.p) * ex.qty;
-    sum =
-      `${ex.qty}× ${o.n} → ${ex.qty}× ${n.n} · ` +
-      (df === 0
-        ? "same price"
-        : df > 0
-          ? "bill goes up by " + KES(df)
-          : "bill goes down by " + KES(-df));
+      n = get(ex.nw);
+    sum = `${ex.qty}× ${o.n} → ${ex.qty}× ${n.n} · same price, the bill doesn't change`;
   }
   $("#exSum").textContent = sum;
   $("#exGo").disabled = !ok;
@@ -100,6 +127,36 @@ $("#exGo").onclick = () => {
     q = ex.qty,
     oi = get(ex.old),
     ni = get(ex.nw);
+  if (oi.p !== ni.p) return fsNote("Only items of the same price can be swapped.");
+  // A Manager or Super Cashier authorizes it. Having the right doesn't replace this.
+  let by = user.n;
+  if (!BILL_AUTH.includes(user.role)) {
+    const m = $("#exMsg");
+    if (Date.now() < exLock) return (m.textContent = "Too many tries. Wait 30 seconds.");
+    const a = USERS.find(x => BILL_AUTH.includes(x.role) && x.pin === $("#exPin").value);
+    $("#exPin").value = "";
+    if (!a) {
+      if (++exFails >= 3) {
+        exFails = 0;
+        exLock = Date.now() + 30000;
+      }
+      return (m.textContent = "A Manager or Super Cashier PIN is needed.");
+    }
+    exFails = 0;
+    by = a.n;
+  }
+  $("#exMsg").textContent = "";
+  const rec = {
+    q,
+    from: oi.n,
+    to: ni.n,
+    toId: ex.nw,
+    p: oi.p,
+    reason: ex.reason,
+    back: ex.back,
+    by,
+    user: user.n
+  };
   if (ex.o) {
     const o = ex.o;
     if (ex.back) itemStockMove(oi, -q);
@@ -119,24 +176,40 @@ $("#exGo").onclick = () => {
       q,
       reason: ex.reason,
       back: ex.back,
-      diff: (ni.p - oi.p) * q
+      authBy: by
     });
+    swapLog(o, rec);
+    ordersKeep();
     $("#mEx").classList.remove("show");
+    // Both stations hear about it when the two items are made in different places.
+    const seen = new Set(),
+      tickets = [oi, ni].flatMap(it => {
+        const station = orderStation(it),
+          printer = stationPrinter(it.d, station),
+          key = station + "|" + (printer ? printer.n : "");
+        if (seen.has(key)) return [];
+        seen.add(key);
+        const d = {
+          no: o.no,
+          ord: o.ord,
+          dept: billPlace(o.lines) || o.dept,
+          label: o.label,
+          waiter: user ? user.n : "",
+          q,
+          from: oi.n,
+          to: ni.n,
+          reason: ex.reason,
+          back: ex.back,
+          by
+        };
+        return [{ station, printer, point: it.d, d, html: exchangeSlipHTML({ ...d, station }) }];
+      });
     showRc(
-      exchangeSlipHTML({
-        no: o.no,
-        dept: o.dept,
-        label: o.label,
-        waiter: user ? user.n : "",
-        q,
-        from: oi.n,
-        to: ni.n,
-        reason: ex.reason,
-        back: ex.back
-      }),
+      tickets.map(x => x.html).join("") + '<div class="sl-scr" id="rcPrinted"></div>',
       null,
       "Close"
     );
+    printOrderTickets(tickets, swapTicketLines, "swap");
     if ($("#mSel").classList.contains("show")) selRender();
     drawCart();
   } else {
@@ -147,13 +220,14 @@ $("#exGo").onclick = () => {
       if (selId == ex.old) selId = null;
     }
     cart[ex.nw] = (cart[ex.nw] || 0) + q;
+    cartSwaps.push(rec);
     $("#mEx").classList.remove("show");
     drawCart();
-    fsNote("Exchanged " + q + "× " + oi.n + " for " + ni.n + ".");
+    fsNote("Swapped " + q + "× " + oi.n + " for " + ni.n + ".");
   }
 };
 $("#exBtn").onclick = () => {
   if (Object.keys(cart).length) return exOpen(null);
   selOpen();
-  fsNote("Tap Swap on a bill to exchange its items.");
+  fsNote("Tap Swap on a bill to swap its items.");
 };

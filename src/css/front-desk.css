@@ -622,17 +622,6 @@
   font-size: 11.5px;
   color: #a89c7e;
 }
-.fl-pw {
-  margin-top: 4px;
-  background: #fff;
-  border-radius: 10px;
-  padding: 6px 12px;
-  width: 120px;
-}
-.fl-pw img {
-  display: block;
-  width: 100%;
-}
 .fl-in small {
   color: #8d8266;
   font-size: 11px;
@@ -818,7 +807,7 @@
   .fl-feats,
   .fl-in p,
   .fl-in small,
-  .fl-pw,
+  .fl-in .kf-brand,
   .fl-rule {
     display: none;
   }

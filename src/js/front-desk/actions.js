@@ -11,17 +11,20 @@ function recPay(r, method, amt, ci) {
   if (!shiftOk()) return "__shift";
   if (method === "account") CU[ci].owes += amt;
   r.pays.push({ at: new Date().toISOString(), method, amt, by: user.n });
+  const pos = posCut(r, amt),
+    fresh = amt - pos;
   SALES.push({
     no: "FD-" + String(SALES.length + 1).padStart(4, "0"),
     at: new Date(),
+    bd: bizDate(),
     dept: "Front Desk",
     label: "Room " + r.room,
     user: user.n,
-    net: amt,
+    net: fresh,
     tax: 0,
-    g: amt,
-    lines: [{ id: 0, n: "Room " + r.room + " · " + r.guest, q: 1, p: amt, t: "C" }],
-    mx: { [method === "account" ? "credit" : method]: amt }
+    g: fresh,
+    lines: [{ id: 0, n: "Room " + r.room + " · " + r.guest, q: 1, p: fresh, t: "A" }],
+    mx: { [method === "account" ? "credit" : method]: amt, ...(pos > 0 ? { room: -pos } : {}) }
   });
   sync();
   return "";
@@ -534,13 +537,14 @@ $("#fd").onclick = e => {
       SALES.push({
         no: "FD-" + String(SALES.length + 1).padStart(4, "0"),
         at: new Date(),
+        bd: bizDate(),
         dept: "Front Desk",
         label: "Cash sale",
         user: user.n,
         net: a,
         tax: 0,
         g: a,
-        lines: [{ id: 0, n: d, q: 1, p: a, t: "C" }],
+        lines: [{ id: 0, n: d, q: 1, p: a, t: "A" }],
         mx: { [m]: a }
       });
       sync();

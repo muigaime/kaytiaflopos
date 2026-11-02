@@ -35,7 +35,7 @@ function retOpen(no) {
   bopt = { act: "ret", bill: retBill(no) };
   $("#bopWheel").style.display = "none";
   boptEl("Box").style.display = "";
-  boptEl("Box").classList.remove("bop-split");
+  boptEl("Box").classList.remove("bop-tr");
   boptEl("Box").classList.add("bop-void");
   boptEl("Body").innerHTML =
     `<h3>Return items</h3><p class="stk">${slipEsc(bopt.bill.label)} · ${slipEsc(no)}. A Manager or Super Cashier needs to authorize this.</p>
@@ -120,6 +120,7 @@ function retSave() {
       no,
       ord: s.ord,
       at,
+      bd: bizDate(),
       dept: s.dept,
       label: s.label,
       user: s.user,
@@ -127,6 +128,7 @@ function retSave() {
       guest: s.guest,
       covers: s.covers,
       room: s.room,
+      rates: s.rates,
       net: -(g - s.tax * k),
       tax: -s.tax * k,
       g: -g,
@@ -151,6 +153,9 @@ function retSave() {
       left -= take;
     }
   });
+  // What was put on a room comes off its folio.
+  const roomBack = SALES.filter(s => s.no === no).reduce((a, s) => a - ((s.mx || {}).room || 0), 0);
+  if (roomBack > 0.004 && keep && keep.roomId) roomCharge(keep.roomId, -roomBack, `Return ${no}`);
   if (left > 0.009) SALES.filter(s => s.no === no).forEach(s => (s.ret.byHand = left));
   boptLog(
     "Return",
@@ -175,7 +180,7 @@ function returnSlipHTML(no, copy, B = slipBiz()) {
     lines = S.flatMap(s => s.lines).map(l => ({ q: -l.q, n: l.n, p: l.p, t: l.t })),
     paid = {};
   S.forEach(s => Object.entries(s.mx || {}).forEach(([m, v]) => (paid[m] = (paid[m] || 0) - v)));
-  return `<div class="slip">${slipHead("Credit Note", S.map(s => s.dept).join(", "), B)}${copy ? `<div class="sl-copy">Reprint · copy ${copy}</div>` : ""}${slipMeta(
+  return `<div class="slip">${slipHead("Credit Note", S.map(s => s.dept).join(", "), B)}${copy ? `<div class="sl-stamp">Reprinted</div><div class="sl-copy">Copy ${copy}</div>` : ""}${slipMeta(
     [
       ["Credit note", no],
       ["Original bill", A.ret.of],
@@ -195,7 +200,7 @@ function returnSlipHTML(no, copy, B = slipBiz()) {
     g: tot("g")
   })}<div class="sl-paid"><h5>Refunded by</h5>${Object.entries(paid)
     .filter(([, v]) => v > 0)
-    .map(([m, v]) => slipRow(MN[m] || m, bill2(v)))
+    .map(([m, v]) => slipRow(m === "comp" ? "Complimentary, no refund" : MN[m] || m, bill2(v)))
     .join(
       ""
     )}</div><div class="sl-note">Reason: ${slipEsc(A.ret.why)}</div>${A.ret.byHand ? `<div class="sl-note">Take KES ${bill2(A.ret.byHand)} off the customer's account by hand.</div>` : ""}${slipSign()}${slipFoot()}</div>`;

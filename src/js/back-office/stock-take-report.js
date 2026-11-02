@@ -267,7 +267,7 @@ function stModalIfOpen() {
    ${findBox("st", "Search code, item or group")}
    <div class="seg2">${show("all", "All items")}${show("counted", "Counted")}${show("var", "Variances only")}</div>
    <button class="mini" data-a="st_var">Variance report</button>
-   <button class="chip on" data-a="st_print">Print</button>
+   <button class="mini xl-btn" style="flex:none" data-a="rep_xlsxpage" data-title="Stock take report" data-like="st_print">Export to Excel</button><button class="chip on" data-a="st_print">Print</button>
    <button class="mini" data-a="st_close" aria-label="Close">✕</button></div>
   <style>${ST_CSS}</style>${stDocHTML(c)}</div></div>`;
 }
@@ -335,7 +335,7 @@ function stVarDoc(R, print) {
 }
 function varHTML() {
   const R = stVarRows();
-  return `${stLocBar()}<div class="pn" data-findscope><div class="fr" style="align-items:center;justify-content:space-between"><h4 style="margin:0">Stock take variance report</h4><span class="fr" style="flex:none;margin:0;align-items:center">${findBox("var", "Search item, count no or place")}<button class="chip on" data-a="st_varprint">Print</button></span></div>
+  return `${stLocBar()}<div class="pn" data-findscope><div class="fr" style="align-items:center;justify-content:space-between"><h4 style="margin:0">Stock take variance report</h4><span class="fr" style="flex:none;margin:0;align-items:center">${findBox("var", "Search item, count no or place")}<button class="mini xl-btn" style="flex:none" data-a="rep_xlsxpage" data-title="Stock take variance report" data-like="st_varprint">Export to Excel</button><button class="chip on" data-a="st_varprint">Print</button></span></div>
  <style>${ST_CSS}</style>${stVarDoc(R)}</div>`;
 }
 

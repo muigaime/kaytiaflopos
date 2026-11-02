@@ -32,9 +32,19 @@ function fdBrand() {
   });
   // The POS carries the hotel's name and its initial as a crest.
   document.querySelectorAll(".hotelName").forEach(e => (e.textContent = FD_SETTINGS.name));
-  document
-    .querySelectorAll(".hotelMark")
-    .forEach(e => (e.textContent = (FD_SETTINGS.name || "H").trim().charAt(0).toUpperCase()));
+  document.querySelectorAll(".hotelMark").forEach(e => {
+    const logo = (FD_SETTINGS.logos || {}).company;
+    if (logo) {
+      const i = document.createElement("img");
+      i.src = logo;
+      i.alt = FD_SETTINGS.name || "";
+      e.replaceChildren(i);
+      e.classList.add("has-logo");
+    } else {
+      e.textContent = (FD_SETTINGS.name || "H").trim().charAt(0).toUpperCase();
+      e.classList.remove("has-logo");
+    }
+  });
 }
 function fdSeed() {
   [
@@ -90,6 +100,12 @@ const stayOf = no => RESERVATIONS.find(r => r.room === no && r.status === "inhou
       paid = sSum(r.pays, p => p.amt);
     return { n, room, meal, ex, total: room + meal + ex, paid, bal: room + meal + ex - paid };
   };
+/** How much of a payment settles POS bills already counted as sales. */
+const posCut = (r, amt) => {
+  const take = Math.min(amt, r.posOwed || 0);
+  if (take > 0) r.posOwed -= take;
+  return take;
+};
 const isFree = (no, a, b, skip) =>
   !RESERVATIONS.some(
     r =>

@@ -214,7 +214,9 @@ function prodHTML() {
    <label>Unit<input data-iv="pr.outUom" list="uomL" value="${esc(outK ? itemInfo(outK).uom : F.outUom)}" ${outK ? "disabled" : ""}></label>
    <label>Goes to<select data-iv="pr.to">${opts(S, F.to)}</select></label></div>
   <div class="fr"><label>Selling price on the POS (KES)<input data-iv="pr.price" type="number" min="0" step="any" value="${esc(F.price)}" placeholder="${prod ? "Now " + m2(prod.p) : "Empty = stock only"}"></label>
-   <label>VAT<select data-iv="pr.tax">${SP_TAX.map(([v, l]) => `<option value="${v}" ${v === F.tax ? "selected" : ""}>${l}</option>`).join("")}</select></label></div>
+   <label>Tax<select data-iv="pr.tax">${taxChoices()
+     .map(([v, l]) => `<option value="${v}" ${v === F.tax ? "selected" : ""}>${l}</option>`)
+     .join("")}</select></label></div>
   <div class="stk" id="prInfo">${yq > 0 && cost > 0 ? `Cost per item: KES ${m2(cost / yq)}` : ""}</div>
   <div class="fr"><button class="chip on" data-a="rec_run">Run production</button><button class="mini" data-a="rec_clear" data-f="pr">Clear</button></div></div>
   ${itemDatalists()}`;
@@ -355,7 +357,9 @@ function recipesHTML() {
    ${recipeFromField("rcp.from", F.from)}</div>
   <div class="fr"><label>Selling price (KES)<input data-iv="rcp.price" type="number" min="0" step="any" value="${esc(F.price)}"></label>
    <label>Category<input data-iv="rcp.cat" value="${esc(F.cat)}" placeholder="e.g. Mains"></label>
-   <label>VAT<select data-iv="rcp.tax">${SP_TAX.map(([v, l]) => `<option value="${v}" ${v === F.tax ? "selected" : ""}>${l}</option>`).join("")}</select></label></div>
+   <label>Tax<select data-iv="rcp.tax">${taxChoices()
+     .map(([v, l]) => `<option value="${v}" ${v === F.tax ? "selected" : ""}>${l}</option>`)
+     .join("")}</select></label></div>
   ${recipeLineEditor("rcp", F.from)}
   ${
     F.lines.length
@@ -487,7 +491,9 @@ function itemMadeSection(F, sp) {
      <label>${recipe ? "Sold at" : "Goes to"}<select data-iv="it.madeSp">${opts(S, F.madeSp)}</select></label>
      <label>Selling price (KES)<input data-iv="it.spPrice" type="number" min="0" step="any" value="${esc(F.spPrice)}" placeholder="${recipe ? "Needed" : "Empty = stock only"}"></label>
      <label>Category<input data-iv="it.spCat" value="${esc(F.spCat)}" placeholder="e.g. Mains"></label>
-     <label>VAT<select data-iv="it.spTax">${SP_TAX.map(([v, l]) => `<option value="${v}" ${v === F.spTax ? "selected" : ""}>${l}</option>`).join("")}</select></label>
+     <label>Tax<select data-iv="it.spTax">${taxChoices()
+       .map(([v, l]) => `<option value="${v}" ${v === F.spTax ? "selected" : ""}>${l}</option>`)
+       .join("")}</select></label>
     </div>
     <div class="itm-hint">Next you add the ${recipe ? "ingredients and create the recipe" : "materials and run the production"}.</div>
    </section>`;
@@ -706,7 +712,7 @@ function recBalHTML(kind) {
     sum2 = f => R.reduce((a, r) => a + f(r), 0),
     kst = (l, v) => `<div class="kst"><span>${l}</span><b>${v}</b></div>`;
   return `<div class="pn"><h4>${K.title}</h4><div class="stk">${K.what}</div>
-  <div class="fr" style="align-items:end;margin-top:8px"><label>From<input type="date" data-iv="recb.from" value="${esc(F.from)}"></label><label>To<input type="date" data-iv="recb.to" value="${esc(F.to)}"></label><div class="seg2"><button data-a="rec_brange" data-rng="today">Today</button><button data-a="rec_brange" data-rng="month">This month</button></div><button class="chip on" style="flex:none" data-a="rec_bprint" ${R.length && !bad ? "" : "disabled"}>Print</button></div></div>
+  <div class="fr" style="align-items:end;margin-top:8px"><label>From<input type="date" data-iv="recb.from" value="${esc(F.from)}"></label><label>To<input type="date" data-iv="recb.to" value="${esc(F.to)}"></label><div class="seg2"><button data-a="rec_brange" data-rng="today">Today</button><button data-a="rec_brange" data-rng="month">This month</button></div><button class="mini xl-btn" style="flex:none" data-a="rep_xlsxpage" data-title="Production batches" data-like="rec_bprint">Export to Excel</button><button class="chip on" style="flex:none" data-a="rec_bprint" ${R.length && !bad ? "" : "disabled"}>Print</button></div></div>
   ${
     bad
       ? '<div class="pn"><div class="empty">The From date is after the To date.</div></div>'
@@ -856,7 +862,7 @@ function recRepView() {
     sum2 = f => D.items.reduce((a, r) => a + f(r), 0),
     kst = (l, v) => `<div class="kst"><span>${l}</span><b>${v}</b></div>`;
   return `<div class="inv" style="grid-template-columns:minmax(0,1fr)"><div class="inv-main">
-  <div class="pn"><div class="fr" style="align-items:end"><label>From<input type="date" data-iv="recr.from" value="${esc(F.from)}"></label><label>To<input type="date" data-iv="recr.to" value="${esc(F.to)}"></label><div class="seg2"><button data-a="rec_rrange" data-rng="today">Today</button><button data-a="rec_rrange" data-rng="month">This month</button></div><button class="chip on" style="flex:none" data-a="rec_rprint" ${bad ? "disabled" : ""}>Print</button></div></div>
+  <div class="pn"><div class="fr" style="align-items:end"><label>From<input type="date" data-iv="recr.from" value="${esc(F.from)}"></label><label>To<input type="date" data-iv="recr.to" value="${esc(F.to)}"></label><div class="seg2"><button data-a="rec_rrange" data-rng="today">Today</button><button data-a="rec_rrange" data-rng="month">This month</button></div><button class="mini xl-btn" style="flex:none" data-a="rep_xlsxpage" data-title="Recipe and production report" data-like="rec_rprint">Export to Excel</button><button class="chip on" style="flex:none" data-a="rec_rprint" ${bad ? "disabled" : ""}>Print</button></div></div>
   ${
     bad
       ? '<div class="pn"><div class="empty">The From date is after the To date.</div></div>'

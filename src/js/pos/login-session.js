@@ -1,17 +1,11 @@
 // ---- cashier PIN login (module entry) ----
 const USERS = [
-  { n: "Wanjiru Kamau", pin: "1234", d: ["Bar", "Kitchen"] },
-  { n: "Otieno Odhiambo", pin: "5678", d: ["Supermarket"] },
+  { n: "Wanjiru Kamau", pin: "1234", d: ["Bar", "Kitchen"], role: "Waiter" },
+  { n: "Otieno Odhiambo", pin: "5678", d: ["Kitchen"], role: "Cashier" },
   { n: "Peter Mwangi", pin: "0000", d: [...ALLD] }
 ];
 let user = null,
   pin = "";
-$("#ldate").textContent = new Date().toLocaleDateString("en-GB", {
-  weekday: "long",
-  day: "numeric",
-  month: "long",
-  year: "numeric"
-});
 const pmsg = (t, bad) => {
   $("#pinMsg").textContent = t;
   $("#pinMsg").className = bad ? "bad" : "";
@@ -20,6 +14,10 @@ const pdraw = () => {
   $("#pinDisp").textContent = "●".repeat(pin.length);
 };
 function loginAs(u) {
+  LIC.gate();
+  billsExpire();
+  tblFill();
+  draftRelease();
   user = u;
   DEPTS = u.d.filter(posSells);
   if (!DEPTS.length) DEPTS = [ALLD.filter(posSells)[0] || ALLD[0]];
@@ -42,7 +40,11 @@ function loginAs(u) {
     }
     if (!(curDay() && shiftOf(u.n)))
       shiftOpen(
-        curDay() ? "Start your shift to begin selling." : "Start the day to begin trading."
+        curDay()
+          ? "Start your shift to begin selling."
+          : canDay()
+            ? "Start the day to begin trading."
+            : ""
       );
   }, 350);
   feed();

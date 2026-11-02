@@ -2,7 +2,21 @@ const $ = s => document.querySelector(s),
   KES = n =>
     "KES " +
     Number(n).toLocaleString("en-KE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const TAX = { A: 0, B: 16, C: 0 };
+// An item's tax: B is VAT, C is Tax C, BC is both, A is no tax. Rates are set in Back Office → Settings.
+const TAX = { A: 0, B: 16, C: 0, BC: 16 };
+function taxApply() {
+  const x = FD_SETTINGS.tax || {};
+  TAX.B = x.B === undefined ? 16 : x.B;
+  TAX.C = x.C || 0;
+  TAX.BC = TAX.B + TAX.C;
+}
+const taxChoices = () => [
+  ["B", `VAT ${TAX.B}%`],
+  ["C", `Tax C ${TAX.C}%`],
+  ["BC", `VAT and Tax C ${TAX.BC}%`],
+  ["A", "No tax"]
+];
+const taxName = () => (TAX.C ? "Tax" : "VAT");
 // stock of raw ingredients, per department (base units)
 const STOCK0 = {
   whisky: 7500,
@@ -21,14 +35,13 @@ const STOCK0 = {
   bread: 25
 };
 // Stores hold purchased stock (Back Office > Inventory). Selling points (ALLD) are the bars, kitchens,
-// restaurants and shops that receive stock from a store and sell it on the POS; each keeps its own stock.
+// restaurants and kitchens that receive stock from a store and sell it on the POS; each keeps its own stock.
 // Both lists can grow (Back Office); LOCS = stores + selling points, and STK has one stock map per place.
 const STORES = ["Main Store"],
-  ALLD = ["Bar", "Kitchen", "Supermarket"],
+  ALLD = ["Bar", "Kitchen"],
   OUTLET_INFO = {
     Bar: { type: "Bar", store: "Main Store" },
-    Kitchen: { type: "Kitchen", store: "Main Store" },
-    Supermarket: { type: "Shop", store: "Main Store" }
+    Kitchen: { type: "Kitchen", store: "Main Store" }
   },
   LOCS = [],
   STK = {},
@@ -153,18 +166,6 @@ const ITEMS = [
     r: { bun: 1, beef: 150, cheese: 20 }
   },
   { id: 9, n: "Water 500ml", d: "Kitchen", c: "Drinks", p: 80, t: "B", r: { water: 1 } },
-  {
-    id: 10,
-    n: "Rice 2kg (pkt)",
-    d: "Supermarket",
-    c: "Grocery",
-    p: 380,
-    t: "C",
-    r: { rice: 2000 }
-  },
-  { id: 11, n: "Sugar 2kg", d: "Supermarket", c: "Grocery", p: 330, t: "B", r: { sugar: 1 } },
-  { id: 12, n: "Fresh Milk 500ml", d: "Supermarket", c: "Dairy", p: 70, t: "A", r: { milk: 1 } },
-  { id: 13, n: "Bread 400g", d: "Supermarket", c: "Bakery", p: 65, t: "A", r: { bread: 1 } },
   {
     id: 14,
     n: "Cheese Burger",

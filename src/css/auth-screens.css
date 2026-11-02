@@ -39,16 +39,6 @@
   -webkit-mask-image: linear-gradient(#000, transparent 70%);
   mask-image: linear-gradient(#000, transparent 70%);
 }
-.lbrand .lglogo {
-  background: #fff;
-  border-radius: 12px;
-  padding: 8px 14px;
-  width: 150px;
-}
-.lbrand .lglogo img {
-  display: block;
-  width: 100%;
-}
 .lbrand h2 {
   margin: auto 0 0;
   font-size: clamp(30px, 3.6vw, 50px);
@@ -365,9 +355,6 @@
   .lbrand h2 {
     margin: 4px 0 0;
     font-size: 24px;
-  }
-  .lbrand .lglogo {
-    width: 130px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

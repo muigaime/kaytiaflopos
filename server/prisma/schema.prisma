@@ -130,7 +130,7 @@ model OverrideGrant {
 
 enum DepartmentKind {
   STORE // holds stock, issues to outlets (Main Store, Kitchen Store, Beverage Store)
-  OUTLET // sells (Pool Bar, Main Restaurant, Supermarket, Room Service)
+  OUTLET // sells (Pool Bar, Main Restaurant, Room Service)
   FRONT_OFFICE // Front Desk / PMS
   ADMIN
 }
@@ -620,7 +620,7 @@ model DepartmentInventory {
   @@id([departmentId, stockItemId])
 }
 
-/// A sellable POS item (menu / shelf item). Its recipe says which stock it uses.
+/// A sellable POS item (menu item). Its recipe says which stock it uses.
 model MenuItem {
   id           String       @id @default(uuid())
   name         String

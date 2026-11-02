@@ -106,6 +106,8 @@ function bosave() {
         BL: BILLLOG,
         OR: orders,
         RN: rno,
+        TB: TBL,
+        FB: FREE_BILLS,
         IS: ISSUES,
         PD: PRODS,
         ST: STORES,
@@ -117,6 +119,7 @@ function bosave() {
         X: INGC,
         IU: INGU,
         A: ADM,
+        LI: LIC.s,
         BR: ROLE_OVER,
         D: DAYS,
         H: SHIFTS,
@@ -143,11 +146,15 @@ window.bosave = bosave;
     if (!s) return;
     SALES.push(...s.S.map(x => ({ ...x, at: new Date(x.at) })));
     ITEMS.length = 0;
-    ITEMS.push(...s.I);
+    ITEMS.push(...s.I.filter(i => i.d !== "Supermarket"));
     // Stores and selling points first: the stock maps below are keyed by them.
     if (s.ST && s.ST.length) STORES.splice(0, STORES.length, ...s.ST);
-    if (s.OL && s.OL.length) ALLD.splice(0, ALLD.length, ...s.OL);
+    if (s.OL && s.OL.length) ALLD.splice(0, ALLD.length, ...s.OL.filter(o => o !== "Supermarket"));
     Object.assign(OUTLET_INFO, s.OI || {});
+    delete OUTLET_INFO.Supermarket;
+    Object.values(OUTLET_INFO).forEach(i => {
+      if (i.type === "Shop") i.type = "Other";
+    });
     syncLocs();
     if (s.K && typeof Object.values(s.K)[0] === "object")
       LOCS.forEach(l => {
@@ -187,6 +194,9 @@ window.bosave = bosave;
     Object.assign(RO, s.R);
     Object.assign(INGC, s.X || {});
     Object.assign(INGU, s.IU || {});
+    Object.values(INGU).forEach(u => {
+      if (u.group === "Groceries") u.group = "Dry goods";
+    });
     USERS.length = 0;
     USERS.push(...s.U);
     CU.length = 0;
@@ -205,6 +215,14 @@ window.bosave = bosave;
     RESERVATIONS.length = 0;
     RESERVATIONS.push(...(s.RV || []));
     Object.assign(FD_SETTINGS, s.FS || {});
+    // Class C used to mean zero-rated. Those items stay untaxed now that C is a real tax.
+    if (!FD_SETTINGS.tax) {
+      ITEMS.forEach(i => {
+        if (i.t === "C") i.t = "A";
+      });
+      FD_SETTINGS.tax = { B: 16, C: 0 };
+    }
+    taxApply();
     ROOMTYPES.length = 0;
     ROOMTYPES.push(...(s.RT || []));
     GROUPS.length = 0;
@@ -214,6 +232,11 @@ window.bosave = bosave;
       plain = x => (/^NBO-\d+$/.test(x) ? pad(+x.slice(4), 5) : moved[x] || x);
     const top = SALES.reduce((a, x) => Math.max(a, +String(x.no).replace(/^NBO-/, "") || 0), 0);
     rno = Math.max(rno, s.RN || 0, top + 1);
+    FREE_BILLS.push(...(s.FB || []));
+    if (s.TB) {
+      TBL.length = 0;
+      TBL.push(...s.TB);
+    }
     orders.forEach(o => {
       if (!/^ORD-/.test(o.no)) return;
       o.ord = o.ord || +o.no.slice(4) || "";
@@ -262,6 +285,7 @@ window.bosave = bosave;
         if (!made && (K.length > 1 || i.from)) i.from = mat;
       });
     fdBrand(); // the saved hotel name reaches the POS
+    posOptsApply();
     Object.keys(STK).forEach(l => {
       if (!STK[l] || typeof STK[l] !== "object") STK[l] = {};
     });
@@ -281,12 +305,7 @@ refreshBRS();
 USERS.forEach((u, i) => {
   if (!u.card) u.card = "KT" + String(i + 1).padStart(4, "0");
   if (!u.role)
-    u.role =
-      u.d.filter(posSells).length >= ALLD.filter(posSells).length
-        ? "Manager"
-        : u.d.includes("Supermarket")
-          ? "Cashier"
-          : "Waiter";
+    u.role = u.d.filter(posSells).length >= ALLD.filter(posSells).length ? "Manager" : "Waiter";
 });
 const H = async t => {
   t = "kaytia|" + t;

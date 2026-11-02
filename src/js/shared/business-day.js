@@ -8,6 +8,68 @@ const curDay = () => DAYS.find(d => !d.closedAt),
   openShifts = () => SHIFTS.filter(s => !s.closedAt),
   shiftOf = n => SHIFTS.find(s => !s.closedAt && s.user === n),
   pOf = sh => PAYOUTS.filter(p => p.shift === sh.id);
+// The system's date. It belongs to the business day, so it only moves when a day is ended and the next one started.
+const ymdOf = d => {
+  const x = new Date(d);
+  return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, "0")}-${String(x.getDate()).padStart(2, "0")}`;
+};
+const dayDate = d => d.date || ymdOf(d.openedAt);
+function bizDate() {
+  const d = curDay() || DAYS[DAYS.length - 1];
+  return d ? dayDate(d) : ymdOf(new Date());
+}
+/** The date a new day takes: the day after the last one, or today if that's later. */
+function nextBizDate() {
+  const today = ymdOf(new Date()),
+    last = DAYS[DAYS.length - 1];
+  if (!last) return today;
+  const [y, m, n] = dayDate(last).split("-").map(Number),
+    next = ymdOf(new Date(y, m - 1, n + 1));
+  return next > today ? next : today;
+}
+const dateGB = ymd => ymd.split("-").reverse().join("/");
+/** A moment shown on a business date: the date of the day, the clock's time. */
+function onBizDate(ymd, at = new Date()) {
+  const [y, m, n] = ymd.split("-").map(Number),
+    x = new Date(at);
+  return new Date(y, m - 1, n, x.getHours(), x.getMinutes(), x.getSeconds());
+}
+const bizNow = () => onBizDate(bizDate());
+/** When a sale counts in reports. Sales from before business dates use their clock time. */
+const saleAt = s => (s.bd ? new Date(s.bd + "T12:00:00") : s.at);
+const saleShown = s => (s.bd ? onBizDate(s.bd, s.at) : s.at);
+// ---- A waiter starts their own shift. With bills still pending, Back Office has to agree first.
+const shiftAuths = () => FD_SETTINGS.shiftAuth || (FD_SETTINGS.shiftAuth = []);
+const shiftAuthOf = n =>
+  shiftAuths()
+    .filter(x => x.user === n && x.status !== "used")
+    .pop();
+/** Bills a waiter still answers for. Ones sent to a cashier are the cashier's to clear. */
+const pendingOf = n =>
+  orders.filter(o => o.waiter === n && !o.handedTo && Object.keys(o.lines).length);
+function shiftAuthAsk(n) {
+  const P = pendingOf(n);
+  shiftAuths().push({
+    id: "SA" + Date.now(),
+    user: n,
+    at: new Date().toISOString(),
+    bills: P.map(o => o.no),
+    amt: P.reduce((a, o) => a + totals(o.lines, o).g, 0),
+    status: "wait"
+  });
+  sync();
+}
+function shiftAuthAnswer(id, ok, by) {
+  const x = shiftAuths().find(y => y.id === id);
+  if (!x || x.status !== "wait") return "That request has already been answered.";
+  Object.assign(x, { status: ok ? "ok" : "no", by, byAt: new Date().toISOString() });
+  sync();
+  return "";
+}
+const shiftAuthDone = n =>
+  shiftAuths()
+    .filter(x => x.user === n && x.status !== "used")
+    .forEach(x => (x.status = "used"));
 const sPm = (a, k) => a.reduce((x, s) => x + ((s.mx || {})[k] || 0), 0),
   sSum = (a, f) => a.reduce((x, y) => x + f(y), 0),
   sync = () => {
@@ -39,20 +101,28 @@ const shiftCalc = sh => {
     tax: sSum(a, s => s.tax),
     cash,
     mpesa: sPm(a, "mpesa"),
+    pdq: sPm(a, "pdq"),
+    comp: sPm(a, "comp"),
+    room: sPm(a, "room"),
+    tips: sSum(a, s => Object.values(s.tips || {}).reduce((x, y) => x + y, 0)),
     credit: sPm(a, "credit"),
     paid,
-    expected: sh.float + cash - paid
+    // Cash tips are in the drawer until they're paid out.
+    expected: sh.float + cash + sSum(a, s => (s.tips || {}).cash || 0) - paid
   };
 };
 function dayStart(by) {
   if (curDay()) return "The day is already open.";
+  const date = nextBizDate();
   DAYS.push({
     id: "D" + (DAYS.length + 1),
+    date,
     openedAt: new Date().toISOString(),
     openedBy: by,
     closedAt: null
   });
   sync();
+  document.dispatchEvent(new Event("kf:newday"));
   return "";
 }
 function shiftStart(u, fl, by) {
@@ -69,6 +139,7 @@ function shiftStart(u, fl, by) {
     openedBy: by,
     closedAt: null
   });
+  shiftAuthDone(u);
   sync();
   return "";
 }
@@ -88,6 +159,10 @@ function shiftEnd(sh, counted, by) {
     net: c.gross - c.tax,
     cash: c.cash,
     mpesa: c.mpesa,
+    pdq: c.pdq,
+    comp: c.comp,
+    room: c.room,
+    tips: c.tips,
     credit: c.credit,
     paid: c.paid
   });
@@ -108,6 +183,10 @@ function dayEnd(by) {
     vat: sSum(a, s => s.tax),
     cash: sPm(a, "cash"),
     mpesa: sPm(a, "mpesa"),
+    pdq: sPm(a, "pdq"),
+    comp: sPm(a, "comp"),
+    room: sPm(a, "room"),
+    tips: sSum(a, s => Object.values(s.tips || {}).reduce((x, y) => x + y, 0)),
     credit: sPm(a, "credit"),
     paid: sSum(
       PAYOUTS.filter(p => p.day === d.id),
@@ -173,13 +252,13 @@ function printHTML(html, th, pg) {
 }
 const rr = (a, b, bd) => `<tr${bd ? ' class="bd"' : ""}><td>${a}</td><td>${b}</td></tr>`,
   rhead = t =>
-    `<h2>MWANGAZA SUPERMART</h2><div class="c">${t}</div><div class="c">${new Date().toLocaleString("en-GB")}</div><hr>`;
+    `<h2>${hx(FD_SETTINGS.name)}</h2><div class="c">${t}</div><div class="c">${new Date().toLocaleString("en-GB")}</div><hr>`;
 function shiftReport(sh, act, by) {
   const c = shiftCalc(sh),
     ac = sh.closedAt ? sh.counted : act,
     vr = ac >= 0 ? ac - c.expected : null,
     pays = pOf(sh);
-  return `<div class="rd">${rhead("SHIFT SUMMARY")}<table>${rr("Shift no", sh.id)}${rr("Cashier", hx(sh.user))}${rr("Opened", dm(sh.openedAt) + " " + hm(sh.openedAt))}${rr("Closed", sh.closedAt ? dm(sh.closedAt) + " " + hm(sh.closedAt) : "Still open")}</table><hr><div class="sec">PAYMODES (KSH)</div><table>${rr("CASH", R2(c.cash))}${rr("M-PESA", R2(c.mpesa))}${rr("CREDIT", R2(c.credit))}${rr("TOTAL", R2(c.cash + c.mpesa + c.credit), 1)}</table><hr><div class="sec">SALES</div><table>${rr("Bills", c.bills)}${rr("Gross sales", R2(c.gross))}${rr("Taxes", R2(c.tax))}${rr("Net sales", R2(c.gross - c.tax), 1)}</table><hr><div class="sec">CASH RECONCILIATION</div><table>${rr("Opening float", R2(sh.float))}${rr("+ Cash sales", R2(c.cash))}${rr("- Cash paid out", R2(c.paid))}${rr("Expected in till", R2(c.expected), 1)}${rr("Actual in till", ac >= 0 ? R2(ac) : "not counted")}${rr("Variance", vr === null ? "-" : sg(vr), 1)}</table><hr><div class="sec">CASH PAYOUTS / EXPENSES</div>${pays.length ? `<table>${pays.map(x => rr(hm(x.at) + " " + hx(x.cat) + ": " + hx(x.desc), R2(x.amt))).join("")}${rr("TOTAL PAID OUT", R2(c.paid), 1)}</table>` : "<div>None</div>"}<hr><div class="c">Printed by ${hx(by || sh.user)}</div></div>`;
+  return `<div class="rd">${rhead("SHIFT SUMMARY")}<table>${rr("Shift no", sh.id)}${rr("Cashier", hx(sh.user))}${rr("Opened", dm(sh.openedAt) + " " + hm(sh.openedAt))}${rr("Closed", sh.closedAt ? dm(sh.closedAt) + " " + hm(sh.closedAt) : "Still open")}</table><hr><div class="sec">PAYMODES (KSH)</div><table>${rr("CASH", R2(c.cash))}${rr("M-PESA", R2(c.mpesa))}${rr("PDQ", R2(c.pdq || 0))}${rr("Complimentary", R2(c.comp || 0))}${rr("Room", R2(c.room || 0))}${rr("Tips", R2(c.tips || 0))}${rr("CREDIT", R2(c.credit))}${rr("TOTAL", R2(c.cash + c.mpesa + (c.pdq || 0) + (c.comp || 0) + (c.room || 0) + c.credit), 1)}</table><hr><div class="sec">SALES</div><table>${rr("Bills", c.bills)}${rr("Gross sales", R2(c.gross))}${rr("Taxes", R2(c.tax))}${rr("Net sales", R2(c.gross - c.tax), 1)}</table><hr><div class="sec">CASH RECONCILIATION</div><table>${rr("Opening float", R2(sh.float))}${rr("+ Cash sales", R2(c.cash))}${rr("- Cash paid out", R2(c.paid))}${rr("Expected in till", R2(c.expected), 1)}${rr("Actual in till", ac >= 0 ? R2(ac) : "not counted")}${rr("Variance", vr === null ? "-" : sg(vr), 1)}</table><hr><div class="sec">CASH PAYOUTS / EXPENSES</div>${pays.length ? `<table>${pays.map(x => rr(hm(x.at) + " " + hx(x.cat) + ": " + hx(x.desc), R2(x.amt))).join("")}${rr("TOTAL PAID OUT", R2(c.paid), 1)}</table>` : "<div>None</div>"}<hr><div class="c">Printed by ${hx(by || sh.user)}</div></div>`;
 }
 function dayReport(d, by) {
   const sh = SHIFTS.filter(x => x.day === d.id),
@@ -188,5 +267,5 @@ function dayReport(d, by) {
       s => s.at >= new Date(d.openedAt) && (!d.closedAt || s.at <= new Date(d.closedAt))
     ),
     paid = sSum(pays, p => p.amt);
-  return `<div class="rd">${rhead("END OF DAY SUMMARY")}<table>${rr("Day", d.id)}${rr("Opened", dm(d.openedAt) + " " + hm(d.openedAt) + " by " + hx(d.openedBy))}${rr("Closed", d.closedAt ? dm(d.closedAt) + " " + hm(d.closedAt) + " by " + hx(d.closedBy) : "Still open")}</table><hr><div class="sec">SALES</div><table>${rr("Bills", a.length)}${rr("Gross sales", R2(sSum(a, s => s.g)))}${rr("Taxes", R2(sSum(a, s => s.tax)))}${rr("Net sales", R2(sSum(a, s => s.g - s.tax)), 1)}</table><hr><div class="sec">PAYMODES (KSH)</div><table>${rr("CASH", R2(sPm(a, "cash")))}${rr("M-PESA", R2(sPm(a, "mpesa")))}${rr("CREDIT", R2(sPm(a, "credit")))}</table><hr><div class="sec">SHIFTS</div>${sh.length ? `<table>${sh.map(x => rr(hx(x.user) + " " + hm(x.openedAt) + "-" + (x.closedAt ? hm(x.closedAt) : "open"), x.closedAt ? "var " + sg(x.variance) : "open")).join("")}</table>` : "<div>None</div>"}<hr><div class="sec">CASH PAYOUTS / EXPENSES</div>${pays.length ? `<table>${pays.map(x => rr(hx(x.cat) + ": " + hx(x.desc) + " (" + hx(x.user) + ")", R2(x.amt))).join("")}${rr("TOTAL PAID OUT", R2(paid), 1)}</table>` : "<div>None</div>"}<hr><table>${rr("Total cash variance", sg(sSum(sh, x => x.variance || 0)), 1)}</table><hr><div class="c">Printed by ${hx(by || d.closedBy || d.openedBy)}</div></div>`;
+  return `<div class="rd">${rhead("END OF DAY SUMMARY")}<table>${rr("Day", d.id)}${rr("Business date", dateGB(dayDate(d)))}${rr("Opened", dm(d.openedAt) + " " + hm(d.openedAt) + " by " + hx(d.openedBy))}${rr("Closed", d.closedAt ? dm(d.closedAt) + " " + hm(d.closedAt) + " by " + hx(d.closedBy) : "Still open")}</table><hr><div class="sec">SALES</div><table>${rr("Bills", a.length)}${rr("Gross sales", R2(sSum(a, s => s.g)))}${rr("Taxes", R2(sSum(a, s => s.tax)))}${rr("Net sales", R2(sSum(a, s => s.g - s.tax)), 1)}</table><hr><div class="sec">PAYMODES (KSH)</div><table>${rr("CASH", R2(sPm(a, "cash")))}${rr("M-PESA", R2(sPm(a, "mpesa")))}${rr("CREDIT", R2(sPm(a, "credit")))}</table><hr><div class="sec">SHIFTS</div>${sh.length ? `<table>${sh.map(x => rr(hx(x.user) + " " + hm(x.openedAt) + "-" + (x.closedAt ? hm(x.closedAt) : "open"), x.closedAt ? "var " + sg(x.variance) : "open")).join("")}</table>` : "<div>None</div>"}<hr><div class="sec">CASH PAYOUTS / EXPENSES</div>${pays.length ? `<table>${pays.map(x => rr(hx(x.cat) + ": " + hx(x.desc) + " (" + hx(x.user) + ")", R2(x.amt))).join("")}${rr("TOTAL PAID OUT", R2(paid), 1)}</table>` : "<div>None</div>"}<hr><table>${rr("Total cash variance", sg(sSum(sh, x => x.variance || 0)), 1)}</table><hr><div class="c">Printed by ${hx(by || d.closedBy || d.openedBy)}</div></div>`;
 }

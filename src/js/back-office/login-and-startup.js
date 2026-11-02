@@ -71,6 +71,7 @@ const boTry = async () => {
       $("#boRm").checked ? localStorage.setItem(RMK, u) : localStorage.removeItem(RMK);
     } catch (e) {}
     boUser = { n: a.n, u: a.u, role: a.role || SUPER };
+    LIC.gate();
     boShow();
   } else {
     if (++fails >= 5) {
@@ -143,8 +144,6 @@ document.querySelectorAll(".bkm").forEach(
       $("#start").style.display = "grid";
     })
 );
-$("#start img").src = $("#logoSrc").src;
-$("#boLogin img").src = $("#logoSrc").src;
 setInterval(bosave, 4000);
 addEventListener("pagehide", bosave);
 drawCats();

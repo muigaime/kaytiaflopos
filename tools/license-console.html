@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kaytia Flow License Console</title>
+    <style>
+      :root {
+        --ink: #241b12;
+        --mute: #75695a;
+        --line: #e2d9c8;
+        --brass: #c7a25a;
+        --lo: #9c7a36;
+        --card: #fffdf8;
+        --bad: #a4342a;
+        --ok: #1f6f55;
+        --serif: "Playfair Display", Georgia, "Times New Roman", serif;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: #f3eee4;
+        color: var(--ink);
+        font:
+          14px/1.5 "Schibsted Grotesk",
+          Arial,
+          sans-serif;
+      }
+      header {
+        padding: 22px 30px;
+        background: radial-gradient(circle at 12% 0, #4a3925 0, #241b12 48%, #17120d 100%);
+        color: #f6efe0;
+      }
+      header h1 {
+        margin: 0;
+        font: 500 28px/1.2 var(--serif);
+      }
+      header em {
+        color: #e3c98e;
+      }
+      header p {
+        margin: 2px 0 0;
+        color: #cdbfa5;
+      }
+      main {
+        display: grid;
+        gap: 14px;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 18px;
+      }
+      section {
+        padding: 18px 20px;
+        border: 1px solid var(--line);
+        border-top: 2px solid var(--brass);
+        border-radius: 6px;
+        background: var(--card);
+      }
+      h2 {
+        margin: 0 0 10px;
+        font: 500 20px/1.2 var(--serif);
+      }
+      .g {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+        gap: 12px;
+      }
+      label {
+        display: grid;
+        gap: 3px;
+        color: var(--mute);
+        font-size: 12px;
+        font-weight: 600;
+      }
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #fff;
+        color: var(--ink);
+        font: inherit;
+        font-weight: 400;
+      }
+      textarea {
+        font:
+          12.5px/1.4 ui-monospace,
+          Consolas,
+          monospace;
+      }
+      button {
+        padding: 10px 18px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--card);
+        color: var(--ink);
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      button.go {
+        border-color: #b58a3c;
+        background: linear-gradient(170deg, #e3c98e, #b58a3c);
+        color: #1c1408;
+      }
+      button.lock {
+        border-color: #7c231b;
+        background: linear-gradient(170deg, #b23c31, #7c231b);
+        color: #fff;
+      }
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+        margin-top: 12px;
+      }
+      #msg {
+        min-height: 20px;
+        margin-top: 8px;
+        color: var(--bad);
+      }
+      #msg.ok {
+        color: var(--ok);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+      }
+      th {
+        padding: 8px;
+        color: var(--mute);
+        font-size: 11px;
+        letter-spacing: 0.05em;
+        text-align: left;
+        text-transform: uppercase;
+      }
+      td {
+        padding: 8px;
+        border-top: 1px solid var(--line);
+      }
+      .tag {
+        padding: 2px 9px;
+        border-radius: 10px;
+        background: #f4eee2;
+        font-size: 11.5px;
+        font-weight: 700;
+      }
+      .tag.lock,
+      .tag.ended {
+        background: #f7e4e1;
+        color: var(--bad);
+      }
+      .tag.on {
+        background: #e0efe9;
+        color: var(--ok);
+      }
+      .mini {
+        padding: 4px 10px;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Kaytia <em>Flow</em> License Console</h1>
+      <p>For Kaytia Tech Services only. Never give this page or your signing key to a client.</p>
+    </header>
+    <main>
+      <section>
+        <h2>1. Load your signing key</h2>
+        <label>tools/license-private-key.json<input type="file" id="file" accept=".json" /></label>
+        <div id="keyState" style="margin-top: 8px; color: var(--mute)">
+          No key loaded. It stays in this page and is forgotten when you close it.
+        </div>
+      </section>
+      <section>
+        <h2>2. Make a key</h2>
+        <div class="g">
+          <label>Client name<input id="client" placeholder="e.g. The Tide Hotel" autocomplete="off" /></label>
+          <label>Installation code<input id="code" placeholder="KF-XXXX-XXXX-XXXX, from the client" autocomplete="off" /></label>
+          <label
+            >Length<select id="len">
+              <option value="30">30 days</option>
+              <option value="90">90 days</option>
+              <option value="180">6 months</option>
+              <option value="365" selected>1 year</option>
+              <option value="15">Trial extension: 15 days</option>
+              <option value="0">No end date</option>
+              <option value="d">Pick a last day</option>
+            </select></label
+          >
+          <label>Last day<input type="date" id="end" disabled /></label>
+        </div>
+        <div class="row">
+          <button class="go" id="make">Make license key</button>
+          <button class="lock" id="lock">Make lock key</button>
+        </div>
+        <div id="msg"></div>
+        <label style="margin-top: 8px">Key to send<textarea id="out" rows="5" readonly></textarea></label>
+        <div class="row"><button id="copy">Copy key</button></div>
+      </section>
+      <section>
+        <h2>Keys issued</h2>
+        <div class="row" style="margin: 0 0 10px"><input id="q" placeholder="Search client or code" style="flex: 1 1 280px" /><button id="csv">Export CSV</button></div>
+        <div style="overflow: auto">
+          <table>
+            <thead>
+              <tr><th>Issued</th><th>Client</th><th>Installation</th><th>Type</th><th>Last day</th><th>Status</th><th></th></tr>
+            </thead>
+            <tbody id="list"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+    <script>
+      const $ = s => document.querySelector(s),
+        HK = "kaytia_license_issued";
+      let key = null,
+        hist = [];
+      try {
+        hist = JSON.parse(localStorage.getItem(HK) || "[]");
+      } catch (e) {}
+      const esc = t => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+      const b64u = bytes => btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+      const say = (t, ok) => {
+        $("#msg").textContent = t;
+        $("#msg").className = ok ? "ok" : "";
+      };
+      $("#file").onchange = async e => {
+        try {
+          const jwk = JSON.parse(await e.target.files[0].text());
+          key = await crypto.subtle.importKey("jwk", { kty: jwk.kty, n: jwk.n, e: jwk.e, d: jwk.d, p: jwk.p, q: jwk.q, dp: jwk.dp, dq: jwk.dq, qi: jwk.qi, alg: "RS256", ext: true }, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["sign"]);
+          $("#keyState").textContent = "Signing key loaded.";
+          $("#keyState").style.color = "var(--ok)";
+        } catch (err) {
+          key = null;
+          $("#keyState").textContent = "That file isn't a signing key.";
+          $("#keyState").style.color = "var(--bad)";
+        }
+      };
+      $("#len").onchange = () => ($("#end").disabled = $("#len").value !== "d");
+      function lastDay() {
+        const v = $("#len").value;
+        if (v === "0") return "";
+        if (v === "d") return $("#end").value;
+        const d = new Date();
+        d.setDate(d.getDate() + +v);
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      }
+      async function make(t) {
+        const c = $("#client").value.trim(),
+          i = $("#code").value.trim().toUpperCase();
+        if (!key) return say("Load your signing key first.");
+        if (!c) return say("Enter the client's name.");
+        if (!/^KF-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}$/.test(i)) return say("Enter the installation code from the client, like KF-1A2B-3C4D-5E6F.");
+        let e = "",
+          type = t;
+        if (t !== "lock") {
+          e = lastDay();
+          if ($("#len").value === "d" && !e) return say("Pick the last day.");
+          type = $("#len").value === "15" ? "trial" : "full";
+        }
+        const p = b64u(new TextEncoder().encode(JSON.stringify({ c, i, t: type, e, at: Date.now() }))),
+          sig = await crypto.subtle.sign("RSASSA-PKCS1-v1_5", key, new TextEncoder().encode(p)),
+          raw = `KF1.${p}.${b64u(new Uint8Array(sig))}`;
+        $("#out").value = raw;
+        hist.unshift({ at: Date.now(), c, i, t: type, e, raw });
+        localStorage.setItem(HK, JSON.stringify(hist));
+        say(t === "lock" ? "Lock key made. The system locks when this key is entered on it." : "License key made. Copy it and send it to the client.", true);
+        draw();
+      }
+      $("#make").onclick = () => make("full");
+      $("#lock").onclick = () => make("lock");
+      $("#copy").onclick = async () => {
+        $("#out").select();
+        try {
+          await navigator.clipboard.writeText($("#out").value);
+        } catch (e) {
+          document.execCommand("copy");
+        }
+        say("Copied.", true);
+      };
+      function statusOf(x) {
+        if (x.t === "lock") return ["Lock", "lock"];
+        if (!x.e) return ["No end date", "on"];
+        return new Date(x.e + "T23:59:59") < new Date() ? ["Ended", "ended"] : ["Running", "on"];
+      }
+      function draw() {
+        const w = $("#q").value.trim().toLowerCase(),
+          L = hist.filter(x => !w || `${x.c} ${x.i}`.toLowerCase().includes(w));
+        $("#list").innerHTML =
+          L.map(x => {
+            const [l, c] = statusOf(x);
+            return `<tr><td>${new Date(x.at).toLocaleDateString("en-GB")}</td><td>${esc(x.c)}</td><td>${esc(x.i)}</td><td>${{ full: "License", trial: "Trial extension", lock: "Lock" }[x.t]}</td><td>${x.e ? new Date(x.e + "T12:00:00").toLocaleDateString("en-GB") : x.t === "lock" ? "" : "No end date"}</td><td><span class="tag ${c}">${l}</span></td><td><button class="mini" data-c="${hist.indexOf(x)}">Use client</button> <button class="mini" data-k="${hist.indexOf(x)}">Show key</button></td></tr>`;
+          }).join("") || '<tr><td colspan="7" style="color:var(--mute)">No keys yet.</td></tr>';
+      }
+      $("#list").onclick = e => {
+        const d = e.target.dataset;
+        if (d.c !== undefined) {
+          $("#client").value = hist[+d.c].c;
+          $("#code").value = hist[+d.c].i;
+          window.scrollTo(0, 0);
+        }
+        if (d.k !== undefined) $("#out").value = hist[+d.k].raw;
+      };
+      $("#q").oninput = draw;
+      $("#csv").onclick = () => {
+        const q = v => `"${String(v).replace(/"/g, '""')}"`,
+          rows = [["Issued", "Client", "Installation", "Type", "Last day"], ...hist.map(x => [new Date(x.at).toISOString(), x.c, x.i, x.t, x.e])],
+          a = document.createElement("a");
+        a.href = URL.createObjectURL(new Blob([rows.map(r => r.map(q).join(",")).join("\n")], { type: "text/csv" }));
+        a.download = "kaytia-flow-keys.csv";
+        a.click();
+      };
+      draw();
+    </script>
+  </body>
+</html>
