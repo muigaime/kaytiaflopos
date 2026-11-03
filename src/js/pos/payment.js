@@ -13,7 +13,8 @@ const c2 = n => Math.round(n * 100),
     pdq: "PDQ",
     comp: "Complimentary",
     credit: "Credit",
-    room: "Room"
+    room: "Room",
+    payroll: "Staff payroll"
   };
 const payDue = () => (payT ? payT.reduce((a, o) => a + totals(o.lines, o).g, 0) : totals().g);
 const payBal = () => (c2(payDue()) - c2(pays.reduce((a, p) => a + p.amt, 0))) / 100;
@@ -24,6 +25,15 @@ const PAY_ROWS = [
   ["pdq", "PDQ", "Card slip number"],
   ["mpesa", "M-Pesa", "M-Pesa code, or 2547… to send a request"]
 ];
+/** The rows on the Settle screen: the built-in ones left on, then any the business added. */
+const payRowsNow = () => [
+  ...PAY_ROWS.filter(([m]) => payModeOn(m)),
+  ...payCustomsOn().map(c => [c.k, c.n, c.ph || "Reference, if any"])
+];
+/** Custom modes get their names on receipts and in the Bills report filter. */
+function mnSync() {
+  payCustoms().forEach(c => (MN[c.k] = c.n));
+}
 const PAY_NOTES = [
   [1000, "n1"],
   [500, "n2"],
@@ -51,6 +61,7 @@ function openPay(tg) {
   if (!tg && newBillBlock()) return fsNote(newBillBlock());
   const none = (tg || []).find(o => !Object.keys(o.lines).length);
   if (none) return fsNote(`Bill ${none.no} has no items yet.`);
+  clearingShift();
   if (!shiftOk()) return;
   payT = tg || null;
   pays = [];
@@ -75,14 +86,17 @@ function payBillInfo() {
   };
 }
 function drawPay() {
+  mnSync();
   const B = payBillInfo(),
     payBill = !payT ? cartAdj : payT.length === 1 ? payT[0] : null,
     payCur = payBill && payBill.cur,
     val = (m, k) => slipEsc((payVals[m] || {})[k] || ""),
-    rows = PAY_ROWS.map(
-      ([m, l, ph]) =>
-        `<tr class="pay-r ${m === payRow ? "on" : ""}" data-pr="${m}"><th>${l}</th><td><input ${m === "cash" ? 'id="pAmt"' : ""} data-pa="${m}" type="number" inputmode="decimal" min="0" step="any" value="${val(m, "a")}" placeholder="0.00"></td><td><input data-pt="${m}" type="number" inputmode="decimal" min="0" step="any" value="${val(m, "t")}" placeholder="0" ${m === "comp" ? "disabled" : ""}></td><td class="pay-n"><input data-pn="${m}" value="${val(m, "n")}" placeholder="${ph}" autocomplete="off">${m === "mpesa" ? '<button class="pay-stk" data-stk>Send request</button>' : ""}</td></tr>`
-    ).join(""),
+    rows = payRowsNow()
+      .map(
+        ([m, l, ph]) =>
+          `<tr class="pay-r ${m === payRow ? "on" : ""}" data-pr="${m}"><th>${l}</th><td><input ${m === "cash" ? 'id="pAmt"' : ""} data-pa="${m}" type="number" inputmode="decimal" min="0" step="any" value="${val(m, "a")}" placeholder="0.00"></td><td><input data-pt="${m}" type="number" inputmode="decimal" min="0" step="any" value="${val(m, "t")}" placeholder="0" ${m === "comp" ? "disabled" : ""}></td><td class="pay-n"><input data-pn="${m}" value="${val(m, "n")}" placeholder="${ph}" autocomplete="off">${m === "mpesa" ? '<button class="pay-stk" data-stk>Send request</button>' : ""}</td></tr>`
+      )
+      .join(""),
     posted = payPost
       .map(
         (p, i) =>
@@ -99,12 +113,35 @@ function drawPay() {
   <div class="pay-low"><div><div class="pay-rc"><label><input type="radio" name="pRc" id="pRcY" ${payNoRc ? "" : "checked"}> Print receipt</label><label><input type="radio" name="pRc" id="pRcN" ${payNoRc ? "checked" : ""}> No receipt</label></div>
   <div class="pay-cash">${PAY_NOTES.map(([v, c]) => `<button class="pay-note ${c}" data-note="${v}"><small>KES</small>${v}</button>`).join("")}<button class="pay-reset" data-note="0">Reset</button></div></div>
   <div class="pay-sum"><div><span>Tendered total</span><b id="pTend">0.00</b></div><div id="pBal" class="status"></div></div></div>
-  <div class="pay-go"><button class="pay-post" id="pAcct">Post to account</button><button class="pay-post" id="pRoom">Post to room</button><button class="pay-post" id="pMulti">Clear multiple bills</button><button class="pay-clear" id="pOk">Clear bill</button></div>`;
+  <div class="pay-go"><button class="pay-post" id="pAcct">Post to account</button><button class="pay-post" id="pRoom">Post to room</button><button class="pay-post" id="pPayroll">Post to payroll</button><button class="pay-post" id="pMulti">Clear multiple bills</button><button class="pay-clear" id="pOk">Clear bill</button></div>`;
   applyRights();
+  if (!payModeOn("credit")) $("#pAcct").style.display = "none";
+  if (!payModeOn("room")) $("#pRoom").style.display = "none";
+  if (!payStaff().length) $("#pPayroll").style.display = "none";
   payCalc();
 }
+/** Whoever has the right charges a bill to pay on their own. Anyone else needs a PIN. */
+const payrollAlone = () =>
+  !!user &&
+  (BILL_AUTH.includes(user.role) ||
+    cashierHas(user.role, "postPayroll") ||
+    !!(user.perm && user.perm.postPayroll));
+/** Who a bill can be charged to: staff on the payroll. */
+const payStaff = () => ((FD_SETTINGS.hr || {}).emps || []).filter(e => e.status !== "Left");
 function payPanelHTML() {
   const due = Math.max(0, payLeft()).toFixed(2);
+  if (payPanel === "payroll") {
+    const bill = payT && payT[0],
+      who = bill && bill.waiter;
+    return `<div class="pay-panel"><h4>Post to payroll</h4><select id="pStaff">${payStaff()
+      .map(
+        e =>
+          `<option value="${slipEsc(e.id)}" ${e.user && e.user === who ? "selected" : ""}>${slipEsc(e.name)}${e.job ? " · " + slipEsc(e.job) : ""}</option>`
+      )
+      .join(
+        ""
+      )}</select><input id="pPostA" type="number" inputmode="decimal" min="0" step="any" value="${due}">${payrollAlone() ? "" : '<input id="pStaffPin" type="password" inputmode="numeric" autocomplete="off" placeholder="Manager or Super Cashier PIN">'}<button class="pay-mini" data-post="payroll">Add</button><button class="pay-mini" data-panel="">Cancel</button></div>`;
+  }
   if (payPanel === "acct")
     return `<div class="pay-panel"><h4>Post to account</h4><select id="pCu">${CU.map((c, i) => `<option value="${i}">${slipEsc(c.n)} · limit ${c.limit.toLocaleString()} · owes ${c.owes.toLocaleString()}</option>`).join("") || '<option value="">No credit customers yet</option>'}</select><input id="pPostA" type="number" inputmode="decimal" min="0" step="any" value="${due}"><button class="pay-mini" data-post="acct">Add</button><button class="pay-mini" data-panel="">Cancel</button></div>`;
   if (payPanel === "room") {
@@ -134,7 +171,7 @@ function payRead() {
   if ($("#pCustN")) payCust = { n: $("#pCustN").value, p: $("#pCustP").value };
 }
 const payTendered = () =>
-  PAY_ROWS.reduce((a, [m]) => a + payNum((payVals[m] || {}).a), 0) +
+  payRowsNow().reduce((a, [m]) => a + payNum((payVals[m] || {}).a), 0) +
   payPost.reduce((a, p) => a + p.amt, 0);
 const payLeft = () => (c2(payDue()) - c2(payTendered())) / 100;
 function payCalc() {
@@ -155,7 +192,12 @@ function payCommit() {
   const V = m => payVals[m] || {},
     A = m => payNum(V(m).a),
     due = payDue(),
-    others = A("comp") + A("pdq") + A("mpesa") + payPost.reduce((a, p) => a + p.amt, 0);
+    others =
+      A("comp") +
+      A("pdq") +
+      A("mpesa") +
+      payCustomsOn().reduce((a, c) => a + A(c.k), 0) +
+      payPost.reduce((a, p) => a + p.amt, 0);
   if (payLeft() > 0.004) return (fsNote("Balance due: " + KES(payLeft())), false);
   if (others > due + 0.004) return (fsNote("Only cash can be more than the bill."), false);
   const mp = String(V("mpesa").n || "").trim();
@@ -184,6 +226,9 @@ function payCommit() {
   pays = [...payPost];
   if (A("mpesa") > 0) pays.push({ m: "mpesa", amt: A("mpesa"), ref: mp });
   if (A("pdq") > 0) pays.push({ m: "pdq", amt: A("pdq"), ref: String(V("pdq").n || "").trim() });
+  payCustomsOn().forEach(c => {
+    if (A(c.k) > 0) pays.push({ m: c.k, amt: A(c.k), ref: String(V(c.k).n || "").trim() });
+  });
   if (A("comp") > 0)
     pays.push({ m: "comp", amt: A("comp"), ref: String(V("comp").n).trim(), who: by });
   const need = Math.max(0, due - others);
@@ -197,7 +242,7 @@ function payCommit() {
     });
   }
   payTipsNow = {};
-  PAY_ROWS.forEach(([m]) => {
+  payRowsNow().forEach(([m]) => {
     const t = payNum(V(m).t);
     if (t > 0) payTipsNow[m] = t;
   });
@@ -207,7 +252,19 @@ function payAddPost(kind) {
   const a = parseFloat($("#pPostA").value);
   if (!(a > 0)) return fsNote("Enter an amount.");
   if (a > payLeft() + 0.004) return fsNote("That is more than the balance due.");
-  if (kind === "acct") {
+  if (kind === "payroll") {
+    const auth = payrollAlone()
+        ? user
+        : USERS.find(x => BILL_AUTH.includes(x.role) && x.pin === $("#pStaffPin").value),
+      e = payStaff().find(x => x.id === $("#pStaff").value);
+    if (!auth) {
+      $("#pStaffPin").value = "";
+      return fsNote("That PIN can't charge a bill to staff pay.");
+    }
+    payPost = payPost.filter(p => p.m !== "payroll");
+    payPost.push({ m: "payroll", amt: a, who: e.name, emp: e.id, auth: auth.n });
+    if (!payCust.n) payCust.n = e.name;
+  } else if (kind === "acct") {
     const ci = $("#pCu").value;
     if (ci === "") return fsNote("Add a credit customer first.");
     const c = CU[+ci],
@@ -280,12 +337,20 @@ $("#mPay").addEventListener("click", e => {
     payPost.splice(+d.rm, 1);
     return drawPay();
   }
-  if (b.id === "pAcct" || b.id === "pRoom" || b.id === "pMulti" || d.panel !== undefined) {
+  if (
+    b.id === "pAcct" ||
+    b.id === "pRoom" ||
+    b.id === "pPayroll" ||
+    b.id === "pMulti" ||
+    d.panel !== undefined
+  ) {
     payRead();
     if (b.id === "pMulti" && !payT)
       return fsNote("Send this sale first, then clear it with other bills.");
     payPanel =
-      d.panel !== undefined ? d.panel : { pAcct: "acct", pRoom: "room", pMulti: "multi" }[b.id];
+      d.panel !== undefined
+        ? d.panel
+        : { pAcct: "acct", pRoom: "room", pPayroll: "payroll", pMulti: "multi" }[b.id];
     return drawPay();
   }
   if (d.post) {
@@ -337,7 +402,8 @@ function payClear() {
   const q = pays.map(p => ({ ...p, left: c2(p.amt) }));
   let html = "",
     gsum = 0;
-  const chv = pays.reduce((a, p) => a + (p.chg || 0), 0);
+  const billNos = [],
+    chv = pays.reduce((a, p) => a + (p.chg || 0), 0);
   targets.forEach((o, bi) => {
     const t = totals(o.lines, o),
       no = o.no || nextBill(),
@@ -345,6 +411,7 @@ function payClear() {
       lines = Object.entries(o.lines).map(([id, n]) => ({ it: get(id), q: n })),
       used = {};
     gsum += t.g;
+    billNos.push(no);
     if (direct)
       lines.forEach(({ it, q: n }) => {
         itemStockMove(it, n);
@@ -368,7 +435,7 @@ function payClear() {
     const cu = "KRACU0100" + Math.floor(1000 + Math.random() * 8999),
       inv = +no,
       change = bi === targets.length - 1 ? chv : 0,
-      credit = pays.some(p => p.m === "credit" || p.m === "room"),
+      credit = pays.some(p => p.m === "credit" || p.m === "room" || p.m === "payroll"),
       tips = bi === 0 ? payTipsNow : {},
       roomPay = pays.find(p => p.m === "room"),
       cust = payCust.n.trim(),
@@ -406,6 +473,7 @@ function payClear() {
         ord,
         at: new Date(),
         bd: bizDate(),
+        pc: auditMachine(),
         billCopies: o.billCopies,
         dept: d,
         label: o.label,
@@ -451,7 +519,15 @@ function payClear() {
         g,
         lines: lines
           .filter(({ it }) => it.d === d)
-          .map(({ it, q: n }) => ({ id: it.id, n: it.n, q: n, p: itemPrice(it, o), t: it.t })),
+          .map(({ it, q: n }) => ({
+            id: it.id,
+            n: it.n,
+            q: n,
+            p: itemPrice(it, o),
+            t: it.t,
+            ...(it.was ? { was: it.was } : {}),
+            ...(it.promo ? { promo: it.promo } : {})
+          })),
         disc: dd,
         pl: t.pl ? t.pl.n : "",
         mx: pmx
@@ -494,6 +570,32 @@ function payClear() {
         : "") +
       `</div></div>`;
   pays.filter(p => p.m === "credit").forEach(p => (CU[p.ci].owes += p.amt));
+  // The next payroll collects it.
+  pays
+    .filter(p => p.m === "payroll")
+    .forEach(p => {
+      const H = FD_SETTINGS.hr;
+      H.charges = H.charges || [];
+      H.charges.push({
+        id: "CH-" + Date.now().toString(36).toUpperCase() + billNos[0],
+        kind: "bill",
+        at: new Date().toISOString(),
+        emp: p.emp,
+        amt: p.amt,
+        left: p.amt,
+        note: "Bill " + billNos.join(", "),
+        by: p.auth
+      });
+      auditAdd(
+        "Payroll",
+        `Bill ${billNos.join(", ")} · KES ${p.amt.toFixed(2)} sent to ${p.who}'s pay · authorised by ${p.auth}`,
+        {
+          who: user ? user.n : p.auth,
+          mod: "POS",
+          pri: "Important"
+        }
+      );
+    });
   if (direct) {
     cartSwaps.filter(x => cart[x.toId]).forEach(x => swapLog(targets[0], x));
     cartSwaps = [];

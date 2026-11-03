@@ -89,7 +89,7 @@ function mods() {
       ROOMS.filter(r => roomStatus(r) === "occ").length + " of " + ROOMS.length + " rooms occupied",
       "Bookings and guest bills"
     ],
-    ["Products", "box", "#c8553d", ITEMS.length + " items", "Prices and tax"],
+    ["Products List", "box", "#c8553d", ITEMS.length + " items", "Prices and tax"],
     ["Tables", "pos", "#3a8fb7", TBL.length + " on the list", "Tables and takeaways"],
     [
       "Inventory",
@@ -120,7 +120,7 @@ function mods() {
       LPOS.filter(p => p.status === "Open" || p.status === "Partly received").length + " open LPOs",
       VENDORS.length + " vendors"
     ],
-    ["Accounting", "book", "#2f9e75", "Next build", "Ledgers and tax"],
+    ["Accounting", "book", "#2f9e75", "Open", "Ledgers and reports"],
     ["M-Pesa & eTIMS", "phone", "#12804a", "Next build", "Sync and invoices"],
     [
       "Reports",
@@ -144,6 +144,7 @@ $("#mods").onclick = e => {
   const b = e.target.closest("[data-m]");
   if (b) go(b.dataset.m);
 };
+const inPL = () => (per === "today" ? "today" : "in the " + PL[per]);
 function trend() {
   const n = per === "today" ? 12 : +per,
     cur = ser(0, s => s.g),
@@ -166,7 +167,7 @@ function trend() {
   }
   const lab = i =>
       per === "today"
-        ? 8 + i + ":00"
+        ? `${pad2(Math.floor((dayStartMins() + i * 120) / 60) % 24)}:${pad2(dayStartMins() % 60)}`
         : new Date(a + i * D).toLocaleDateString(
             "en-GB",
             per === "7" ? { weekday: "short" } : { day: "numeric" }
@@ -183,7 +184,7 @@ function trend() {
     pl = prev.map((v, i) => (i ? "L" : "M") + x(i).toFixed(1) + " " + y(v).toFixed(1)).join("");
   $("#trend").innerHTML =
     `<svg class="ch" viewBox="0 0 ${W} ${H}"><defs><linearGradient id="tg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--c2)"/><stop offset="1" style="stop-color:var(--c1)"/></linearGradient></defs>${g}${bars}<path d="${pl}" fill="none" style="stroke:var(--tr2,var(--acc))" stroke-width="2" stroke-dasharray="5 4" pointer-events="none"/></svg>`;
-  $("#tc").textContent = KES(sum(cur, v => v)) + " in the " + PL[per] + " · " + br.toLowerCase();
+  $("#tc").textContent = KES(sum(cur, v => v)) + " " + inPL() + " · " + br.toLowerCase();
   $("#pl").textContent = br + " · " + PL[per];
 }
 function donut() {
@@ -286,7 +287,7 @@ function insights() {
       "g",
       "spark",
       esc(top[0]) + " is your best seller",
-      "Sold " + top[1] + " units in the " + PL[per] + ".",
+      "Sold " + top[1] + " units " + inPL() + ".",
       "See sales",
       "go:Sales & Orders"
     ]);

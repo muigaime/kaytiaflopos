@@ -77,6 +77,20 @@ function vendorLedger(v) {
       cr: 0
     })
   );
+  grList()
+    .filter(r => r.status === "Returned" && r.sup === v.name)
+    .forEach(r =>
+      T.push({
+        t: new Date(r.appr.at).getTime(),
+        day: day(r.appr.at),
+        ref: r.id,
+        kind: "Return",
+        narr: `Goods returned · ${r.id} against GRN ${r.grn} · ${r.why} · Amount ${m2(grAmount(r))}`,
+        sub: `From ${r.store} · authorised by ${r.appr.by}`,
+        dr: grAmount(r),
+        cr: 0
+      })
+    );
   return T.sort((a, b) => a.t - b.t);
 }
 /** What is owed to the vendor today. */
@@ -212,24 +226,40 @@ function vsPrint(v, from, to) {
 }
 
 // ---------------------------------------------------------------- page
+// What each screen is for, shown at the top of it.
+const VN_PAGES = {
+  list: ["Vendors", "The suppliers you buy from, and what you owe each one."],
+  stmt: [
+    "Vendor statement",
+    "What was bought from a vendor and what was paid, for the dates you choose."
+  ],
+  pay: ["Vendor payments", "Record a payment to a vendor, and see what's already been paid."]
+};
 function vendorsView() {
   if (!boTabOk("vn", vnT)) vnT = "list";
   invF.vn.open = false; // the vendor form is on the page itself
   if (!VENDORS.some(v => v.id === invF.vs.vendor)) invF.vs.vendor = VENDORS[0] ? VENDORS[0].id : "";
   const body =
     vnT === "list"
-      ? `<div class="pn"><h4>Vendors</h4>${vendorFormHTML()}</div>`
+      ? `${
+          vnPageNew || invF.vn.id || !VENDORS.length
+            ? `<div class="pn"><h4>${invF.vn.id ? "Edit vendor" : "New vendor"}</h4>${vendorFieldsHTML()}</div>`
+            : ""
+        }<div class="pn"><div class="inv-head"><h4>Vendors (${VENDORS.length})</h4>${vnPageNew || invF.vn.id || !VENDORS.length ? "" : '<button class="chip on" data-a="inv_vnpage">New vendor</button>'}</div>${vendorListHTML()}</div>`
       : !VENDORS.length
         ? `<div class="pn"><div class="empty">Add a vendor first.</div><button class="chip on" data-a="vs_tab" data-t="list">Go to the vendor list</button></div>`
         : vnT === "stmt"
           ? vsStatementHTML()
           : vsPaymentsHTML();
-  return `<div class="inv"><nav class="inv-rail">${VN_TABS.filter(([t]) => boTabOk("vn", t))
+  const [title, what] = VN_PAGES[vnT];
+  return `<div class="inv invx"><nav class="inv-rail">${VN_TABS.filter(([t]) => boTabOk("vn", t))
     .map(
       ([t, l, ic]) =>
         `<button class="ir ${t === vnT ? "on" : ""}" data-a="vs_tab" data-t="${t}">${I(ic)}<span>${l}</span></button>`
     )
-    .join("")}</nav><div class="inv-main">${body}</div></div>`;
+    .join(
+      ""
+    )}</nav><div class="inv-main"><div class="inv-title"><h1>${title}</h1><p>${what}</p></div>${body}</div></div>`;
 }
 
 const vsVendorSelect = () =>
@@ -242,7 +272,7 @@ function vsStatementHTML() {
     S = bad ? null : vendorStatement(v, F.from, F.to),
     H = invF.vh,
     kst = (l, n) => `<div class="kst"><span>${l}</span><b>${n}</b></div>`;
-  return `<div class="pn"><h4>Vendor statement</h4>
+  return `<div class="pn">
   <div class="fr">${vsVendorSelect()}
    <label>From<input type="date" data-iv="vs.from" value="${esc(F.from)}"></label>
    <label>To<input type="date" data-iv="vs.to" value="${esc(F.to)}"></label></div>

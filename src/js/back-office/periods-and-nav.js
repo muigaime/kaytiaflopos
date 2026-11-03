@@ -6,6 +6,11 @@ const D = 864e5,
     return new Date(y, m - 1, n).getTime();
   },
   nD = () => (per === "today" ? 1 : +per);
+// Today's chart runs in two-hour bars from the start of the working day.
+const dayStartMins = () => {
+  const [h, m] = dayTimes().start.split(":").map(Number);
+  return h * 60 + m;
+};
 const rngOf = p => {
   const e = d0() + D - p * nD() * D;
   return [e - nD() * D, e];
@@ -21,7 +26,9 @@ const ser = (p, f) => {
   sel(p).forEach(s => {
     const i =
       per === "today"
-        ? Math.min(11, Math.max(0, s.at.getHours() - 8))
+        ? Math.floor(
+            ((s.at.getHours() * 60 + s.at.getMinutes() - dayStartMins() + 1440) % 1440) / 120
+          )
         : Math.min(n - 1, Math.max(0, Math.floor((saleAt(s) - a) / D)));
     o[i] += f(s);
   });
@@ -52,7 +59,7 @@ const NAV = [
       ["Sales &amp; Orders", "cart"],
       ["Shifts &amp; Day", "id"],
       ["Purchasing", "dl"],
-      ["Products", "box"],
+      ["Products List", "box"],
       ["Inventory", "box"],
       ["Selling points", "pos"],
       ["Tables", "pos"],

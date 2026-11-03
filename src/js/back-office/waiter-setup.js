@@ -52,7 +52,7 @@ function wsEdit(u) {
   };
 }
 const wsTile = (k, label, hint, off) =>
-  `<label class="ws-p ${off ? "later" : ""}"><input type="checkbox" data-wsp="${k}" ${wsF.perm[k] ? "checked" : ""}><span><b>${label}</b>${hint ? `<small>${hint}</small>` : ""}</span></label>`;
+  `<label class="ws-p ${off ? "later" : ""}"><input type="checkbox" data-wsp="${k}" ${wsF.perm[k] || cashierHas(wsF.role, k) ? "checked" : ""} ${cashierHas(wsF.role, k) ? 'disabled title="Cashiers can always do this"' : ""}><span><b>${label}</b>${hint ? `<small>${hint}</small>` : ""}</span></label>`;
 V.wait = () => {
   const F = wsF,
     f = (l, k, attrs = "") =>
@@ -157,6 +157,7 @@ function wsSave() {
     });
   }
   bosave();
+  auditAdd("Staff", me ? `${n} updated` : `${n} created`);
   toast(me ? `${n} updated.` : `${n} created.`);
   wsF = wsBlank();
   all();

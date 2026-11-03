@@ -39,6 +39,7 @@ function boptLog(act, b, why, detail, amt, extra) {
   BILLLOG.push({
     at: new Date().toISOString(),
     bd: bizDate(),
+    pc: auditMachine(),
     act,
     no: b.no,
     label: b.label,
@@ -225,6 +226,8 @@ const VOID_REASONS = [
   "Erroneous entry",
   "Goods returned"
 ];
+const voidReasons = () =>
+  (typeof FD_SETTINGS !== "undefined" && FD_SETTINGS.voidReasons) || VOID_REASONS;
 function boptVoidForm() {
   const b = bopt.bill;
   bopt.vq = Object.fromEntries(Object.keys(b.lines).map(id => [id, 0]));
@@ -233,7 +236,9 @@ function boptVoidForm() {
   <div class="bv-wrap"><table class="bv-t"><thead><tr><th>Selected</th><th>Code</th><th>Description</th><th class="n">Qty</th><th class="n">Price</th><th class="n">Total</th></tr>
   <tr class="bv-f"><td colspan="6"><input id="bopVF" placeholder="Filter items" autocomplete="off"></td></tr></thead><tbody id="bopVRows"></tbody></table></div>
   <div class="bv-sum"><label class="bop-c"><input type="checkbox" id="bopVAll"> Select all</label><div id="bopVSum"></div></div>
-  <div class="bv-rs">${VOID_REASONS.map(r => `<button class="bv-r" data-vw="${r}">${r}</button>`).join("")}</div>
+  <div class="bv-rs">${voidReasons()
+    .map(r => `<button class="bv-r" data-vw="${slipEsc(r)}">${slipEsc(r)}</button>`)
+    .join("")}</div>
   <label>Void reason<textarea id="bopWhy" rows="2" placeholder="Tap a reason above or type your own"></textarea></label>
   ${b.draft ? "" : `<label class="bop-c"><input type="checkbox" id="bopBack" ${boptBackDefault(b) ? "checked" : ""}> Return voided items to stock</label>`}
   <div class="bop-msg" id="bopMsg"></div>

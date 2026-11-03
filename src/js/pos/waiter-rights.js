@@ -32,6 +32,7 @@ const WAITER_RIGHTS = [
       ["postAccount", "Post to Account", "Charge a customer's credit account"],
       ["comp", "Give Complimentary", "Without a manager's PIN"],
       ["postRoom", "Post to Room", "Charge a bill to a guest's room"],
+      ["postPayroll", "Post to Payroll", "Charge a bill to a staff member's pay"],
       ["swap", "Swap Items", "Same price only, and a manager's PIN is still needed"]
     ]
   ],
@@ -77,7 +78,10 @@ const WAITER_DEFAULTS = [
   "sendPending"
 ];
 const allowedAlways = u => !u || !u.perm || BILL_AUTH.includes(u.role);
-const can = k => allowedAlways(user) || !!user.perm[k];
+// Part of a cashier's job, so these aren't left to a tick in Waiter setup.
+const CASHIER_POSTS = ["postRoom", "postPayroll"];
+const cashierHas = (role, k) => role === "Cashier" && CASHIER_POSTS.includes(k);
+const can = k => allowedAlways(user) || cashierHas(user.role, k) || !!user.perm[k];
 /** Only given when ticked in Waiter setup, even for staff from before that page. */
 const canDay = () => !!user && (BILL_AUTH.includes(user.role) || !!(user.perm && user.perm.newDay));
 /** Bill options: a waiter with this right acts alone; anyone else needs a PIN. */
@@ -93,7 +97,8 @@ function applyRights() {
     ["#selBtn", "interim"],
     ["#billBtn", "functions"],
     ["#pAcct", "postAccount"],
-    ["#pRoom", "postRoom"]
+    ["#pRoom", "postRoom"],
+    ["#pPayroll", "postPayroll"]
   ].forEach(([s, k]) => {
     const el = $(s);
     if (el) el.style.display = can(k) ? "" : "none";

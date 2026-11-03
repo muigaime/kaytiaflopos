@@ -71,6 +71,9 @@ const boTry = async () => {
       $("#boRm").checked ? localStorage.setItem(RMK, u) : localStorage.removeItem(RMK);
     } catch (e) {}
     boUser = { n: a.n, u: a.u, role: a.role || SUPER };
+    AUDIT_WHO = a.n;
+    auditAdd("Sign in", "Signed in to Back Office", { who: a.n, mod: "Back Office" });
+    repToday();
     LIC.gate();
     boShow();
   } else {
@@ -78,6 +81,10 @@ const boTry = async () => {
       lock = Date.now() + 3e4;
       fails = 0;
     }
+    auditAdd("Failed sign-in", `Wrong password for username "${u}"`, {
+      who: u || "Unknown",
+      mod: "Back Office"
+    });
     bad("Wrong username or password.");
   }
 };

@@ -1,17 +1,24 @@
 // ---- Approvals: purchase orders (LPO), requisitions and issues need a manager's approval ----
 // LPO:          "Awaiting approval" → "Open" (can be received) or "Rejected".
-// Requisition:  "Awaiting approval" → "Approved" (the store can issue it) or "Rejected".
-// Issue:        issuing (Issue tab, a requisition, Send to selling point) raises an issue note (ISSUES);
-//               the stock moves only when it is approved, after checking the store still has it.
+// Requisition:  "Awaiting approval" → approving it moves the stock. Whatever the store is short of stays open.
+// Issue:        anyone with the approve right issues straight away. Anyone else raises a note (ISSUES),
+//               and the stock moves when a manager approves that. One approval per movement, never two.
 // A manager approves by typing their PIN (Waiter setup). Each decision keeps who, when and why.
 const AWAIT = "Awaiting approval";
 let apM = null; // approval popup: { kind: "lpo" | "req" | "iss", id, act: "approve" | "reject" }
 
-const AP_KIND = { lpo: "Purchase order", req: "Requisition", iss: "Issue" };
-const apList = kind => (kind === "lpo" ? LPOS : kind === "req" ? REQS : ISSUES);
+const AP_KIND = {
+  lpo: "Purchase order",
+  req: "Requisition",
+  iss: "Issue",
+  ret: "Return to supplier"
+};
+const AP_KINDS = ["lpo", "req", "iss", "ret"];
+const apList = kind =>
+  kind === "ret" ? grList() : kind === "lpo" ? LPOS : kind === "req" ? REQS : ISSUES;
 const apFind = (kind, id) => apList(kind).find(x => x.id === id);
 const apPending = () =>
-  ["lpo", "req", "iss"].flatMap(kind =>
+  AP_KINDS.flatMap(kind =>
     apList(kind)
       .filter(x => x.status === AWAIT)
       .map(d => ({ kind, d }))
@@ -48,6 +55,48 @@ function raiseIssue(from, to, lines, note, src, req) {
   bosave();
   return x;
 }
+/** Issues now, for a requisition or by someone allowed to approve: no second approval. */
+function issueNow(from, to, lines, note, src, req, who) {
+  const x = raiseIssue(from, to, lines, note, src, req),
+    err = apApprove("iss", x, who);
+  if (err) {
+    ISSUES.splice(ISSUES.indexOf(x), 1);
+    bosave();
+    toast(err);
+    return null;
+  }
+  bosave();
+  return x;
+}
+/** Everything still owed on an approved requisition that the store has. */
+function reqIssueLines(r) {
+  const st = r.store || STORES[0],
+    lines = [];
+  r.lines.forEach(x => {
+    const q = Math.min(x.q - x.issued - reqPend(r, x.k), have(st, x.k));
+    if (q > 1e-9) lines.push({ k: x.k, q });
+  });
+  return lines;
+}
+/** Moves what the store has for an approved requisition. Says what's still short. */
+function reqIssueAll(r, who) {
+  const st = r.store || STORES[0],
+    lines = reqIssueLines(r);
+  if (lines.length) issueNow(st, r.dept, lines, "", "requisition", r.id, who);
+  const left = r.lines.filter(x => x.issued < x.q - 1e-9);
+  return left.length
+    ? `${esc(st)} is short of ${left.map(x => itemInfo(x.k).name).join(", ")}. It stays open under Requisitions.`
+    : `Stock moved to ${r.dept}.`;
+}
+/** Notes raised behind a requisition that was already approved were waiting for nothing. */
+function apClearDoubles() {
+  let moved = false;
+  ISSUES.filter(x => x.status === AWAIT && x.req).forEach(x => {
+    const r = REQS.find(y => y.id === x.req);
+    if (r && r.appr && !apApprove("iss", x, r.appr.by)) moved = true;
+  });
+  if (moved) bosave();
+}
 /** Quantity of item k on a requisition already in issue notes waiting for approval. */
 const reqPend = (r, k) =>
   ISSUES.filter(x => x.req === r.id && x.status === AWAIT).reduce(
@@ -58,6 +107,7 @@ const reqPend = (r, k) =>
 // ---------------------------------------------------------------- deciding
 /** Returns an error message, or "" when done. */
 function apApprove(kind, d, who) {
+  if (kind === "ret") return grApply(d, who);
   if (kind === "iss") {
     const short = d.lines.find(l => l.q > have(d.from, l.k) + 1e-9);
     if (short)
@@ -96,6 +146,8 @@ function apDocLines(kind, d) {
       .join(
         ""
       )}<tr><td colspan="3"><b>Order total</b></td><td class="n"><b>${m2(lpoTotal(d))}</b></td></tr>`;
+  if (kind === "ret")
+    return `<tr><th>Item</th><th class="n">To return</th><th class="n">In ${esc(d.store)}</th><th class="n">Value (KES)</th></tr>${d.lines.map(x => `<tr><td>${esc(itemInfo(x.k).name)}</td><td class="n">${qtyBoth(x.k, x.q)}</td><td class="n ${have(d.store, x.k) < x.q - 1e-9 ? "bad" : ""}">${qtyBoth(x.k, have(d.store, x.k))}</td><td class="n">${m2(x.gross)}</td></tr>`).join("")}<tr><td colspan="3"><b>Reason: ${esc(d.why)}</b></td><td class="n"><b>${m2(grAmount(d))}</b></td></tr>`;
   const from = kind === "req" ? d.store || STORES[0] : d.from;
   return `<tr><th>Item</th><th class="n">${kind === "req" ? "Requested" : "To issue"}</th><th class="n">In ${esc(from)}</th><th class="n">Value at cost (KES)</th></tr>${d.lines
     .map(
@@ -105,11 +157,13 @@ function apDocLines(kind, d) {
     .join("")}`;
 }
 const apTitle = (kind, d) =>
-  kind === "lpo"
-    ? `${d.id} · ${esc(d.sup)} → ${esc(d.store)}`
-    : kind === "req"
-      ? `${d.id} · ${esc(d.dept)} asks ${esc(d.store || STORES[0])}`
-      : `${d.id} · ${esc(d.from)} → ${esc(d.to)}${d.req ? " · for " + esc(d.req) : ""}`;
+  kind === "ret"
+    ? `${d.id} · back to ${esc(d.sup)} from ${esc(d.store)}`
+    : kind === "lpo"
+      ? `${d.id} · ${esc(d.sup)} → ${esc(d.store)}`
+      : kind === "req"
+        ? `${d.id} · ${esc(d.dept)} asks ${esc(d.store || STORES[0])}`
+        : `${d.id} · ${esc(d.from)} → ${esc(d.to)}${d.req ? " · for " + esc(d.req) : ""}`;
 
 function apModalIfOpen() {
   const d = apM && apFind(apM.kind, apM.id);
@@ -126,7 +180,7 @@ function apModalIfOpen() {
       ? `<label>Manager PIN<input id="apPin" type="password" inputmode="numeric" autocomplete="off" placeholder="${mgrs.length} manager(s) can ${rej ? "reject" : "approve"}"></label>`
       : '<div class="stk" style="color:var(--bad)">No manager can approve yet. Give a staff member the Manager role under Waiter setup.</div>'
   }
-  <div class="stk">${apM.kind === "iss" && !rej ? "Approving moves the stock now." : apM.kind === "lpo" && !rej ? "Once approved the order can be received." : apM.kind === "req" && !rej ? "Once approved the store can issue it." : ""}</div>
+  <div class="stk">${apM.kind === "ret" && !rej ? "Approving takes the stock out now and reduces what's owed to the supplier." : apM.kind === "iss" && !rej ? "Approving moves the stock now." : apM.kind === "lpo" && !rej ? "Once approved the order can be received." : apM.kind === "req" && !rej ? "Once approved the store can issue it." : ""}</div>
   <div class="fr" style="justify-content:flex-end"><button class="mini" data-a="ap_close">Cancel</button><button class="chip on" data-a="ap_ok" ${mgrs.length ? "" : "disabled"}>${rej ? "Reject" : "Approve"}</button></div>
  </div></div>`;
 }
@@ -135,23 +189,25 @@ function apModalIfOpen() {
 function apView() {
   const P = apPending(),
     n = k => P.filter(x => x.kind === k).length,
-    done = ["lpo", "req", "iss"]
-      .flatMap(kind =>
-        apList(kind)
-          .filter(d => d.appr || d.rej)
-          .map(d => ({ kind, d, t: (d.appr || d.rej).at }))
-      )
+    done = AP_KINDS.flatMap(kind =>
+      apList(kind)
+        .filter(d => d.appr || d.rej)
+        .map(d => ({ kind, d, t: (d.appr || d.rej).at }))
+    )
       .sort((a, b) => (a.t < b.t ? 1 : -1))
       .slice(0, 25),
     detail = (kind, d) =>
-      kind === "lpo"
-        ? `${d.lines.length} line(s) · KES ${m2(lpoTotal(d))}`
-        : d.lines.map(x => `${esc(itemInfo(x.k).name)} ${qtyBoth(x.k, x.q)}`).join(", ");
+      kind === "ret"
+        ? `${d.lines.map(x => `${esc(itemInfo(x.k).name)} ${qn(x.q)}`).join(", ")} · KES ${m2(grAmount(d))} · ${esc(d.why)}`
+        : kind === "lpo"
+          ? `${d.lines.length} line(s) · KES ${m2(lpoTotal(d))}`
+          : d.lines.map(x => `${esc(itemInfo(x.k).name)} ${qtyBoth(x.k, x.q)}`).join(", ");
   return `<div class="pn"><h4>Approvals</h4><div class="stk">Purchase orders, requisitions and issues wait here until a manager approves them with their PIN. Stock is only issued once its issue note is approved.</div></div>
  <div class="kstg">${[
    ["Purchase orders", n("lpo")],
    ["Requisitions", n("req")],
-   ["Issues", n("iss")]
+   ["Issues", n("iss")],
+   ["Supplier returns", n("ret")]
  ]
    .map(([l, v]) => `<div class="kst"><span>${l} waiting</span><b>${v}</b></div>`)
    .join("")}</div>
@@ -189,7 +245,7 @@ function apIssueNotes(store) {
     L.length
       ? `<table class="t"><tr><th>Date</th><th>Issue no</th><th>To</th><th>Items</th><th>By</th><th>Status</th><th></th></tr>${L.map(
           x =>
-            `<tr><td>${dt2(x.at)}</td><td>${esc(x.id)}${x.req ? `<div class="stk">${esc(x.req)}</div>` : ""}</td><td>${esc(x.to)}</td><td>${x.lines.map(l => `${esc(itemInfo(l.k).name)} ${qtyBoth(l.k, l.q)}`).join(", ")}</td><td>${esc(x.by)}</td><td><span class="tag ${x.status === "Issued" ? "ok" : x.status === "Rejected" ? "bad" : "warn"}">${esc(x.status)}</span>${apNote(x) ? `<div class="stk">${apNote(x)}</div>` : ""}</td><td><div class="fr" style="flex-wrap:nowrap">${apButtons("iss", x)}</div></td></tr>`
+            `<tr><td>${dt2(x.at)}</td><td>${esc(x.id)}${x.req ? `<div class="stk">${esc(x.req)}</div>` : ""}</td><td>${esc(x.to)}</td><td>${x.lines.map(l => `${esc(itemInfo(l.k).name)} ${qtyBoth(l.k, l.q)}`).join(", ")}</td><td>${esc(x.by)}</td><td><span class="tag ${x.status === "Issued" ? "ok" : x.status === "Rejected" ? "bad" : "warn"}">${esc(x.status)}</span>${apNote(x) ? `<div class="stk">${apNote(x)}</div>` : ""}</td><td><div class="fr" style="flex-wrap:nowrap">${apButtons("iss", x)}${docBtn("iss", x.id, "View or print")}</div></td></tr>`
         ).join("")}</table>`
       : '<div class="empty">No issue notes yet.</div>'
   }</div>`;
@@ -240,7 +296,7 @@ function apHomeHTML() {
           "book",
           `Requisition ${esc(r.id)}`,
           `${esc(r.dept)} asks ${esc(st)} · ${items(r)}${held ? " · issue note waiting for approval" : ""}`,
-          `<button class="mini" data-a="ap_go" data-l="${esc(st)}">Issue stock</button>`
+          `<button class="mini" data-a="ap_issue" data-id="${esc(r.id)}">Issue stock</button>`
         );
       })
       .join("") +
@@ -267,11 +323,12 @@ function apAct(a, b) {
     const p = $(d.act === "reject" ? "#apWhy" : "#apPin");
     return p && p.focus();
   }
-  if (a === "go") {
-    // An approved requisition on the dashboard: go and issue it.
-    STKT.loc = d.l;
-    invT = "req";
-    return go("Inventory");
+  if (a === "issue") {
+    // An approved requisition on the dashboard: issue it from here.
+    const r = REQS.find(x => x.id === d.id);
+    if (!r) return all();
+    toast(reqIssueAll(r, boUser.n));
+    return all();
   }
   if (a === "close") {
     apM = null;
@@ -289,17 +346,21 @@ function apAct(a, b) {
     if (apM.act === "reject" && !why) return toast("Enter the reason for rejecting.");
     if (!mgr) return toast("That is not a manager's PIN.");
     const kind = apM.kind;
+    let extra = "";
     if (apM.act === "reject") apReject(kind, doc, mgr.n, why);
     else {
       const err = apApprove(kind, doc, mgr.n);
       if (err) return toast(err);
+      // Approving a requisition is the only approval it needs: the stock goes now.
+      if (kind === "req") extra = " " + reqIssueAll(doc, mgr.n);
     }
     apM = null;
     bosave();
     toast(
-      `${AP_KIND[kind]} ${doc.id} ${doc.status === "Rejected" ? "rejected" : "approved"} by ${mgr.n}.` +
-        (kind === "iss" && doc.status === "Issued" ? ` Stock moved to ${doc.to}.` : "")
+      `${AP_KIND[kind]} ${doc.id} ${doc.status === "Rejected" ? "rejected" : "approved"} by ${mgr.n}.${kind === "ret" && doc.status === "Returned" ? " The return note is ready to print." : ""}` +
+        (kind === "iss" && doc.status === "Issued" ? ` Stock moved to ${doc.to}.` : extra)
     );
     return all();
   }
 }
+apClearDoubles();

@@ -49,7 +49,7 @@ let ci = 0,
   cf = [];
 function cmd() {
   const q = $("#cq").value.toLowerCase();
-  cf = CMD.filter(c => c.n.toLowerCase().includes(q));
+  cf = [...CMD.filter(c => c.n.toLowerCase().includes(q)), ...repCommands(q)];
   ci = Math.min(ci, Math.max(0, cf.length - 1));
   $("#cl").innerHTML =
     cf
@@ -62,7 +62,10 @@ function cmd() {
 function runCmd(c) {
   if (!c) return;
   $("#ov").classList.remove("show");
-  if (c.f === "req") addReq();
+  if (c.rep) {
+    repPick(c.rep);
+    go("Reports");
+  } else if (c.f === "req") addReq();
   else go(c.n);
 }
 const cOpen = () => {

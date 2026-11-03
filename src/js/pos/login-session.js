@@ -19,6 +19,7 @@ function loginAs(u) {
   tblFill();
   draftRelease();
   user = u;
+  auditAdd("Sign in", "Signed in to the POS", { who: u.n, mod: "POS" });
   DEPTS = u.d.filter(posSells);
   if (!DEPTS.length) DEPTS = [ALLD.filter(posSells)[0] || ALLD[0]];
   dept = DEPTS.length > 1 && can("switchSP") ? ALLP : DEPTS[0];
@@ -38,6 +39,7 @@ function loginAs(u) {
       fdShow();
       return;
     }
+    if (dayLockStop()) return;
     if (!(curDay() && shiftOf(u.n)))
       shiftOpen(
         curDay()
@@ -52,7 +54,40 @@ function loginAs(u) {
   drawCats();
   drawCart();
 }
+/** Clocking in or out with a PIN, without signing in. A POS PIN works, and so does one set in HR. */
+function staffClock() {
+  const H = FD_SETTINGS.hr || {},
+    u = USERS.find(x => x.pin === pin),
+    e =
+      pin &&
+      (H.emps || []).find(x => x.status !== "Left" && (x.pin === pin || (u && x.user === u.n)));
+  pin = "";
+  pdraw();
+  if (!e) return pmsg("That PIN isn't on the staff list.", true);
+  const now = new Date(),
+    at = now.toTimeString().slice(0, 5);
+  H.time = H.time || [];
+  const open = H.time.find(t => t.emp === e.id && !t.out);
+  if (open) open.out = at;
+  else
+    H.time.push({
+      id: "T-" + now.getTime().toString(36).toUpperCase(),
+      emp: e.id,
+      date: ymdOf(now),
+      in: at,
+      out: "",
+      by: e.name,
+      src: "Staff PIN"
+    });
+  auditAdd("Attendance", `${e.name} clocked ${open ? "out" : "in"} at ${at}`, {
+    who: e.name,
+    mod: "POS"
+  });
+  if (window.bosave) window.bosave();
+  pmsg(`${e.name} clocked ${open ? "out" : "in"} at ${at}.`);
+}
 function pkey(k) {
+  if (k === "T") return staffClock();
   if (k === "C") {
     pin = "";
     pmsg("Enter your PIN, or swipe your staff card.");
@@ -60,6 +95,7 @@ function pkey(k) {
     const u = USERS.find(x => x.pin === pin);
     if (u) return loginAs(u);
     pin = "";
+    auditAdd("Failed sign-in", "Wrong PIN on the POS", { who: "Unknown", mod: "POS" });
     pmsg("Invalid PIN. Try again.", true);
     $("#pinDisp").classList.remove("shk");
     void $("#pinDisp").offsetWidth;

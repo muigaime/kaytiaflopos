@@ -73,9 +73,8 @@ const rcIsBuy = (k, units) =>
 const rcExact = text => {
   const n = itemNorm(text);
   return n
-    ? Object.keys(ING).find(
-        k => itemNorm(itemInfo(k).name) === n || itemNorm(itemInfo(k).code) === n
-      ) || ""
+    ? pickKeys().find(k => itemNorm(itemInfo(k).name) === n || itemNorm(itemInfo(k).code) === n) ||
+        ""
     : "";
 };
 
@@ -110,7 +109,7 @@ function recvHTML() {
   const R = invF.rc,
     dest = rcDest(R),
     lpoMode = R.mode === "lpo",
-    keys = Object.keys(ING).sort((a, b) => itemInfo(a).name.localeCompare(itemInfo(b).name)),
+    keys = pickKeys().sort((a, b) => itemInfo(a).name.localeCompare(itemInfo(b).name)),
     sups = vendorNames(),
     v = VENDORS.find(x => x.name === R.sup),
     lpo = R.lpo ? LPOS.find(x => x.id === R.lpo) : null;
@@ -130,12 +129,7 @@ function recvHTML() {
     ab = (a, icon, label, badge, extra = "") =>
       `<button class="grn-ab" data-a="${a}" ${extra}>${I(icon)}<span>${label}</span>${badge ? `<b>${badge}</b>` : ""}</button>`,
     diff = R.invAmt === "" || !R.lines.length ? null : gross - +R.invAmt,
-    check =
-      diff === null
-        ? ["", R.lines.length ? "Enter the invoice amount to check it against the total." : ""]
-        : Math.abs(diff) <= 0.5
-          ? ["ok", "✓ Matches the invoice amount"]
-          : ["bad", `⚠ Differs from the invoice amount by KES ${m2(diff)}`],
+    check = rcCheck(R),
     lpos = openLposAll();
 
   // Vendor card differs per receipt type.
@@ -190,9 +184,9 @@ function recvHTML() {
   <section class="grn-card"><h4>Document</h4><div class="grn-grid2">
    <label>Date<input type="date" data-iv="rc.date" value="${esc(R.date)}"></label>
    ${placeField}
-   <label>Delivery note no<input data-iv="rc.dnote" value="${esc(R.dnote)}"></label>
-   <label>Invoice / receipt no<input data-iv="rc.inv" value="${esc(R.inv)}"></label>
-   <label>Invoice amount (KES)<input data-iv="rc.invAmt" type="number" min="0" step="any" value="${esc(R.invAmt)}"></label>
+   <label><span>Invoice / receipt no <em class="grn-req">required</em></span><input data-iv="rc.inv" value="${esc(R.inv)}"></label>
+   <label><span>Delivery note no <em class="grn-req">required</em></span><span class="grn-inl"><input data-iv="rc.dnote" value="${esc(R.dnote)}"><button class="mini" data-a="inv_rcdnsame" title="Use the invoice number">Same as invoice</button></span></label>
+   <label><span>Invoice amount (KES) <em class="grn-req">required</em></span><input data-iv="rc.invAmt" type="number" min="0" step="any" value="${esc(R.invAmt)}"></label>
    <label>Posted by<input value="${esc(boUser ? boUser.n : "")}" readonly></label>
   </div></section>
  </div>
@@ -219,7 +213,7 @@ function recvHTML() {
     rows.join("") ||
     `<tr><td colspan="12" class="grn-empty">${lpoMode ? "No purchase order loaded yet." : "No items yet. Add them above."}</td></tr>`
   }</table></div>
-  <div class="grn-foot"><div class="grn-check ${check[0]}">${check[1]}</div>
+  <div class="grn-foot"><div class="grn-check ${check[0]}" id="rcCheck">${check[1]}</div>
    <div class="grn-tot"><span>Net amount</span><b>${m2(net)}</b><span>VAT</span><b>${m2(tax)}</b><span class="g">Gross total (KES)</span><b class="g">${m2(gross)}</b></div></div>
  </section>
 
@@ -234,9 +228,9 @@ function rcRecent(place) {
     .slice(0, 10);
   return `<section class="grn-card"><h4>Recent GRNs · ${esc(place)}</h4>${
     L.length
-      ? `<div class="tw"><table class="t grn-t"><tr><th>Date</th><th>GRN</th><th>Type</th><th>Vendor</th><th>Invoice</th><th>Delivery note</th><th>LPO</th><th class="n">Lines</th><th class="n">Gross (KES)</th><th>Posted by</th></tr>${L.map(
+      ? `<div class="tw"><table class="t grn-t"><tr><th>Date</th><th>GRN</th><th>Type</th><th>Vendor</th><th>Invoice</th><th>Delivery note</th><th>LPO</th><th class="n">Lines</th><th class="n">Gross (KES)</th><th>Posted by</th><th></th></tr>${L.map(
           g =>
-            `<tr><td>${dt2(g.at)}</td><td><b>${g.id}</b></td><td>${esc(g.mode || (g.lpo ? "LPO" : "Direct"))}</td><td>${esc(g.sup)}</td><td>${esc(g.inv || g.ref || "–")}</td><td>${esc(g.dnote || "–")}</td><td>${esc(g.lpo || "–")}</td><td class="n">${g.lines.length}</td><td class="n">${m2(g.gross !== undefined ? g.gross : g.lines.reduce((a, x) => a + x.q * x.c, 0))}</td><td>${esc(g.by || "")}</td></tr>`
+            `<tr><td>${dt2(g.at)}</td><td><b>${g.id}</b></td><td>${esc(g.mode || (g.lpo ? "LPO" : "Direct"))}</td><td>${esc(g.sup)}</td><td>${esc(g.inv || g.ref || "–")}</td><td>${esc(g.dnote || "–")}</td><td>${esc(g.lpo || "–")}</td><td class="n">${g.lines.length}</td><td class="n">${m2(g.gross !== undefined ? g.gross : g.lines.reduce((a, x) => a + x.q * x.c, 0))}</td><td>${esc(g.by || "")}</td><td class="n">${docBtn("grn", g.id)}</td></tr>`
         ).join("")}</table></div>`
       : `<div class="grn-empty">Nothing received into ${esc(place)} yet.</div>`
   }</section>`;
@@ -250,8 +244,28 @@ function rcItemInfo(k, place) {
 }
 
 /** Live parts of the entry row, updated while typing (a full redraw would lose the cursor). */
+/** The GRN's total, and whether the invoice amount agrees with it. */
+const rcGross = R =>
+  R.lines.reduce((a, L) => a + rcCalc(L.unitPrice, L.qty, L.taxRate, R.incl).gross, 0);
+function rcCheck(R) {
+  if (R.invAmt === "")
+    return ["", R.lines.length ? "Enter the invoice amount. It must match the total." : ""];
+  const diff = +R.invAmt - rcGross(R);
+  return Math.abs(diff) < 0.01
+    ? ["ok", "✓ Matches the invoice amount"]
+    : [
+        "bad",
+        `⚠ Invoice is KES ${m2(Math.abs(diff))} ${diff > 0 ? "more" : "less"} than the total. It can't be posted until they match.`
+      ];
+}
 function rcSync(f) {
   const R = invF.rc;
+  if (f === "invAmt" && $("#rcCheck")) {
+    const c = rcCheck(R);
+    $("#rcCheck").className = "grn-check " + c[0];
+    $("#rcCheck").textContent = c[1];
+    return;
+  }
   if (f === "dept") {
     if (isStore(R.dept)) STKT.loc = R.dept;
     return all();
@@ -353,6 +367,7 @@ function rcQtyChange(t, i) {
 
 // ---------------------------------------------------------------- vendors
 /** Vendor setup as a popup (from Receive / LPO); the full page is People → Vendors (vendors.js). */
+let vnPageNew = false;
 function vendorPopupIfOpen() {
   if (!invF.vn.open) return "";
   return `<div class="modal show" id="vnModal" style="z-index:70"><div class="box" style="max-width:820px">
@@ -361,19 +376,25 @@ function vendorPopupIfOpen() {
 }
 /** Vendor form plus the list of vendors (shared by the popup and the People → Vendors page). */
 function vendorFormHTML() {
+  return vendorFieldsHTML() + vendorListHTML();
+}
+function vendorFieldsHTML() {
   const F = invF.vn;
   return `<div class="fr"><label>Vendor name<input id="vnName" data-iv="vn.name" value="${esc(F.name)}" placeholder="e.g. East African Breweries"></label><label>Contact person<input data-iv="vn.contact" value="${esc(F.contact)}"></label><label>Phone<input data-iv="vn.phone" value="${esc(F.phone)}" inputmode="tel"></label></div>
   <div class="fr"><label>Email<input data-iv="vn.email" value="${esc(F.email)}" type="email"></label><label>KRA PIN<input data-iv="vn.pin" value="${esc(F.pin)}" placeholder="e.g. P051234567X"></label><label>Payment terms<select data-iv="vn.terms">${opts(VN_TERMS, F.terms)}</select></label></div>
   <div class="fr"><label style="flex:1">Address<input data-iv="vn.address" value="${esc(F.address)}"></label><label>Opening balance owed (KES)<input data-iv="vn.ob" type="number" min="0" step="any" value="${esc(F.ob)}" placeholder="Optional"></label><label>Owed as at<input data-iv="vn.obAt" type="date" value="${esc(F.obAt)}" max="${todayYmd()}"></label></div>
-  <div class="fr" style="justify-content:flex-end">${F.id ? '<button class="mini" data-a="inv_vnnew">New vendor</button>' : ""}<button class="chip on" data-a="inv_vnsave">${F.id ? "Save changes" : "Save vendor"}</button></div>
-  <div class="tw"><table class="t"><tr><th>Vendor</th><th>Contact</th><th>Phone</th><th>Email</th><th>KRA PIN</th><th>Terms</th><th class="n">LPOs</th><th class="n">Receipts</th><th class="n">Purchased (KES)</th><th class="n">Balance (KES)</th><th></th></tr>${
+  <div class="fr" style="justify-content:flex-end">${F.open ? (F.id ? '<button class="mini" data-a="inv_vnnew">New vendor</button>' : "") : '<button class="mini" data-a="inv_vnnew">Cancel</button>'}<button class="chip on" data-a="inv_vnsave">${F.id ? "Save changes" : "Save vendor"}</button></div>`;
+}
+function vendorListHTML() {
+  const F = invF.vn;
+  return `<div class="tw"><table class="t"><tr><th>Vendor</th><th>Contact</th><th>Phone</th><th>Email</th><th>KRA PIN</th><th>Terms</th><th class="n">LPOs</th><th class="n">Receipts</th><th class="n">Purchased (KES)</th><th class="n">Balance (KES)</th><th></th></tr>${
     VENDORS.length
       ? VENDORS.map(v => {
           const g = GRNS.filter(x => x.sup === v.name),
             spent = g.reduce((a, x) => a + x.lines.reduce((b, l) => b + l.q * l.c, 0), 0);
-          return `<tr ${v.id === F.id ? 'style="outline:2px solid #2ec4b6"' : ""}><td>${esc(v.name)}</td><td>${esc(v.contact || "")}</td><td>${esc(v.phone || "")}</td><td>${esc(v.email || "")}</td><td>${esc(v.pin || "")}</td><td>${esc(v.terms || "")}</td><td class="n">${LPOS.filter(p => p.sup === v.name).length}</td><td class="n">${g.length}</td><td class="n">${m2(spent)}</td><td class="n">${m2(vendorBalance(v))}</td><td><span class="fr" style="flex-wrap:nowrap;margin:0"><button class="mini" data-a="vs_open" data-id="${v.id}">Statement</button><button class="mini" data-a="inv_vnedit" data-id="${v.id}">Edit</button></span></td></tr>`;
+          return `<tr ${v.id === F.id ? 'style="outline:2px solid var(--brass, #c7a25a)"' : ""}><td><b>${esc(v.name)}</b></td><td>${esc(v.contact || "")}</td><td>${esc(v.phone || "")}</td><td>${esc(v.email || "")}</td><td>${esc(v.pin || "")}</td><td>${esc(v.terms || "")}</td><td class="n">${LPOS.filter(p => p.sup === v.name).length}</td><td class="n">${g.length}</td><td class="n">${m2(spent)}</td><td class="n">${m2(vendorBalance(v))}</td><td><span class="fr" style="flex-wrap:nowrap;margin:0"><button class="mini" data-a="vs_open" data-id="${v.id}">Statement</button><button class="mini" data-a="inv_vnedit" data-id="${v.id}">Edit</button></span></td></tr>`;
         }).join("")
-      : '<tr><td colspan="11" class="stk">No vendors yet. Add your first one above.</td></tr>'
+      : '<tr><td colspan="11" class="stk">No vendors yet.</td></tr>'
   }</table></div>`;
 }
 
@@ -419,6 +440,7 @@ function vendorSave() {
     if (!invF.po.sup) invF.po.sup = name;
   }
   invF.vn = { ...vnBlank(), open: F.open }; // stay in the popup, or on the Vendors page
+  vnPageNew = false;
   bosave();
   toast(name + (F.id ? " updated." : " added as a vendor."));
   all();
@@ -440,7 +462,13 @@ function rcAct(a, b) {
     invF.vn = vnBlank();
     return all();
   }
+  if (a === "vnpage") {
+    vnPageNew = true;
+    all();
+    return $("#vnName").focus();
+  }
   if (a === "vnnew") {
+    vnPageNew = false;
     invF.vn = { ...vnBlank(), open: invF.vn.open };
     return all();
   }
@@ -474,7 +502,7 @@ function rcAct(a, b) {
     const t = itemNorm(R.eName),
       k =
         rcExact(R.eName) ||
-        Object.keys(ING).find(
+        pickKeys().find(
           x =>
             t && (itemNorm(itemInfo(x).name).includes(t) || itemNorm(itemInfo(x).code).includes(t))
         );
@@ -587,6 +615,11 @@ function rcAct(a, b) {
     return all();
   }
 
+  if (a === "rcdnsame") {
+    if (!R.inv.trim()) return toast("Enter the invoice number first.");
+    R.dnote = R.inv;
+    return all();
+  }
   // post
   if (a === "rcpost") {
     if (R.mode === "lpo" && !R.lpo) return toast("Choose the purchase order being received.");
@@ -610,17 +643,16 @@ function rcAct(a, b) {
       return toast(
         `Delivery note ${R.dnote.trim()} from ${sup} was already received on ${dt2(dupDn.at)} (${dupDn.id}).`
       );
-    const gross = R.lines.reduce(
-      (a2, L) => a2 + rcCalc(L.unitPrice, L.qty, L.taxRate, R.incl).gross,
-      0
-    );
-    if (R.invAmt !== "" && Math.abs(+R.invAmt - gross) > 0.5 && !b.dataset.sure) {
-      b.dataset.sure = "1";
-      setTimeout(() => delete b.dataset.sure, 4000);
+    // The paperwork has to be complete, and the invoice has to agree with what was received.
+    if (!R.inv.trim()) return toast("Enter the invoice number.");
+    if (!R.dnote.trim())
+      return toast("Enter the delivery note number. It can be the same as the invoice number.");
+    if (R.invAmt === "") return toast("Enter the invoice amount.");
+    const gross = rcGross(R);
+    if (Math.abs(+R.invAmt - gross) >= 0.01)
       return toast(
-        `Invoice amount ${m2(+R.invAmt)} differs from the total ${m2(gross)}. Press Post again to post anyway.`
+        `The invoice says KES ${m2(+R.invAmt)} but the items come to KES ${m2(gross)}. They must match before posting.`
       );
-    }
     return rcPost();
   }
   if (a === "rcissue") {
@@ -696,6 +728,7 @@ function rcPost() {
       ? { id: r.id, store: dest, lines: r.lines.map(x => ({ k: x.k, q: x.q })) }
       : null
   });
+  docOpen("grn", r.id);
   bosave();
   toast(
     `${r.id} posted: ${lines.length} item(s) into ${dest}, KES ${m2(gross)}.${R.lpo ? " " + R.lpo + " updated." : ""}${intoStore ? " Use Issue items to send them on." : ""}`

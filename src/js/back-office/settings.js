@@ -35,11 +35,16 @@ V.settings = () => {
         OPT_BILLS
       ),
     pos: () =>
+      dayTimeHTML() +
       optsHTML("POS options", "These apply to every waiter and cashier straight away.", OPT_POS),
     tax: () => `<div class="pn"><h4>Tax setup</h4><div class="stk">Menu prices include tax. Each item is set to VAT, Tax C, both or no tax when it's created. A new rate applies to bills paid from now on, and past reports keep the rate they were paid at.</div>
   <div class="fr" style="align-items:end"><label>VAT (%)<input data-iv="hs.taxB" inputmode="decimal" value="${esc(invF.hs.taxB)}"></label><label>Tax C (%)<input data-iv="hs.taxC" inputmode="decimal" value="${esc(invF.hs.taxC)}"></label><button class="chip on" style="flex:none" data-a="hs_tax">Save tax rates</button></div></div>`,
+    paymodes: payModesHTML,
+    voids: voidReasonsHTML,
     cats: categoriesHTML,
-    printers: () => machinesHTML() + printerSetupHTML() + printersHTML()
+    printers: () => machinesHTML() + printerSetupHTML() + printersHTML(),
+    backup: backupHTML,
+    network: networkHTML
   };
   return setTabsHTML() + panels[setTab]();
 };
@@ -56,7 +61,7 @@ function taxSave() {
 }
 async function settingsAct(a, b) {
   if (a === "tax") return taxSave();
-  if (["tab", "logorm", "payadd", "paydel"].includes(a)) return generalAct(a, b);
+  if (["tab", "logorm", "payadd", "paydel", "daytime"].includes(a)) return generalAct(a, b);
   if (a === "test") {
     const p = FD_SETTINGS.printers[+b.dataset.i];
     toast("Testing " + p.n + "…");
@@ -108,6 +113,7 @@ async function settingsAct(a, b) {
   );
   fdBrand();
   bosave();
+  auditAdd("Settings", "Hotel and receipt details changed");
   toast("Details saved. New bills and receipts will use them.");
   all();
 }

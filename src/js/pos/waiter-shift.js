@@ -179,7 +179,7 @@ function msDraw(msg) {
   else
     main = `<div class="shc ms-open"><div class="status ok">Shift open since ${hm(sh.openedAt)}</div><div class="ms-acts"><button class="chip on" data-sa="ms_end">End shift</button></div></div>`;
   $("#shMgr").innerHTML =
-    `<div class="shm"><div class="shm-top"><h2>My shift</h2><button class="mini" data-sa="exit">Exit</button></div>${msg ? `<div class="status">${msg}</div>` : ""}${main}
+    `<div class="shm"><div class="shm-top"><h2>My shift</h2><button class="mini" data-sa="exit">Exit</button></div>${msg ? `<div class="status">${msg}</div>` : ""}${bizLateNote()}${main}
   <div class="ms-tiles">${tile("Sales today", "KES " + R2(msSum(today)))}${tile("Bills today", msBills(today))}${tile("Last 7 days", "KES " + R2(msSum(week)))}${tile("Pending bills", P.length, "KES " + R2(pend))}</div>
   <div class="shc">${msChart(n)}</div>${!sh && d && shiftHeld() ? "" : msPendingHTML(n)}</div>`;
 }
@@ -194,6 +194,7 @@ function msEnd() {
 function msAct(a, b) {
   const n = user.n;
   if (a === "ms_start") {
+    if (dayOver()) return msDraw();
     const r = shiftStart(n, 0, n);
     if (r) return msDraw(r);
     shiftBadge();

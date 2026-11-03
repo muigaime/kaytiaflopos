@@ -10,7 +10,9 @@ invF.sptr = { to: "", note: "", lines: [] };
 
 const spInfo = o => OUTLET_INFO[o] || { type: "Other", store: STORES[0] };
 const spCanSell = i =>
-  Math.min(...Object.entries(i.r).map(([k, v]) => Math.floor(have(i.from || i.d, k) / v + 1e-9)));
+  Math.min(
+    ...Object.entries(i.r).map(([k, v]) => Math.floor(stockCanUse(i.from || i.d, k) / v + 1e-9))
+  );
 const spCost = i => Object.entries(i.r).reduce((a, [k, v]) => a + cst(k) * v, 0);
 
 // ---- a new stock item created from a selling point (Manage → + New item) ----
@@ -261,25 +263,55 @@ function spRefreshPos() {
   } catch (e) {}
 }
 
-function outletsView() {
-  const F = invF.spf,
-    t0 = d0();
+// The page has four tabs. Manage opens one selling point on its own screen, with tabs of its own.
+const SP_VIEWS = [
+  ["points", "Selling points"],
+  ["cats", "Product categories"],
+  ["hh", "Happy hour"],
+  ["promo", "Promotions"]
+];
+let spView = "points",
+  spSub = "prod",
+  spNew = false,
+  spAddOpen = false;
+const spTabs = (L, on, act) =>
+  `<div class="set-tabs sp-tabs" role="tablist">${L.map(([k, l]) => `<button role="tab" aria-selected="${k === on}" class="${k === on ? "on" : ""}" data-a="${act}" data-k="${k}">${l}</button>`).join("")}</div>`;
+const spToday = o => SALES.filter(s => s.dept === o && s.at >= d0()).reduce((a, s) => a + s.g, 0);
+const spInStock = o => Object.keys(ING).filter(k => have(o, k) > 0).length;
+const spStaff = o => USERS.filter(u => u.d.includes(o)).length;
+function spNewModal() {
+  if (!spNew) return "";
+  const F = invF.spf;
   F.store = pick(F.store, STORES);
-  const rows = ALLD.map(o => {
-    const info = spInfo(o),
-      sales = SALES.filter(s => s.dept === o && s.at >= t0).reduce((a, s) => a + s.g, 0);
-    return `<tr class="${o === spSel ? "on" : ""}"><td><b>${esc(o)}</b></td><td>${esc(info.type)}</td><td>${esc(info.store)}</td><td class="n">${ITEMS.filter(i => i.d === o).length}</td><td class="n">${Object.keys(ING).filter(k => have(o, k) > 0).length}</td><td class="n">${m2(sales)}</td><td class="n">${USERS.filter(u => u.d.includes(o)).length}</td><td><div class="fr" style="flex-wrap:nowrap"><button class="mini" data-a="sp_open" data-o="${esc(o)}">Manage</button><button class="mini" data-a="sp_delask" data-o="${esc(o)}">Delete</button></div></td></tr>`;
-  }).join("");
-  return `<div class="pn"><h4>Create a selling point</h4><div class="fr"><label>Name<input data-iv="spf.name" value="${esc(F.name)}" placeholder="e.g. Pool Bar, Main Restaurant"></label><label>Type<select data-iv="spf.type">${opts(SP_TYPES, F.type)}</select></label><label>Gets stock from<select data-iv="spf.store">${opts(STORES, F.store)}</select></label><button class="chip on" data-a="sp_add">Create selling point</button></div><div class="stk">A new selling point shows on the POS straight away. Managers can sell there; choose other staff under Manage.</div></div>
- <div class="pn tw"><h4>Selling points (${ALLD.length})</h4><table class="t"><tr><th>Selling point</th><th>Type</th><th>Gets stock from</th><th class="n">Products</th><th class="n">Items in stock</th><th class="n">Sales today (KES)</th><th class="n">Staff</th><th></th></tr>${rows}</table></div>
- ${categoriesHTML()}
- ${spSel && ALLD.includes(spSel) ? spDetail(spSel) : ""}${itemPopupIfOpen()}${stModalIfOpen()}${apModalIfOpen()}${spDeleteModal()}${speModal()}`;
+  return `<div class="modal show" id="spNewEd" style="z-index:63"><div class="box itm sp-new">
+  <header class="itm-h"><div><h3>New selling point</h3><p>It shows on the POS straight away. Managers can sell there; choose other staff under Manage.</p></div><button class="itm-x" data-a="sp_newclose" aria-label="Close">✕</button></header>
+  <div class="itm-b"><section class="itm-s"><div class="itm-g"><label>Name<input data-iv="spf.name" value="${esc(F.name)}" placeholder="e.g. Pool Bar, Main Restaurant"></label><label>Type<select data-iv="spf.type">${opts(SP_TYPES, F.type)}</select></label><label>Gets stock from<select data-iv="spf.store">${opts(STORES, F.store)}</select></label></div></section></div>
+  <footer class="itm-f"><button class="mini" data-a="sp_newclose">Cancel</button><button class="chip on" data-a="sp_add">Create selling point</button></footer></div></div>`;
+}
+function spListHTML() {
+  const can = boCan("sp.manage"),
+    rows = ALLD.map(o => {
+      const info = spInfo(o);
+      return `<tr><td><b>${esc(o)}</b></td><td>${esc(info.type)}</td><td>${esc(info.store)}</td><td class="n">${ITEMS.filter(i => i.d === o).length}</td><td class="n">${spInStock(o)}</td><td class="n">${m2(spToday(o))}</td><td class="n">${spStaff(o)}</td><td class="n"><span class="sp-acts"><button class="chip on" data-a="sp_open" data-o="${esc(o)}">Manage</button><button class="mini cat-del" data-a="sp_delask" data-o="${esc(o)}">Delete</button></span></td></tr>`;
+    }).join("");
+  return `<div class="pn tw"><div class="sp-head"><div><h4>Selling points (${ALLD.length})</h4><p>Bars, restaurants and kitchens. Click Manage to see a selling point's products, stock and staff.</p></div>${can ? '<button class="chip on" data-a="sp_newopen">New selling point</button>' : ""}</div><table class="t"><tr><th>Selling point</th><th>Type</th><th>Gets stock from</th><th class="n">Products</th><th class="n">Items in stock</th><th class="n">Sales today (KES)</th><th class="n">Staff</th><th></th></tr>${rows}</table></div>`;
+}
+function outletsView() {
+  const popups = `${plHTML()}${prEditModal()}${spNewModal()}${itemPopupIfOpen()}${stModalIfOpen()}${apModalIfOpen()}${spDeleteModal()}${speModal()}`;
+  if (spSel && ALLD.includes(spSel)) return `<div id="spPage">${spDetail(spSel)}</div>${popups}`;
+  const body = {
+    points: spListHTML,
+    cats: categoriesHTML,
+    hh: happyHTML,
+    promo: promotionsHTML
+  }[spView]();
+  return `<div id="spPage"><div class="sp-top">${spTabs(SP_VIEWS, spView, "sp_view")}<button class="mini" data-a="pl_open">Price list</button></div>${body}</div>${popups}`;
 }
 
 function spDetail(o) {
   const info = spInfo(o),
     P = invF.spp,
-    keys = Object.keys(ING).sort((a, b) => itemInfo(a).name.localeCompare(itemInfo(b).name)),
+    keys = pickKeys().sort((a, b) => itemInfo(a).name.localeCompare(itemInfo(b).name)),
     prods = ITEMS.filter(i => i.d === o),
     held = keys.filter(k => Math.abs(have(o, k)) > 1e-9);
   if (!P.k || ING[P.k] === undefined) P.k = keys[0] || "";
@@ -287,50 +319,55 @@ function spDetail(o) {
     made = i =>
       Object.entries(i.r)
         .map(([k, v]) => `${esc(itemInfo(k).name)} × ${qn(v)} ${esc(itemInfo(k).uom)}`)
-        .join(", ");
-  return `<div id="spDetail"><div class="pn"><div class="fr" style="align-items:center;justify-content:space-between"><h4 style="margin:0">${esc(o)}</h4><div class="fr"><label>Type<select data-sp="type" data-o="${esc(o)}">${opts(SP_TYPES, info.type)}</select></label><label>Gets stock from<select data-sp="store" data-o="${esc(o)}">${opts(STORES, pick(info.store, STORES))}</select></label><button class="mini" data-a="sp_delask" data-o="${esc(o)}">Delete</button><button class="mini" data-a="sp_close">Close</button></div></div></div>
-
- ${
-   mat
-     ? `<div class="pn"><div class="stk">A materials store holds ingredients for the kitchen. Nothing is sold here; use them under Recipes &amp; Production.</div></div>`
-     : ` <div class="pn"><div class="fr" style="align-items:center;justify-content:space-between"><h4 style="margin:0">Add a product to sell here</h4><span class="fr" style="flex:none;align-items:center;margin:0"><span class="stk">Not in the Stock Master yet?</span><button class="chip on" data-a="inv_itnew" data-sp="${esc(o)}">+ New item</button></span></div>
+        .join(", "),
+    subs = [
+      ...(mat ? [] : [["prod", `Products (${prods.length})`]]),
+      ["stock", "Request stock"],
+      ["move", "Transfer stock"],
+      ["count", "Stock take"],
+      ...(mat ? [] : [["staff", `Staff (${spStaff(o)})`]]),
+      ["set", "Settings"]
+    ];
+  if (!subs.some(([k]) => k === spSub)) spSub = subs[0][0];
+  const kpi = (l, v) => `<div class="sp-kpi"><span>${l}</span><b>${v}</b></div>`,
+    addForm =
+      () => `<div class="pn"><div class="sp-head"><div><h4>Add a product to sell here</h4><p>Not in the Stock Master yet? Create it with New item.</p></div><button class="mini" data-a="inv_itnew" data-sp="${esc(o)}">New item</button></div>
   <div class="fr"><label>Made from stock item<select data-iv="spp.k">${keys.map(k => `<option value="${k}" ${k === P.k ? "selected" : ""}>${esc(itemInfo(k).name)} (${esc(itemInfo(k).uom)})</option>`).join("")}</select></label>
    <label>Uses per sale<input data-iv="spp.q" type="number" min="0" step="any" value="${esc(P.q)}"></label>
-   <label>Product name<input data-iv="spp.name" value="${esc(P.name)}" placeholder="Same as the stock item"></label>
-   <label>Category<input data-iv="spp.cat" list="prodCatL" value="${esc(P.cat)}" placeholder="e.g. Beer, Mains"></label>
+   <label>Product name<input data-iv="spp.name" value="${esc(P.name)}" placeholder="Same as the stock item"></label></div>
+  <div class="fr"><label>Category<input data-iv="spp.cat" list="prodCatL" value="${esc(P.cat)}" placeholder="e.g. Beer, Mains"></label>
    <label>Selling price (KES)<input data-iv="spp.price" type="number" min="0" step="any" value="${esc(P.price)}"></label>
    <label>Tax<select data-iv="spp.tax">${taxChoices()
      .map(([v, l]) => `<option value="${v}" ${v === P.tax ? "selected" : ""}>${l}</option>`)
      .join("")}</select></label></div>
   <div class="stk" id="sppInfo"></div>
-  <button class="chip on" data-a="sp_addprod">Add product</button></div>
-
- <div class="pn tw"><h4>Products sold here (${prods.length})</h4>${
-   prods.length
-     ? `<table class="t"><tr><th>Product</th><th>Category</th><th>VAT</th><th>Price (KES)</th><th>Deducts from</th><th>One sale uses</th><th class="n">Cost</th><th class="n">Margin</th><th class="n">Can sell</th><th></th></tr>${prods
-         .map(i => {
-           const c = spCost(i);
-           return `<tr><td>${esc(i.n)}</td><td>${esc(i.c)}</td><td>${i.t}</td><td><input type="number" value="${i.p}" data-pr="${i.id}" style="max-width:100px"></td><td>${speSourceTag(i)}</td><td>${made(i)}</td><td class="n">${m2(c)}</td><td class="n">${i.p > 0 ? Math.round(((i.p - c) / i.p) * 100) + "%" : "-"}</td><td class="n">${Math.max(0, spCanSell(i))}</td><td><div class="fr" style="flex-wrap:nowrap"><button class="mini" data-a="sp_pedit" data-id="${i.id}">Edit</button><button class="mini" data-a="sp_delprod" data-id="${i.id}">Delete</button></div></td></tr>`;
-         })
-         .join("")}</table>`
-     : '<div class="empty">No products yet. Add one above and it appears on this POS at once.</div>'
- }</div>
-
-`
- }
- ${spRequestPanel(o, keys)}
- ${spRequisitions(o)}
- ${spTransferPanel(o)}
- ${spCountPanel(o, keys, held)}
-
- ${
-   mat
-     ? ""
-     : ` <div class="pn"><h4>Staff who can sell here</h4><div class="fr">${USERS.map(
-         (u, i) =>
-           `<label style="margin-right:12px"><input type="checkbox" style="width:auto;min-width:0" data-sps="${i}" data-o="${esc(o)}" ${u.d.includes(o) ? "checked" : ""}> ${esc(u.n)} <span class="stk">(${esc(u.role || "")})</span></label>`
-       ).join("")}</div></div>`
- }</div>`;
+  <div class="sp-go"><button class="chip on" data-a="sp_addprod">Add product</button></div></div>`,
+    panels = {
+      prod: () =>
+        `${spAddOpen || !prods.length ? addForm() : ""}<div class="pn tw"><div class="sp-head"><div><h4>Products sold here (${prods.length})</h4><p>Change a price in its box and it applies on the POS straight away.</p></div>${prods.length ? `<button class="${spAddOpen ? "mini" : "chip on"}" data-a="sp_padd">${spAddOpen ? "Close the form" : "Add a product"}</button>` : ""}</div>${
+          prods.length
+            ? `<table class="t"><tr><th>Product</th><th>Category</th><th>Tax</th><th>Price (KES)</th><th>Deducts from</th><th>One sale uses</th><th class="n">Cost</th><th class="n">Margin</th><th class="n">Can sell</th><th></th></tr>${prods
+                .map(i => {
+                  const c = spCost(i);
+                  return `<tr><td><b>${esc(i.n)}</b></td><td>${esc(i.c)}</td><td>${TAX[i.t] > 0 ? qn(TAX[i.t]) + "%" : "None"}</td><td><input type="number" value="${i.p}" data-pr="${i.id}" aria-label="Price of ${esc(i.n)}" style="max-width:100px"></td><td>${speSourceTag(i)}</td><td>${made(i)}</td><td class="n">${m2(c)}</td><td class="n">${i.p > 0 ? Math.round(((i.p - c) / i.p) * 100) + "%" : "-"}</td><td class="n">${prNoStock(i) ? "No stock kept" : Math.max(0, spCanSell(i))}</td><td class="n"><span class="sp-acts"><button class="mini" data-a="sp_pedit" data-id="${i.id}">Edit</button><button class="mini cat-del" data-a="sp_delprod" data-id="${i.id}">Delete</button></span></td></tr>`;
+                })
+                .join("")}</table>`
+            : '<div class="empty">No products yet. Add one above and it appears on this POS at once.</div>'
+        }</div>`,
+      stock: () => spRequestPanel(o, keys) + spRequisitions(o),
+      move: () => spTransferPanel(o),
+      count: () => spCountPanel(o, keys, held),
+      staff: () =>
+        `<div class="pn"><div class="sp-head"><div><h4>Staff who can sell here</h4><p>Tick everyone who works at ${esc(o)}.</p></div></div><div class="sp-staff">${USERS.map(
+          (u, i) =>
+            `<label><input type="checkbox" data-sps="${i}" data-o="${esc(o)}" ${u.d.includes(o) ? "checked" : ""}> <span><b>${esc(u.n)}</b><small>${esc(u.role || "")}</small></span></label>`
+        ).join("")}</div></div>`,
+      set: () => `<div class="pn"><div class="sp-head"><div><h4>Settings</h4><p>What ${esc(o)} is and which store supplies it.</p></div></div><div class="fr"><label>Type<select data-sp="type" data-o="${esc(o)}">${opts(SP_TYPES, info.type)}</select></label><label>Gets stock from<select data-sp="store" data-o="${esc(o)}">${opts(STORES, pick(info.store, STORES))}</select></label></div></div>
+  <div class="pn"><div class="sp-head"><div><h4>Delete ${esc(o)}</h4><p>Only possible once it has no stock left and nothing waiting.</p></div><button class="mini cat-del" data-a="sp_delask" data-o="${esc(o)}">Delete selling point</button></div></div>`
+    };
+  return `<div id="spDetail"><button class="sp-back" data-a="sp_close">← All selling points</button>
+  <div class="pn sp-hero"><div><h3>${esc(o)}</h3><p>${esc(info.type)} · gets stock from ${esc(info.store)}</p></div><div class="sp-kpis">${mat ? "" : kpi("Products", prods.length)}${kpi("Items in stock", spInStock(o))}${mat ? "" : kpi("Sales today (KES)", m2(spToday(o))) + kpi("Staff", spStaff(o))}</div></div>
+  ${spTabs(subs, spSub, "sp_sub")}${mat && spSub === "stock" ? '<div class="stk sp-note">A materials store holds ingredients for the kitchen. Nothing is sold here; use them under Recipes &amp; Production.</div>' : ""}${panels[spSub]()}</div>`;
 }
 
 // ---- requesting stock (requisition): the selling point asks; the store issues it in Inventory ----
@@ -351,7 +388,7 @@ function spRequestPanel(o, keys) {
 function spTransferPanel(o) {
   const F = invF.sptr,
     peers = ALLD.filter(x => x !== o),
-    keys = Object.keys(ING)
+    keys = pickKeys()
       .filter(k => have(o, k) > 0)
       .sort((a, b) => itemInfo(a).name.localeCompare(itemInfo(b).name)),
     L = MOV.filter(m => m.t === "TRANS_OUT" && (m.loc === o || m.peer === o))
@@ -386,9 +423,9 @@ function spRequisitions(o) {
     .slice(0, 20);
   return `<div class="pn tw"><h4>Requisitions from ${esc(o)}</h4>${
     L.length
-      ? `<table class="t"><tr><th>Date</th><th>Reference</th><th>From store</th><th>Items (issued / requested)</th><th>Status</th></tr>${L.map(
+      ? `<table class="t"><tr><th>Date</th><th>Reference</th><th>From store</th><th>Items (issued / requested)</th><th>Status</th><th></th></tr>${L.map(
           r =>
-            `<tr><td>${dt2(r.at)}</td><td>${r.id}</td><td>${esc(r.store || STORES[0])}</td><td>${r.lines.map(x => `${esc(itemInfo(x.k).name)} ${qn(x.issued)}/${qn(x.q)}`).join(", ")}</td><td><span class="tag ${r.status === "Issued" ? "ok" : r.status === "Rejected" ? "bad" : "warn"}">${r.status}</span>${apNote(r) ? `<div class="stk">${apNote(r)}</div>` : ""}<div class="fr" style="flex-wrap:nowrap">${apButtons("req", r)}</div></td></tr>`
+            `<tr><td>${dt2(r.at)}</td><td>${r.id}</td><td>${esc(r.store || STORES[0])}</td><td>${r.lines.map(x => `${esc(itemInfo(x.k).name)} ${qn(x.issued)}/${qn(x.q)}`).join(", ")}</td><td><span class="tag ${r.status === "Issued" ? "ok" : r.status === "Rejected" ? "bad" : "warn"}">${r.status}</span>${apNote(r) ? `<div class="stk">${apNote(r)}</div>` : ""}<div class="fr" style="flex-wrap:nowrap">${apButtons("req", r)}</div></td><td class="n">${docBtn("req", r.id)}</td></tr>`
         ).join(
           ""
         )}</table><div class="stk">A manager approves requisitions (Inventory → Approvals); the store then issues them in Inventory → Requisitions.</div>`
@@ -509,6 +546,22 @@ function spPreview() {
 
 function spAct(a, b) {
   const d = b.dataset;
+  if (a === "view" || a === "sub") {
+    a === "view" ? (spView = d.k) : (spSub = d.k);
+    all();
+    return setTimeout(spPreview);
+  }
+  if (a === "newopen" || a === "newclose") {
+    spNew = a === "newopen";
+    all();
+    if (spNew) $('#spNewEd [data-iv="spf.name"]').focus();
+    return;
+  }
+  if (a === "padd") {
+    spAddOpen = !spAddOpen;
+    all();
+    return setTimeout(spPreview);
+  }
   if (a === "delask") {
     spDel = d.o;
     return all();
@@ -535,10 +588,13 @@ function spAct(a, b) {
     invF.spf = { name: "", type: F.type, store: F.store };
     invF.spp = { k: "", q: "1", name: "", cat: "", price: "", tax: "B" };
     bosave();
-    toast(name + " created. It is on the POS now; add its products below.");
+    spNew = false;
+    spSub = "prod";
+    spAddOpen = false;
+    auditAdd("Selling point", `${name} created`);
+    toast(name + " created. It is on the POS now; add its products here.");
     all();
-    const el = $("#spDetail");
-    return el && el.scrollIntoView({ behavior: "smooth" });
+    return $("#spPage").scrollIntoView();
   }
   if (a === "open") {
     spSel = d.o;
@@ -546,10 +602,11 @@ function spAct(a, b) {
     invF.spr = { store: spInfo(d.o).store, note: "", lines: [] };
     invF.sptr = { to: "", note: "", lines: [] };
     spCnt = { phys: {}, narr: {} };
+    spSub = "prod";
+    spAddOpen = false;
     all();
     setTimeout(spPreview);
-    const el = $("#spDetail");
-    return el && el.scrollIntoView({ behavior: "smooth" });
+    return $("#spPage").scrollIntoView();
   }
   if (a === "close") {
     spSel = null;
@@ -592,6 +649,10 @@ function spAct(a, b) {
       b,
       () => {
         const n = ITEMS[i].n;
+        auditAdd("Product", `${n} deleted from ${ITEMS[i].d}`, {
+          ref: String(id),
+          pri: "Important"
+        });
         ITEMS.splice(i, 1);
         spRefreshPos();
         bosave();
@@ -601,7 +662,7 @@ function spAct(a, b) {
       "Delete?"
     );
   }
-  if (a === "pedit") return speOpen(+d.id);
+  if (a === "pedit") return prEditOpen(+d.id);
   if (a === "pno") {
     invF.spe = null;
     return all();
@@ -635,6 +696,7 @@ function spAct(a, b) {
     if (!isStore(R.store)) return toast("Choose the store to ask.");
     if (!R.lines.length) return toast("Add at least one line.");
     const r = makeRequisition(o, R.store, R.note.trim(), R.lines);
+    docOpen("req", r.id);
     invF.spr = { store: R.store, note: "", lines: [] };
     toast(
       `Requisition ${r.id} sent to ${R.store}. A manager approves it, then the store issues it.`
@@ -867,6 +929,7 @@ function speModal() {
    </section>
    <section class="itm-s"><h4>Modifiers</h4><div class="mod-cell">${modCell(i)}</div></section>
    <section class="itm-s"><h4>Accompaniments</h4><div class="mod-cell">${accCell(i)}</div></section>
+   <section class="itm-s"><h4>Stock conversion</h4><div class="mod-cell">${cvCell(i)}</div></section>
    <section class="itm-s"><h4>Each sale deducts from</h4>
     <div class="grn-modes it-ways">${ways.map(([w, l, s]) => `<button class="grn-mode ${F.way === w ? "on" : ""}" data-a="sp_pway" data-w="${w}"><b>${l}</b><span>${s}</span></button>`).join("")}</div>
     ${source}
@@ -989,6 +1052,7 @@ function spDelete(o) {
   spDel = null;
   refreshBRS();
   spRefreshPos();
+  auditAdd("Selling point", `${o} deleted`, { pri: "Critical" });
   bosave();
   toast(
     o + " deleted" + (n ? ` with ${n} product(s)` : "") + ". Past sales and stock history are kept."
@@ -1015,6 +1079,7 @@ function spChange(t, s) {
   }
   spRefreshPos();
   bosave();
+  all();
 }
 
 V.outlets = outletsView;

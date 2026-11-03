@@ -1,6 +1,6 @@
 import { execFile } from "node:child_process";
 import net from "node:net";
-import { Router, type Request, type Response } from "express";
+import { Router, type NextFunction, type Request, type Response } from "express";
 import { z } from "zod";
 
 // Sends kitchen and bar tickets straight to network receipt printers (raw ESC/POS, normally port 9100).
@@ -158,7 +158,7 @@ export async function sendInstalled(name: string, bytes: Buffer): Promise<void> 
 }
 
 /** Browsers on the same computer may print. Anyone else needs PRINT_KEY from the server's .env. */
-function allowed(req: Request): boolean {
+export function printAllowed(req: Request): boolean {
   const key = process.env.PRINT_KEY;
   if (key) return req.get("x-print-key") === key;
   const from = req.socket.remoteAddress ?? "";
@@ -169,7 +169,7 @@ function allowed(req: Request): boolean {
 
 export const printRouter = Router();
 
-printRouter.use((req: Request, res: Response, next) => {
+export function printAccess(req: Request, res: Response, next: NextFunction) {
   const origin = req.get("origin");
   if (origin) {
     res.set("Access-Control-Allow-Origin", origin);
@@ -179,10 +179,11 @@ printRouter.use((req: Request, res: Response, next) => {
   }
   if (req.method === "OPTIONS") return void res.sendStatus(204);
   next();
-});
+}
+printRouter.use(printAccess);
 
 printRouter.get("/installed", async (req, res) => {
-  if (!allowed(req)) {
+  if (!printAllowed(req)) {
     return void res
       .status(403)
       .json({ error: { code: "PRINT_FORBIDDEN", message: "This terminal needs the print key." } });
@@ -197,7 +198,7 @@ printRouter.get("/installed", async (req, res) => {
 });
 
 printRouter.post("/ticket", async (req, res) => {
-  if (!allowed(req)) {
+  if (!printAllowed(req)) {
     return void res
       .status(403)
       .json({ error: { code: "PRINT_FORBIDDEN", message: "This terminal needs the print key." } });

@@ -1,6 +1,8 @@
 // ---- inventory: stores, item setup, receive, purchase orders, requisitions, issue, damage, stock master ----
 // Stores (STORES) hold purchased stock. Selling points (ALLD) get stock from a store by requisition or issue.
-let invT = "stores";
+let invT = "stores",
+  invSdOpen = false,
+  invPoNew = false;
 const invF = {
     rc: { store: STORES[0], sup: "", ref: "", lines: [] },
     rq: { dept: ALLD[0], store: STORES[0], note: "", lines: [] },
@@ -43,7 +45,11 @@ const fq = n =>
       maximumFractionDigits: 3
     }),
   iN = k => ING[k] || k,
-  cst = k => INGC[k] || 0,
+  // A converted item costs its share of the bottle it comes from.
+  cst = k => {
+    const c = stockConvs()[k];
+    return c ? ((INGC[c.from] || 0) * c.pq) / c.y : INGC[k] || 0;
+  },
   have = (l, k) => STK[l][k] || 0,
   nid = p => p + "-" + Date.now().toString(36).slice(-5).toUpperCase(),
   dt2 = t => {
@@ -51,7 +57,7 @@ const fq = n =>
     return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short" }) + " " + hm(d);
   };
 const optK = s0 =>
-    Object.keys(ING)
+    pickKeys()
       .map(k => `<option value="${k}" ${k === s0 ? "selected" : ""}>${esc(ING[k])}</option>`)
       .join(""),
   optL = (s0, ex) =>
@@ -162,6 +168,7 @@ function itemDuplicate(name, code, exceptKey) {
   return "";
 }
 /** Has this item ever had stock or a movement? Then its unit of measure is fixed. */
+const MASTER_ALL = "All stores";
 const itemUsed = k => tot(k) !== 0 || MOV.some(m => m.k === k);
 /** Plain quantity: 5, 2.5, 1,200 (no padded decimals). */
 const qn = n => (Math.round(n * 1000) / 1000).toLocaleString("en-KE", { maximumFractionDigits: 3 });
@@ -255,24 +262,57 @@ function sendToStore(k, store, qtyBuy, pricePerBuy, sup, ref) {
 // The place chosen in the picker (STKT.loc) drives every tab. Tabs marked "store" only exist for stores:
 // a selling point never receives, orders or issues stock; it requests it (requisition).
 const RAIL = [
+  ["h", "Stock"],
   ["stores", "Stores", "home"],
-  ["appr", "Approvals", "shield"],
+  ["master", "Stock Master", "box"],
   ["items", "Item setup", "plus"],
   ["cats", "Categories", "book"],
-  ["master", "Stock Master", "box"],
+  ["h", "Moving stock"],
   ["req", "Requisitions", "book"],
   ["issue", "Issue", "cart", "store"],
   ["damage", "Damage", "alert"],
-  "-",
+  ["appr", "Approvals", "shield"],
   ["h", "Reports"],
+  ["track", "Item tracking", "truck"],
   ["riss", "Issues", "cart"],
   ["rdmg", "Damage report", "alert"],
   ["position", "Stock position", "chart"],
   ["variance", "Stock take variance", "chart"],
   ["streps", "Stock take reports", "book"],
   "-",
-  ["exit", "Exit", "alert"]
+  ["exit", "Exit", "home"]
 ];
+// What each screen is for, shown at the top of it.
+const INV_PAGES = {
+  stores: [
+    "Stores",
+    "The places that hold your stock. Selling points get their stock from a store."
+  ],
+  master: [
+    "Stock Master",
+    "Every item in the chosen store, with its balance. Count the stock and post a stock take here."
+  ],
+  items: [
+    "Item setup",
+    "Create each item once, then receive it into a store and issue it to a selling point."
+  ],
+  cats: ["Categories", "The groups your store items are sorted into."],
+  req: ["Requisitions", "Stock requests from selling points, waiting to be approved and issued."],
+  issue: ["Issue stock", "Send stock from a store to a selling point, without a requisition."],
+  damage: ["Damage", "Write off stock that was broken, spoiled or lost."],
+  appr: ["Approvals", "Stock movements waiting for a manager to agree."],
+  track: [
+    "Item tracking",
+    "Follow one item from the day it was bought until now: where it went, who moved it and what's left."
+  ],
+  riss: ["Issues report", "Everything issued from the stores, for the dates you choose."],
+  rdmg: ["Damage report", "Everything written off, for the dates you choose."],
+  position: ["Stock position", "How much of each item you hold and what it's worth."],
+  variance: ["Stock take variance", "The differences between the system and what was counted."],
+  streps: ["Stock take reports", "Stock takes already posted."]
+};
+// The chosen store only matters on these screens.
+const INV_NO_STORE = ["stores", "items", "cats", "track"];
 const tabAllowed = t => {
   const x = RAIL.find(r => r !== "-" && r[0] === t);
   return boTabOk("inv", t) && (!x || x[3] !== "store" || isStore(STKT.loc));
@@ -285,7 +325,8 @@ const reqsHere = () =>
   REQS.filter(r => (isStore(STKT.loc) ? (r.store || STORES[0]) === STKT.loc : r.dept === STKT.loc));
 const rail = () => {
   const pend = reqsHere().filter(isOpenReq).length;
-  return RAIL.filter(x => x === "-" || tabAllowed(x[0]))
+  const L = RAIL.filter(x => x === "-" || x[0] === "h" || tabAllowed(x[0]));
+  return L.filter((x, i) => x[0] !== "h" || (L[i + 1] && L[i + 1][0] !== "h" && L[i + 1] !== "-"))
     .map(x =>
       x === "-"
         ? '<i class="rsep"></i>'
@@ -297,13 +338,11 @@ const rail = () => {
 };
 /** Store picker. Inventory is for stores only; selling points are managed under "Selling points". */
 const strip = () => {
-  const ks = Object.keys(ING),
-    chip = l => {
-      const inn = ks.filter(k => have(l, k) > 0).length,
-        out = ks.length - inn;
-      return `<button class="sc2 ${l === STKT.loc ? "on" : ""}" data-a="inv_loc" data-l="${esc(l)}"><span>${esc(l)}</span><b>${inn}<small>/${ks.length}</small></b><i><u style="width:${ks.length ? (inn / ks.length) * 100 : 0}%"></u></i><em>${out ? out + " out" : "&nbsp;"}</em></button>`;
-    };
-  return `<div class="stgw"><div class="stgh">Stores</div><div class="stg">${STORES.map(chip).join("")}</div></div>`;
+  const ks = pickKeys(),
+    chip = l =>
+      `<button class="sc2 ${l === STKT.loc && !(STKT.all && invT === "master") ? "on" : ""}" data-a="inv_loc" data-l="${esc(l)}"><span>${esc(l)}</span><small>${ks.filter(k => have(l, k) > 0).length} of ${ks.length} items in stock</small></button>`;
+  const allOn = invT === "master";
+  return `<div class="stgw"><div class="stgh">Store</div><div class="stg">${allOn ? `<button class="sc2 ${STKT.all ? "on" : ""}" data-a="inv_locall"><span>${MASTER_ALL}</span><small>${STORES.length === 1 ? "1 store" : `${STORES.length} stores together`}</small></button>` : ""}${STORES.map(chip).join("")}</div></div>`;
 };
 /** "Main Store" / "Pool Bar (selling point)" as shown in headings. */
 const placeLabel = l => `<b>${esc(l)}</b>${isStore(l) ? "" : " (selling point)"}`;
@@ -324,7 +363,7 @@ const qtyBoth = (k, units) => {
 const unitHint = (k, place) => (k && place ? `${place} has ${qtyBoth(k, have(place, k))}` : "");
 function lineEd(f, cost) {
   const L = invF[f].lines;
-  const k0 = invF[f].pick && ING[invF[f].pick] !== undefined ? invF[f].pick : Object.keys(ING)[0];
+  const k0 = invF[f].pick && ING[invF[f].pick] !== undefined ? invF[f].pick : pickKeys()[0];
   return `<div class="fr" style="align-items:end"><label>Item<select id="l_k_${f}" data-unitfor="${f}">${optK(k0)}</select></label><label>Quantity<input id="l_q_${f}" type="number" min="0" step="any" placeholder="Qty"></label><label>Units${unitSel("l_u_" + f, k0)}</label>${cost ? `<label>Unit cost (KES)<input id="l_c_${f}" type="number" step="any" placeholder="Optional"></label>` : ""}<button class="mini" data-a="inv_ladd" data-f="${f}">Add line</button></div><div class="stk" id="l_h_${f}">${unitHint(k0, STKT.loc)}</div>${L.length ? `<div class="tw"><table class="t"><tr><th>Item</th><th class="n">Qty</th>${cost ? '<th class="n">Unit cost</th>' : ""}<th></th></tr>${L.map((x, i) => `<tr><td>${esc(iN(x.k))}</td><td class="n">${qtyBoth(x.k, x.q)}</td>${cost ? `<td class="n">${x.c ? m2(x.c) : "-"}</td>` : ""}<td><button class="mini" data-a="inv_ldel" data-f="${f}" data-i="${i}">✕</button></td></tr>`).join("")}</table></div>` : ""}`;
 }
 function mRows() {
@@ -332,7 +371,10 @@ function mRows() {
     // Stores hold stock items only; finished products exist only at selling points.
     kind = isStore(loc) ? "raw" : STKT.kind,
     t0 = new Date(STKT.since).getTime(),
-    agg = {};
+    agg = {},
+    // The categories ticked on the store decide what it lists. Anything it really holds always shows too.
+    kinds = isStore(loc) ? storeKinds(loc).map(x => x.toLowerCase()) : [],
+    inKind = k => kinds.includes(String(itemInfo(k).group || "").toLowerCase());
   MOV.filter(m => m.loc === loc && m.at >= t0).forEach(m => {
     const a = (agg[m.k] = agg[m.k] || { add: 0, inn: 0, sold: 0, dmg: 0, out: 0, prod: 0 });
     // Added: received, plus stock adjustments (either way). Damages: written off as damaged only.
@@ -340,8 +382,8 @@ function mRows() {
     else if (m.t === "ISSUE_IN" || m.t === "TRANS_IN") a.inn += m.q;
     else if (m.t === "SALE" || m.t === "SALE_RET") a.sold -= m.q;
     else if (m.t === "DAMAGE") a.dmg -= m.q;
-    else if (m.t === "PROD_IN" || m.t === "PROD_OUT") a.prod += m.q;
-    else if (m.t === "ISSUE_OUT" || m.t === "TRANS_OUT") a.out -= m.q;
+    else if (m.t === "PROD_IN" || m.t === "PROD_OUT" || m.t === "CONVERT") a.prod += m.q;
+    else if (m.t === "ISSUE_OUT" || m.t === "TRANS_OUT" || m.t === "RETURN") a.out -= m.q;
   });
   const mk = (code, name, cost, grp, price, k, div) => {
     const a = agg[k] || { add: 0, inn: 0, sold: 0, dmg: 0, out: 0, prod: 0 },
@@ -373,7 +415,7 @@ function mRows() {
   };
   let R =
     kind === "raw"
-      ? Object.keys(ING).map((k, i) => {
+      ? pickKeys().map((k, i) => {
           const u = itemInfo(k);
           return mk(u.code || 100 + i, iN(k), cst(k), u.group || "Raw materials", "", k, 1);
         })
@@ -382,42 +424,195 @@ function mRows() {
             v = i.r[k];
           return mk(i.id, i.n, cst(k) * v, i.c, i.p, k, v);
         });
+  const moved = r => Math.abs(r.sys) > 1e-9 || r.add || r.inn || r.sold || r.dmg || r.out || r.prod;
+  if (kinds.length) R = R.filter(r => inKind(r.k) || moved(r));
   if (!STKT.zero)
     R = R.filter(
       r =>
-        Math.abs(r.sys) > 1e-9 ||
-        r.add ||
-        r.inn ||
-        r.sold ||
-        r.dmg ||
-        r.out ||
-        // A newly created item shows in every store's Stock Master before it has any stock.
-        (isStore(loc) && kind === "raw" && !itemUsed(r.k))
+        moved(r) ||
+        // A store lists its ticked categories even at zero. With none ticked, a new item shows until it's used.
+        (isStore(loc) && kind === "raw" && (kinds.length ? inKind(r.k) : !itemUsed(r.k)))
     );
   if (STKT.issued) R = R.filter(r => r.inn > 0 || r.out > 0);
   return R;
 }
+// ---- Stock Master: tiles, quick filters and items grouped by category ----
+const MS_STATUS = [
+  ["all", "All"],
+  ["in", "In stock"],
+  ["low", "Low"],
+  ["out", "Out of stock"]
+];
+const MS_COUNT = [
+  ["todo", "Not counted"],
+  ["var", "Has variance"]
+];
+/** Which store the Stock Master shows, for the full-screen view where the store cards are out of sight. */
+const masterStorePick = () =>
+  STKT.full
+    ? `<label class="m-store">Store<select data-m="loc"><option ${STKT.all ? "selected" : ""}>${MASTER_ALL}</option>${STORES.map(l => `<option ${!STKT.all && l === STKT.loc ? "selected" : ""}>${esc(l)}</option>`).join("")}</select></label>`
+    : "";
+const msLevel = (k, units) => (units <= 1e-9 ? "out" : RO[k] && units <= RO[k] ? "low" : "in");
+const msTag = l =>
+  l === "out"
+    ? '<span class="tag bad">Out</span>'
+    : l === "low"
+      ? '<span class="tag warn">Low</span>'
+      : "";
+const msCounted = r => {
+  const p = STKT.phys[r.key];
+  return p !== undefined && p !== "" && !isNaN(parseFloat(p));
+};
+const msVar = r => (msCounted(r) ? parseFloat(STKT.phys[r.key]) - r.sys : 0);
+const msSigned = v => (v > 0 ? "+" : "") + qn(v);
+const msTile = (l, v, id, cls, extra) =>
+  `<div class="stm-tile ${cls || ""}"><span>${l}</span><b ${id ? `id="${id}"` : ""}>${v}</b>${extra || ""}</div>`;
+function msPills(list, key, on, act) {
+  return list
+    .map(
+      ([v, l, n]) =>
+        `<button class="pr-pill ${on === v ? "on" : ""}" data-a="${act}" data-v="${esc(v)}">${esc(l)}${n === undefined ? "" : ` <small>${n}</small>`}</button>`
+    )
+    .join("");
+}
+/** The category chooser with how many items each holds. A category no longer listed falls back to All. */
+function msCats(R) {
+  const C = {};
+  R.forEach(r => (C[r.grp || "Other"] = (C[r.grp || "Other"] || 0) + 1));
+  if (STKT.grp && !C[STKT.grp]) STKT.grp = "";
+  return `<label class="stm-cat">Category<select data-m="grp"><option value="">All (${R.length})</option>${Object.keys(
+    C
+  )
+    .sort((a, b) => a.localeCompare(b))
+    .map(
+      g =>
+        `<option value="${esc(g)}" ${STKT.grp === g ? "selected" : ""}>${esc(g)} (${C[g]})</option>`
+    )
+    .join("")}</select></label>`;
+}
+const msClosed = () => STKT.closed || (STKT.closed = {});
+/** Each category is a thin heading that folds its rows away. */
+function msBands(R, cols, row) {
+  const G = {};
+  R.forEach(r => (G[r.grp || "Other"] = G[r.grp || "Other"] || []).push(r));
+  return Object.keys(G)
+    .sort((a, b) => a.localeCompare(b))
+    .map(g => {
+      const L = G[g].sort((a, b) => a.name.localeCompare(b.name)),
+        value = L.reduce((a, r) => a + r.value, 0);
+      return `<tbody class="stm-g ${msClosed()[g] ? "closed" : ""}"><tr class="stm-band" data-a="inv_mband" data-v="${esc(g)}" title="Show or hide this category"${findAttr("master", g, ...L.map(r => `${r.code} ${r.name}`))}><td colspan="${cols}"><div class="stm-bd"><i aria-hidden="true">▾</i><b>${esc(g)}</b><span>${L.length} ${L.length === 1 ? "item" : "items"}</span><em>KES ${m2(value)}</em></div></td></tr>${L.map(row).join("")}</tbody>`;
+    })
+    .join("");
+}
+const msFold =
+  '<span class="stm-fold"><button class="mini" data-a="inv_mbandall" data-v="1">Collapse all</button><button class="mini" data-a="inv_mbandall" data-v="">Expand all</button></span>';
+/** Every store side by side. Counting is done one store at a time. */
+function masterAllRows() {
+  return pickKeys()
+    .map(k => {
+      const u = itemInfo(k),
+        at = STORES.map(l => have(l, k)),
+        q = at.reduce((a, x) => a + x, 0);
+      return {
+        k,
+        code: u.code || "-",
+        name: iN(k),
+        grp: u.group || "Other",
+        at,
+        q,
+        cost: cst(k),
+        value: q * cst(k),
+        level: msLevel(k, q)
+      };
+    })
+    .filter(r => STKT.zero || r.at.some(x => Math.abs(x) > 1e-9));
+}
+function masterAllTable() {
+  const R = masterAllRows().sort((a, b) => a.name.localeCompare(b.name));
+  return {
+    c: ["Code", "Item", "Group", ...STORES.map(l => "#" + l), "#Total", "#Cost", "#Value (KES)"],
+    r: R.map(r => [r.code, r.name, r.grp, ...r.at.map(qn), qn(r.q), m2(r.cost), m2(r.value)]),
+    total: R.reduce((a, r) => a + r.value, 0)
+  };
+}
+function masterAllHTML() {
+  const R = masterAllRows(),
+    st = MS_STATUS.some(([v]) => v === STKT.st) ? STKT.st : "all",
+    count = v => R.filter(r => r.level === v).length,
+    cats = msCats(R),
+    V = R.filter(r => (st === "all" || r.level === st) && (!STKT.grp || r.grp === STKT.grp)),
+    value = R.reduce((a, r) => a + r.value, 0),
+    cols = STORES.length + 4;
+  return `<div class="pn stm ${STKT.full ? "mfull" : ""}" data-findscope>
+ <div class="stm-tiles">${msTile("Stores", STORES.length)}${msTile("Items listed", R.length)}${msTile("Stock value (KES)", m2(value), "", "gold")}${msTile("Low or out", count("low") + count("out"), "", count("low") + count("out") ? "warn" : "")}</div>
+ <div class="stm-bar">${masterStorePick()}${findBox("master", "Search by name, code or category")}${cats}<span class="stm-acts"><button class="mini xl-btn" data-a="inv_mallx">Export to Excel</button><button class="mini" data-a="inv_mallp">Print</button><button class="mini" data-a="inv_full">${STKT.full ? "⤡ Collapse" : "⤢ Expand"}</button></span></div>
+ <div class="stm-filters"><div class="pr-pills">${msPills(
+   MS_STATUS.map(([v, l]) => [v, l, v === "all" ? R.length : count(v)]),
+   "st",
+   st,
+   "inv_mst"
+ )}</div><span class="stm-sw"><label class="sw"><input type="checkbox" data-m="zero" ${STKT.zero ? "checked" : ""}><span>Zero balances</span></label>${msFold}</span></div>
+ <div class="stk stm-note">Stock in every store. To count stock, choose one store.</div>
+ <div class="tw tall"><table class="t stm-t ${(FINDQ.master || "").trim() ? "stm-find" : ""}"><thead><tr><th>Item</th>${STORES.map(l => `<th class="n">${esc(l)}</th>`).join("")}<th class="n">Total</th><th class="n">Cost</th><th class="n">Value (KES)</th></tr></thead>${
+   V.length
+     ? msBands(
+         V,
+         cols,
+         r =>
+           `<tr${findAttr("master", r.code, r.name, r.grp)}><td class="stm-item"><b>${esc(r.name)}</b><small>${esc(r.code)}</small></td>${r.at.map(x => `<td class="n">${qn(x)}</td>`).join("")}<td class="n"><b>${qn(r.q)}</b> ${msTag(r.level)}</td><td class="n">${m2(r.cost)}</td><td class="n">${m2(r.value)}</td></tr>`
+       )
+     : `<tr><td colspan="${cols}" class="stm-empty">Nothing matches. Try All, or tick Zero balances to list every item.</td></tr>`
+ }</table></div></div>`;
+}
 function masterHTML() {
-  const R = mRows(),
+  if (STKT.all) return masterAllHTML();
+  const R = mRows().map(r => {
+      const units = r.sys * r.div;
+      return { ...r, value: r.sys * r.cost, level: msLevel(r.k, units) };
+    }),
     loc = STKT.loc,
-    done = R.filter(r => {
-      const p = STKT.phys[r.key];
-      return p !== undefined && p !== "";
-    }).length,
+    done = R.filter(msCounted).length,
     pct = R.length ? Math.round((done / R.length) * 100) : 0,
     os = openShifts(),
-    sh = curDay() ? (os.length ? os.map(x => x.id).join(", ") : curDay().id) : "-";
-  return `<div class="pn ${STKT.full ? "mfull" : ""}" data-findscope><div class="mtop">${findBox("master", "Search code, item or group")}${isStore(loc) ? '<span class="chip2">Stock items</span>' : `<div class="seg2"><button class="${STKT.kind === "raw" ? "on" : ""}" data-a="inv_kind" data-k="raw">Stock items</button><button class="${STKT.kind === "fin" ? "on" : ""}" data-a="inv_kind" data-k="fin">Finished products</button></div>`}<label class="sw"><input type="checkbox" data-m="zero" ${STKT.zero ? "checked" : ""}><span>Zero balances</span></label><label class="sw"><input type="checkbox" data-m="issued" ${STKT.issued ? "checked" : ""}><span>Issued only</span></label><span class="chip2">Stock take for ${placeLabel(loc)} · Shift ${sh}</span>${STKT.full ? `<select data-m="loc">${STORES.map(l => `<option ${l === loc ? "selected" : ""}>${esc(l)}</option>`).join("")}</select>` : ""}<button class="mini" data-a="inv_tab" data-t="load" title="Reload balances from the latest stock movements">Load data</button><button class="mini" data-a="inv_tab" data-t="export" title="Copy the sheet for Excel">Export</button><button class="chip on" data-a="inv_tab" data-t="run" title="Post the physical counts">Run stock take</button><button class="mini" data-a="inv_full">${STKT.full ? "⤡ Collapse" : "⤢ Expand"}</button></div>
- <div class="pbar"><i style="width:${pct}%"></i><span>${pct}% counted</span></div>
- <div class="tw tall"><table class="t sm"><tr><th>Item code</th><th>Item name</th><th class="n">Item cost</th><th>Item group</th><th class="n">Sale price</th><th class="n">Opening bal</th><th class="n">Added</th><th class="n">Production</th><th class="n">Stock in</th><th class="n">Sold</th><th class="n">Damages</th><th class="n">Stock out</th><th class="n">System bal</th><th>Physical bal</th><th class="n">Variance</th><th>Narration</th></tr>${
-   R.length
-     ? R.map(r => {
+    sh = curDay() ? (os.length ? os.map(x => x.id).join(", ") : curDay().id) : "-",
+    count = v => R.filter(r => r.level === v).length,
+    value = R.reduce((a, r) => a + r.value, 0),
+    varVal = R.reduce((a, r) => a + msVar(r) * r.cost, 0),
+    st = STKT.st || "all",
+    cats = msCats(R),
+    V = R.filter(
+      r =>
+        (st === "all" ||
+          r.level === st ||
+          (st === "todo" && !msCounted(r)) ||
+          (st === "var" && Math.abs(msVar(r)) > 1e-9)) &&
+        (!STKT.grp || (r.grp || "Other") === STKT.grp)
+    ),
+    D = !!STKT.detail,
+    cols = D ? 14 : 11;
+  return `<div class="pn stm ${STKT.full ? "mfull" : ""}" data-findscope>
+ <div class="stm-tiles">${msTile("Items listed", R.length)}${msTile("Stock value (KES)", m2(value), "", "gold")}${msTile("Low or out", count("low") + count("out"), "", count("low") + count("out") ? "warn" : "")}${msTile("Counted", `${done} of ${R.length}`, "msDone", "", `<div class="pbar"><i style="width:${pct}%"></i><span>${pct}%</span></div>`)}${msTile("Variance (KES)", (varVal > 0 ? "+" : "") + m2(varVal), "msVar", varVal < 0 ? "bad" : "")}</div>
+ <div class="stm-bar">${masterStorePick()}${findBox("master", "Search by name, code or category")}${cats}${isStore(loc) ? "" : `<div class="seg2"><button class="${STKT.kind === "raw" ? "on" : ""}" data-a="inv_kind" data-k="raw">Stock items</button><button class="${STKT.kind === "fin" ? "on" : ""}" data-a="inv_kind" data-k="fin">Finished products</button></div>`}<span class="stm-acts"><button class="mini" data-a="inv_tab" data-t="load" title="Reload balances from the latest stock movements">Load data</button><button class="mini" data-a="inv_tab" data-t="export" title="Copy the sheet for Excel">Export</button><button class="mini" data-a="inv_full">${STKT.full ? "⤡ Collapse" : "⤢ Expand"}</button><button class="chip on" data-a="inv_tab" data-t="run" title="Post the physical counts">Run stock take</button></span></div>
+ <div class="stm-filters"><div class="pr-pills">${msPills(
+   [
+     ...MS_STATUS.map(([v, l]) => [v, l, v === "all" ? R.length : count(v)]),
+     ...MS_COUNT.map(([v, l]) => [v, l])
+   ],
+   "st",
+   st,
+   "inv_mst"
+ )}</div><span class="stm-sw"><label class="sw"><input type="checkbox" data-m="zero" ${STKT.zero ? "checked" : ""}><span>Zero balances</span></label><label class="sw"><input type="checkbox" data-m="issued" ${STKT.issued ? "checked" : ""}><span>Issued only</span></label><label class="sw"><input type="checkbox" data-a="inv_mdetail" ${D ? "checked" : ""}><span>All movements</span></label>${msFold}</span></div>
+ <div class="stk stm-note">Stock take for ${placeLabel(loc)} · Shift ${esc(sh)}.${isStore(loc) && storeKinds(loc).length ? ` Lists ${storeKinds(loc).map(esc).join(", ")}, and anything else it holds.` : ""} Type a count, then press Enter for the next item.</div>
+ <div class="tw tall"><table class="t stm-t ${(FINDQ.master || "").trim() ? "stm-find" : ""} ${D ? "stm-wide" : ""}"><thead><tr><th>Item</th><th class="n">Cost</th>${D ? '<th class="n">Sale price</th>' : ""}<th class="n">Opening</th>${D ? '<th class="n">Added</th><th class="n">Production</th><th class="n">Stock in</th><th class="n">Sold</th>' : '<th class="n">In</th><th class="n">Sold</th>'}<th class="n">Damages</th><th class="n">${D ? "Stock out" : "Issued out"}</th><th class="n">System</th><th class="stm-count">Physical</th><th class="n">Variance</th><th>Reason</th></tr></thead>${
+   V.length
+     ? msBands(V, cols, r => {
          const p = STKT.phys[r.key],
-           has = p !== undefined && p !== "" && !isNaN(parseFloat(p)),
-           v = has ? parseFloat(p) - r.sys : 0;
-         return `<tr${findAttr("master", r.code, r.name, r.grp)}><td>${r.code}</td><td>${esc(r.name)}</td><td class="n">${m2(r.cost)}</td><td>${esc(r.grp)}</td><td class="n">${r.price === "" ? "" : m2(r.price)}</td><td class="n">${fq(r.op)}</td><td class="n">${fq(r.add)}</td><td class="n">${fq(r.prod)}</td><td class="n">${fq(r.inn)}</td><td class="n">${fq(r.sold)}</td><td><input type="number" min="0" step="any" class="dmg-in" data-dm="${esc(r.key)}" value="${Math.abs(r.dmg) < 1e-9 ? "" : +r.dmg.toFixed(3)}" placeholder="0" title="Type the quantity damaged: the change is written off (the Narration is the reason)"></td><td class="n">${fq(r.out)}</td><td class="n"><b>${fq(r.sys)}</b></td><td><input type="number" step="any" data-ph="${esc(r.key)}" value="${p === undefined ? "" : esc(p)}" style="max-width:110px"></td><td class="n ${v < 0 ? "neg" : ""}" data-vr="${esc(r.key)}" data-sys="${r.sys}">${has ? fq(v) : ""}</td><td><input data-pn="${esc(r.key)}" value="${esc(STKT.narr[r.key] || "")}" placeholder="Reason"></td></tr>`;
-       }).join("")
-     : '<tr><td colspan="16" class="stk">No items for this source. Receive or issue stock first, or tick "Show stock with zero balances".</td></tr>'
+           has = msCounted(r),
+           v = msVar(r),
+           tint = has && v < -1e-9 ? "stm-short" : has && v > 1e-9 ? "stm-over" : "";
+         return `<tr class="${tint}"${findAttr("master", r.code, r.name, r.grp)}><td class="stm-item"><b>${esc(r.name)}</b><small>${esc(r.code)}</small></td><td class="n">${m2(r.cost)}</td>${D ? `<td class="n">${r.price === "" ? "" : m2(r.price)}</td>` : ""}<td class="n">${qn(r.op)}</td>${D ? `<td class="n">${qn(r.add)}</td><td class="n">${qn(r.prod)}</td><td class="n">${qn(r.inn)}</td>` : `<td class="n">${qn(r.add + r.prod + r.inn)}</td>`}<td class="n">${qn(r.sold)}</td><td class="n"><input type="number" min="0" step="any" class="dmg-in" data-dm="${esc(r.key)}" value="${Math.abs(r.dmg) < 1e-9 ? "" : +r.dmg.toFixed(3)}" placeholder="0" title="Type the quantity damaged: the change is written off (the Reason is the narration)" aria-label="Damages of ${esc(r.name)}"></td><td class="n">${qn(r.out)}</td><td class="n stm-sys"><b>${qn(r.sys)}</b> ${msTag(r.level)}</td><td class="stm-count"><input type="number" step="any" data-ph="${esc(r.key)}" value="${p === undefined ? "" : esc(p)}" aria-label="Physical count of ${esc(r.name)}"></td><td class="n ${v < 0 ? "neg" : ""}" data-vr="${esc(r.key)}" data-sys="${r.sys}">${has ? msSigned(v) : ""}</td><td><input data-pn="${esc(r.key)}" value="${esc(STKT.narr[r.key] || "")}" placeholder="Reason" aria-label="Reason for ${esc(r.name)}"></td></tr>`;
+       })
+     : `<tr><td colspan="${cols}" class="stm-empty">Nothing matches. Try All, or tick Zero balances to list every item.</td></tr>`
  }</table></div></div>`;
 }
 /** A selling point asks a store for stock (raised from the Selling points page). lines: [{ k, q }] in units. */
@@ -443,7 +638,7 @@ function reqHTML() {
     act = isOpenReq,
     canIssue = r => act(r);
   const L = REQS.map((r, i) => [r, i]).filter(([r]) => reqsHere().includes(r));
-  return `<div class="pn"><div class="stk">Requisitions sent to ${placeLabel(here)} by selling points. A manager approves each one, then the store raises an issue note (also approved) to send the stock.</div></div>
+  return `<div class="pn"><div class="stk">Requisitions sent to ${placeLabel(here)} by selling points. Approving one moves the stock. Anything the store was short of stays open here to issue when it arrives.</div></div>
  <div class="pn"><h4>${store ? "Requisitions to " : "Requisitions from "}${esc(here)}</h4>${
    L.length
      ? L.reverse()
@@ -458,7 +653,7 @@ function reqHTML() {
              )
              .join(
                ""
-             )}${r.status === AWAIT ? `<div class="stk">Waiting for a manager to approve it before ${esc(st)} can issue.</div><div class="fr">${apButtons("req", r)}</div>` : canIssue(r) ? `<div class="fr"><button class="chip on" data-a="inv_rqissue" data-i="${i}">Raise issue note</button><button class="mini" data-a="inv_rqrej" data-i="${i}">Reject</button></div>` : ""}</div></details>`;
+             )}${r.status === AWAIT ? `<div class="stk">Waiting for a manager to approve it before ${esc(st)} can issue.</div><div class="fr">${apButtons("req", r)}${docBtn("req", r.id, "View or print")}</div>` : canIssue(r) ? `<div class="fr"><button class="chip on" data-a="inv_rqissue" data-i="${i}">Issue stock</button><button class="mini" data-a="inv_rqrej" data-i="${i}">Reject</button>${docBtn("req", r.id, "View or print")}</div>` : `<div class="fr">${docBtn("req", r.id, "View or print")}</div>`}</div></details>`;
          })
          .join("")
      : '<div class="empty">No requisitions here yet.</div>'
@@ -475,11 +670,13 @@ function issHTML() {
   F.from = STKT.loc;
   // Until someone chooses, stock goes to the store's materials store first (Recipes & Production).
   F.to = ALLD.includes(F.to) ? F.to : issueDefault(F.from);
-  return `<div class="pn"><h4>Issue stock from ${placeLabel(F.from)} to a selling point</h4><div class="fr"><label>Issue to selling point<select data-iv="is.to">${opts(ALLD, F.to)}</select></label><label>Note<input data-iv="is.note" value="${esc(F.note)}" placeholder="Optional"></label></div>${lineEd("is")}<button class="chip on" data-a="inv_isspost">Raise issue note</button><div class="stk">The stock moves when a manager approves the issue note.</div></div>
+  return `<div class="pn"><h4>Issue stock from ${placeLabel(F.from)} to a selling point</h4><div class="fr"><label>Issue to selling point<select data-iv="is.to">${opts(ALLD, F.to)}</select></label><label>Note<input data-iv="is.note" value="${esc(F.note)}" placeholder="Optional"></label></div>${lineEd("is")}<button class="chip on" data-a="inv_isspost">${boCan("inv.approve") ? "Issue stock" : "Raise issue note"}</button><div class="stk">${boCan("inv.approve") ? "No requisition needed. The stock moves as soon as you issue it." : "No requisition needed. The stock moves when a manager approves the issue note."}</div></div>
  ${apIssueNotes(F.from)}
  <div class="pn tw"><h4>Recent issues</h4>${tb(
    ["Date", "Reference", "From", "To", "Item", "#Quantity", "By"],
-   L.map(m => [dt2(m.at), m.ref, m.loc, m.peer, iN(m.k), fq(-m.q), m.by])
+   L.map(m => [dt2(m.at), m.ref, m.loc, m.peer, iN(m.k), fq(-m.q), m.by]),
+   null,
+   "No stock issued yet."
  )}</div>`;
 }
 /** Damages typed in the Stock Master: the change from what is already recorded is written off as a damage
@@ -518,7 +715,9 @@ function dmgHTML() {
   return `<div class="pn"><h4>Record damaged or wasted stock in ${placeLabel(F.loc)}</h4><div class="fr"><label>Item<select data-iv="dm.k">${optK(F.k)}</select></label><label>Quantity<input data-iv="dm.q" type="number" step="any" value="${esc(F.q)}"></label><label>Reason<select data-iv="dm.why">${["Damaged", "Expired", "Spilled", "Spoiled", "Theft or loss", "Other"].map(x => `<option ${F.why === x ? "selected" : ""}>${x}</option>`).join("")}</select></label><button class="chip on" data-a="inv_dmpost">Record damage</button></div></div>
  <div class="pn tw"><h4>Recent damages</h4>${tb(
    ["Date", "Location", "Item", "#Quantity", "Reason", "By"],
-   L.map(m => [dt2(m.at), m.loc, iN(m.k), fq(-m.q), m.note, m.by])
+   L.map(m => [dt2(m.at), m.loc, iN(m.k), fq(-m.q), m.note, m.by]),
+   null,
+   "No damages recorded yet."
  )}</div>`;
 }
 function posHTML() {
@@ -539,11 +738,10 @@ function storesHTML() {
       LPOS.filter(p => p.store === l && (p.status === "Open" || p.status === "Partly received"))
         .length,
     supplies = l => ALLD.filter(o => (OUTLET_INFO[o] || {}).store === l);
-  return `<div class="pn"><h4>Create a store</h4><div class="fr"><label>Store name<input data-iv="st.name" value="${esc(invF.st.name)}" placeholder="e.g. Beverages Store, Kitchen Store"></label><button class="chip on" data-a="inv_stadd">Create store</button></div><div class="stk">Stores hold the stock you buy (receive and purchase orders). Selling points get their stock from a store by requisition or issue.</div></div>
- <div class="pn tw"><h4>Stores (${STORES.length})</h4><table class="t"><tr><th>Store</th><th class="n">Items in stock</th><th class="n">Stock value (KES)</th><th>Supplies</th><th class="n">Open requisitions</th><th class="n">Open LPOs</th><th></th></tr>${STORES.map(
-   l =>
-     `<tr><td><b>${esc(l)}</b></td><td class="n">${Object.keys(ING).filter(k => have(l, k) > 0).length}</td><td class="n">${m2(storeValue(l))}</td><td>${esc(supplies(l).join(", ") || "-")}</td><td class="n">${reqOpen(l)}</td><td class="n">${lpoOpenN(l)}</td><td><div class="fr" style="flex-wrap:nowrap"><button class="mini" data-a="inv_loc" data-l="${esc(l)}">Stock master</button><button class="mini" data-a="pur_go" data-l="${esc(l)}" data-t="receive">Receive</button><button class="mini" data-a="pur_go" data-l="${esc(l)}" data-t="lpo">LPO</button></div></td></tr>`
- ).join("")}</table></div>`;
+  return `<div class="pn tw"><div class="inv-head"><h4>Stores (${STORES.length})</h4><button class="chip on" data-a="inv_stnew">New store</button></div><table class="t"><tr><th>Store</th><th>Holds</th><th class="n">Items in stock</th><th class="n">Stock value (KES)</th><th>Supplies</th><th class="n">Open requisitions</th><th class="n">Open LPOs</th><th></th></tr>${STORES.map(
+    l =>
+      `<tr><td><b>${esc(l)}</b></td><td>${storeKindCell(l)}</td><td class="n">${Object.keys(ING).filter(k => have(l, k) > 0).length}</td><td class="n">${m2(storeValue(l))}</td><td>${esc(supplies(l).join(", ") || "-")}</td><td class="n">${reqOpen(l)}</td><td class="n">${lpoOpenN(l)}</td><td class="n"><span class="sp-acts"><button class="mini" data-a="inv_loc" data-l="${esc(l)}">Stock master</button><button class="mini" data-a="pur_go" data-l="${esc(l)}" data-t="receive">Receive</button><button class="mini" data-a="pur_go" data-l="${esc(l)}" data-t="lpo">LPO</button><button class="mini" data-a="inv_stedit" data-l="${esc(l)}">Edit</button><button class="mini cat-del" data-a="inv_stdel" data-l="${esc(l)}">Delete</button></span></td></tr>`
+  ).join("")}</table></div>`;
 }
 /** A new store or selling point name must be unique across all places. */
 function placeNameError(name) {
@@ -560,11 +758,14 @@ const lpoTotal = p => p.lines.reduce((a, x) => a + x.qty * x.price, 0),
   lpoOpen = p => p.status === "Open" || p.status === "Partly received";
 function lpoHTML() {
   const F = invF.po,
-    keys = Object.keys(ING).sort((a, b) => itemInfo(a).name.localeCompare(itemInfo(b).name));
+    keys = pickKeys().sort((a, b) => itemInfo(a).name.localeCompare(itemInfo(b).name));
   F.store = STKT.loc;
   const tag = s => (s === "Received" ? "ok" : s === "Cancelled" || s === "Closed" ? "bad" : "warn"),
     mine = LPOS.map((p, i) => [p, i]).filter(([p]) => p.store === F.store);
-  return `<div class="pn"><h4>New local purchase order (LPO) for ${placeLabel(F.store)}</h4>
+  const showForm = invPoNew || F.lines.length > 0 || !mine.length;
+  return `${
+    showForm
+      ? `<div class="pn"><h4>New local purchase order (LPO) for ${placeLabel(F.store)}</h4>
   <div class="fr"><label>Vendor<span class="fr" style="flex-wrap:nowrap"><select data-iv="po.sup"><option value="">Choose a vendor…</option>${[...new Set([...vendorNames(), ...(F.sup ? [F.sup] : [])])].map(s => `<option ${s === F.sup ? "selected" : ""}>${esc(s)}</option>`).join("")}</select><button class="mini" data-a="inv_vnopen" title="Add a vendor">+</button></span></label><label>Expected delivery<input type="date" data-iv="po.due" value="${esc(F.due)}"></label><label>Note<input data-iv="po.note" value="${esc(F.note)}" placeholder="Optional"></label></div>
   <div class="fr" style="align-items:end"><label>Item<select id="po_k">${keys.map(k => `<option value="${k}">${esc(itemInfo(k).name)} · ${esc(buyLabel(itemInfo(k)))}</option>`).join("")}</select></label><label>Quantity (buying units)<input id="po_q" type="number" min="0" step="any"></label><label>Price per buying unit (KES)<input id="po_p" type="number" min="0" step="any" placeholder="Last price"></label><button class="mini" data-a="inv_poladd">Add line</button></div>
   ${
@@ -572,8 +773,10 @@ function lpoHTML() {
       ? `<div class="tw"><table class="t"><tr><th>Item</th><th class="n">Quantity</th><th class="n">Price</th><th class="n">Total (KES)</th><th></th></tr>${F.lines.map((x, i) => `<tr><td>${esc(itemInfo(x.k).name)}</td><td class="n">${qn(x.qty)} ${esc(itemInfo(x.k).buyUnit)}</td><td class="n">${m2(x.price)}</td><td class="n">${m2(x.qty * x.price)}</td><td><button class="mini" data-a="inv_poldel" data-i="${i}">✕</button></td></tr>`).join("")}<tr><td colspan="3"><b>Order total</b></td><td class="n"><b>${m2(lpoTotal(F))}</b></td><td></td></tr></table></div>`
       : ""
   }
-  <button class="chip on" data-a="inv_pomake">Create LPO</button></div>
- <div class="pn"><h4>Purchase orders for ${esc(F.store)}</h4>${
+  <div class="fr"><button class="chip on" data-a="inv_pomake">Create LPO</button><button class="mini" data-a="inv_ponew">Cancel</button></div></div>`
+      : ""
+  }
+ <div class="pn"><div class="inv-head"><h4>Purchase orders for ${esc(F.store)}</h4>${showForm ? "" : '<button class="chip on" data-a="inv_ponew">New purchase order</button>'}</div>${
    mine.length
      ? mine
          .reverse()
@@ -586,32 +789,12 @@ function lpoHTML() {
                })
                .join(
                  ""
-               )}</table></div>${p.note ? `<div class="stk">${esc(p.note)}</div>` : ""}${apNote(p) ? `<div class="stk">${apNote(p)}</div>` : p.status === AWAIT ? `<div class="stk">Waiting for a manager to approve it before it can be received.</div>` : ""}<div class="fr">${lpoOpen(p) ? `<input id="prf_${i}" placeholder="Delivery note / invoice no." style="max-width:220px"><button class="chip on" data-a="inv_porecv" data-i="${i}">Receive delivery</button><button class="mini" data-a="pur_rclpo" data-i="${i}" title="Receive with VAT, batch and expiry">Open in GRN</button>` : ""}<button class="mini" data-a="inv_poprint" data-i="${i}">Print LPO</button>${apButtons("lpo", p)}${p.status === "Open" || p.status === AWAIT ? `<button class="mini" data-a="inv_pocancel" data-i="${i}">Cancel LPO</button>` : ""}${p.status === "Partly received" ? `<button class="mini" data-a="inv_poclose" data-i="${i}">Close (no more deliveries)</button>` : ""}</div></div></details>`
+               )}</table></div>${p.note ? `<div class="stk">${esc(p.note)}</div>` : ""}${apNote(p) ? `<div class="stk">${apNote(p)}</div>` : p.status === AWAIT ? `<div class="stk">Waiting for a manager to approve it before it can be received.</div>` : ""}<div class="fr">${lpoOpen(p) ? `<input id="prf_${i}" placeholder="Delivery note / invoice no." style="max-width:220px"><button class="chip on" data-a="inv_porecv" data-i="${i}">Receive delivery</button><button class="mini" data-a="pur_rclpo" data-i="${i}" title="Receive with VAT, batch and expiry">Open in GRN</button>` : ""}${docBtn("lpo", p.id, "View, print or email")}${apButtons("lpo", p)}${p.status === "Open" || p.status === AWAIT ? `<button class="mini" data-a="inv_pocancel" data-i="${i}">Cancel LPO</button>` : ""}${p.status === "Partly received" ? `<button class="mini" data-a="inv_poclose" data-i="${i}">Close (no more deliveries)</button>` : ""}</div></div></details>`
          )
          .join("")
      : '<div class="empty">No purchase orders yet.</div>'
  }</div>`;
 }
-function lpoPrint(p) {
-  const w = window.open("", "_blank");
-  if (!w) return toast("Allow pop-ups to print the LPO.");
-  const rows = p.lines
-    .map(
-      x =>
-        `<tr><td>${esc(itemInfo(x.k).code || "")}</td><td>${esc(itemInfo(x.k).name)}</td><td>${esc(buyLabel(itemInfo(x.k)))}</td><td class="n">${qn(x.qty)}</td><td class="n">${m2(x.price)}</td><td class="n">${m2(x.qty * x.price)}</td></tr>`
-    )
-    .join("");
-  w.document
-    .write(`<!DOCTYPE html><html><head><title>${p.id}</title><style>body{font:14px Arial,sans-serif;margin:32px;color:#111}h1{font-size:20px;margin:0}table{width:100%;border-collapse:collapse;margin-top:16px}td,th{border:1px solid #999;padding:6px 8px;text-align:left}.n{text-align:right}.g{display:grid;grid-template-columns:1fr 1fr;gap:4px 24px;margin-top:12px}.s{margin-top:48px;display:grid;grid-template-columns:1fr 1fr;gap:48px}.s div{border-top:1px solid #111;padding-top:4px}</style></head><body>
-<h1>${esc(FD_SETTINGS.name)}</h1><div>LOCAL PURCHASE ORDER</div>${p.appr ? "" : `<div style="margin-top:8px;padding:6px 10px;border:2px solid #b3261e;color:#b3261e;font-weight:700;display:inline-block">${p.status === "Rejected" ? "REJECTED" : "NOT APPROVED · NOT VALID FOR SUPPLY"}</div>`}
-<div class="g"><div><b>LPO no:</b> ${p.id}</div><div><b>Date:</b> ${new Date(p.at).toLocaleDateString("en-GB")}</div><div><b>Vendor:</b> ${esc(p.sup)}</div><div><b>Deliver to:</b> ${esc(p.store)}</div><div><b>Expected delivery:</b> ${esc(p.due || "-")}</div><div><b>Raised by:</b> ${esc(p.by)}</div></div>
-<table><tr><th>Code</th><th>Item</th><th>Unit</th><th class="n">Quantity</th><th class="n">Price (KES)</th><th class="n">Total (KES)</th></tr>${rows}<tr><td colspan="5"><b>Total</b></td><td class="n"><b>${m2(lpoTotal(p))}</b></td></tr></table>
-${p.note ? `<p>${esc(p.note)}</p>` : ""}<div class="s"><div>Prepared by: ${esc(p.by)}</div><div>Approved by${p.appr ? ": " + esc(p.appr.by) + " · " + new Date(p.appr.at).toLocaleDateString("en-GB") : ""}</div></div><\/body><\/html>`); // "<\/" so tools scanning the page for </body> don't stop here
-  w.document.close();
-  w.focus();
-  w.print();
-}
-
 /** Live "cost per unit" and "= N units" hints, updated while typing (no full redraw). */
 function itPreview() {
   const F = invF.it,
@@ -698,12 +881,11 @@ function itemsHTML() {
     S = invF.sd,
     editing = F.edit && ING[F.edit] !== undefined,
     lockUom = editing && itemUsed(F.edit),
-    keys = Object.keys(ING).sort((a, b) => itemInfo(a).name.localeCompare(itemInfo(b).name));
+    keys = pickKeys().sort((a, b) => itemInfo(a).name.localeCompare(itemInfo(b).name));
   if (!S.k || ING[S.k] === undefined) S.k = keys[0] || "";
   return `${itemDatalists()}
- <div class="pn"><div class="fr" style="align-items:center;justify-content:space-between"><div><h4 style="margin:0">Item setup</h4><div class="stk">Each item is created once and kept in the Stock Master. Receive it into a store, then issue it to any selling point.</div></div><button class="chip on" data-a="inv_itnew">+ New item</button></div></div>
  ${F.open ? itemPopup(F, editing, lockUom) : ""}
- ${sendPanel(S, keys)}
+ ${invSdOpen ? sendPanel(S, keys) : ""}
  ${itemsTable(keys)}`;
 }
 /** The create / edit item popup. */
@@ -757,14 +939,16 @@ function itemPopup(F, editing, lockUom) {
        ? ""
        : sp
          ? itemSpSection(F)
-         : `<section class="itm-s"><h4>Opening stock <span>optional</span></h4>
+         : `<section class="itm-s"><h4>Store that receives it</h4>
     <div class="itm-g itm-g3">
      <label>Store<select data-iv="it.store">${opts(STORES, (F.store = pick(F.store, STORES)))}</select></label>
      <label>Quantity received (buying units)<input data-iv="it.qty" type="number" min="0" step="any" value="${esc(F.qty)}" placeholder="Empty = item only"></label>
      <label>Vendor<input data-iv="it.sup" value="${esc(F.sup)}" placeholder="Optional"></label>
     </div>
     <div class="itm-hint" id="itEq"></div>
-   </section>`
+    <div class="itm-hint" id="itStoreNote">${esc(storeKindNote(F.store, F.group))}</div>
+    <div class="itm-hint">Only selling it, with no stock kept? <button class="mini" data-a="prl_add" data-m="sell">Create a selling item instead</button></div>
+   </section>${itemSellHTML(F)}`
    }
   </div>
   <footer class="itm-f"><button class="mini" data-a="inv_itcancel">Cancel</button><button class="chip on" id="itSave" data-a="inv_itsave">${editing ? "Save changes" : M === "recipe" ? "Continue to recipe" : M ? "Continue to production" : sp ? "Save product" : "Save item"}</button></footer>
@@ -788,7 +972,7 @@ function sendPanel(S, keys) {
         : { name: "", price: "", per: "1", tax: itemTax(S.k) }
     );
   }
-  return `<div class="pn" id="sdPanel"><h4>Send stock to a selling point</h4>
+  return `<div class="pn" id="sdPanel"><div class="inv-head"><h4>Send stock to a selling point</h4><button class="mini" data-a="inv_sdtog">Close</button></div>
   <div class="stk">Issues the stock from a store to the selling point${isMaterials(S.sp) ? "" : " and puts it on that selling point's POS"}.</div>
   <div class="fr"><label>Item<select data-iv="sd.k">${keys.map(k => `<option value="${k}" ${k === S.k ? "selected" : ""}>${esc(itemInfo(k).name)} (${esc(itemInfo(k).uom)})</option>`).join("")}</select></label>
    <label>Selling point<select data-iv="sd.sp">${opts(ALLD, S.sp)}</select></label>
@@ -818,12 +1002,12 @@ function sdSync(f) {
   all();
 }
 function itemsTable(keys) {
-  return `<div class="pn tw"><h4>Items in the Stock Master (${keys.length})</h4><table class="t"><tr><th>Code</th><th>Item</th><th>Category</th><th>VAT / tax</th><th>Unit</th><th>Buying unit</th><th class="n">Buying price</th><th class="n">Cost / unit</th><th class="n">In stores</th><th class="n">At selling points</th><th></th></tr>${keys
+  return `<div class="pn tw"><div class="inv-head"><h4>Items in the Stock Master (${keys.length})</h4><span class="inv-btns">${invSdOpen ? "" : '<button class="mini" data-a="inv_sdtog">Send stock to a selling point</button>'}<button class="chip on" data-a="inv_itnew">+ New item</button></span></div><table class="t"><tr><th>Code</th><th>Item</th><th>Category</th><th>VAT / tax</th><th>Unit</th><th>Buying unit</th><th class="n">Buying price</th><th class="n">Cost / unit</th><th class="n">In stores</th><th class="n">At selling points</th><th></th></tr>${keys
     .map(k => {
       const u = itemInfo(k),
         all = tot(k),
         inStores = STORES.reduce((a, l) => a + have(l, k), 0);
-      return `<tr ${k === invF.itLast ? 'style="outline:2px solid #2ec4b6"' : ""}><td>${esc(u.code || "-")}</td><td>${esc(u.name)}</td><td>${esc(u.group || "")}</td><td>${esc(itemTaxLabel(k))}</td><td>${esc(u.uom)}</td><td>${esc(buyLabel(u))}</td><td class="n">${m2(u.buyPrice)}</td><td class="n">${m2(cst(k))}</td><td class="n">${fq(inStores)}</td><td class="n ${all - inStores < 0 ? "neg" : ""}">${fq(all - inStores)}</td><td><div class="fr" style="flex-wrap:nowrap"><button class="mini" data-a="inv_itedit" data-k="${k}">Edit</button><button class="mini" data-a="inv_itpick" data-k="${k}">Send to selling point</button></div></td></tr>`;
+      return `<tr ${k === invF.itLast ? 'style="outline:2px solid var(--brass, #c7a25a)"' : ""}><td>${esc(u.code || "-")}</td><td>${esc(u.name)}</td><td>${esc(u.group || "")}</td><td>${esc(itemTaxLabel(k))}</td><td>${esc(u.uom)}</td><td>${esc(buyLabel(u))}</td><td class="n">${m2(u.buyPrice)}</td><td class="n">${m2(cst(k))}</td><td class="n">${fq(inStores)}</td><td class="n ${all - inStores < 0 ? "neg" : ""}">${fq(all - inStores)}</td><td><div class="fr" style="flex-wrap:nowrap"><button class="mini" data-a="inv_itedit" data-k="${k}">Edit</button><button class="mini" data-a="inv_itpick" data-k="${k}">Send</button><button class="mini" data-a="trk_go" data-k="${k}">Track</button></div></td></tr>`;
     })
     .join("")}</table></div>`;
 }
@@ -840,6 +1024,7 @@ function invView() {
     riss: () => invReportHTML("iss"),
     rdmg: () => invReportHTML("dmg"),
     variance: varHTML, // stock-take-report.js
+    track: itemTrackHTML,
     streps: stHistHTML,
     appr: apView // approvals.js
   };
@@ -854,29 +1039,53 @@ function invView() {
     (invT !== "items" ? itemPopupIfOpen() : "") +
     vendorPopupIfOpen() +
     stModalIfOpen() +
-    apModalIfOpen();
-  return `<div class="inv"><nav class="inv-rail">${rail()}</nav><div class="inv-main">${strip()}${(B[invT] || masterHTML)()}${popups}</div></div>`;
+    apModalIfOpen() +
+    storeModal() +
+    storeDeleteModal();
+  const [title, what] = INV_PAGES[invT] || ["Inventory", ""];
+  return `<div class="inv invx"><nav class="inv-rail">${rail()}</nav><div class="inv-main"><div class="inv-title"><h1>${title}</h1><p>${what}</p></div>${INV_NO_STORE.includes(invT) ? "" : strip()}${(B[invT] || masterHTML)()}${popups}</div></div>`;
 }
 V.inv = invView;
 function updMaster() {
-  let n = 0,
-    tt = 0;
   document.querySelectorAll("#vSub [data-vr]").forEach(td => {
-    tt++;
     const p = STKT.phys[td.dataset.vr],
       has = p !== undefined && p !== "" && !isNaN(parseFloat(p)),
-      v = has ? parseFloat(p) - parseFloat(td.dataset.sys) : 0;
-    if (has) n++;
-    td.textContent = has ? fq(v) : "";
+      v = has ? parseFloat(p) - parseFloat(td.dataset.sys) : 0,
+      tr = td.closest("tr");
+    td.textContent = has ? msSigned(v) : "";
     td.classList.toggle("neg", has && v < 0);
+    tr.classList.toggle("stm-short", has && v < -1e-9);
+    tr.classList.toggle("stm-over", has && v > 1e-9);
   });
-  const pc = tt ? Math.round((n / tt) * 100) : 0,
-    pb = document.querySelector("#vSub .pbar");
+  // The tiles count every item in the store, including any a filter is hiding.
+  const R = mRows(),
+    n = R.filter(msCounted).length,
+    pc = R.length ? Math.round((n / R.length) * 100) : 0,
+    val = R.reduce((a, r) => a + msVar(r) * r.cost, 0),
+    pb = document.querySelector("#vSub .pbar"),
+    d = $("#msDone"),
+    mv = $("#msVar");
   if (pb) {
     pb.firstElementChild.style.width = pc + "%";
     pb.lastElementChild.textContent = pc + "%";
   }
+  if (d) d.textContent = `${n} of ${R.length}`;
+  if (mv) {
+    mv.textContent = (val > 0 ? "+" : "") + m2(val);
+    mv.parentElement.classList.toggle("bad", val < 0);
+  }
 }
+// Enter on a count goes straight to the next item.
+$("#vSub").addEventListener("keydown", e => {
+  if (e.key !== "Enter" || e.target.dataset.ph === undefined) return;
+  e.preventDefault();
+  const L = [...document.querySelectorAll("#vSub [data-ph]")].filter(x => x.offsetParent),
+    next = L[L.indexOf(e.target) + 1];
+  if (next) {
+    next.focus();
+    next.select();
+  }
+});
 function invRun() {
   const R = mRows(),
     ch = R.filter(r => {
@@ -1072,6 +1281,8 @@ function itemSave() {
   }
   const dup = itemDuplicate(name, code, F.edit);
   if (dup) return toast(dup);
+  const sell = editing || sp || M ? null : itemSellRead();
+  if (typeof sell === "string") return toast(sell);
 
   const k = editing ? F.edit : itemKey(name);
   INGU[k] = {
@@ -1103,12 +1314,14 @@ function itemSave() {
     const r = sendToStore(k, F.store, qty, price, F.sup.trim(), "");
     msg += " " + qn(r.q) + " " + uom + " sent to " + F.store + ".";
   }
+  if (sell) msg += itemSellAdd(k, name, F.group.trim() || "General", F.tax, sell);
   invF.it = blankItemForm(F.store);
   invF.sd.k = k;
   invF.itLast = k; // highlight the new / edited row
   if (view === "pur" && purT === "receive" && !editing) rcPick(k, false); // created from Receive goods: ready to add
   if (made) return itemToProduction(k, made, msg);
   if (sp) return itemSpDone(k, sp, F, qty * perBuy, spPrice, msg);
+  auditAdd("Stock item", msg, { mod: "Inventory" });
   bosave();
   toast(msg);
   all();
@@ -1133,6 +1346,32 @@ function invAct(a, b) {
   if (a.slice(0, 2) === "rp") return repAct(a, d); // inventory reports (inventory-reports.js)
   if (a.slice(0, 2) === "rc" || a.slice(0, 2) === "vn") return rcAct(a, b); // direct receive & vendors (receive.js)
   // ---- stores
+  if (a === "stnew" || a === "stedit") {
+    stE =
+      a === "stnew"
+        ? { was: "", name: "", kinds: [] }
+        : { was: d.l, name: d.l, kinds: storeKinds(d.l) };
+    all();
+    return $("#stName").focus();
+  }
+  if (a === "stclose") {
+    stE = null;
+    return all();
+  }
+  if (a === "stsave") return storeSave();
+  if (a === "stdel") {
+    stDel = d.l;
+    return all();
+  }
+  if (a === "stdelno") {
+    stDel = null;
+    return all();
+  }
+  if (a === "stdelyes") return storeDelete();
+  if (a === "sdtog") {
+    invSdOpen = !invSdOpen;
+    return all();
+  }
   if (a === "stadd") {
     const name = invF.st.name.trim(),
       err = placeNameError(name);
@@ -1140,6 +1379,7 @@ function invAct(a, b) {
     STORES.push(name);
     syncLocs();
     invF.st.name = "";
+    invStNew = false;
     bosave();
     toast(name + " created. Receive stock into it in Purchasing.");
     return all();
@@ -1170,6 +1410,11 @@ function invAct(a, b) {
     invF.po.lines.splice(+d.i, 1);
     return all();
   }
+  if (a === "ponew") {
+    invPoNew = !invPoNew;
+    if (!invPoNew) invF.po = { ...invF.po, lines: [] };
+    return all();
+  }
   if (a === "pomake") {
     const F = invF.po;
     F.store = STKT.loc;
@@ -1189,6 +1434,8 @@ function invAct(a, b) {
     };
     LPOS.push(p);
     invF.po = { store: F.store, sup: "", due: "", note: "", lines: [] };
+    invPoNew = false;
+    docOpen("lpo", p.id);
     bosave();
     toast(
       `LPO ${p.id} created for ${p.sup} (KES ${m2(lpoTotal(p))}). It waits for a manager to approve it.`
@@ -1227,7 +1474,6 @@ function invAct(a, b) {
     toast("LPO " + p.id + " " + p.status.toLowerCase() + ".");
     return all();
   }
-  if (a === "poprint") return lpoPrint(LPOS[+d.i]);
   // ---- item setup
   if (a === "itsave") return itemSave();
   if (a === "itnew") {
@@ -1293,6 +1539,8 @@ function invAct(a, b) {
   }
   if (a === "itpick") {
     invF.sd = { ...invF.sd, k: d.k, qty: "" };
+    invSdOpen = true;
+    all();
     sdSync("k");
     const p = $("#sdPanel");
     return p && p.scrollIntoView({ behavior: "smooth" });
@@ -1322,9 +1570,15 @@ function invAct(a, b) {
       if (ITEMS.some(i => i.d === S.sp && i.n.toLowerCase() === name.toLowerCase()))
         return toast(S.sp + " already sells a product called " + name + ".");
     }
-    // An issue note: the stock moves when a manager approves it (approvals.js).
-    const x = raiseIssue(S.store, S.sp, [{ k: S.k, q: units }], "", "send");
-    let msg = `Issue note ${x.id}: ${qtyBoth(S.k, units)} of ${u.name} from ${S.store} to ${S.sp}, waiting for approval.`;
+    // With the approve right the stock moves now; otherwise a manager approves the note.
+    const now = boCan("inv.approve"),
+      x = now
+        ? issueNow(S.store, S.sp, [{ k: S.k, q: units }], "", "send", "", boUser.n)
+        : raiseIssue(S.store, S.sp, [{ k: S.k, q: units }], "", "send");
+    if (!x) return all();
+    let msg = now
+      ? `${x.id}: ${qtyBoth(S.k, units)} of ${u.name} moved from ${S.store} to ${S.sp}.`
+      : `Issue note ${x.id}: ${qtyBoth(S.k, units)} of ${u.name} from ${S.store} to ${S.sp}, waiting for approval.`;
     if (prod && price !== null && price !== prod.p) {
       msg += ` ${prod.n} now KES ${m2(price)} (was ${m2(prod.p)}).`;
       prod.p = price;
@@ -1352,7 +1606,59 @@ function invAct(a, b) {
     STKT.full = !STKT.full;
     return all();
   }
+  if (a === "mst") {
+    STKT.st = d.v;
+    return all();
+  }
+  // Folding touches only the page, so counts being typed and the scroll position stay put.
+  if (a === "mband") {
+    msClosed()[d.v] = !msClosed()[d.v];
+    b.parentElement.classList.toggle("closed", msClosed()[d.v]);
+    return;
+  }
+  if (a === "mbandall") {
+    document.querySelectorAll("#vSub .stm-g").forEach(g => {
+      msClosed()[g.querySelector(".stm-band").dataset.v] = !!d.v;
+      g.classList.toggle("closed", !!d.v);
+    });
+    return;
+  }
+  if (a === "mdetail") {
+    STKT.detail = !STKT.detail;
+    return all();
+  }
+  if (a === "locall") {
+    STKT.all = true;
+    return all();
+  }
+  if (a === "mallp" || a === "mallx") {
+    const T = masterAllTable(),
+      title = "Stock Master - all stores";
+    if (a === "mallx") {
+      XLSX.download(
+        {
+          company: FD_SETTINGS.name,
+          title,
+          head: `Total value KES ${m2(T.total)}`,
+          by: xlsxBy(),
+          sections: [{ c: T.c, r: T.r }]
+        },
+        `Stock_Master_all_stores_${bizDate()}`
+      );
+      return toast("Stock Master downloaded as Excel.");
+    }
+    const num = h => (h[0] === "#" ? ' class="n"' : "");
+    return stPrint(
+      title,
+      `<div class="st-doc"><div class="st-head"><div>${esc(FD_SETTINGS.name)}</div><h2>${title}</h2></div><table class="st-t"><thead><tr>${T.c.map(h => `<th${num(h)}>${esc(h.replace("#", ""))}</th>`).join("")}</tr></thead><tbody>${T.r.map(r => `<tr>${r.map((v, i) => `<td${num(T.c[i])}>${esc(v)}</td>`).join("")}</tr>`).join("")}<tr class="st-tot"><td colspan="${T.c.length - 1}">Total value (KES)</td><td class="n">${m2(T.total)}</td></tr></tbody></table><div class="st-foot"><span>${printedBy()}</span></div></div>`
+    );
+  }
+  if (a === "stall" || a === "stnone") {
+    document.querySelectorAll("#stEd [data-stk]").forEach(x => (x.checked = a === "stall"));
+    return;
+  }
   if (a === "loc") {
+    STKT.all = false;
     STKT.loc = d.l;
     STKT.phys = {};
     STKT.narr = {};
@@ -1418,7 +1724,7 @@ function invAct(a, b) {
       st = r.store || STORES[0];
     if (st !== STKT.loc)
       return toast("Only " + st + " can issue this requisition. Choose it above.");
-    // An issue note for the requisition: the stock moves when a manager approves it (approvals.js).
+    // Already approved, so the stock moves now (approvals.js).
     const lines = [];
     r.lines.forEach((x, j) => {
       const want = Math.max(0, parseFloat($("#iq_" + d.i + "_" + j).value) || 0),
@@ -1427,8 +1733,8 @@ function invAct(a, b) {
     });
     if (!lines.length)
       return toast("Nothing to issue. Check the quantities and the stock in " + st + ".");
-    const x = raiseIssue(st, r.dept, lines, "", "requisition", r.id);
-    toast(`Issue note ${x.id} for ${r.id} raised. The stock moves when a manager approves it.`);
+    const x = issueNow(st, r.dept, lines, "", "requisition", r.id, boUser.n);
+    if (x) toast(`${x.id}: stock moved to ${r.dept} for ${r.id}.`);
     return all();
   }
   if (a === "rqrej") {
@@ -1448,16 +1754,25 @@ function invAct(a, b) {
     if (!F.lines.length) return toast("Add at least one line.");
     const bad = F.lines.find(x => x.q > have(F.from, x.k) + 1e-9);
     if (bad) return toast("Not enough " + iN(bad.k) + " in " + F.from + ".");
-    // An issue note: the stock moves when a manager approves it (approvals.js).
-    const x = raiseIssue(F.from, F.to, F.lines, F.note, "issue");
+    // No requisition needed. With the approve right the stock moves now; otherwise a manager approves it.
+    const now = boCan("inv.approve"),
+      x = now
+        ? issueNow(F.from, F.to, F.lines, F.note, "issue", "", boUser.n)
+        : raiseIssue(F.from, F.to, F.lines, F.note, "issue");
+    if (!x) return all();
     invF.is = { from: F.from, to: F.to, note: "", lines: [] };
-    toast("Issue note " + x.id + " to " + F.to + " raised. It waits for a manager to approve it.");
+    docOpen("iss", x.id);
+    toast(
+      now
+        ? `${x.id}: stock moved to ${F.to}.`
+        : `Issue note ${x.id} to ${F.to} raised. It waits for a manager to approve it.`
+    );
     return all();
   }
   if (a === "dmpost") {
     const F = invF.dm;
     F.loc = STKT.loc;
-    const k = F.k || Object.keys(ING)[0],
+    const k = F.k || pickKeys()[0],
       q = parseFloat(F.q);
     if (!(q > 0)) return toast("Enter the quantity damaged.");
     if (q > have(F.loc, k) + 1e-9)
@@ -1493,8 +1808,9 @@ $("#vSub").oninput = e => {
     updMaster();
   } else if (s.pn !== undefined) STKT.narr[s.pn] = e.target.value;
   else if (s.spc !== undefined || s.spn !== undefined) spCountInput(e.target, s);
-  else if (s.find !== undefined)
-    stFind(e.target); // search boxes (stock-take-report.js)
+  else if (s.find !== undefined) stFind(e.target); // search boxes (stock-take-report.js)
+  const mt = $(".stm-t");
+  if (mt) mt.classList.toggle("stm-find", !!e.target.value.trim());
   else if (s.stloc !== undefined) {
     stVar.loc = e.target.value === "All places" ? "All" : e.target.value;
     all();
@@ -1503,6 +1819,7 @@ $("#vSub").oninput = e => {
     invF[p][f] = e.target.value;
     if (p === "it") itSrcSync(f); // selling-points.js
     if (p === "it" || p === "sd") itPreview();
+    if (p === "it") itemStoreMatch(f);
     if (p === "sd") sdSync(f);
     if (p === "spp" && f === "k" && invF.spp.k) {
       // A new product starts with its stock item's tax. It can still be changed here.

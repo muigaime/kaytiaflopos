@@ -23,7 +23,7 @@ const catTaken = (name, not) =>
   prodCats().some(x => x !== not && x.toLowerCase() === name.toLowerCase());
 let catQ = "";
 const catHit = c => c.toLowerCase().includes(catQ.trim().toLowerCase());
-/** One line for each category, so a long list stays short. It opens up only to rename or delete. */
+/** One line for each category, so a long list stays short. It opens up only to edit or delete. */
 function catCard(c) {
   const on = catE && catE.key === c,
     M = catMods()[c] || [],
@@ -36,13 +36,13 @@ function catCard(c) {
     const others = prodCats().filter(x => x !== c);
     more =
       n && !others.length
-        ? `<div class="cat-q"><span>There's no other category to move its products to. Rename it instead.</span><button class="cat-b" data-a="cat_no">Close</button></div>`
+        ? `<div class="cat-q"><span>There's no other category to move its products to. Edit its name instead.</span><button class="cat-b" data-a="cat_no">Close</button></div>`
         : `<div class="cat-q">${n ? `<label>Move its ${n === 1 ? "product" : `${n} products`} to<select id="catTo">${others.map(x => `<option>${esc(x)}</option>`).join("")}</select></label>` : "<span>Delete this category?</span>"}<button class="cat-b cat-del" data-a="cat_del">${n ? "Move and delete" : "Delete"}</button><button class="cat-b" data-a="cat_no">Cancel</button></div>`;
   }
   return `<article class="cat-card ${on ? "on" : ""}" data-cat="${esc(c)}" style="--h:${hue(c)}" ${catHit(c) ? "" : "hidden"}>
    <div class="cat-line"><span class="cat-mark" aria-hidden="true">${esc(c.charAt(0).toUpperCase())}</span><h5 title="${esc(c)}">${esc(c)}</h5>
    <div class="cat-mods" title="${esc(modText(M))}">${M.length ? M.map(g => `<span class="cat-group">${g.o.map(x => `<i>${esc(x)}</i>`).join("")}</span>`).join('<b aria-hidden="true">→</b>') : ""}</div>
-   <div class="cat-btns">${boCan("prod.manage") ? `<button class="cat-b" data-a="mod_cat" data-c="${esc(c)}" aria-label="Modifiers for ${esc(c)}">Modifiers</button>` : ""}${can ? `<button class="cat-b" data-a="cat_edit" data-k="${esc(c)}" aria-label="Rename ${esc(c)}">Rename</button><button class="cat-b cat-del" data-a="cat_ask" data-k="${esc(c)}" aria-label="Delete ${esc(c)}">Delete</button>` : ""}</div></div>
+   <div class="cat-btns">${boCan("prod.manage") ? `<button class="cat-b" data-a="mod_cat" data-c="${esc(c)}" aria-label="Modifiers for ${esc(c)}">Modifiers</button>` : ""}${can ? `<button class="cat-b" data-a="cat_edit" data-k="${esc(c)}" aria-label="Edit ${esc(c)}">Edit</button><button class="cat-b cat-del" data-a="cat_ask" data-k="${esc(c)}" aria-label="Delete ${esc(c)}">Delete</button>` : ""}</div></div>
    ${more}
   </article>`;
 }
@@ -82,9 +82,11 @@ function catRename() {
     FD_SETTINGS.cats = catSaved()
       .filter(x => x !== key)
       .concat(name);
+    hhSaved().forEach(r => r.cat === key && (r.cat = name));
   }
   catE = null;
   bosave();
+  if (name !== key) auditAdd("Category", `${key} renamed to ${name}`);
   toast(`Saved as ${name}.`);
   all();
 }
@@ -94,9 +96,13 @@ function catDelete() {
   if (box) ITEMS.forEach(i => i.c === key && (i.c = box.value));
   delete catMods()[key];
   FD_SETTINGS.cats = catSaved().filter(x => x !== key);
+  // Its happy hour goes too: carried over, it would also discount everything in the other category.
+  const deals = hhSaved().filter(r => r.cat === key).length;
+  FD_SETTINGS.happy = hhSaved().filter(r => r.cat !== key);
   catE = null;
   bosave();
-  toast(`${key} deleted.`);
+  auditAdd("Category", `${key} deleted`, { pri: "Important" });
+  toast(`${key} deleted.${deals ? ` Its happy hour was removed too.` : ""}`);
   all();
 }
 function catAct(a, b) {
@@ -171,7 +177,13 @@ function storeCatsHTML() {
 function grpAct(a, b) {
   if (!grpRight()) return boDenied();
   const list = not => groupList().filter(x => x !== not),
-    move = (from, to) => grpItems(from).forEach(k => (INGU[k] = { ...itemInfo(k), group: to })),
+    move = (from, to) => {
+      grpItems(from).forEach(k => (INGU[k] = { ...itemInfo(k), group: to }));
+      // A store that held this category holds the new one instead.
+      Object.values(storeInfos()).forEach(i => {
+        i.kinds = [...new Set((i.kinds || []).map(k => (k === from ? to : k)))];
+      });
+    },
     done = msg => {
       grpE = null;
       bosave();

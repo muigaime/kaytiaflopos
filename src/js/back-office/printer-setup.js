@@ -1,6 +1,6 @@
 // ---- Settings: registered machines, and which printer takes this computer's orders, bills and receipts ----
 const PSU_ORDER = ["KITCHEN ORDER", "BAR ORDER"];
-const PSU_DOCS = [...PSU_ORDER, "GUEST BILL", "RECEIPT"];
+const PSU_DOCS = [...PSU_ORDER, "GUEST BILL", ...ONE_PRINTER_DOCS];
 const psuPoints = () => ALLD.filter(posSells);
 const PSU_ALL = "All sale points";
 const psuRules = () => FD_SETTINGS.printRules || (FD_SETTINGS.printRules = []);
@@ -15,7 +15,7 @@ function psuDraft() {
   psuD = {};
   const routes = FD_SETTINGS.printRoutes || {};
   PSU_DOCS.forEach(doc =>
-    (doc === "RECEIPT" ? [PSU_ALL] : psuPoints()).forEach(pt => {
+    (ONE_PRINTER_DOCS.includes(doc) ? [PSU_ALL] : psuPoints()).forEach(pt => {
       const r = docRule(doc, pt),
         old =
           PSU_ORDER.includes(doc) && (routes[pt] || {})[doc === "BAR ORDER" ? "bar" : "kitchen"];
@@ -99,7 +99,16 @@ function printerSetupHTML() {
     ]
   )}
   ${psuCard("Bills", "Print when a waiter prints a guest bill. A bill with items from several sale points uses its first sale point.", [["GUEST BILL", "Bill printer"]])}
-  ${psuCard("Receipts", "Print when a bill is settled. One printer takes the receipts from every sale point.", [["RECEIPT", "Receipt printer"]], [PSU_ALL])}</div>`;
+  ${psuCard("Receipts", "Print when a bill is settled. One printer takes the receipts from every sale point.", [["RECEIPT", "Receipt printer"]], [PSU_ALL])}
+  ${psuCard(
+    "Stores",
+    "Requisitions and issue notes print here when you press Thermal print. With no printer chosen, the print dialog opens instead.",
+    [
+      ["REQUISITION", "Requisition printer"],
+      ["ISSUE NOTE", "Issue note printer"]
+    ],
+    [PSU_ALL]
+  )}</div>`;
 }
 /** A box on the setup changed. Only a new printer changes what else is on the row. */
 function psuChange(el) {

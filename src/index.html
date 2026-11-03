@@ -101,7 +101,7 @@
             (all). Demo cards: KT0001, KT0002, KT0003.</span
           >
         </div>
-        <div class="bt"><button data-k="C">CLEAR</button><button data-k="X">EXIT</button></div>
+        <div class="bt"><button data-k="C">CLEAR</button><button data-k="T">CLOCK IN / OUT</button><button data-k="X">EXIT</button></div>
       </div>
     </div>
     <!-- ==================== POS: "application closed" screen ==================== -->
@@ -201,6 +201,7 @@
           <button class="mini" data-close>← Back</button>
           <h3 id="selT">Pending bills</h3>
         </div>
+        <div id="selFilt"></div>
         <div id="selList"></div>
         <div class="sfoot">
           <div class="stot" id="selTot"></div>
@@ -475,9 +476,14 @@
     <!-- Script group 1: POS. Keep the order; the build merges each group into one script block. -->
     <script src="js/shared/license.js"></script>
     <script src="js/shared/machine.js"></script>
+    <script src="js/shared/audit.js"></script>
+    <script src="js/shared/pay-modes.js"></script>
     <script src="js/shared/xlsx.js"></script>
+    <script src="js/shared/pdf.js"></script>
     <script src="js/shared/business-day.js"></script>
     <script src="js/pos/catalog-stock.js"></script>
+    <script src="js/pos/happy-hour.js"></script>
+    <script src="js/pos/promotions.js"></script>
     <script src="js/pos/cart-sale.js"></script>
     <script src="js/pos/payment.js"></script>
     <script src="js/pos/orders.js"></script>
@@ -720,8 +726,8 @@
                 </div>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center">
                   <div class="seg" id="per">
-                    <button data-p="today">Today</button><button data-p="7">7 days</button
-                    ><button data-p="30" class="on">30 days</button>
+                    <button data-p="today" class="on">Today</button><button data-p="7">7 days</button
+                    ><button data-p="30">30 days</button>
                   </div>
                   <button class="btn a" id="openPos">
                     <svg class="i"><use href="#i-pos" /></svg>Open POS</button
@@ -929,6 +935,26 @@
     <script src="js/back-office/general-setup.js" data-private></script>
     <script src="js/back-office/modifier-setup.js" data-private></script>
     <script src="js/back-office/accompaniment-setup.js" data-private></script>
+    <script src="js/back-office/conversion-setup.js" data-private></script>
+    <script src="js/back-office/happy-hour-setup.js" data-private></script>
+    <script src="js/back-office/promotion-setup.js" data-private></script>
+    <script src="js/back-office/price-list.js" data-private></script>
+    <script src="js/back-office/products-list.js" data-private></script>
+    <script src="js/back-office/store-setup.js" data-private></script>
+    <script src="js/back-office/audit-log.js" data-private></script>
+    <script src="js/back-office/item-tracking.js" data-private></script>
+    <script src="js/back-office/pay-void-setup.js" data-private></script>
+    <script src="js/back-office/supplier-returns.js" data-private></script>
+    <script src="js/back-office/doc-a4.js" data-private></script>
+    <script src="js/back-office/hr-payroll.js" data-private></script>
+    <script src="js/back-office/hr.js" data-private></script>
+    <script src="js/back-office/hr-more.js" data-private></script>
+    <script src="js/back-office/hr-home.js" data-private></script>
+    <script src="js/back-office/backup.js" data-private></script>
+    <script src="js/back-office/lan-sync.js" data-private></script>
+    <script src="js/back-office/accounting-core.js" data-private></script>
+    <script src="js/back-office/accounting-reports.js" data-private></script>
+    <script src="js/back-office/accounting.js" data-private></script>
     <script src="js/back-office/categories.js" data-private></script>
     <script src="js/back-office/waiter-setup.js" data-private></script>
     <script src="js/back-office/users-and-roles.js" data-private></script>

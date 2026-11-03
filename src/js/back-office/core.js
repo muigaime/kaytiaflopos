@@ -73,7 +73,7 @@ const sum = (a, f) => a.reduce((x, y) => x + f(y), 0),
     );
 let boUser = null,
   view = "home",
-  per = "30",
+  per = "today",
   br = "All sale points";
 const POS = "#pos",
   BRS = ["All sale points", ...ALLD.filter(posSells)],
@@ -88,7 +88,10 @@ function refreshBRS() {
   ).join("");
 }
 $("#br").innerHTML = BRS.map(k => `<option>${k}</option>`).join("");
+// Set while a restore is under way, so that the old data in memory can't be saved over the new.
+let boFrozen = false;
 function bosave() {
+  if (boFrozen) return;
   try {
     localStorage.setItem(
       LS,
@@ -140,116 +143,127 @@ function bosave() {
   }
 }
 window.bosave = bosave;
-(function () {
-  try {
-    const s = JSON.parse(localStorage.getItem(LS) || "null");
-    if (!s) return;
-    SALES.push(...s.S.map(x => ({ ...x, at: new Date(x.at) })));
-    ITEMS.length = 0;
-    ITEMS.push(...s.I.filter(i => i.d !== "Supermarket"));
-    // Stores and selling points first: the stock maps below are keyed by them.
-    if (s.ST && s.ST.length) STORES.splice(0, STORES.length, ...s.ST);
-    if (s.OL && s.OL.length) ALLD.splice(0, ALLD.length, ...s.OL.filter(o => o !== "Supermarket"));
-    Object.assign(OUTLET_INFO, s.OI || {});
-    delete OUTLET_INFO.Supermarket;
-    Object.values(OUTLET_INFO).forEach(i => {
-      if (i.type === "Shop") i.type = "Other";
+/** Puts saved data into memory: at start-up, and again when another computer's changes arrive. */
+function boLoad(s, again) {
+  if (again) {
+    SALES.length = 0;
+    FREE_BILLS.length = 0;
+    [OUTLET_INFO, ING, RO, INGC, INGU, ROLE_OVER].forEach(o =>
+      Object.keys(o).forEach(k => delete o[k])
+    );
+    Object.keys(FD_SETTINGS).forEach(k => {
+      if (!(k in (s.FS || {}))) delete FD_SETTINGS[k];
     });
-    syncLocs();
-    if (s.K && typeof Object.values(s.K)[0] === "object")
-      LOCS.forEach(l => {
-        STK[l] = s.K[l] || {};
-      });
-    MOV.length = 0;
-    MOV.push(...(s.MV || []));
-    REQS.length = 0;
-    REQS.push(...(s.RQ || []));
-    COUNTS.length = 0;
-    COUNTS.push(...(s.CT || []));
-    GRNS.length = 0;
-    GRNS.push(...(s.GN || []));
-    LPOS.length = 0;
-    LPOS.push(...(s.LP || []));
-    VENDORS.length = 0;
-    VENDORS.push(...(s.VN || []));
-    VPAYS.length = 0;
-    VPAYS.push(...(s.VP || []));
-    BILLLOG.length = 0;
-    BILLLOG.push(...(s.BL || []));
-    // Open orders: a line whose product has since gone is dropped, so one bad line can't stop the POS.
-    orders.length = 0;
-    (s.OR || []).forEach(o => {
-      o.at = new Date(o.at);
-      Object.keys(o.lines || {}).forEach(id => {
-        if (!get(id)) delete o.lines[id];
-      });
-      if (Object.keys(o.lines || {}).length) orders.push(o);
+  }
+  SALES.push(...s.S.map(x => ({ ...x, at: new Date(x.at) })));
+  ITEMS.length = 0;
+  ITEMS.push(...s.I.filter(i => i.d !== "Supermarket"));
+  // Stores and selling points first: the stock maps below are keyed by them.
+  if (s.ST && s.ST.length) STORES.splice(0, STORES.length, ...s.ST);
+  if (s.OL && s.OL.length) ALLD.splice(0, ALLD.length, ...s.OL.filter(o => o !== "Supermarket"));
+  Object.assign(OUTLET_INFO, s.OI || {});
+  delete OUTLET_INFO.Supermarket;
+  Object.values(OUTLET_INFO).forEach(i => {
+    if (i.type === "Shop") i.type = "Other";
+  });
+  syncLocs();
+  if (s.K && typeof Object.values(s.K)[0] === "object")
+    LOCS.forEach(l => {
+      STK[l] = s.K[l] || {};
     });
-    ISSUES.length = 0;
-    ISSUES.push(...(s.IS || []));
-    PRODS.length = 0;
-    PRODS.push(...(s.PD || []));
-    if (s.SS) STKT.since = s.SS;
-    Object.assign(ING, s.G);
-    Object.assign(RO, s.R);
-    Object.assign(INGC, s.X || {});
-    Object.assign(INGU, s.IU || {});
-    Object.values(INGU).forEach(u => {
-      if (u.group === "Groceries") u.group = "Dry goods";
+  MOV.length = 0;
+  MOV.push(...(s.MV || []));
+  REQS.length = 0;
+  REQS.push(...(s.RQ || []));
+  COUNTS.length = 0;
+  COUNTS.push(...(s.CT || []));
+  GRNS.length = 0;
+  GRNS.push(...(s.GN || []));
+  LPOS.length = 0;
+  LPOS.push(...(s.LP || []));
+  VENDORS.length = 0;
+  VENDORS.push(...(s.VN || []));
+  VPAYS.length = 0;
+  VPAYS.push(...(s.VP || []));
+  BILLLOG.length = 0;
+  BILLLOG.push(...(s.BL || []));
+  // Open orders: a line whose product has since gone is dropped, so one bad line can't stop the POS.
+  orders.length = 0;
+  (s.OR || []).forEach(o => {
+    o.at = new Date(o.at);
+    Object.keys(o.lines || {}).forEach(id => {
+      if (!get(id)) delete o.lines[id];
     });
-    USERS.length = 0;
-    USERS.push(...s.U);
-    CU.length = 0;
-    CU.push(...s.C);
-    ADM.length = 0;
-    ADM.push(...(s.A || []));
-    Object.assign(ROLE_OVER, s.BR || {});
-    DAYS.length = 0;
-    DAYS.push(...(s.D || []));
-    SHIFTS.length = 0;
-    SHIFTS.push(...(s.H || []));
-    PAYOUTS.length = 0;
-    PAYOUTS.push(...(s.P || []));
-    ROOMS.length = 0;
-    ROOMS.push(...(s.RM || []));
-    RESERVATIONS.length = 0;
-    RESERVATIONS.push(...(s.RV || []));
-    Object.assign(FD_SETTINGS, s.FS || {});
-    // Class C used to mean zero-rated. Those items stay untaxed now that C is a real tax.
-    if (!FD_SETTINGS.tax) {
-      ITEMS.forEach(i => {
-        if (i.t === "C") i.t = "A";
-      });
-      FD_SETTINGS.tax = { B: 16, C: 0 };
-    }
-    taxApply();
-    ROOMTYPES.length = 0;
-    ROOMTYPES.push(...(s.RT || []));
-    GROUPS.length = 0;
-    GROUPS.push(...(s.GR || []));
-    // Older bills were NBO-001042 and open orders ORD-001. They move to the plain numbers, once.
-    const moved = {},
-      plain = x => (/^NBO-\d+$/.test(x) ? pad(+x.slice(4), 5) : moved[x] || x);
-    const top = SALES.reduce((a, x) => Math.max(a, +String(x.no).replace(/^NBO-/, "") || 0), 0);
-    rno = Math.max(rno, s.RN || 0, top + 1);
-    FREE_BILLS.push(...(s.FB || []));
-    if (s.TB) {
-      TBL.length = 0;
-      TBL.push(...s.TB);
-    }
-    orders.forEach(o => {
-      if (!/^ORD-/.test(o.no)) return;
-      o.ord = o.ord || +o.no.slice(4) || "";
-      moved[o.no] = pad(rno++, 5);
-      o.no = moved[o.no];
+    if (Object.keys(o.lines || {}).length) orders.push(o);
+  });
+  ISSUES.length = 0;
+  ISSUES.push(...(s.IS || []));
+  PRODS.length = 0;
+  PRODS.push(...(s.PD || []));
+  if (s.SS) STKT.since = s.SS;
+  Object.assign(ING, s.G);
+  Object.assign(RO, s.R);
+  Object.assign(INGC, s.X || {});
+  Object.assign(INGU, s.IU || {});
+  Object.values(INGU).forEach(u => {
+    if (u.group === "Groceries") u.group = "Dry goods";
+  });
+  USERS.length = 0;
+  USERS.push(...s.U);
+  CU.length = 0;
+  CU.push(...s.C);
+  ADM.length = 0;
+  ADM.push(...(s.A || []));
+  Object.assign(ROLE_OVER, s.BR || {});
+  DAYS.length = 0;
+  DAYS.push(...(s.D || []));
+  SHIFTS.length = 0;
+  SHIFTS.push(...(s.H || []));
+  PAYOUTS.length = 0;
+  PAYOUTS.push(...(s.P || []));
+  ROOMS.length = 0;
+  ROOMS.push(...(s.RM || []));
+  RESERVATIONS.length = 0;
+  RESERVATIONS.push(...(s.RV || []));
+  Object.assign(FD_SETTINGS, s.FS || {});
+  // Class C used to mean zero-rated. Those items stay untaxed now that C is a real tax.
+  if (!FD_SETTINGS.tax) {
+    ITEMS.forEach(i => {
+      if (i.t === "C") i.t = "A";
     });
-    SALES.forEach(x => {
-      x.no = plain(x.no);
-      if (x.ret) x.ret.of = plain(x.ret.of);
-    });
-    BILLLOG.forEach(x => (x.no = plain(x.no)));
-  } catch (e) {}
-})();
+    FD_SETTINGS.tax = { B: 16, C: 0 };
+  }
+  taxApply();
+  ROOMTYPES.length = 0;
+  ROOMTYPES.push(...(s.RT || []));
+  GROUPS.length = 0;
+  GROUPS.push(...(s.GR || []));
+  // Older bills were NBO-001042 and open orders ORD-001. They move to the plain numbers, once.
+  const moved = {},
+    plain = x => (/^NBO-\d+$/.test(x) ? pad(+x.slice(4), 5) : moved[x] || x);
+  const top = SALES.reduce((a, x) => Math.max(a, +String(x.no).replace(/^NBO-/, "") || 0), 0);
+  rno = Math.max(rno, s.RN || 0, top + 1);
+  FREE_BILLS.push(...(s.FB || []));
+  if (s.TB) {
+    TBL.length = 0;
+    TBL.push(...s.TB);
+  }
+  orders.forEach(o => {
+    if (!/^ORD-/.test(o.no)) return;
+    o.ord = o.ord || +o.no.slice(4) || "";
+    moved[o.no] = pad(rno++, 5);
+    o.no = moved[o.no];
+  });
+  SALES.forEach(x => {
+    x.no = plain(x.no);
+    if (x.ret) x.ret.of = plain(x.ret.of);
+  });
+  BILLLOG.forEach(x => (x.no = plain(x.no)));
+}
+try {
+  const saved = JSON.parse(localStorage.getItem(LS) || "null");
+  if (saved) boLoad(saved);
+} catch (e) {}
 // Repair saved data from older or interrupted versions, so one bad value can't stop the app from opening.
 (function () {
   try {

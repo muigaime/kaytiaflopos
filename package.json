@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "node scripts/dev.js",
     "build": "node scripts/build.js",
+    "build:exe": "node desktop/build-exe.js",
     "format": "prettier --write \"src/**/*.{js,css,html}\"",
     "format:check": "prettier --check \"src/**/*.{js,css,html}\""
   },

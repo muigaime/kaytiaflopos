@@ -17,8 +17,12 @@ $("#vSub").onclick = e => {
   if (roomTab) return rrAct(roomTab);
   const rr = e.target.closest("[data-r]");
   if (rr) {
-    rp = rr.dataset.r;
-    return all();
+    repPick(rr.dataset.r);
+    const menu = $(".rp-menu"),
+      top = menu ? menu.scrollTop : 0;
+    all();
+    if ($(".rp-menu")) $(".rp-menu").scrollTop = top;
+    return;
   }
   const qq = e.target.closest("[data-q]");
   if (qq) {
@@ -31,6 +35,11 @@ $("#vSub").onclick = e => {
   const a = b.dataset.a,
     v = id => $("#" + id).value.trim(),
     num = id => parseFloat($("#" + id).value);
+  if (a === "rep_full") {
+    if (REP[rp][1](rs())[5] && REP[rp][1](rs())[5].wide) rpWideList = !rpWideList;
+    else rpFull = !rpFull;
+    return all();
+  }
   if (a === "rep_print") return repPrint(b.dataset.k);
   if (a === "rep_xlsx") return repXlsx(b.dataset.k);
   if (a === "rep_xlsxpage") return pageXlsx(b);
@@ -39,14 +48,27 @@ $("#vSub").onclick = e => {
   if (a.slice(0, 4) === "psu_") return psuAct(a, b);
   if (a.slice(0, 4) === "mod_") return modAct(a, b);
   if (a.slice(0, 4) === "acc_") return accAct(a, b);
+  if (a.slice(0, 3) === "cv_") return cvAct(a, b);
   if (a.slice(0, 4) === "cat_") return catAct(a, b);
+  if (a.slice(0, 3) === "hh_") return hhAct(a, b);
+  if (a.slice(0, 3) === "pm_") return pmAct(a, b);
+  if (a.slice(0, 4) === "prl_") return prAct(a, b);
+  if (a.slice(0, 3) === "al_") return alAct(a, b);
+  if (a.slice(0, 4) === "trk_") return trkAct(a, b);
+  if (a.slice(0, 3) === "ac_") return acAct(a, b);
+  if (a.slice(0, 3) === "gr_") return grAct(a, b);
+  if (a.slice(0, 3) === "dc_") return docAct(a, b);
+  if (a.slice(0, 3) === "bk_") return bkAct(a);
+  if (a.slice(0, 3) === "hr_") return hrAct(a, b);
+  if (a.slice(0, 3) === "pv_") return pvAct(a, b);
+  if (a.slice(0, 3) === "pl_") return plAct(a);
   if (a.slice(0, 4) === "grp_") return grpAct(a, b);
   if (a.slice(0, 4) === "lic_") return licAct(a);
   if (ACT_RIGHTS[a] && !boCan(ACT_RIGHTS[a])) return boDenied();
   if (a.slice(0, 3) === "ur_") return urAct(a, b);
   if (a === "dstart" || a === "dend") {
-    const r = a === "dstart" ? dayStart(boUser.n) : dayEnd(boUser.n);
-    toast(r || (a === "dstart" ? `New day started: ${dateGB(bizDate())}.` : "Day ended."));
+    const r = a === "dstart" ? dayStart(boUser.n) : dayRoll(boUser.n);
+    toast(r || `New day started: ${dateGB(bizDate())}.`);
     return all();
   }
   if (a === "sfloat") {
@@ -189,6 +211,12 @@ $("#vSub").onclick = e => {
       q = num("cp_" + b.dataset.i);
     if (!(q > 0)) return toast("Enter an amount.");
     c.owes = Math.max(0, c.owes - q);
+    (FD_SETTINGS.custPays = FD_SETTINGS.custPays || []).push({
+      at: new Date().toISOString(),
+      n: c.n,
+      amt: q,
+      by: boUser.n
+    });
     toast("Payment recorded.");
   }
   bosave();
@@ -206,7 +234,10 @@ $("#vSub").onchange = e => {
   if (s.m !== undefined) {
     if (s.m === "zero") STKT.zero = t.checked;
     else if (s.m === "issued") STKT.issued = t.checked;
+    else if (s.m === "grp") STKT.grp = t.value;
+    else if (s.m === "loc" && t.value === MASTER_ALL) STKT.all = true;
     else if (s.m === "loc") {
+      STKT.all = false;
       STKT.loc = t.value;
       STKT.phys = {};
       STKT.narr = {};
@@ -251,7 +282,7 @@ $("#vSub").onchange = e => {
   if (s.psx) return psuChange(t);
   if (s.setc) return settingsChange(t);
   if (s.rpsel !== undefined) {
-    rp = t.value;
+    repPick(t.value);
     return all();
   }
   if (s.urg !== undefined) {
@@ -297,8 +328,13 @@ $("#vSub").onchange = e => {
   if (s.pr) {
     const it = get(s.pr),
       p = parseFloat(t.value);
-    if (p > 0) it.p = p;
-    else t.value = it.p;
+    if (p > 0) {
+      if (p !== it.p)
+        auditAdd("Price change", `${it.n} at ${it.d}: KES ${it.p} to KES ${p}`, {
+          ref: String(it.id)
+        });
+      it.p = p;
+    } else t.value = it.p;
   } else if (s.uc) {
     const c = parseFloat(t.value);
     INGC[s.uc] = c >= 0 ? c : 0;

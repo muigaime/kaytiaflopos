@@ -7,10 +7,12 @@
 //              e.g. 0.25 kg flour + 0.1 L oil per portion (ITEMS entry with r + from, see itemLoc).
 let recT = "overview";
 const REC_TABS = [
+  ["h", "Kitchen"],
   ["overview", "Kitchen materials", "box"],
   ["prod", "Production", "chef"],
-  ["pbal", "Production balances", "chart"],
   ["recipes", "Recipes", "book"],
+  ["h", "Reports"],
+  ["pbal", "Production balances", "chart"],
   ["allp", "All products", "box"],
   ["log", "Production log", "chart"]
 ];
@@ -41,7 +43,7 @@ invF.rcp = rcpBlank();
 const materialStores = () => ALLD.filter(isMaterials);
 const salePoints = () => ALLD.filter(posSells);
 const itemsByName = () =>
-  Object.keys(ING).sort((a, b) => itemInfo(a).name.localeCompare(itemInfo(b).name));
+  pickKeys().sort((a, b) => itemInfo(a).name.localeCompare(itemInfo(b).name));
 /** Stock in place l, with its unit: "2.5 kg". */
 const qtyAt = (l, k) => `${qn(have(l, k))} ${itemInfo(k).uom}`;
 
@@ -91,6 +93,32 @@ function prAddLine(id) {
 }
 
 // ---------------------------------------------------------------- page
+// What each screen is for, shown at the top of it.
+const REC_PAGES = {
+  overview: [
+    "Kitchen materials",
+    "The ingredients held for the kitchen, and how the stock gets from your store to the plate."
+  ],
+  prod: ["Production", "Turn raw materials into finished items, such as flour into ugali."],
+  recipes: ["Recipes", "Dishes made from ingredients. Each sale takes the ingredients off stock."],
+  log: ["Production log", "Every production run, newest first."],
+  pbal: ["Production balances", "Opening, added, used and what remains of each item you make."],
+  allp: [
+    "All products in selling points",
+    "Opening, added, sold and what remains of everything on sale."
+  ]
+};
+let recNewOn = false;
+function recRail() {
+  const L = REC_TABS.filter(([t]) => t === "h" || boTabOk("rec", t));
+  return L.filter(([t], i) => t !== "h" || (L[i + 1] && L[i + 1][0] !== "h"))
+    .map(([t, l, ic]) =>
+      t === "h"
+        ? `<div class="rhd">${l}</div>`
+        : `<button class="ir ${t === recT ? "on" : ""}" data-a="rec_tab" data-t="${t}">${I(ic)}<span>${l}</span></button>`
+    )
+    .join("");
+}
 function recipesView() {
   if (!boTabOk("rec", recT)) recT = "overview";
   const body =
@@ -103,12 +131,8 @@ function recipesView() {
           : recT === "log"
             ? prodLogHTML()
             : recOverviewHTML();
-  return `<div class="inv"><nav class="inv-rail">${REC_TABS.filter(([t]) => boTabOk("rec", t))
-    .map(
-      ([t, l, ic]) =>
-        `<button class="ir ${t === recT ? "on" : ""}" data-a="rec_tab" data-t="${t}">${I(ic)}<span>${l}</span></button>`
-    )
-    .join("")}</nav><div class="inv-main">${body}${apModalIfOpen()}</div></div>`;
+  const [title, what] = REC_PAGES[recT] || REC_PAGES.overview;
+  return `<div class="inv invx"><nav class="inv-rail">${recRail()}</nav><div class="inv-main"><div class="inv-title"><h1>${title}</h1><p>${what}</p></div>${body}${apModalIfOpen()}</div></div>`;
 }
 V.rec = recipesView;
 
@@ -350,7 +374,15 @@ function recipesHTML() {
     cost = recipeCost(F.lines),
     price = parseFloat(F.price),
     can = F.lines.length ? recipeCan(F.lines, F.from) : 0;
-  return `<div class="pn"><h4>${F.edit ? "Edit recipe" : "New recipe"}</h4>
+  const showForm =
+    recNewOn ||
+    !!F.edit ||
+    !!String(F.name || "").trim() ||
+    F.lines.length > 0 ||
+    !recipeList().length;
+  return `${
+    showForm
+      ? `<div class="pn"><h4>${F.edit ? "Edit recipe" : "New recipe"}</h4>
   <div class="stk">One portion. Choose ingredients from the store; decimals such as 0.5, 0.25, 0.1 or 0.3 are fine. Each sale deducts them from what was issued to ${esc(F.from)}.</div>
   <div class="fr"><label>Product name<input id="rcpName" data-iv="rcp.name" value="${esc(F.name)}" placeholder="e.g. Beef stew"></label>
    <label>Sold at<select data-iv="rcp.sp">${opts(S, F.sp)}</select></label>
@@ -366,8 +398,10 @@ function recipesHTML() {
       ? `<div class="tw"><table class="t"><tr><th>Ingredient</th><th class="n">Per portion</th><th class="n">In stores</th><th class="n">In ${esc(F.from)}</th><th class="n">Cost (KES)</th><th></th></tr>${F.lines.map((x, i) => `<tr><td>${esc(itemInfo(x.k).name)}</td><td class="n">${qn(x.q)} ${esc(itemInfo(x.k).uom)}</td>${recipeStockCells(x, F.from)}<td class="n">${m2(x.q * cst(x.k))}</td><td><button class="mini" data-a="rec_ldel" data-f="rcp" data-i="${i}">✕</button></td></tr>`).join("")}<tr><td colspan="4"><b>Cost per portion${price > 0 ? ` · margin ${Math.round(((price - cost) / price) * 100)}%` : ""} · can make ${can}</b></td><td class="n"><b>${m2(cost)}</b></td><td></td></tr></table></div>`
       : ""
   }
-  <div class="fr"><button class="chip on" data-a="rec_rsave">${F.edit ? "Save recipe" : "Create recipe"}</button>${F.edit ? '<button class="mini" data-a="rec_clear" data-f="rcp">Cancel</button>' : ""}</div></div>
-  <div class="pn tw"><h4>Recipes (${recipeList().length})</h4>${
+  <div class="fr"><button class="chip on" data-a="rec_rsave">${F.edit ? "Save recipe" : "Create recipe"}</button>${F.edit ? "" : '<button class="mini" data-a="rec_rno">Cancel</button>'}${F.edit ? '<button class="mini" data-a="rec_clear" data-f="rcp">Cancel</button>' : ""}</div></div>`
+      : ""
+  }
+  <div class="pn tw"><div class="inv-head"><h4>Recipes (${recipeList().length})</h4>${showForm ? "" : '<button class="chip on" data-a="rec_rnew">New recipe</button>'}</div>${
     recipeList().length
       ? `<table class="t"><tr><th>Product</th><th>Sold at</th><th>Deducts from</th><th>Per portion</th><th class="n">Price</th><th class="n">Cost</th><th class="n">Margin</th><th class="n">Can make</th><th></th></tr>${recipeList()
           .map(i => {
@@ -435,6 +469,7 @@ function recipeSave() {
   if (was) Object.assign(was, data);
   else ITEMS.push({ id: Math.max(0, ...ITEMS.map(i => i.id)) + 1, ...data });
   invF.rcp = { ...rcpBlank(), sp: F.sp, from: F.from };
+  recNewOn = false;
   spRefreshPos();
   bosave();
   toast(
@@ -711,7 +746,7 @@ function recBalHTML(kind) {
     bad = F.from > F.to,
     sum2 = f => R.reduce((a, r) => a + f(r), 0),
     kst = (l, v) => `<div class="kst"><span>${l}</span><b>${v}</b></div>`;
-  return `<div class="pn"><h4>${K.title}</h4><div class="stk">${K.what}</div>
+  return `<div class="pn"><div class="stk">${K.what}</div>
   <div class="fr" style="align-items:end;margin-top:8px"><label>From<input type="date" data-iv="recb.from" value="${esc(F.from)}"></label><label>To<input type="date" data-iv="recb.to" value="${esc(F.to)}"></label><div class="seg2"><button data-a="rec_brange" data-rng="today">Today</button><button data-a="rec_brange" data-rng="month">This month</button></div><button class="mini xl-btn" style="flex:none" data-a="rep_xlsxpage" data-title="Production batches" data-like="rec_bprint">Export to Excel</button><button class="chip on" style="flex:none" data-a="rec_bprint" ${R.length && !bad ? "" : "disabled"}>Print</button></div></div>
   ${
     bad
@@ -861,7 +896,7 @@ function recRepView() {
     D = bad ? null : recRepData(),
     sum2 = f => D.items.reduce((a, r) => a + f(r), 0),
     kst = (l, v) => `<div class="kst"><span>${l}</span><b>${v}</b></div>`;
-  return `<div class="inv" style="grid-template-columns:minmax(0,1fr)"><div class="inv-main">
+  return `<div class="inv invx inv-solo"><div class="inv-main">
   <div class="pn"><div class="fr" style="align-items:end"><label>From<input type="date" data-iv="recr.from" value="${esc(F.from)}"></label><label>To<input type="date" data-iv="recr.to" value="${esc(F.to)}"></label><div class="seg2"><button data-a="rec_rrange" data-rng="today">Today</button><button data-a="rec_rrange" data-rng="month">This month</button></div><button class="mini xl-btn" style="flex:none" data-a="rep_xlsxpage" data-title="Recipe and production report" data-like="rec_rprint">Export to Excel</button><button class="chip on" style="flex:none" data-a="rec_rprint" ${bad ? "disabled" : ""}>Print</button></div></div>
   ${
     bad
@@ -948,6 +983,11 @@ function recAct(a, b) {
     return all();
   }
   if (a === "rsave") return recipeSave();
+  if (a === "rnew" || a === "rno") {
+    recNewOn = a === "rnew";
+    if (a === "rno") invF.rcp = { ...rcpBlank(), sp: invF.rcp.sp, from: invF.rcp.from };
+    return all();
+  }
   if (a === "redit") {
     const i = ITEMS.find(x => x.id === +d.id);
     invF.rcp = {

@@ -2,10 +2,14 @@
 const SET_TABS = [
   ["hotel", "Hotel and logos"],
   ["bills", "Bills and receipts"],
+  ["paymodes", "Payment modes"],
+  ["voids", "Void reasons"],
   ["pos", "POS options"],
   ["cats", "Categories"],
   ["tax", "Tax"],
-  ["printers", "Printers"]
+  ["printers", "Printers"],
+  ["backup", "Backup and restore"],
+  ["network", "Network"]
 ];
 let setTab = "hotel";
 invF.gp = { pt: "*", m: "", v: "", a: "" };
@@ -141,6 +145,14 @@ function payMethodsHTML() {
   }</div>`;
 }
 
+// ---------------------------------------------------------------- the system day
+function dayTimeHTML() {
+  const T = dayTimes(),
+    d = curDay();
+  return `<div class="pn"><h4>Working day</h4><div class="stk">The date stays the same through midnight. When the day's time is up, nobody can sell until the bills are cleared and the day is ended. The day can also be ended earlier, once the bills are cleared. The date changes as soon as the day ends.${d ? ` The current day ends ${esc(dayEndText(d))}.` : ""}</div>
+  <div class="fr" style="align-items:end"><label>Day starts at<input id="dayS" type="time" value="${esc(T.start)}"></label><label>Day ends at<input id="dayE" type="time" value="${esc(T.end)}"></label><button class="chip on" style="flex:none" data-a="hs_daytime">Save times</button></div></div>`;
+}
+
 // ---------------------------------------------------------------- options
 const OPT_BILLS = [
   ["showLogo", "Show the logo on bills and receipts"],
@@ -189,6 +201,16 @@ async function settingsChange(t) {
   }
 }
 function generalAct(a, b) {
+  if (a === "daytime") {
+    const start = $("#dayS").value,
+      end = $("#dayE").value;
+    if (!start || !end) return toast("Enter both times.");
+    FD_SETTINGS.dayTime = { start, end };
+    bosave();
+    auditAdd("Settings", `Working day set to ${start} to ${end}`, { pri: "Important" });
+    toast("Saved. The working day runs " + start + " to " + end + ".");
+    return all();
+  }
   if (a === "tab") {
     setTab = b.dataset.k;
     return all();

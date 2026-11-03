@@ -210,7 +210,7 @@ function billMark(o, by, who, lines = o.lines) {
   o.printed = true;
 }
 function doSend(label) {
-  if (!shiftOk()) return $("#mSend").classList.remove("show");
+  if (dayLockStop() || !shiftOk()) return $("#mSend").classList.remove("show");
   let tickets = [];
   const round = { ...cart };
   // Only Add items on a chosen bill adds to it. Anything else is a new bill, whatever its table.
@@ -353,6 +353,7 @@ $("#ordList").onclick = e => {
     exOpen(o);
     return;
   }
+  if (a === "add" && dayLockStop()) return;
   if (a === "add" && !canAddTo(o))
     return fsNote(`You don't have the right to add to ${o.waiter}'s bills.`);
   if (a === "add" && o.printed && posOpt("stopPrinted") && !can("addPrinted"))

@@ -176,7 +176,7 @@ function invReportHTML(kind) {
   const seg = (list, cur, act, attr) =>
     `<div class="seg2">${list.map(([v, l]) => `<button class="${v === cur ? "on" : ""}" data-a="${act}" ${attr}="${v}">${l}</button>`).join("")}</div>`;
 
-  return `<div class="pn"><h4>${K.title}</h4><div class="stk">${K.what}</div>
+  return `<div class="pn"><div class="stk">${K.what}</div>
   <div class="fr" style="align-items:end;margin-top:8px"><label>From<input type="date" data-ir="0" value="${invR[0]}"></label><label>To<input type="date" data-ir="1" value="${invR[1]}"></label>${seg(kind === "pur" ? REP_RANGES.filter(([r]) => r !== "30") : REP_RANGES, "", "inv_rprange", "data-rng")}</div>
   <div class="fr" style="align-items:end"><label>Totals by${seg(REP_BY, invRep.by, "inv_rpby", "data-b")}</label>
    <label>${kind === "pur" ? "Received into" : repAllPlaces(kind) ? "From" : "Store"}<select data-rp="store">${opts([repAllPlaces(kind) ? "All places" : "All stores", ...repPlaces(kind)], invRep.store === "All" ? (repAllPlaces(kind) ? "All places" : "All stores") : invRep.store)}</select></label>

@@ -4,9 +4,14 @@
 const printServer = () =>
   (FD_SETTINGS.printUrl || `http://${location.hostname || "localhost"}:4000`).replace(/\/$/, "");
 /** This machine's printer for a document at a sale point, from Settings → Printer setup. Receipts have one printer for all sale points. */
+// These go to one printer whichever sale point they come from.
+const ONE_PRINTER_DOCS = ["RECEIPT", "REQUISITION", "ISSUE NOTE"];
 const docRule = (doc, point) =>
   (FD_SETTINGS.printRules || []).find(
-    r => r.src === MACHINE.name() && r.doc === doc && (doc === "RECEIPT" || r.point === point)
+    r =>
+      r.src === MACHINE.name() &&
+      r.doc === doc &&
+      (ONE_PRINTER_DOCS.includes(doc) || r.point === point)
   );
 const printerNamed = name => (FD_SETTINGS.printers || []).find(p => p.n === name);
 const rulePrinter = r => (r.kind === "win" ? { n: r.printer, win: true } : printerNamed(r.printer));

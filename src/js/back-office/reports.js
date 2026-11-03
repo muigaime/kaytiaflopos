@@ -8,23 +8,37 @@ const z = (n, w = 2) => String(n).padStart(w, "0"),
   PMK = ["cash", "mpesa", "pdq", "comp", "credit", "room"],
   PMH = ["#Cash", "#M-Pesa", "#PDQ", "#Complimentary", "#Credit", "#Room"],
   pm = (s, k) => (s.mx || {})[k] || 0;
-let rp = "sc",
+let rp = "dr",
+  rpFull = false,
+  rpWideList = false,
+  rpQ = "",
   rd = "All",
   rcm = 2,
   rt = ymd(d0()),
-  rf = ymd(d0() - 29 * D);
-// A new day moves the reports on to its date.
-document.addEventListener("kf:newday", () => {
-  rt = ymd(d0());
-});
+  rf = ymd(d0());
+// Reports open on today. Earlier dates are there for whoever asks for them.
+const repToday = () => {
+  rf = rt = ymd(d0());
+};
+document.addEventListener("kf:newday", repToday);
+/** Report columns follow the payment modes the business has added. */
+function pmSync() {
+  mnSync();
+  PMK.length = PMH.length = 6;
+  payCustoms().forEach(c => {
+    PMK.push(c.k);
+    PMH.push("#" + c.n);
+  });
+}
 const rs = () => {
+  pmSync();
   const a = new Date(rf + "T00:00:00"),
     b = new Date(rt + "T23:59:59");
   return SALES.filter(s => saleAt(s) >= a && saleAt(s) <= b && (rd === "All" || s.dept === rd));
 };
 const cost = l => {
   const it = get(l.id);
-  return it ? sum(Object.entries(it.r || {}), ([k, q]) => q * (INGC[k] || 0)) * l.q : 0;
+  return it ? sum(Object.entries(it.r || {}), ([k, q]) => q * cst(k)) * l.q : 0;
 };
 const by = (L, kf) => {
   const o = {};
@@ -73,7 +87,8 @@ const logPoints = x =>
       ? x.points
       : String(x.dept || "").split(", ");
 const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
-const logHead = t => `${t} · ${rf} to ${rt} · ${rd === "All" ? "all sale points" : rd}`;
+const repDates = () => (rf === rt ? dateGB(rf) : `${dateGB(rf)} to ${dateGB(rt)}`);
+const logHead = t => `${t} · ${repDates()} · ${rd === "All" ? "all sale points" : rd}`;
 const voidRows = () => billLog(["Void"]);
 /** What a void took off, limited to the chosen sale point. Older entries only kept a total. */
 const voidParts = x =>
@@ -676,7 +691,7 @@ const REP = {
             s => s.g
           ),
         T = sum(R, tipTotal),
-        keys = ["cash", "mpesa", "pdq"],
+        keys = ["cash", "mpesa", "pdq", ...payCustoms().map(c => c.k)],
         names = [...new Set(L.filter(s => s.tips).map(who))].sort();
       return [
         [
@@ -727,6 +742,98 @@ const REP = {
             }
           ]
         }
+      ];
+    }
+  ],
+  hh: [
+    "Happy Hour Report",
+    L => {
+      const m = {};
+      L.forEach(s =>
+        (s.lines || [])
+          .filter(l => String(l.id).includes("~" + HH_MARK))
+          .forEach(l => {
+            const it = get(l.id),
+              was = l.was || (it && it.was) || l.p,
+              n = l.n.replace(/ \((.*, )?Happy hour\)$/, ""),
+              k = [n, s.dept, l.p, was].join("|"),
+              x = m[k] || (m[k] = { n, d: s.dept, p: l.p, was, q: 0 });
+            x.q += l.q;
+          })
+      );
+      const R = Object.values(m)
+        .filter(x => x.q)
+        .sort((a, b) => a.d.localeCompare(b.d) || a.n.localeCompare(b.n));
+      return [
+        [
+          "Item",
+          "Sale point",
+          "#Qty",
+          "#Normal price",
+          "#Happy hour price",
+          "#Normal value",
+          "#Sold for",
+          "#Discount given"
+        ],
+        R.map(x => [
+          x.n,
+          x.d,
+          x.q,
+          m2(x.was),
+          m2(x.p),
+          m2(x.q * x.was),
+          m2(x.q * x.p),
+          m2(x.q * (x.was - x.p))
+        ]),
+        [
+          "Total",
+          "",
+          sum(R, x => x.q),
+          "",
+          "",
+          m2(sum(R, x => x.q * x.was)),
+          m2(sum(R, x => x.q * x.p)),
+          m2(sum(R, x => x.q * (x.was - x.p)))
+        ],
+        "No happy hour sales for these dates and sale point.",
+        logHead("Happy hour sales")
+      ];
+    }
+  ],
+  promo: [
+    "Promotion Report",
+    L => {
+      const m = {};
+      L.forEach(s =>
+        (s.lines || [])
+          .filter(l => isPromoLine(l.id))
+          .forEach(l => {
+            const n = l.n.replace(/ \(Promotion\)$/, ""),
+              name = l.promo || promoName(l.id),
+              was = l.was || (get(l.id) || {}).was || 0,
+              k = [name, n, s.dept, was].join("|"),
+              x = m[k] || (m[k] = { name, n, d: s.dept, was, q: 0, c: 0 });
+            x.q += l.q;
+            x.c += cost(l);
+          })
+      );
+      const R = Object.values(m)
+        .filter(x => x.q)
+        .sort((a, b) => a.name.localeCompare(b.name) || a.n.localeCompare(b.n));
+      return [
+        [
+          "Promotion",
+          "Free item",
+          "Sale point",
+          "#Qty given free",
+          "#Normal price",
+          "#Value given away",
+          "#Cost to the business"
+        ],
+        R.map(x => [x.name, x.n, x.d, x.q, m2(x.was), m2(x.q * x.was), m2(x.c)]),
+        ["Total", "", "", sum(R, x => x.q), "", m2(sum(R, x => x.q * x.was)), m2(sum(R, x => x.c))],
+        "No promotion items given for these dates and sale point.",
+        logHead("Promotion items")
       ];
     }
   ],
@@ -958,7 +1065,13 @@ const REP = {
         tax = r => r.B + r.C,
         totalTax = sum(R, tax),
         P = k => sum(L, s => pm(s, k)),
-        recv = P("cash") + P("mpesa") + P("pdq") + P("credit") + P("room"),
+        recv =
+          P("cash") +
+          P("mpesa") +
+          P("pdq") +
+          P("credit") +
+          P("room") +
+          payCustoms().reduce((t, c) => t + P(c.k), 0),
         tipT = sum(L, s => sum(Object.values(s.tips || {}), v => v));
       return [
         [
@@ -1033,6 +1146,7 @@ const REP = {
                 ["M-Pesa", P("mpesa"), "mp"],
                 ["Cash", P("cash"), "ca"],
                 ["PDQ", P("pdq"), "pq"],
+                ...payCustoms().map(c => [c.n, P(c.k), "pq"]),
                 ["Customer credit", P("credit"), "cr"],
                 ["Charged to rooms", P("room"), "rm"],
                 ["Complimentary", P("comp"), "co"]
@@ -1042,6 +1156,7 @@ const REP = {
                 ["M-Pesa", m2(P("mpesa"))],
                 ["Cash", m2(P("cash"))],
                 ["PDQ", m2(P("pdq"))],
+                ...payCustoms().map(c => [c.n, m2(P(c.k))]),
                 ["Customer credit", m2(P("credit"))],
                 ["Charged to rooms", m2(P("room"))],
                 ["Total received", m2(recv)],
@@ -1341,7 +1456,7 @@ const REP = {
       ["Date", ...PMH, "#Total"],
       by(L, s => ymd(saleAt(s)))
         .sort((a, b) => (a[0] < b[0] ? -1 : 1))
-        .map(([d, a]) => [d, ...PMK.map(k => m2(sum(a, s => pm(s, k)))), m2(G(a))]),
+        .map(([d, a]) => [dateGB(d), ...PMK.map(k => m2(sum(a, s => pm(s, k)))), m2(G(a))]),
       ["Total", ...PMK.map(k => m2(sum(L, s => pm(s, k)))), m2(G(L))]
     ]
   ]
@@ -1350,27 +1465,205 @@ const tb = (c, r, f, none = "No sales for this report, date range and sale point
   const n = i => (c[i][0] === "#" ? ' class="n"' : "");
   return `<div class="tw"><table class="t"><tr>${c.map(x => (x[0] === "#" ? `<th class="n">${x.slice(1)}</th>` : `<th>${x}</th>`)).join("")}</tr>${r.length ? r.map(x => `<tr>${x.map((v, i) => `<td${n(i)}>${esc(v)}</td>`).join("")}</tr>`).join("") : `<tr><td colspan="${c.length}"><div class="empty">${none}</div></td></tr>`}${r.length && f ? `<tr>${f.map((v, i) => `<td${n(i)}><b>${esc(v)}</b></td>`).join("")}</tr>` : ""}</table></div>`;
 };
+// The report list, sorted into the groups people look for them in.
+const REP_GROUPS = [
+  ["Sales", ["dr", "bills", "ps", "ts", "sp"]],
+  ["Items", ["iw", "ip", "sc", "hh", "promo"]],
+  ["Staff", ["ss", "com", "tips"]],
+  ["Control", ["vall", "dlog", "cmp", "rets", "swp", "msp", "blog"]]
+];
+const REP_WHAT = {
+  dr: "What was taken each day, by payment method.",
+  bills: "Every bill, one line each. Double-click a bill to reprint it.",
+  ps: "Sales added up over the period, by category and payment method.",
+  ts: "Sales between two times of day, such as a happy hour or a shift.",
+  sp: "How much each sale point sold.",
+  iw: "Every item on every bill.",
+  ip: "Each item's sales, split by how it was paid for.",
+  sc: "What each item sold for, what it cost, and the profit.",
+  hh: "Items sold at a happy hour price, and the discount given.",
+  promo: "Items given free on promotion, and what they were worth.",
+  ss: "What each staff member sold, by payment method.",
+  com: "Commission earned by each staff member.",
+  tips: "Tips received, by staff member.",
+  vall: "Every bill or item that was voided, and who did it.",
+  dlog: "Every discount given, and who authorised it.",
+  cmp: "Complimentary items, the reason and who gave them.",
+  rets: "Items returned from paid bills.",
+  swp: "Items swapped on a bill, and who authorised it.",
+  msp: "Bills that were merged or split.",
+  blog: "Everything done through Bill options."
+};
+// Words people use for what a report shows, so nobody needs to know its name.
+const REP_KEYS = {
+  dr: "money cash mpesa m-pesa card pdq takings end of day today banking",
+  bills: "receipt reprint invoice paid unpaid pending",
+  ps: "summary monthly weekly category overall totals z report",
+  ts: "hour hours shift morning evening night busy",
+  sp: "department bar restaurant kitchen pool outlet",
+  iw: "items lines what sold everything",
+  ip: "item cash mpesa m-pesa card paid",
+  sc: "profit margin cost earnings best selling",
+  hh: "discount offer cheap time price",
+  promo: "free offer buy one get one deal giveaway",
+  ss: "waiter cashier employee who sold performance cash mpesa",
+  com: "waiter pay earned percentage",
+  tips: "waiter gratuity service",
+  vall: "void cancelled deleted removed",
+  dlog: "reduced price off",
+  cmp: "free comp house gift",
+  rets: "refund credit note money back",
+  swp: "exchange changed replaced",
+  msp: "combine join separate",
+  blog: "audit history changes who did what"
+};
+const repHit = (k, q) => {
+  const hay = (REP[k][0] + " " + (REP_WHAT[k] || "") + " " + (REP_KEYS[k] || "")).toLowerCase();
+  return q
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .every(w => hay.includes(w));
+};
+const RECENT_KEY = "kaytia_rep_recent";
+function repRecent() {
+  try {
+    return JSON.parse(localStorage.getItem(RECENT_KEY)) || [];
+  } catch (e) {
+    return [];
+  }
+}
+/** Opens a report and remembers it for the Recent list on this computer. */
+function repPick(k) {
+  rp = k;
+  try {
+    localStorage.setItem(
+      RECENT_KEY,
+      JSON.stringify([k, ...repRecent().filter(x => x !== k)].slice(0, 3))
+    );
+  } catch (e) {}
+}
+const repAllowed = () => Object.keys(REP).filter(k => boCan(repRight(k, REP[k][0])));
+const repGroups = has => {
+  const known = REP_GROUPS.flatMap(([, L]) => L),
+    other = has.filter(k => !known.includes(k));
+  return (other.length ? [...REP_GROUPS, ["Other", other]] : REP_GROUPS)
+    .map(([g, L]) => [g, L.filter(k => has.includes(k))])
+    .filter(([, L]) => L.length);
+};
+const repOptions = picker =>
+  repGroups(picker.map(([k]) => k))
+    .map(
+      ([g, L]) =>
+        `<optgroup label="${g}">${L.map(k => `<option value="${k}" ${k === rp ? "selected" : ""}>${REP[k][0]}</option>`).join("")}</optgroup>`
+    )
+    .join("");
+function repMenuHTML(picker) {
+  const has = picker.map(([k]) => k),
+    item = (k, on) =>
+      `<button class="rp-item ${on && k === rp ? "on" : ""}" data-r="${k}" title="${esc(REP_WHAT[k] || "")}" ${repHit(k, rpQ) ? "" : "hidden"}><span>${REP[k][0].replace(/ Report$/, "")}</span><small>${REP_WHAT[k] || ""}</small></button>`,
+    recent = repRecent().filter(k => has.includes(k));
+  return `<nav class="pn rp-menu ${rpQ.trim() ? "searching" : ""}"><input id="rpFind" type="search" value="${esc(rpQ)}" placeholder="Search, e.g. M-Pesa or waiter" aria-label="Find a report by name or by what you need" autocomplete="off">
+  ${recent.length ? `<div class="rp-group rp-recent"><div class="rp-gh">Recent</div>${recent.map(k => item(k, false)).join("")}</div>` : ""}${repGroups(
+    has
+  )
+    .map(
+      ([g, L]) =>
+        `<div class="rp-group" ${L.some(k => repHit(k, rpQ)) ? "" : "hidden"}><div class="rp-gh">${g}</div>${L.map(k => item(k, true)).join("")}</div>`
+    )
+    .join(
+      ""
+    )}<div class="stk rp-none" ${has.some(k => repHit(k, rpQ)) ? "hidden" : ""}>Nothing matches. Try another word, or clear the search.</div></nav>`;
+}
+// The list filters as you type, without redrawing, so the cursor stays in the box.
+function repFilter(box) {
+  const q = rpQ;
+  box.classList.toggle("searching", !!q.trim());
+  box.querySelectorAll(".rp-group:not(.rp-recent)").forEach(g => {
+    let any = false;
+    g.querySelectorAll(".rp-item").forEach(b => {
+      const on = repHit(b.dataset.r, q);
+      b.hidden = !on;
+      b.classList.remove("kb");
+      any = any || on;
+    });
+    g.hidden = !any;
+  });
+  box.querySelector(".rp-none").hidden = [
+    ...box.querySelectorAll(".rp-group:not(.rp-recent)")
+  ].some(g => !g.hidden);
+  const first = repVisible(box)[0];
+  if (q.trim() && first) first.classList.add("kb");
+}
+const repVisible = box => [
+  ...box.querySelectorAll(".rp-group:not(.rp-recent):not([hidden]) .rp-item:not([hidden])")
+];
+document.addEventListener("input", e => {
+  if (e.target.id !== "rpFind") return;
+  rpQ = e.target.value;
+  repFilter(e.target.closest(".rp-menu"));
+});
+// Up and down move through what's listed, and Enter opens it.
+document.addEventListener("keydown", e => {
+  if (e.target.id !== "rpFind") return;
+  const box = e.target.closest(".rp-menu"),
+    L = repVisible(box),
+    at = L.findIndex(b => b.classList.contains("kb"));
+  if (e.key === "Escape") {
+    e.stopPropagation();
+    e.target.value = rpQ = "";
+    return repFilter(box);
+  }
+  if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+    e.preventDefault();
+    if (!L.length) return;
+    const next = e.key === "ArrowDown" ? Math.min(at + 1, L.length - 1) : Math.max(at - 1, 0);
+    L.forEach(b => b.classList.remove("kb"));
+    L[next].classList.add("kb");
+    L[next].scrollIntoView({ block: "nearest" });
+  }
+  if (e.key === "Enter" && L.length) {
+    e.preventDefault();
+    repPick((L[at] || L[0]).dataset.r);
+    all();
+    const f = $("#rpFind");
+    if (f) {
+      f.focus();
+      f.setSelectionRange(f.value.length, f.value.length);
+    }
+  }
+});
+/** Reports in the search at the top of every page. */
+function repCommands(q) {
+  return !q.trim()
+    ? []
+    : repAllowed()
+        .filter(k => repHit(k, q))
+        .map(k => ({ n: REP[k][0], ic: "chart", g: "Report", rep: k }));
+}
 const V = {
   rep() {
     if (!boCan(repRight(rp, REP[rp][0])))
       rp = Object.keys(REP).find(k => boCan(repRight(k, REP[k][0])));
-    const [t, fn] = REP[rp],
+    const [title, fn] = REP[rp],
       L = rs(),
       [c, r, f, note, head, x] = fn(L),
-      picker = Object.entries(REP).filter(([k, y]) => boCan(repRight(k, y[0])));
-    return `<div style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start">${
-      x && x.wide
-        ? `<div class="pn rp-pick"><label>Report<select data-rpsel>${picker.map(([k, y]) => `<option value="${k}" ${k === rp ? "selected" : ""}>${y[0]}</option>`).join("")}</select></label></div>`
-        : ""
-    }<div class="pn" style="flex:1 1 230px;max-width:300px;${x && x.wide ? "display:none" : ""}"><h4>Sales reports</h4>${picker
-      .map(
-        ([k, x]) =>
-          `<button class="mini ${k === rp ? "ok" : ""}" style="text-align:left;width:100%" data-r="${k}">${x[0]}</button>`
-      )
-      .join("")}</div>
- <div class="pn" style="flex:3 1 420px;min-width:0"><h4>${t}</h4>${repExtraTop(x)}<div class="fr" style="align-items:center"><input type="date" data-f="rf" value="${rf}"><input type="date" data-f="rt" value="${rt}"><select data-f="rd">${["All", ...ALLD].map(d => `<option ${d === rd ? "selected" : ""}>${d}</option>`).join("")}</select>${rp === "ts" ? `<label class="rp-time">From time<input type="time" data-f="tf" value="${rtf}"></label><label class="rp-time">To time<input type="time" data-f="tt" value="${rtt}"></label>` : ""}${x && x.tools ? x.tools : ""}${rp === "com" ? `<input type="number" step="any" data-f="rc" value="${rcm}" title="Commission rate %" placeholder="Rate %">` : ""}</div>
- <div class="fr"><button class="mini" data-q="0">Today</button><button class="mini" data-q="6">Last 7 days</button><button class="mini" data-q="29">Last 30 days</button>${printTools("rep")}</div>
- <div style="color:var(--mute);font-size:12px">${head || `${L.length} bills · ${KES(G(L))} · ${rf} to ${rt} · ${rd === "All" ? "all sale points" : rd}`}</div>${rp === "bills" ? billsGrid(c, r, note) : x && x.colour ? `<div class="rp-colour">${tb(c, r, f, note)}</div>` : head ? tb(c, r, f, note) : tb(c, r, f)}${repExtraBelow(x)}${note && !head ? `<div class="stk">${note}</div>` : ""}</div></div>`;
+      picker = Object.entries(REP).filter(([k, y]) => boCan(repRight(k, y[0]))),
+      wide = x && x.wide ? !rpWideList : rpFull,
+      bills = L.length,
+      total = G(L),
+      kpi = (l, v) => `<div class="sp-kpi"><span>${l}</span><b>${v}</b></div>`,
+      quick = [
+        ["0", "Today"],
+        ["6", "Last 7 days"],
+        ["29", "Last 30 days"]
+      ],
+      onQuick = q => rt === ymd(d0()) && rf === ymd(d0() - q * D);
+    return `<div class="rp-page ${wide ? "wide" : ""}">${wide ? "" : repMenuHTML(picker)}
+ <div class="pn rp-main"><div class="rp-head"><div><h3>${title}</h3><p>${REP_WHAT[rp] || ""}</p></div><span class="rp-head-btns">${wide ? `<label class="rp-jump">Report<select data-rpsel>${repOptions(picker)}</select></label>` : ""}<button class="mini" data-a="rep_full">${wide ? "Show report list" : "Full width"}</button></span></div>
+ ${repExtraTop(x)}<div class="rp-filters"><label>From<input type="date" data-f="rf" value="${rf}"></label><label>To<input type="date" data-f="rt" value="${rt}"></label><label>Sale point<select data-f="rd">${["All", ...ALLD].map(d => `<option value="${esc(d)}" ${d === rd ? "selected" : ""}>${d === "All" ? "All sale points" : esc(d)}</option>`).join("")}</select></label>${rp === "ts" ? `<label>From time<input type="time" data-f="tf" value="${rtf}"></label><label>To time<input type="time" data-f="tt" value="${rtt}"></label>` : ""}${rp === "com" ? `<label>Commission rate (%)<input type="number" step="any" data-f="rc" value="${rcm}" placeholder="Rate %"></label>` : ""}${x && x.tools ? x.tools : ""}</div>
+ <div class="rp-bar"><span class="pr-pills">${quick.map(([q, l]) => `<button class="pr-pill ${onQuick(+q) ? "on" : ""}" data-q="${q}">${l}</button>`).join("")}</span><span class="rp-tools">${printTools("rep")}</span></div>
+ ${head ? `<div class="rp-cap">${head}</div>` : `<div class="sp-kpis rp-kpis">${kpi("Bills", bills)}${kpi("Total sales", KES(total))}${kpi("Average bill", KES(bills ? total / bills : 0))}</div><div class="rp-cap">${repDates()} · ${rd === "All" ? "all sale points" : esc(rd)}</div>`}${rp === "bills" ? billsGrid(c, r, note) : x && x.colour ? `<div class="rp-colour">${tb(c, r, f, note)}</div>` : head ? tb(c, r, f, note) : tb(c, r, f)}${repExtraBelow(x)}${note && !head ? `<div class="stk">${note}</div>` : ""}</div></div>`;
   },
   sales() {
     const F = salesF,
@@ -1378,14 +1671,7 @@ const V = {
     return `<div class="pn"><div class="so-bar"><label class="so-q">Search orders<input data-sq value="${esc(F.q)}" placeholder="Bill or order number, table, waiter, guest or item" autocomplete="off"></label><label>From<input type="date" data-sf="from" value="${esc(F.from)}"></label><label>To<input type="date" data-sf="to" value="${esc(F.to)}"></label>${on ? '<button class="mini" data-a="sales_clear">Back to current</button>' : ""}</div><div id="salesList">${salesList()}</div></div>`;
   },
   prod() {
-    return `<div class="pn"><h4>Add product</h4><div class="fr"><input id="pn" placeholder="Name"><select id="pd">${ALLD.map(d => `<option>${d}</option>`).join("")}</select><input id="pc" list="prodCatL" placeholder="Category"><input id="pp" type="number" placeholder="Price KES"><select id="pt">${taxChoices()
-      .map(([v, l]) => `<option value="${v}">${l}</option>`)
-      .join("")}</select><select id="pi">${Object.keys(ING)
-      .map(k => `<option value="${k}">${esc(ING[k])}</option>`)
-      .join(
-        ""
-      )}</select><input id="pq" type="number" placeholder="Stock used per sale"><button class="chip on" data-a="addp">Add</button></div></div>
- <div class="pn tw"><table class="t"><tr><th>Item</th><th>Sale point</th><th>Category</th><th>VAT</th><th>Price (KES)</th><th class="n">Can sell</th><th>Modifiers</th><th>Accompaniments</th></tr>${ITEMS.map(i => `<tr><td>${esc(i.n)}</td><td>${i.d}</td><td>${esc(i.c)}</td><td>${i.t}</td><td><input type="number" value="${i.p}" data-pr="${i.id}"></td><td class="n">${avail(i)}</td><td>${modCell(i)}</td><td>${accCell(i)}</td></tr>`).join("")}</table></div>`;
+    return productsHTML();
   },
   inv() {
     return `<div class="pn"><h4>New ingredient</h4><div class="fr"><input id="gn" placeholder="Name and unit, e.g. Tomato (g)"><input id="gq" type="number" placeholder="Opening stock"><button class="chip on" data-a="addg">Add</button></div></div>
@@ -1739,10 +2025,13 @@ document.addEventListener("click", e => {
   if (!e.target.closest("[data-rr=menu]"))
     document.querySelectorAll(".rrmenu").forEach(m => m.classList.remove("show"));
 });
-const dayLate = () =>
-  bizDate() < ymdOf(new Date())
-    ? ` · today is ${dateGB(ymdOf(new Date()))}, so this day still needs ending`
-    : "";
+const dayLate = () => {
+  const d = curDay();
+  if (!d) return "";
+  if (!dayOver()) return ` · ends ${dayEndText(d)}`;
+  const n = pendingAll().length;
+  return ` · the system day ended at ${dayEndText(d)} and still needs ending${n ? `. ${plural(n, "bill")} still pending` : ""}`;
+};
 /** Waiters with pending bills, waiting to start a shift. */
 function shiftAuthHTML() {
   const L = shiftAuths().filter(x => x.status === "wait");
@@ -1765,8 +2054,8 @@ $("#dayBar").onclick = e => {
   if (!a) return;
   const k = a.dataset.d;
   if (k === "page") return go("Shifts & Day");
-  const r = k === "dstart" ? dayStart(boUser.n) : dayEnd(boUser.n);
-  toast(r || (k === "dstart" ? `New day started: ${dateGB(bizDate())}.` : "Day ended."));
+  const r = k === "dstart" ? dayStart(boUser.n) : dayRoll(boUser.n);
+  toast(r || `New day started: ${dateGB(bizDate())}.`);
   all();
 };
 const vr = n =>

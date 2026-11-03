@@ -9,6 +9,7 @@ const itemMods = it => {
 };
 /** A tap on a product: straight onto the order, or through its options first. */
 function pickItem(id, q) {
+  if (dayLockStop()) return;
   const it = get(id);
   if (!itemMods(it).length) return pickDone(id, q, it);
   accT = null;
@@ -52,6 +53,7 @@ const accSides = it =>
   ITEMS.filter(x => accUsable(x) && String(x.id) !== String(it.id).split("~")[0]);
 /** The item is on the order. If it's a food item with accompaniments, ask for them next. */
 function pickDone(id, q, it) {
+  id = happyKey(id);
   const before = cart[id] || 0;
   add(id, q);
   const added = (cart[id] || 0) - before,

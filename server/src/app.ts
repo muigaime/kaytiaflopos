@@ -3,6 +3,7 @@ import { authenticate } from "./http/auth.js";
 import { errorHandler } from "./http/errors.js";
 import { authRouter, publicAuthRouter } from "./modules/auth/auth.routes.js";
 import { dashboardRouter } from "./modules/dashboard/dashboard.routes.js";
+import { mailRouter } from "./modules/mail/mail.routes.js";
 import { printRouter } from "./modules/printing/print.routes.js";
 import { roomBillingRouter } from "./modules/room-billing/room-billing.routes.js";
 import { stockTakeRouter } from "./modules/stock-take/stock-take.routes.js";
@@ -25,6 +26,8 @@ export function createApp() {
 
   // Order tickets to network printers (own rule: this computer, or the print key)
   app.use("/api/print", printRouter);
+  // Documents emailed to suppliers (same rule as printing)
+  app.use("/api/mail", mailRouter);
 
   // Everything below requires a signed-in session
   app.use("/api", authenticate);

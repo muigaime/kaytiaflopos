@@ -6,10 +6,12 @@ let dept = "Bar",
 // 1e-9: quantities such as 0.1 must not lose a whole portion to rounding (0.3 / 0.1 = 2.9999…).
 const avail = it =>
   Math.min(
-    ...Object.entries(it.r).map(([k, v]) => Math.floor((STK[itemLoc(it)][k] || 0) / v + 1e-9))
+    ...Object.entries(it.r).map(([k, v]) => Math.floor(stockCanUse(itemLoc(it), k) / v + 1e-9))
   );
 const ACC_MARK = "^";
 const isAccLine = id => String(id).split("~")[1] === ACC_MARK;
+/** Lines the system looks after: their quantity follows another line. */
+const isAutoLine = id => isAccLine(id) || isPromoLine(id);
 /** How many of this product are on the order, across all its modifier choices. */
 const inCart = id => {
   const base = String(id).split("~")[0];
@@ -27,8 +29,13 @@ let catSel = "",
 /** Bill numbers run on for ever. Order numbers start again with each staff shift. */
 // A number only stays taken once a bill has been used. One given back is the next to go out.
 const FREE_BILLS = [];
-const nextBill = () =>
-  FREE_BILLS.length ? FREE_BILLS.sort((a, b) => +a - +b).shift() : pad(rno++, 5);
+/** With tills connected, each computer has its own series of numbers, so two can't issue the same bill. */
+function nextBill() {
+  const lan = window.__lan;
+  if (!lan && FREE_BILLS.length) return FREE_BILLS.sort((a, b) => +a - +b).shift();
+  if (lan) while (rno % lan.mod !== lan.idx) rno++;
+  return pad(rno++, 5);
+}
 function billNoBack(no) {
   if (+no === rno - 1) rno--;
   else if (!FREE_BILLS.includes(no)) FREE_BILLS.push(no);
@@ -68,9 +75,21 @@ function draftRelease() {
 }
 /** A product, or for a modifier line ("12~Cold") that product under the line's own name. */
 const get = id => {
-    const [base, ...picks] = String(id).split("~"),
-      it = ITEMS.find(i => i.id == base);
-    if (!it || !picks.length) return it;
+    const [base, ...rest] = String(id).split("~"),
+      it = ITEMS.find(i => i.id == base),
+      hh = rest.find(x => x.startsWith(HH_MARK)),
+      pr = rest.find(x => x.startsWith(PR_MARK)),
+      picks = rest.filter(x => x !== hh);
+    if (!it || !rest.length) return it;
+    if (pr)
+      return {
+        ...it,
+        id: String(id),
+        n: `${it.n} (Promotion)`,
+        p: 0,
+        was: it.p,
+        promo: promoName(id)
+      };
     // An accompaniment line: free on the bill, and it still uses the item's own stock.
     if (picks[0] === ACC_MARK) {
       const main = ITEMS.find(i => i.id == picks[1]);
@@ -81,6 +100,14 @@ const get = id => {
         p: 0
       };
     }
+    if (hh)
+      return {
+        ...it,
+        id: String(id),
+        n: `${it.n} (${[...picks, "Happy hour"].join(", ")})`,
+        p: +hh.slice(HH_MARK.length),
+        was: it.p
+      };
     return { ...it, id: String(id), n: `${it.n} (${picks.join(", ")})` };
   },
   pad = (n, l = 6) => String(n).padStart(l, "0");
@@ -147,8 +174,10 @@ function drawGrid() {
     ITEMS.filter(i => onMenu(i) && i.c === catSel)
       .map(i => {
         const a = avail(i) - inCart(i.id),
-          n = inCart(i.id);
-        return `<button class="it${n ? " has" : ""}" style="--h:${hue(i.c)}" data-i="${i.id}" title="${i.n.replace(/"/g, "&quot;")}" ${a <= 0 ? "disabled" : ""}>${n ? `<span class="in">${n}</span>` : ""}<span class="lw ${a <= 0 ? "out" : ""}">${a <= 0 && !n ? "Out of stock" : can("stock") && a < 10 && a > 0 ? a + " left" : ""}</span><span class="nm">${i.n}</span><span class="cg">${i.c}</span><span class="pr">${posMoney(i.p)}</span></button>`;
+          n = inCart(i.id),
+          hp = happyPrice(i),
+          pm = promoOn(i);
+        return `<button class="it${n ? " has" : ""}${hp === null ? "" : " hhon"}" style="--h:${hue(i.c)}" data-i="${i.id}" title="${i.n.replace(/"/g, "&quot;")}" ${a <= 0 ? "disabled" : ""}>${n ? `<span class="in">${n}</span>` : ""}<span class="lw ${a <= 0 ? "out" : ""}">${a <= 0 && !n ? "Out of stock" : can("stock") && a < 10 && a > 0 ? a + " left" : ""}</span><span class="nm">${i.n}</span><span class="cg">${hp === null ? i.c : "Happy hour"}</span><span class="pr">${hp === null ? posMoney(i.p) : `<s>${posMoney(i.p)}</s> ${posMoney(hp)}`}</span>${pm ? `<span class="pm-tag">Buy ${pm.n} get ${pm.m}</span>` : ""}</button>`;
       })
       .join("") || '<div class="empty">No items in this category.</div>';
 }
@@ -181,6 +210,8 @@ function totals(c = cart, a = c === cart ? (cur ? { pl: cur.pl } : cartAdj) : nu
 }
 function drawCart() {
   $("#vatL").textContent = taxName();
+  if (!Object.keys(cart).length) promoSkip = {};
+  promoSync();
   const ids = Object.keys(cart),
     adj = cur ? { pl: cur.pl } : cartAdj;
   if (!ids.length) cartAdj = {};
@@ -189,11 +220,16 @@ function drawCart() {
       .map(id => {
         const it = get(id),
           q = cart[id];
-        return `<div class="tr ${id == selId ? "sel" : ""}" data-r="${id}"><span class="qc"><button data-m="${id}">−</button>${q}${isAccLine(id) ? "" : `<button data-p="${id}">+</button>`}</span><span>${it.n}</span><span class="n">${bill2(itemPrice(it, adj))}</span><span class="n">${bill2(itemPrice(it, adj) * q)}</span></div>`;
+        return `<div class="tr ${id == selId ? "sel" : ""}" data-r="${id}"><span class="qc"><button data-m="${id}">−</button>${q}${isAutoLine(id) ? "" : `<button data-p="${id}">+</button>`}</span><span>${it.n}</span><span class="n">${bill2(itemPrice(it, adj))}</span><span class="n">${bill2(itemPrice(it, adj) * q)}</span></div>`;
       })
       .join("") ||
     `<div class="empty" style="padding:24px 8px">${cur ? "Adding to " + cur.label + ". Tap items to add." : "Tap an item to start an order."}</div>`;
   const t = totals();
+  if (promoShort.length)
+    $("#lines").insertAdjacentHTML(
+      "beforeend",
+      `<div class="tr-adj">${promoShort.join(" ")}</div>`
+    );
   if (ids.length && (t.disc || t.pl || t.cur))
     $("#lines").insertAdjacentHTML(
       "beforeend",
@@ -228,10 +264,10 @@ function drawCart() {
 }
 /** Sides are attached to their main item: when it comes down, they come down with it. */
 function accFollow(id) {
-  if (isAccLine(id)) return;
+  if (isAutoLine(id)) return;
   const base = String(id).split("~")[0];
   const left = Object.entries(cart).reduce(
-    (a, [k, q]) => (!isAccLine(k) && k.split("~")[0] === base ? a + q : a),
+    (a, [k, q]) => (!isAutoLine(k) && k.split("~")[0] === base ? a + q : a),
     0
   );
   Object.keys(cart).forEach(k => {
@@ -243,6 +279,7 @@ function accFollow(id) {
 }
 function add(id, d = 1) {
   const n = (cart[id] || 0) + d;
+  if (isPromoLine(id) && d < 0) promoSkip[id] = (promoSkip[id] || 0) - d;
   if (n <= 0) {
     delete cart[id];
     accFollow(id);
@@ -302,7 +339,7 @@ $("#lines").onclick = e => {
   const m = e.target.dataset.m,
     p = e.target.dataset.p;
   if (m) return add(m, -1);
-  if (p) return add(p, 1);
+  if (p) return add(happyKey(p), 1);
   const r = e.target.closest("[data-r]");
   if (r) {
     selId = selId == r.dataset.r ? null : r.dataset.r;
@@ -316,6 +353,7 @@ function newSale() {
   drawCart();
 }
 $("#newSale").onclick = e => {
+  if (dayLockStop()) return;
   Object.keys(cart).length || cur
     ? tapConfirm(e.currentTarget, newSale, "CLEAR? TAP AGAIN")
     : newSale();
@@ -343,7 +381,7 @@ $("#qk").onclick = e => {
     } else if (selId && cart[selId]) {
       if (n <= 0) delete cart[selId];
       // A free line can come down but not go up by hand.
-      else cart[selId] = Math.min(n, isAccLine(selId) ? cart[selId] : lineMax(selId));
+      else cart[selId] = Math.min(n, isAutoLine(selId) ? cart[selId] : lineMax(selId));
       drawCart();
     }
     return;
@@ -355,15 +393,90 @@ $("#qtyBtn").onclick = () => {
   else qOpen("next", "Quantity for the next item");
 };
 let selSet = new Set();
-const myBills = () =>
+// A cashier can clear one department at a time, and within it one waiter at a time.
+const SEL_ALL = "";
+let selDept = SEL_ALL,
+  selWaiter = SEL_ALL,
+  selWOpen = false,
+  selFor = "";
+const selEvery = () =>
   visOrders().sort((a, b) => a.no.localeCompare(b.no, undefined, { numeric: true }));
+const selInDept = o => selDept === SEL_ALL || billAtPoints(o, [selDept]);
+const myBills = () =>
+  selEvery().filter(o => selInDept(o) && (selWaiter === SEL_ALL || o.waiter === selWaiter));
+/** Every department this person works in, plus any their bills touch. They show even with nothing pending. */
+const selDepts = () =>
+  [...new Set([...DEPTS, ...selEvery().flatMap(o => [...billPoints(o.lines), o.dept])])]
+    .filter(d => d && d !== ALLP)
+    .sort();
+/** Waiters at the chosen department, with or without bills. */
+function selWaiters() {
+  const D = selDept === SEL_ALL ? selDepts() : [selDept];
+  return [
+    ...new Set([
+      ...USERS.filter(u => u.role === "Waiter" && u.d.some(d => D.includes(d))).map(u => u.n),
+      ...selEvery()
+        .filter(selInDept)
+        .map(o => o.waiter)
+        .filter(Boolean)
+    ])
+  ].sort();
+}
+function selKeepFilters() {
+  if (selFor !== (user ? user.n : "")) {
+    selFor = user ? user.n : "";
+    selDept = selWaiter = SEL_ALL;
+  }
+  if (selDept !== SEL_ALL && !selDepts().includes(selDept)) selDept = SEL_ALL;
+  if (!seesAllBills(user)) selDept = selWaiter = SEL_ALL;
+}
+function selFiltersHTML() {
+  if (!seesAllBills(user)) return "";
+  const E = selEvery(),
+    inD = E.filter(selInDept),
+    pill = (attr, v, on, label, n) =>
+      `<button class="sf-pill ${on ? "on" : ""}" ${attr}="${slipEsc(v)}">${slipEsc(label)} <i>${n}</i></button>`,
+    row = (title, pills) =>
+      `<div class="sf-row"><span class="sf-t">${title}</span><div class="sf-pills">${pills}</div></div>`;
+  return (
+    row(
+      "Department",
+      pill("data-fd", SEL_ALL, selDept === SEL_ALL, "All departments", E.length) +
+        selDepts()
+          .map(d =>
+            pill("data-fd", d, d === selDept, d, E.filter(o => billAtPoints(o, [d])).length)
+          )
+          .join("")
+    ) + (seesAllBills(user) ? row("Waiter", selWaiterBox(inD)) : "")
+  );
+}
+/** The waiter filter: one button that opens a list you can search, for however many waiters there are. */
+function selWaiterBox(inD) {
+  const n = name => inD.filter(o => o.waiter === name).length,
+    L = selWaiters().sort((x, y) => n(y) - n(x) || x.localeCompare(y)),
+    item = (v, label, c, sub = "") =>
+      `<button class="sf-opt ${v === selWaiter ? "on" : ""}" data-fw="${slipEsc(v)}" data-find="${slipEsc(label.toLowerCase())}"><span>${slipEsc(label)}</span><i>${c}${sub}</i></button>`,
+    now = selWaiter === SEL_ALL ? "All waiters" : selWaiter;
+  return `<div class="sf-dd"><button class="sf-dd-btn" id="selWBtn" aria-expanded="${selWOpen}"><span>${slipEsc(now)}</span><i>${selWaiter === SEL_ALL ? inD.length : n(selWaiter)}</i><b aria-hidden="true">▾</b></button>${
+    selWOpen
+      ? `<div class="sf-panel"><input id="selWFind" type="search" placeholder="Search waiter" aria-label="Search waiter" autocomplete="off"><div class="sf-list">${item(SEL_ALL, "All waiters", inD.length)}${L.map(w => item(w, w, n(w))).join("")}<div class="sf-none" hidden>No waiter by that name.</div></div></div>`
+      : ""
+  }</div>`;
+}
 function selRender() {
+  selKeepFilters();
   const L = myBills(),
-    w = seesAllBills(user) ? "all waiters" : user ? user.n : "",
+    w = [
+      selDept === SEL_ALL ? "" : selDept,
+      !seesAllBills(user) ? (user ? user.n : "") : selWaiter === SEL_ALL ? "all waiters" : selWaiter
+    ]
+      .filter(Boolean)
+      .join(" · "),
     tot = L.reduce((a, o) => a + totals(o.lines, o).g, 0),
     ch = L.filter(o => selSet.has(o.no)),
     ct = ch.reduce((a, o) => a + totals(o.lines, o).g, 0);
   $("#selT").textContent = "Pending bills · " + w;
+  $("#selFilt").innerHTML = selFiltersHTML();
   const cell = (v, c = "") => `<span class="${c}" title="${slipEsc(v)}">${slipEsc(v)}</span>`;
   $("#selList").innerHTML = L.length
     ? `<div class="sr sh"><label><input type="checkbox" id="selAll" ${ch.length === L.length ? "checked" : ""}></label><span>Bill no</span><span>Table no</span><span>Waiter</span><span>Guest name</span><span>Date</span><span>Time</span><span>Curr</span><span class="n">Amount</span><span>S point</span></div>` +
@@ -391,10 +504,14 @@ function selRender() {
   $("#selChg").disabled = !ch.length;
   $("#selOpt").textContent = `Bill options (${ch.length})`;
   $("#selOpt").disabled = !ch.length;
+  $("#selChgAll").textContent = `Charge all (${L.length})`;
   $("#selChgAll").disabled = !L.length;
   $("#selPush").innerHTML = selPushHTML(ch);
 }
 function selOpen() {
+  // Back to everything once the chosen department or waiter has nothing left to clear.
+  if (!myBills().length) selDept = selWaiter = SEL_ALL;
+  selWOpen = false;
   selSet = new Set();
   selPushOpen = false;
   selRender();
@@ -402,6 +519,51 @@ function selOpen() {
   $("#selList").scrollTop = 0;
 }
 $("#selBtn").onclick = selOpen;
+// Search narrows the list as you type, and Enter takes the first one left.
+$("#selFilt").oninput = e => {
+  if (e.target.id !== "selWFind") return;
+  const q = e.target.value.trim().toLowerCase(),
+    O = [...$("#selFilt").querySelectorAll(".sf-opt")];
+  O.forEach(b => (b.hidden = !!q && !q.split(/\s+/).every(w => b.dataset.find.includes(w))));
+  $("#selFilt").querySelector(".sf-none").hidden = O.some(b => !b.hidden);
+};
+$("#selFilt").onkeydown = e => {
+  if (e.target.id !== "selWFind") return;
+  if (e.key === "Escape") {
+    e.stopPropagation();
+    return selWaiterToggle(false);
+  }
+  if (e.key === "Enter") {
+    e.preventDefault();
+    const b = $("#selFilt").querySelector(".sf-opt:not([hidden])");
+    if (b) b.click();
+  }
+};
+// Tapping anywhere else closes the list.
+$("#mSel").addEventListener("click", e => {
+  if (selWOpen && !e.target.closest(".sf-dd")) selWaiterToggle(false);
+});
+function selWaiterToggle(open) {
+  selWOpen = open;
+  selRender();
+  // Touch screens only get the keyboard when they tap the search box.
+  if (open && matchMedia("(hover: hover)").matches) $("#selWFind").focus();
+}
+$("#selFilt").onclick = e => {
+  if (e.target.closest("#selWBtn")) return selWaiterToggle(!selWOpen);
+  const b = e.target.closest("[data-fd],[data-fw]");
+  if (!b) return;
+  selWOpen = false;
+  if (b.dataset.fd !== undefined) {
+    selDept = b.dataset.fd;
+    selWaiter = SEL_ALL; // a new department starts with all its waiters
+  } else selWaiter = b.dataset.fw;
+  // Nothing stays ticked that can't be seen, so Charge selected only ever charges what's on screen.
+  const seen = new Set(myBills().map(o => o.no));
+  selSet = new Set([...selSet].filter(no => seen.has(no)));
+  selRender();
+  $("#selList").scrollTop = 0;
+};
 $("#selList").onchange = e => {
   const t = e.target,
     L = myBills();

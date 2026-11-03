@@ -48,7 +48,8 @@ function stMovesAll(loc, t0) {
     const a = (A[m.k] = A[m.k] || { pur: 0, inn: 0, out: 0, sold: 0, dmg: 0, adj: 0 });
     if (m.t === "RECEIVE") a.pur += m.q;
     else if (m.t === "ISSUE_IN" || m.t === "TRANS_IN" || m.t === "PROD_IN") a.inn += m.q;
-    else if (m.t === "ISSUE_OUT" || m.t === "TRANS_OUT" || m.t === "PROD_OUT") a.out -= m.q;
+    else if (m.t === "ISSUE_OUT" || m.t === "TRANS_OUT" || m.t === "PROD_OUT" || m.t === "RETURN")
+      a.out -= m.q;
     else if (m.t === "SALE" || m.t === "SALE_RET") a.sold -= m.q;
     else if (m.t === "DAMAGE") a.dmg -= m.q;
     else if (m.t === "ADJUST") a.adj += m.q;
@@ -206,50 +207,73 @@ function stDocHTML(c, print) {
 }
 
 // Kept in JS (not a .css file) because the print window needs the same rules.
-const ST_CSS = `.st-doc{position:relative;background:#fff;color:#111;border-radius:6px;padding:24px 28px;font:12px/1.4 Arial,Helvetica,sans-serif;overflow-x:auto}
-.st-doc .st-head{text-align:center;font-weight:700;text-transform:uppercase;font-size:12px;line-height:1.7}
-.st-doc .st-head div:first-child{font-size:15px;letter-spacing:.05em}
-.st-doc .st-head h2{font-size:14px;margin:4px 0 0;text-transform:none;letter-spacing:.02em}
-.st-doc .st-meta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 24px;margin:14px 0 10px;padding:8px 12px;border:1px solid #222}
+const ST_CSS = `.st-doc{position:relative;background:#fff;color:#241b12;border-radius:6px;padding:24px 28px;font:12px/1.45 Arial,Helvetica,sans-serif;overflow-x:auto;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.st-doc *{box-sizing:border-box}
+.st-doc .st-head{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:24px;align-items:start;padding-bottom:11px;border-bottom:2.5px solid #a8741a}
+.st-doc .st-head>div{grid-column:1;font-size:10.5px;color:#6b6358}
+.st-doc .st-head>div:first-child{font:700 19px/1.2 Georgia,'Times New Roman',serif;color:#241b12}
+.st-doc .st-head>h2{grid-column:2;grid-row:1/span 8;margin:0;font:700 21px/1.15 Georgia,'Times New Roman',serif;text-align:right;color:#241b12}
+.st-doc .st-head>.st-co:first-child{display:flex;gap:12px;align-items:flex-start;font:400 10.5px/1.5 Arial,Helvetica,sans-serif;color:#6b6358}
+.st-doc .st-co img{max-width:72px;max-height:58px;object-fit:contain}
+.st-doc .st-co b{display:block;font:700 19px/1.2 Georgia,'Times New Roman',serif;color:#241b12}
+.st-doc .st-co small{display:block;font-size:10.5px;line-height:1.5;color:#6b6358}
+.st-doc .st-meta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px 24px;margin:13px 0 12px;padding:9px 12px;background:#f9f5ed;border-left:3px solid #a8741a}
 .st-doc .st-meta div{display:flex;gap:10px}
-.st-doc .st-meta span{min-width:96px;font-weight:700}
-.st-doc .st-t{width:100%;border-collapse:collapse}
-.st-doc .rr-h{font-size:13px;margin:16px 0 4px}
-.st-doc .st-t th{font-size:11px;text-align:left;border-bottom:2px solid #111;padding:5px 4px;vertical-align:bottom}
-.st-doc .st-t td{padding:5px 4px;border-bottom:1px dotted #999;vertical-align:top}
-.st-doc .st-t small{display:block;color:#666;font-size:10.5px}
+.st-doc .st-meta span{flex:none;min-width:96px;font-size:10.5px;font-weight:700;color:#6b6358}
+.st-doc .st-t{width:100%;margin-top:6px;border-collapse:collapse}
+.st-doc .st-t thead{display:table-header-group}
+.st-doc .st-t tr{break-inside:avoid}
+.st-doc .rr-h,.st-doc h3{margin:18px 0 5px;font:700 14px Georgia,'Times New Roman',serif;color:#241b12}
+.st-doc .st-t th{padding:7px 8px;font-size:10.5px;text-align:left;vertical-align:bottom;color:#fff;background:#241b12}
+.st-doc .st-t td{padding:6px 8px;border-bottom:1px solid #e8e0d0;vertical-align:top}
+.st-doc .st-t tbody tr:nth-child(even) td{background:#fbf8f1}
+.st-doc .st-t small{display:block;color:#6b6358;font-size:10.5px}
 .st-doc .n{text-align:right;white-space:nowrap}
 .st-doc th.n{text-align:right}
-.st-doc .st-g td{background:#eef1f4;font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:11px;border-bottom:1px solid #999}
-.st-doc .st-short td{background:#fff3f2}
+.st-doc .st-t .st-g td{background:#f3ead8;font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:10.5px;color:#6d4b0f;border-bottom:1px solid #d9cdb8}
+.st-doc .st-t .st-short td{background:#fdf0ee}
 .st-doc .st-short td:nth-child(15),.st-doc .st-short td:nth-child(16){color:#b3261e;font-weight:700}
-.st-doc .st-over td{background:#f0faf5}
+.st-doc .st-t .st-over td{background:#eff8f3}
 .st-doc .st-over td:nth-child(15),.st-doc .st-over td:nth-child(16){color:#16805e;font-weight:700}
-.st-doc .st-unc td{color:#888}
-.st-doc .st-none{text-align:center;color:#666;padding:16px}
-.st-doc .st-sum{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));margin-top:16px;border:1px solid #222}
-.st-doc .st-sum div{padding:7px 10px;border-right:1px solid #222;display:grid;gap:2px}
-.st-doc .st-sum div:last-child{border-right:0}
-.st-doc .st-sum span{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#555}
+.st-doc .st-unc td{color:#8a8378}
+.st-doc .st-none{text-align:center;color:#6b6358;padding:16px}
+.st-doc .st-sum{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-top:16px}
+.st-doc .st-sum div{display:grid;gap:2px;padding:8px 10px;background:#f9f5ed;border-left:3px solid #a8741a}
+.st-doc .st-sum span{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6b6358}
 .st-doc .st-sum b{font-size:13px}
-.st-doc .st-sum .big{background:#111;color:#fff}.st-doc .st-sum .big span{color:#ccc}
+.st-doc .st-sum .big{background:#241b12;border-color:#241b12;color:#fff}.st-doc .st-sum .big span{color:#d9cdb8}
 .st-doc .st-sum .bad b{color:#b3261e}.st-doc .st-sum .ok b{color:#16805e}
 .st-doc .st-grp{border-collapse:collapse;margin-top:14px;min-width:60%}
-.st-doc .st-grp th{text-align:left;font-size:11px;border-bottom:2px solid #111;padding:4px 8px}
-.st-doc .st-grp td{padding:4px 8px;border-bottom:1px dotted #999}
-.st-doc .st-tot td{border-top:2px solid #111;border-bottom:3px double #111;font-weight:700}
-.st-doc .st-sig{display:grid;grid-template-columns:repeat(3,1fr);gap:36px;margin-top:40px}
-.st-doc .st-sig div{border-top:1px solid #111;padding-top:4px}
-.st-doc .st-foot{margin-top:14px;font-size:10.5px;color:#555;display:flex;justify-content:space-between;gap:16px}
-.st-doc .st-stamp{position:absolute;right:28px;top:18px;transform:rotate(-7deg);border:3px solid #555;color:#555;border-radius:8px;padding:2px 12px;font-weight:800;letter-spacing:.16em;font-size:12px;opacity:.8}
+.st-doc .st-grp th{padding:6px 8px;font-size:10.5px;text-align:left;color:#fff;background:#241b12}
+.st-doc .st-grp td{padding:5px 8px;border-bottom:1px solid #e8e0d0}
+.st-doc .st-t tbody .st-tot td,.st-doc .st-grp .st-tot td,.st-doc .st-t tfoot td{font-weight:700;color:#fff;background:#241b12;border:0}
+.st-doc .st-sig{display:grid;grid-template-columns:repeat(3,1fr);gap:36px;margin-top:46px;break-inside:avoid}
+.st-doc .st-sig div{border-top:1px solid #241b12;padding-top:5px;font-size:11px}
+.st-doc .st-foot{margin-top:16px;padding-top:6px;border-top:1px solid #d9cdb8;font-size:10px;color:#6b6358;display:flex;justify-content:space-between;gap:16px}
+.st-doc .st-stamp{position:absolute;right:28px;top:62px;transform:rotate(-7deg);border:3px solid #555;color:#555;border-radius:8px;padding:2px 12px;font-weight:800;letter-spacing:.16em;font-size:12px;background:#fff}
 .st-doc .st-stamp.ok{border-color:#16805e;color:#16805e}.st-doc .st-stamp.bad{border-color:#b3261e;color:#b3261e}
 .st-doc .vr-t td:nth-child(9){font-weight:700}`;
 
-function stPrint(title, html) {
+/** Every report's top: the letterhead on the left, its name on the right. */
+function stDress(html) {
+  const B = FD_SETTINGS.biz || {},
+    logo = (FD_SETTINGS.logos || {}).company,
+    lines = [
+      B.addr,
+      [B.phone && "Tel " + B.phone, B.email].filter(Boolean).join(" · "),
+      B.pin && "KRA PIN " + B.pin
+    ].filter(Boolean);
+  return html.replace(
+    /<div class="st-head">[\s\S]*?<h2>([\s\S]*?)<\/h2>\s*<\/div>/,
+    (m, title) =>
+      `<div class="st-head"><div class="st-co">${logo ? `<img src="${esc(logo)}" alt="">` : ""}<div><b>${esc(FD_SETTINGS.name)}</b>${lines.map(l => `<small>${esc(l)}</small>`).join("")}</div></div><h2>${title}</h2></div>`
+  );
+}
+function stPrint(title, html, page = "A4 landscape") {
   const w = window.open("", "_blank");
   if (!w) return toast("Allow pop-ups to print.");
   w.document.write(
-    `<!DOCTYPE html><html><head><title>${esc(title)}</title><style>body{margin:16px}${ST_CSS}.st-doc{padding:0}@page{size:A4 landscape;margin:10mm}</style></head><body>${html}<\/body><\/html>` // "<\/" so tools scanning the page for </body> don't stop here
+    `<!DOCTYPE html><html><head><title>${esc(title)}</title><style>body{margin:0}${ST_CSS}.st-doc{padding:0}@page{size:${page};margin:10mm}</style></head><body>${stDress(html)}<\/body><\/html>` // "<\/" so tools scanning the page for </body> don't stop here
   );
   w.document.close();
   w.focus();
@@ -269,7 +293,7 @@ function stModalIfOpen() {
    <button class="mini" data-a="st_var">Variance report</button>
    <button class="mini xl-btn" style="flex:none" data-a="rep_xlsxpage" data-title="Stock take report" data-like="st_print">Export to Excel</button><button class="chip on" data-a="st_print">Print</button>
    <button class="mini" data-a="st_close" aria-label="Close">✕</button></div>
-  <style>${ST_CSS}</style>${stDocHTML(c)}</div></div>`;
+  <style>${ST_CSS}</style>${stDress(stDocHTML(c))}</div></div>`;
 }
 const stOpen = id => {
   stRep = { id, show: "all" };

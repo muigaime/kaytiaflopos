@@ -307,6 +307,11 @@
 .rd td:last-child {
   text-align: right;
 }
+.rd td.n {
+  text-align: right;
+  padding: 1px 8px;
+  white-space: nowrap;
+}
 .rd tr.bd td {
   font-weight: 700;
 }

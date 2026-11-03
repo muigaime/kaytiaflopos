@@ -63,6 +63,7 @@ function mv(loc, k, q, t, note, peer, ref, by) {
   STK[loc][k] = (STK[loc][k] || 0) + q;
   MOV.push({
     at: Date.now(),
+    pc: auditMachine(),
     loc,
     k,
     q,
@@ -81,10 +82,43 @@ const ALLP = "All sale points";
 const inPoint = (i, d) => (d === ALLP ? DEPTS.includes(i.d) : i.d === d);
 /** Where a product's ingredients are deducted: its materials store (recipes), else where it is sold. */
 const itemLoc = it => (it.from && STK[it.from] ? it.from : STK[it.d] ? it.d : curLoc());
+// Stock conversion: a tot's balance fills up from bottles issued to the same selling point.
+// The POS draws itself before the settings have loaded, and nothing is converted until they have.
+const stockConvs = () =>
+  typeof FD_SETTINGS === "undefined" ? {} : FD_SETTINGS.stockConv || (FD_SETTINGS.stockConv = {});
+const stockConvGone = () =>
+  typeof FD_SETTINGS === "undefined"
+    ? {}
+    : FD_SETTINGS.stockConvGone || (FD_SETTINGS.stockConvGone = {});
+/** Stock items you can buy, issue or choose. A converted balance only ever comes from conversion. */
+const pickKeys = () => Object.keys(ING).filter(k => !stockConvs()[k] && !stockConvGone()[k]);
+/** What a selling point can use of an item: what it holds, plus what its unopened bottles would give. */
+function stockCanUse(loc, k) {
+  const held = STK[loc][k] || 0,
+    c = stockConvs()[k];
+  return c ? held + Math.floor((STK[loc][c.from] || 0) / c.pq + 1e-9) * c.y : held;
+}
+/** Opens as many bottles as this sale needs, when the balance won't cover it. */
+function stockConvert(loc, k, need) {
+  const c = stockConvs()[k],
+    short = need - (STK[loc][k] || 0);
+  if (!c || short <= 1e-9) return;
+  const open = Math.min(
+    Math.ceil(short / c.y - 1e-9),
+    Math.floor((STK[loc][c.from] || 0) / c.pq + 1e-9)
+  );
+  if (open <= 0) return;
+  const note = `${open * c.pq} converted to ${open * c.y}`;
+  mv(loc, c.from, -open * c.pq, "CONVERT", note);
+  mv(loc, k, open * c.y, "CONVERT", note);
+}
 /** Sell n of a product (a negative n puts the stock back). */
 function itemStockMove(it, n) {
   const loc = itemLoc(it);
-  Object.entries(it.r).forEach(([k, v]) => mv(loc, k, -v * n, n > 0 ? "SALE" : "SALE_RET", "POS"));
+  Object.entries(it.r).forEach(([k, v]) => {
+    if (n > 0) stockConvert(loc, k, v * n);
+    mv(loc, k, -v * n, n > 0 ? "SALE" : "SALE_RET", "POS");
+  });
 }
 const stock = new Proxy(
   {},
