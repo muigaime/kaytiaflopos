@@ -125,7 +125,7 @@ function hrEmpModal() {
   <header class="itm-h"><div><h3>${E.id ? `Edit ${esc(E.name)}` : "New employee"}</h3><p>Only the name and basic pay are needed to start.</p></div><button class="itm-x" data-a="hr_empno" aria-label="Close">✕</button></header>
   <div class="itm-b">
   <section class="itm-s"><h4>Personal</h4><div class="itm-g">${f("Full name", "name", 'maxlength="60" autocomplete="off"')}${f("ID or passport no", "idNo", 'maxlength="20"')}${f("Phone", "phone", 'maxlength="20"')}${f("Email", "email", 'type="email" maxlength="80"')}${f("Next of kin", "kin", 'maxlength="80" placeholder="Name and phone"')}</div></section>
-  <section class="itm-s"><h4>Job</h4><div class="itm-g">${f("Job title", "job", 'maxlength="40" placeholder="e.g. Waiter"')}<label>Department<input data-he="dept" list="hrDepts" maxlength="30" value="${esc(E.dept)}"><datalist id="hrDepts">${[...new Set([...ALLD, ...STORES, "Front Office", "Housekeeping", "Administration"])].map(d => `<option value="${esc(d)}">`).join("")}</datalist></label><label>Employment<select data-he="type">${hrOpts(HR_TYPES, E.type)}</select></label>${f("Date started", "start", 'type="date"')}${f("Contract ends", "end", 'type="date"')}${f("Clock-in PIN", "pin", 'inputmode="numeric" maxlength="6" autocomplete="off" placeholder="If no POS sign-in"')}<label>POS sign-in<select data-he="user"><option value="">None</option>${users.map(u => `<option ${u === E.user ? "selected" : ""}>${esc(u)}</option>`).join("")}</select></label>${E.id ? `<label>Status<select data-he="status">${hrOpts(["Active", "Left"], E.status)}</select></label>` : ""}</div><div class="itm-hint">Link the POS sign-in so that shifts count as attendance and bills can be charged to this person.</div></section>
+  <section class="itm-s"><h4>Job</h4><div class="itm-g">${f("Job title", "job", 'maxlength="40" placeholder="e.g. Waiter"')}<label>Department<input data-he="dept" list="hrDepts" maxlength="30" value="${esc(E.dept)}"><datalist id="hrDepts">${[...new Set([...ALLD, ...STORES, "Front Office", "Housekeeping", "Administration"])].map(d => `<option value="${esc(d)}">`).join("")}</datalist></label><label>Employment<select data-he="type">${hrOpts(HR_TYPES, E.type)}</select></label>${f("Date started", "start", 'type="date"')}${f("Contract ends", "end", 'type="date"')}<label>POS sign-in<select data-he="user"><option value="">None</option>${users.map(u => `<option ${u === E.user ? "selected" : ""}>${esc(u)}</option>`).join("")}</select></label>${E.id ? `<label>Status<select data-he="status">${hrOpts(["Active", "Left"], E.status)}</select></label>` : ""}</div><div class="itm-hint">Link the POS sign-in so that shifts count as attendance and bills can be charged to this person.</div></section>
   <section class="itm-s"><h4>Monthly pay (KES)</h4><div class="itm-g">${money("Basic pay", "basic")}${money("House allowance", "house")}${money("Transport allowance", "transport")}${money("Other allowances", "otherAllow")}${money("Day rate (casual staff)", "dayRate")}${f("Service charge points", "svcPts", 'type="number" min="0" step="any" placeholder="1"')}${f("Annual leave days", "leaveYear", `type="number" min="0" step="any" placeholder="${hrR().annualLeave}"`)}</div><div class="hr-est" id="hrEst">${hrEstText(E)}</div></section>
   <section class="itm-s"><h4>How they are paid</h4><div class="itm-g"><label>Paid by<select data-he="via">${hrOpts(HR_VIA, E.via)}</select></label>${f("Bank", "bank", 'maxlength="40"')}${f("Branch", "branch", 'maxlength="40"')}${f("Account no", "acct", 'maxlength="30"')}${f("M-Pesa number", "mpesa", 'maxlength="15" placeholder="07…"')}</div></section>
   <section class="itm-s"><h4>Statutory numbers</h4><div class="itm-g">${f("KRA PIN", "kra", 'maxlength="11" style="text-transform:uppercase"')}${f("NSSF no", "nssfNo", 'maxlength="20"')}${f("SHA no", "shaNo", 'maxlength="20"')}</div></section>
@@ -675,12 +675,6 @@ function hrAct(a, b) {
     if (!E.name.trim()) return toast("Enter the employee's name.");
     if (E.type === "Casual" ? !(+E.dayRate > 0) : !(+E.basic >= 0) || E.basic === "")
       return toast(E.type === "Casual" ? "Enter the day rate." : "Enter the basic pay.");
-    if (
-      E.pin &&
-      (USERS.some(u => u.pin === E.pin && u.n !== E.user) ||
-        H.emps.some(x => x.id !== E.id && x.pin === E.pin))
-    )
-      return toast("That clock-in PIN is already in use.");
     if (E.idNo && H.emps.some(x => x.id !== E.id && x.idNo === E.idNo))
       return toast(`ID ${E.idNo} is already on another employee.`);
     if (E.end && E.start && E.end < E.start)
@@ -703,6 +697,10 @@ function hrAct(a, b) {
       day = ymdOf(new Date()),
       now = new Date().toTimeString().slice(0, 5),
       open = H.time.find(t => t.emp === e.id && !t.out);
+    if (!open && shiftRole(USERS.find(u => u.n === e.user)))
+      return toast(
+        `${e.name}'s hours come from their POS shift. Use Add a missed entry to correct them.`
+      );
     if (open) open.out = now;
     else H.time.push({ id: nid("T"), emp: e.id, date: day, in: now, out: "", by: boUser.n });
     bosave();

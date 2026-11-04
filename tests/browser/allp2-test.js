@@ -15,7 +15,7 @@ const tile=(n,d)=>qa("#grid .it").find(b=>b.textContent.includes(n)&&(!d||b.quer
 const login=async p=>{for (const k of p+"E") { q('#kp [data-k="'+k+'"]').click(); await wait(15); } await wait(450);};
 const send=async l=>{click("#sendBtn"); await wait(20); if(q("#mSend").classList.contains("show")){q("#lbl").value=l; click("#sendGo");} await wait(600);};
 try{
-  click('[data-go="pos"]'); await wait(200); posKioskOff(); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
+  click('[data-go="pos"]'); await wait(200); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
   await login("1111");
   log("1 LOGIN: view "+q("#posOutlet").textContent+" | tiles "+qa("#grid .it").map(b=>b.querySelector(".nm").textContent+"@"+b.querySelector(".cg").textContent+" "+b.querySelector(".pr").textContent).join(", ")+" | cats "+qa("#cats .cat").map(c=>c.textContent).join("/"));
   ${outPng ? 'await add("Tusker","Bar",2); await add("Fish","Restaurant");' : `
@@ -31,9 +31,9 @@ try{
   bosave(); const s=JSON.parse(localStorage.getItem("kaytia_pos_bo_v1")).S; log("8 SALES: "+s.map(x=>x.no+" "+x.dept+" g"+x.g+" mx"+x.mx.cash+" lines"+x.lines.length).join(" | ")+" | sum "+s.reduce((a,x)=>a+x.g,0)+" cash "+s.reduce((a,x)=>a+x.mx.cash,0));
   await add("Fish","Restaurant"); await send("T2"); log("9 VOID STOCK before Rest c "+STK.Restaurant.c); click("#rcClose"); await wait(10);
   click("#chSP"); await wait(15); click('#spList [data-d="Bar"]'); await wait(25); log("10 ONE POINT VIEW: "+q("#posOutlet").textContent+" | tiles "+qa("#grid .it").map(b=>b.querySelector(".nm").textContent).join(","));
-  orderView0: { const v=orders[0]; click("#exBtn"); await wait(5); q("#mEx").classList.remove("show"); }
+  orderView0: { const v=orders[0]; exOpen(v); await wait(5); q("#mEx").classList.remove("show"); }
   click("#billBtn"); await wait(10); click('[data-bo="void"]'); await wait(15); q("#bopPin").value="0000"; click('[data-bg="auth"]'); await wait(15); q("#bopWhy").value="x"; q("#bopBack").checked=true; click('[data-bg="save"]'); await wait(25); log("11 VOID from Bar view returns to Restaurant: Rest c "+STK.Restaurant.c+" | Bar has c "+(STK.Bar.c||0));
-  click("#lock"); await wait(25); posKioskOff(); await login("3333"); log("12 ONE POINT WAITER: view "+q("#posOutlet").textContent+" | tiles "+qa("#grid .it").length); click("#chSP"); await wait(15); log("12b picker "+qa("#spList .chip").map(b=>b.textContent).join("/")); q("#mSP").classList.remove("show");
+  click("#lock"); await wait(25); await login("3333"); log("12 ONE POINT WAITER: view "+q("#posOutlet").textContent+" | tiles "+qa("#grid .it").length); click("#chSP"); await wait(15); log("12b picker "+qa("#spList .chip").map(b=>b.textContent).join("/")); q("#mSP").classList.remove("show");
   await add("Tusker"); await send("B1"); log("13 BAR TICKET: "+q("#rc .sl-ot").textContent+" | "+q("#rcPrinted").innerText.replace(/\\s+/g," ")); click("#rcClose"); await wait(10);`}
 }catch(e){log("X "+e.message)}
 document.documentElement.setAttribute("data-test",__E.join(" @@ "));document.title="done";})();</script>`;

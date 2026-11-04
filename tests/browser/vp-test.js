@@ -15,9 +15,9 @@ const tile=n=>{const hit=()=>qa("#grid .it").find(b=>b.textContent.includes(n));
 const login=async p=>{for (const k of p+"E") { q('#kp [data-k="'+k+'"]').click(); await wait(15); } await wait(450);};
 const send=async l=>{click("#sendBtn"); await wait(20); if(q("#mSend").classList.contains("show")){q("#lbl").value=l; click("#sendGo");} await wait(600);};
 try{
-  click('[data-go="pos"]'); await wait(200); posKioskOff(); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
+  click('[data-go="pos"]'); await wait(200); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
   await login("1111");
-  click("#lock"); await wait(25); posKioskOff(); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400); const nav=async n=>{qa("#nav .nv").find(x=>x.dataset.n===n).click(); await wait(80);}, set=(s,v)=>{const e=q(s); e.value=v; e.dispatchEvent(new Event("input",{bubbles:true})); e.dispatchEvent(new Event("change",{bubbles:true}));}, tst=()=>q("#toast").textContent;
+  click("#lock"); await wait(25); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400); const nav=async n=>{qa("#nav .nv").find(x=>x.dataset.n===n).click(); await wait(80);}, set=(s,v)=>{const e=q(s); e.value=v; e.dispatchEvent(new Event("input",{bubbles:true})); e.dispatchEvent(new Event("change",{bubbles:true}));}, tst=()=>q("#toast").textContent;
   const mkV=async(n)=>{await nav("Vendors"); if(q('[data-a="inv_vnpage"]')) click('[data-a="inv_vnpage"]'); await wait(30); set('[data-iv="vn.name"]',n); set('[data-iv="vn.phone"]',"0700 123456"); set('[data-iv="vn.ob"]',"5000"); click('[data-a="inv_vnsave"]'); await wait(40);};
   await nav("Vendors"); log("1 NO VENDORS SHOWS FORM: "+!!q('[data-a="inv_vnsave"]')+" | title "+q(".inv-title h1").textContent+" | one h1 "+qa("#vSub h1").length);
   await mkV("Kenya Breweries"); log("2 SAVED: "+tst()+" | form closed "+!q('[data-a="inv_vnsave"]')+" | button "+!!q('[data-a="inv_vnpage"]')+" | row "+q("#vSub table tr:nth-child(2) td").textContent);

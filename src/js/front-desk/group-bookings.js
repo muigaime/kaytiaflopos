@@ -8,8 +8,8 @@ function groupFormReset() {
     pname: "",
     pphone: "",
     ac: "0",
-    in: todayYmd(),
-    out: addDays(todayYmd(), 1),
+    in: fdToday(),
+    out: addDays(fdToday(), 1),
     disc: 0,
     sel: [],
     pm: "later",
@@ -26,7 +26,7 @@ const groupFreeRooms = () =>
         r =>
           r.status !== "ooo" &&
           isFree(r.no, groupForm.in, groupForm.out) &&
-          (groupForm.in > todayYmd() || roomStatus(r) === "vac")
+          (groupForm.in > fdToday() || roomStatus(r) === "vac")
       )
     : [];
 const groupReservations = g =>
@@ -45,7 +45,7 @@ const groupPayerName = g => (g.payer === "company" ? (CU[g.ac] || {}).n || "Comp
 function groupCheckIn(g) {
   const R = groupReservations(g).filter(r => r.status === "reserved");
   if (!R.length) return "No rooms are waiting to check in.";
-  if (g.in > todayYmd()) return "The group is not due until " + g.in + ".";
+  if (g.in > fdToday()) return "The group is not due until " + g.in + ".";
   const miss = R.filter(r => !guestIsRegistered(guestsOf(r)[0]));
   if (miss.length)
     return (

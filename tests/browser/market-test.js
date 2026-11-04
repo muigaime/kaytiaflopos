@@ -15,7 +15,7 @@ const tile=n=>{const hit=()=>qa("#grid .it").find(b=>b.textContent.includes(n));
 const login=async p=>{for (const k of p+"E") { q('#kp [data-k="'+k+'"]').click(); await wait(15); } await wait(450);};
 const send=async l=>{click("#sendBtn"); await wait(20); if(q("#mSend").classList.contains("show")){q("#lbl").value=l; click("#sendGo");} await wait(600);};
 try{
-  click('[data-go="pos"]'); await wait(200); posKioskOff(); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
+  click('[data-go="pos"]'); await wait(200); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
   await login("1111");
   const G=()=>JSON.parse(localStorage.getItem("kaytia_pos_bo_v1"));
   log("1 SALE POINTS: "+ALLD.join()+" | listed "+!!ALLD.includes("Supermarket"));
@@ -24,7 +24,7 @@ try{
   log("4 OPEN BILL: "+orders.map(o=>o.no+" "+Object.keys(o.lines).join()).join(";"));
   log("5 STAFF: "+USERS.map(u=>u.n+"="+u.d.join("+")).join(" ; "));
   log("6 PAST SALES KEPT: "+SALES.filter(s=>s.dept==="Supermarket").length);
-  click("#lock"); await wait(25); posKioskOff(); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400);
+  click("#lock"); await wait(25); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400);
   const nav=async n=>{qa("#nav .nv").find(x=>x.dataset.n===n).click(); await wait(60);};
   await nav("Settings"); log("7 SETTINGS: samples "+qa("#vSub .slip").length+" | setPrev "+!!q("#setPrev")+" | "+qa("#vSub .pn h4").map(h=>h.textContent).join(" / "));
   const f=q('[data-iv="hs.name"]'); f.value="Test Hotel"; f.dispatchEvent(new Event("input",{bubbles:true})); await wait(15); log("8 TYPING IN SETTINGS OK");

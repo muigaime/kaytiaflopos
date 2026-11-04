@@ -5,9 +5,9 @@ const SET_TABS = [
   ["paymodes", "Payment modes"],
   ["voids", "Void reasons"],
   ["pos", "POS options"],
-  ["cats", "Categories"],
   ["tax", "Tax"],
   ["printers", "Printers"],
+  ["modules", "Modules"],
   ["backup", "Backup and restore"],
   ["network", "Network"]
 ];
@@ -175,7 +175,11 @@ const OPT_POS = [
   ["autoLogout", "Sign the waiter out after each order"],
   ["chefMsg", "Allow a kitchen message on orders"],
   ["tips", "Show the tip column when settling"],
-  ["boWaiterShift", "Back Office can start waiter shifts", "Waiters can always start their own."]
+  [
+    "boWaiterShift",
+    "Back Office can start waiter shifts",
+    "Their shift also opens by itself when they sign in."
+  ]
 ];
 const optsHTML = (title, note, L) =>
   `<div class="pn"><h4>${title}</h4><div class="stk">${note}</div><div class="set-opts">${L.map(
@@ -212,6 +216,7 @@ function generalAct(a, b) {
     return all();
   }
   if (a === "tab") {
+    mdlLock();
     setTab = b.dataset.k;
     return all();
   }

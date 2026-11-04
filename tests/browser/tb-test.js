@@ -15,9 +15,9 @@ const tile=n=>{const hit=()=>qa("#grid .it").find(b=>b.textContent.includes(n));
 const login=async p=>{for (const k of p+"E") { q('#kp [data-k="'+k+'"]').click(); await wait(15); } await wait(450);};
 const send=async l=>{click("#sendBtn"); await wait(20); if(q("#mSend").classList.contains("show")){q("#lbl").value=l; click("#sendGo");} await wait(600);};
 try{
-  click('[data-go="pos"]'); await wait(200); posKioskOff(); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
+  click('[data-go="pos"]'); await wait(200); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
   await login("1111");
-  const note=()=>(qa("#fsn").pop()||{}).textContent||"", snd=async l=>{await send(l); await wait(400); click("#rcClose"); await wait(10);}, relog=async p=>{click("#lock"); await wait(25); posKioskOff(); await login(p);}, ol=()=>orders.map(o=>o.label+":"+o.no+"/"+o.waiter+" "+JSON.stringify(o.lines)).join(" ; "), tst=()=>q("#toast").textContent;
+  const note=()=>(qa("#fsn").pop()||{}).textContent||"", snd=async l=>{await send(l); await wait(400); click("#rcClose"); await wait(10);}, relog=async p=>{click("#lock"); await wait(25); await login(p);}, ol=()=>orders.map(o=>o.label+":"+o.no+"/"+o.waiter+" "+JSON.stringify(o.lines)).join(" ; "), tst=()=>q("#toast").textContent;
   log("1 DEFAULT LIST: "+TBL.map(t=>t.n).join(",")+" | check box list "+qa("#tblL option").length);
   await add("Tusker","Bar"); await snd("T1"); log("2 JANE T1: "+ol());
   await relog("3333"); await add("Tusker"); await snd("T1"); log("3 SAM ALSO T1, OWN BILL: "+ol()+" | note ["+note()+"]");
@@ -25,7 +25,7 @@ try{
   await relog("0000"); await add("Tusker","Bar"); await snd("T1"); log("5 MANAGER T1: "+ol()); click("#newSale"); await wait(15); q("#fTable").value="T1"; click("#sendBtn"); await wait(20); log("6 EMPTY ON OWN T1: "+note()); click("#newSale"); await wait(5);
   await relog("3333"); click("#selBtn"); await wait(15); log("7 SAM SEES ONLY HIS: "+qa("#selList [data-row]").map(r=>r.dataset.row).join(",")); click('#mSel [data-close]'); await wait(10);
   await add("Tusker"); click("#sendBtn"); await wait(15); log("8 POS CHIPS: "+qa("#tbls .chip").map(b=>b.textContent).join(",")); q("#mSend").classList.remove("show"); cart={}; drawCart();
-  click("#lock"); await wait(25); posKioskOff(); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400);
+  click("#lock"); await wait(25); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400);
   qa("#nav .nv").find(x=>x.dataset.n==="Tables").click(); await wait(30);
   log("9 PAGE: "+q("#vSub h1").textContent+" | "+qa("#vSub .pn h4").map(h=>h.textContent).join(" / "));
   ${outPng ? 'q("#tbP").value="T"; q("#tbF").value="9"; q("#tbE").value="20"; click(\'[data-a="tb_many"]\'); await wait(30); q("#tbN").value="Delivery"; q("#tbT").value="Takeaway"; click(\'[data-a="tb_add"]\'); await wait(30);' : `
@@ -36,7 +36,7 @@ try{
   const del=qa("[data-tbn]").find(i=>i.value==="T1"); q('[data-a="tb_del"][data-i="'+del.dataset.tbn+'"]').click(); await wait(25); log("16 DELETED: "+tst()+" | open bills T1 "+orders.filter(o=>o.label==="T1").length);
   const rn=qa("[data-tbn]").find(i=>i.value==="T2"); rn.value="VIP 1"; rn.dispatchEvent(new Event("change",{bubbles:true})); await wait(25); log("17 RENAMED: "+!!qa("[data-tbn]").find(i=>i.value==="VIP 1")); const r2=qa("[data-tbn]").find(i=>i.value==="T3"); r2.value="VIP 1"; r2.dispatchEvent(new Event("change",{bubbles:true})); await wait(25); log("18 DUPLICATE RENAME: "+tst()+" | stays "+r2.value);
   bosave(); const s=JSON.parse(localStorage.getItem("kaytia_pos_bo_v1")); log("19 SAVED: "+s.TB.length+" | "+s.TB.filter(t=>t.t==="Takeaway").map(t=>t.n).join(","));
-  click("#boMenu"); await wait(30); click('[data-go="pos"]'); await wait(80); posKioskOff(); await login("1111"); click('#spTabs [data-t="Bar"]'); await wait(10); await add("Tusker","Bar"); click("#sendBtn"); await wait(15); log("20 POS UPDATED: "+qa("#tbls .chip").map(b=>b.textContent).join(",")); click('#tbls [data-t="Terrace 2"]'); await wait(10); log("21 PICK: "+q("#lbl").value); click("#sendGo"); await wait(400); click("#rcClose"); await wait(10); log("22 SENT: "+orders.at(-1).label+" | check list "+qa("#tblL option").length);`}
+  click("#boMenu"); await wait(30); click('[data-go="pos"]'); await wait(80); await login("1111"); click('#spTabs [data-t="Bar"]'); await wait(10); await add("Tusker","Bar"); click("#sendBtn"); await wait(15); log("20 POS UPDATED: "+qa("#tbls .chip").map(b=>b.textContent).join(",")); click('#tbls [data-t="Terrace 2"]'); await wait(10); log("21 PICK: "+q("#lbl").value); click("#sendGo"); await wait(400); click("#rcClose"); await wait(10); log("22 SENT: "+orders.at(-1).label+" | check list "+qa("#tblL option").length);`}
 }catch(e){log("X "+e.message)}
 document.documentElement.setAttribute("data-test",__E.join(" @@ "));document.title="done";})();</script>`;
 const html = fs.readFileSync(file, "utf8").replace("<head>", "<head>" + head).replace(/<\/body>(?![\s\S]*<\/body>)/, tail + "</body>");

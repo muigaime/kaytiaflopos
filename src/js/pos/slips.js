@@ -268,4 +268,17 @@ function rcPrint() {
   );
   window.print();
 }
-$("#rcPrint").onclick = rcPrint;
+$("#rcPrint").onclick = async () => {
+  if (!rcAsk) return rcPrint();
+  rcAsk = false;
+  $("#rcPrint").textContent = "Print";
+  $("#rcPrint").className = "mini";
+  $("#rcClose").textContent = "New sale";
+  $("#rcClose").className = "chip on";
+  const q = $("#rc .rc-ask");
+  if (q) q.remove();
+  const r = await printSlips("RECEIPT");
+  if (r === "none")
+    rcPrint(); // no receipt printer set up: the print dialog
+  else if (r === "ok") $("#rcClose").click();
+};

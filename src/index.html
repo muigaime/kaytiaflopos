@@ -36,23 +36,6 @@
 
     <!-- The company logo, kept once here: Start, Back Office and Front Desk screens copy it. -->
 
-    <!-- POS: full screen lock (a Manager PIN is needed to leave) -->
-    <div id="fsGate">
-      <div class="fsg-box">
-        <h3 id="fsgT"></h3>
-        <p id="fsgS"></p>
-        <input
-          id="fsgPin"
-          type="password"
-          inputmode="numeric"
-          autocomplete="off"
-          placeholder="Manager PIN"
-        />
-        <div id="fsgMsg"></div>
-        <div class="fsg-row"><button id="fsgBack"></button><button id="fsgOk">Confirm</button></div>
-      </div>
-    </div>
-
     <!-- ==================== POS: cashier PIN login ==================== -->
     <div id="login">
       <button class="fsl" id="fsl">⛶ Maximise</button>
@@ -101,7 +84,7 @@
             (all). Demo cards: KT0001, KT0002, KT0003.</span
           >
         </div>
-        <div class="bt"><button data-k="C">CLEAR</button><button data-k="T">CLOCK IN / OUT</button><button data-k="X">EXIT</button></div>
+        <div class="bt"><button data-k="C">CLEAR</button><button data-k="X">EXIT</button></div>
       </div>
     </div>
     <!-- ==================== POS: "application closed" screen ==================== -->
@@ -412,16 +395,22 @@
           <h3 id="flHi">Good evening,</h3>
           <p class="fl-s">Please sign in to begin your shift.</p>
           <div class="fl-f">
-            <label for="flS">Staff member</label
+            <label for="flU">Username</label
             ><span class="fl-i"
               ><svg viewBox="0 0 24 24">
                 <circle cx="12" cy="8" r="4" />
                 <path d="M4 21c0-4 4-6 8-6s8 2 8 6" /></svg
-              ><select id="flS"></select
-            ></span>
+              ><input
+                id="flU"
+                type="text"
+                placeholder="Enter your username"
+                autocomplete="off"
+                autocapitalize="off"
+                spellcheck="false"
+            /></span>
           </div>
           <div class="fl-f">
-            <label for="flP">Personal PIN</label
+            <label for="flP">Password</label
             ><span class="fl-i"
               ><svg viewBox="0 0 24 24">
                 <rect x="5" y="11" width="14" height="9" rx="2" />
@@ -429,9 +418,8 @@
               ><input
                 id="flP"
                 type="password"
-                inputmode="numeric"
-                placeholder="Enter your PIN"
-                autocomplete="off" /><button type="button" id="flEye" aria-label="Show or hide PIN">
+                placeholder="Enter your password"
+                autocomplete="off" /><button type="button" id="flEye" aria-label="Show or hide password">
                 <svg viewBox="0 0 24 24">
                   <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z" />
                   <circle cx="12" cy="12" r="3" />
@@ -448,19 +436,31 @@
     <!-- ==================== Front Desk: app (body is drawn by js/front-desk/views.js) ==================== -->
     <div id="fd">
       <div class="fd-wrap">
-        <div class="fd-hero">
-          <button class="bkm" id="fdBack" aria-label="Back to main menu">
-            <svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6" /></svg><span>Main menu</span>
-          </button>
-          <div class="fh-t">
-            <span class="fh-s">★ ★ ★ ★ ★</span><b id="fdHotel">Mwangaza Grand Hotel</b
-            ><span class="sub" id="fdWho"></span>
+        <aside class="fd-side">
+          <div class="fd-brand">
+            <span class="fh-s">★ ★ ★ ★ ★</span><b id="fdHotel">Mwangaza Grand Hotel</b>
+            <small>Front Desk</small>
           </div>
-          <button class="mini" id="fdOut">Sign out</button>
-        </div>
-        <div class="fd-rib" id="fdRib"></div>
-        <div id="fdNote"></div>
-        <div id="fdBody" style="display: grid; gap: 12px"></div>
+          <nav class="fd-rib" id="fdRib" aria-label="Front Desk"></nav>
+          <div class="fd-foot">
+            <span class="sub" id="fdWho"></span>
+            <button class="bkm" id="fdBack" aria-label="Back to main menu">
+              <svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6" /></svg><span>Main menu</span>
+            </button>
+            <button class="mini" id="fdOut">Sign out</button>
+          </div>
+        </aside>
+        <main class="fd-main">
+          <header class="fd-head">
+            <div>
+              <h1 id="fdTitle"></h1>
+              <p id="fdSub"></p>
+            </div>
+            <div class="fd-quick" id="fdQuick"></div>
+          </header>
+          <div id="fdNote"></div>
+          <div id="fdBody" style="display: grid; gap: 14px"></div>
+        </main>
       </div>
     </div>
     <!-- ID / passport document viewer -->
@@ -556,7 +556,7 @@
           </button>
           <div class="lsep"></div>
           <p class="lalt">
-            Tip: press <kbd>P</kbd> POS, <kbd>B</kbd> Back Office or <kbd>F</kbd> Front Desk
+            Tip: press <kbd>P</kbd> POS, <kbd>B</kbd> Back Office<span id="stFdKey"> or <kbd>F</kbd> Front Desk</span>
           </p>
           <p class="lalt" style="font-size: 11.5px">
             Kaytia Flow · Version 1.8.0 · Build 26 Oct 2026
@@ -683,7 +683,8 @@
               <svg class="i"><use href="#i-search" /></svg>Search modules, actions…<kbd>Ctrl K</kbd>
             </button>
             <select class="sel" id="br"></select
-            ><button class="sq" id="boMenu">Start menu</button><span class="sp"></span>
+            ><button class="sq" id="boMenu">Start menu</button
+            ><button class="sq" id="boOut">Log out</button><span class="sp"></span>
             <button class="ib" id="bell" aria-label="Notifications">
               <svg class="i"><use href="#i-bell" /></svg><span class="dot" id="nc">0</span>
             </button>
@@ -729,9 +730,7 @@
                     <button data-p="today" class="on">Today</button><button data-p="7">7 days</button
                     ><button data-p="30">30 days</button>
                   </div>
-                  <button class="btn a" id="openPos">
-                    <svg class="i"><use href="#i-pos" /></svg>Open POS</button
-                  ><button class="btn p" id="newreq">
+                  <button class="btn p" id="newreq">
                     <svg class="i"><use href="#i-plus" /></svg>Stock request
                   </button>
                 </div>
@@ -903,6 +902,7 @@
     <!-- Script group 2: business day + shifts -->
     <script src="js/pos/shift-screen.js"></script>
     <script src="js/pos/waiter-shift.js"></script>
+    <script src="js/pos/waiter-clearance.js"></script>
 
     <!-- Script group 3: Front Desk -->
     <script src="js/front-desk/data.js"></script>
@@ -921,6 +921,7 @@
     <script src="js/back-office/periods-and-nav.js" data-private></script>
     <script src="js/back-office/home-dashboard.js" data-private></script>
     <script src="js/back-office/reports.js" data-private></script>
+    <script src="js/back-office/customers.js" data-private></script>
     <script src="js/back-office/inventory.js" data-private></script>
     <script src="js/back-office/inventory-reports.js" data-private></script>
     <script src="js/back-office/stock-take-report.js" data-private></script>

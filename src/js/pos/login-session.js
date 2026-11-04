@@ -13,15 +13,45 @@ const pmsg = (t, bad) => {
 const pdraw = () => {
   $("#pinDisp").textContent = "●".repeat(pin.length);
 };
+/** Where this person sells on this computer: their sale points, within the ones the machine is attached to. */
+function pointsHere(u) {
+  const M = MACHINE.points(),
+    mine = u.d.filter(posSells);
+  return M.length ? mine.filter(d => M.includes(d)) : mine;
+}
+function deptsFor(u) {
+  const P = pointsHere(u);
+  return P.length ? P : [MACHINE.points()[0] || ALLD.filter(posSells)[0] || ALLD[0]];
+}
+function machineLabel() {
+  const M = MACHINE.points();
+  $("#login .meta .sp").classList.toggle("here", M.length > 0);
+  $("#login .meta .sp").textContent =
+    "SALE POINT: " + (M.length ? M.join(", ") : ALLP).toUpperCase();
+}
 function loginAs(u) {
+  if (u.role === "Housekeeper") {
+    pin = "";
+    pdraw();
+    return pmsg("Housekeepers sign in to the Front Desk with a user account.", true);
+  }
+  const here = MACHINE.points();
+  if (here.length && !pointsHere(u).length) {
+    pin = "";
+    pdraw();
+    auditAdd("Failed sign-in", `${u.n} isn't set up for ${here.join(", ")}, on ${MACHINE.name()}`, {
+      who: u.n,
+      mod: "POS"
+    });
+    return pmsg(`${u.n} can't sell at ${here.join(", ")}, the sale point of this computer.`, true);
+  }
   LIC.gate();
   billsExpire();
   tblFill();
   draftRelease();
   user = u;
   auditAdd("Sign in", "Signed in to the POS", { who: u.n, mod: "POS" });
-  DEPTS = u.d.filter(posSells);
-  if (!DEPTS.length) DEPTS = [ALLD.filter(posSells)[0] || ALLD[0]];
+  DEPTS = deptsFor(u);
   dept = DEPTS.length > 1 && can("switchSP") ? ALLP : DEPTS[0];
   applyRights();
   spTab = DEPTS[0];
@@ -33,6 +63,9 @@ function loginAs(u) {
   $("#login").style.display = "none";
   pmsg("Enter your PIN, or swipe your staff card.");
   posAccess();
+  waiterAuto();
+  if (shiftOf(u.n)) shiftOf(u.n).lastOut = "";
+  shiftBadge();
   setTimeout(() => {
     if (fdPending) {
       fdPending = false;
@@ -43,7 +76,9 @@ function loginAs(u) {
     if (!(curDay() && shiftOf(u.n)))
       shiftOpen(
         curDay()
-          ? "Start your shift to begin selling."
+          ? shiftDoneOf(u.n)
+            ? ""
+            : "Start your shift to begin selling."
           : canDay()
             ? "Start the day to begin trading."
             : ""
@@ -54,40 +89,7 @@ function loginAs(u) {
   drawCats();
   drawCart();
 }
-/** Clocking in or out with a PIN, without signing in. A POS PIN works, and so does one set in HR. */
-function staffClock() {
-  const H = FD_SETTINGS.hr || {},
-    u = USERS.find(x => x.pin === pin),
-    e =
-      pin &&
-      (H.emps || []).find(x => x.status !== "Left" && (x.pin === pin || (u && x.user === u.n)));
-  pin = "";
-  pdraw();
-  if (!e) return pmsg("That PIN isn't on the staff list.", true);
-  const now = new Date(),
-    at = now.toTimeString().slice(0, 5);
-  H.time = H.time || [];
-  const open = H.time.find(t => t.emp === e.id && !t.out);
-  if (open) open.out = at;
-  else
-    H.time.push({
-      id: "T-" + now.getTime().toString(36).toUpperCase(),
-      emp: e.id,
-      date: ymdOf(now),
-      in: at,
-      out: "",
-      by: e.name,
-      src: "Staff PIN"
-    });
-  auditAdd("Attendance", `${e.name} clocked ${open ? "out" : "in"} at ${at}`, {
-    who: e.name,
-    mod: "POS"
-  });
-  if (window.bosave) window.bosave();
-  pmsg(`${e.name} clocked ${open ? "out" : "in"} at ${at}.`);
-}
 function pkey(k) {
-  if (k === "T") return staffClock();
   if (k === "C") {
     pin = "";
     pmsg("Enter your PIN, or swipe your staff card.");
@@ -117,54 +119,15 @@ function fsNote(m) {
 function fsOn() {
   return document.fullscreenElement || document.webkitFullscreenElement;
 }
-// ---- the POS stays full screen: opening it maximises, and only a manager can leave ----
-// A browser can always leave full screen (a held Esc), so when that happens the POS is covered until it is
-// maximised again or a manager agrees. The guard ends when someone signs in to Back Office or Front Desk.
-let posGuard = false, // the rule is in force
-  fsAllowed = false, // a manager has agreed to a normal window, until the next open or log out
-  gateMode = "", // why the lock is up: "left" | "minimise" | "exit"
-  gateFails = 0,
-  gateLock = 0;
-const gateUp = () => $("#fsGate").classList.contains("show");
-function gateClose() {
-  $("#fsGate").classList.remove("show");
-  gateMode = "";
-}
-function gateOpen(mode) {
-  gateMode = mode;
-  const left = mode === "left";
-  $("#fsgT").textContent = left
-    ? "Full screen is required"
-    : mode === "exit"
-      ? "Close the POS?"
-      : "Minimise the POS?";
-  $("#fsgS").textContent = left
-    ? "The POS must stay full screen. Return to it, or enter a Manager PIN to use a normal window."
-    : "A Manager PIN is required.";
-  $("#fsgBack").textContent = left ? "Return to full screen" : "Cancel";
-  $("#fsgPin").value = "";
-  $("#fsgMsg").textContent = "";
-  $("#fsGate").classList.add("show");
-  if (!left) $("#fsgPin").focus();
-}
+// ---- the POS opens maximised. Anyone can go to a normal window and back. ----
 function fsEnter() {
   const el = document.documentElement,
-    rq = el.requestFullscreen || el.webkitRequestFullscreen,
-    refused = () => {
-      if (posGuard && !fsAllowed && !fsOn()) gateOpen("left");
-    };
-  if (!rq) return refused();
+    rq = el.requestFullscreen || el.webkitRequestFullscreen;
+  if (!rq) return;
   try {
     const r = rq.call(el);
-    if (r && r.then)
-      // Where the browser allows it, Esc reaches the page instead of leaving full screen.
-      r.then(() => {
-        if (navigator.keyboard && navigator.keyboard.lock)
-          navigator.keyboard.lock(["Escape"]).catch(() => {});
-      }).catch(refused);
-  } catch (e) {
-    refused();
-  }
+    if (r && r.catch) r.catch(() => {}); // the browser said no: a normal window is fine
+  } catch (e) {}
 }
 function fsLeave() {
   if (!fsOn()) return;
@@ -172,68 +135,13 @@ function fsLeave() {
     (document.exitFullscreen || document.webkitExitFullscreen).call(document);
   } catch (e) {}
 }
-/** Every time the POS opens, or the next person is about to sign in. */
-function posKioskOn() {
-  posGuard = true;
-  fsAllowed = false;
-  if (fsOn()) gateClose();
-  else fsEnter();
-}
-function posKioskOff() {
-  posGuard = false;
-  fsAllowed = false;
-  gateClose();
-}
 function fsToggle() {
-  if (!fsOn()) {
-    fsAllowed = false;
-    return fsEnter();
-  }
-  if (posGuard) return gateOpen("minimise");
-  fsLeave();
+  fsOn() ? fsLeave() : fsEnter();
 }
-function gateOk() {
-  if (Date.now() < gateLock) return ($("#fsgMsg").textContent = "Too many tries. Wait 30 seconds.");
-  const mgr = USERS.find(u => u.role === "Manager" && u.pin === $("#fsgPin").value);
-  if (!mgr) {
-    $("#fsgPin").value = "";
-    if (++gateFails >= 5) {
-      gateLock = Date.now() + 3e4;
-      gateFails = 0;
-    }
-    $("#fsgMsg").textContent = "That is not a manager's PIN.";
-    return $("#fsgPin").focus();
-  }
-  gateFails = 0;
-  const mode = gateMode;
-  gateClose();
-  if (mode === "exit") {
-    posGuard = false;
-    return exitApp();
-  }
-  fsAllowed = true;
-  fsLeave();
-}
-$("#fsgOk").onclick = gateOk;
-$("#fsgPin").onkeydown = e => {
-  e.stopPropagation();
-  if (e.key === "Enter") gateOk();
-};
-$("#fsgBack").onclick = () => {
-  const left = gateMode === "left";
-  gateClose();
-  if (left) {
-    fsAllowed = false;
-    fsEnter();
-  }
-};
 function fsLabel() {
   document
     .querySelectorAll("#fsb,#fsl")
     .forEach(b => (b.textContent = fsOn() ? "⤡ Minimise" : "⛶ Maximise"));
-  if (fsOn()) {
-    if (gateMode === "left") gateClose();
-  } else if (posGuard && !fsAllowed && !gateUp()) gateOpen("left");
 }
 ["fullscreenchange", "webkitfullscreenchange"].forEach(ev =>
   document.addEventListener(ev, fsLabel)
@@ -241,10 +149,7 @@ function fsLabel() {
 $("#fsb").onclick = fsToggle;
 $("#fsl").onclick = fsToggle;
 function exitApp() {
-  if (fsOn())
-    try {
-      (document.exitFullscreen || document.webkitExitFullscreen).call(document);
-    } catch (e) {}
+  fsLeave();
   cart = {};
   user = null;
   pin = "";
@@ -258,7 +163,7 @@ function exitApp() {
   setTimeout(() => $("#bye").classList.add("show"), 250);
 }
 $("#again").onclick = () => {
-  posKioskOn();
+  fsEnter();
   $("#bye").classList.remove("show");
   $("#login").style.display = "grid";
   drawCart();
@@ -267,12 +172,10 @@ $(".bt").onclick = e => {
   const b = e.target.closest("[data-k]");
   if (!b) return;
   if (b.dataset.k === "C") pkey("C");
-  // Closing also leaves full screen, so it needs a manager while the rule is in force.
-  else if (b.dataset.k === "X") posGuard ? gateOpen("exit") : exitApp();
+  else if (b.dataset.k === "X") exitApp();
 };
 document.addEventListener("keydown", e => {
   if (
-    gateUp() ||
     $("#login").style.display === "none" ||
     $("#bo").classList.contains("show") ||
     $("#start").style.display !== "none"
@@ -324,7 +227,7 @@ $("#swd").onclick = () => {
 window.addEventListener(
   "keydown",
   e => {
-    if (!swipe || gateUp() || $("#login").style.display === "none") return;
+    if (!swipe || $("#login").style.display === "none") return;
     e.stopPropagation();
     e.preventDefault();
     if (e.key === "Enter") {

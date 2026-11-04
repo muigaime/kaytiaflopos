@@ -15,10 +15,10 @@ const tile=n=>{const hit=()=>qa("#grid .it").find(b=>b.textContent.includes(n));
 const login=async p=>{for (const k of p+"E") { q('#kp [data-k="'+k+'"]').click(); await wait(15); } await wait(450);};
 const send=async l=>{click("#sendBtn"); await wait(20); if(q("#mSend").classList.contains("show")){q("#lbl").value=l; click("#sendGo");} await wait(600);};
 try{
-  click('[data-go="pos"]'); await wait(200); posKioskOff(); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
+  click('[data-go="pos"]'); await wait(200); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
   await login("1111");
   const jobs=[]; const realFetch=window.fetch; window.fetch=async(u,o)=>{ u=String(u); if(u.includes("/api/print/installed")) return {ok:true,json:async()=>({printers:["TEST","SERVERK"]})}; if(u.includes("/api/print/ticket")){ const b=JSON.parse(o.body); jobs.push(b); if(window.__down) throw new Error("x"); return {ok:true,json:async()=>({})}; } return realFetch(u,o); };
-  const toBO=async()=>{click("#lock"); await wait(25); posKioskOff(); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400); qa("#nav .nv").find(x=>x.dataset.n==="Settings").click(); await wait(60); click('[data-a="hs_tab"][data-k="printers"]'); await wait(40);};
+  const toBO=async()=>{click("#lock"); await wait(25); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400); qa("#nav .nv").find(x=>x.dataset.n==="Settings").click(); await wait(60); click('[data-a="hs_tab"][data-k="printers"]'); await wait(40);};
   const sel=(f,doc,pt)=>q('[data-psx="'+f+'"][data-pt="'+pt+'"][data-docs*="'+doc+'"]'), set=async(f,doc,pt,v)=>{const e=sel(f,doc,pt); e.value=v; e.dispatchEvent(new Event("change",{bubbles:true})); await wait(25);}, tst=()=>q("#toast").textContent;
   const snd=async l=>{await send(l); await wait(400); click("#rcClose"); await wait(10);}, note=()=>(q("#rcPrinted")||{}).textContent||"", who=j=>j.printer.name||j.printer.ip, A=s=>click('[data-a="'+s+'"]');
   await toBO();
@@ -34,7 +34,7 @@ try{
   bosave(); log("9 NOT SAVED YET: "+(FD_SETTINGS.printRules||[]).length); A("psu_save"); await wait(40); const R=FD_SETTINGS.printRules; log("10 SAVED: "+tst()+" | "+R.map(r=>r.doc+"/"+r.point+"="+r.kind+":"+r.printer+"x"+r.copies+"/"+r.paper).join(" ; ")+" | routes "+Object.keys(FD_SETTINGS.printRoutes).length);
   log("11 STILL SHOWN: "+sel("printer","GUEST BILL","Bar").value+" x"+sel("copies","GUEST BILL","Bar").value);
   const sv=JSON.parse(localStorage.getItem("kaytia_pos_bo_v1")); log("12 ON DISK: "+(sv.FS.printRules||[]).length);
-  click("#boMenu"); await wait(30); click('[data-go="pos"]'); await wait(80); posKioskOff(); await login("1111"); click('#spTabs [data-t="Bar"]'); await wait(10);
+  click("#boMenu"); await wait(30); click('[data-go="pos"]'); await wait(80); await login("1111"); click('#spTabs [data-t="Bar"]'); await wait(10);
   jobs.length=0; await add("Tusker","Bar"); await snd("T1"); log("13 BAR ORDER: "+jobs.map(j=>who(j)+":"+j.lines[0].t).join()+" | body "+JSON.stringify(jobs[0].printer));
   jobs.length=0; await add("Fish","Restaurant"); await snd("T2"); log("14 KITCHEN ORDER, 2 COPIES: "+jobs.map(j=>who(j)+":"+j.lines[0].t).join());
   jobs.length=0; await add("Burger","Pool"); await snd("T3"); log("15 POOL HAS NO PRINTER NOW: "+jobs.length+" | slip on screen");
@@ -43,7 +43,7 @@ try{
   jobs.length=0; await bill(1); log("17 RESTAURANT BILL: "+jobs.map(who).join()+" | "+note()); click("#rcClose"); await wait(10);
   jobs.length=0; await bill(2); log("18 POOL BILL BY HAND: "+jobs.length+" | slip "+!!q("#rc .slip")+" | note ["+note()+"]"); click("#rcClose"); await wait(10);
   window.__down=1; jobs.length=0; await bill(0); log("19 DOWN: "+note()+" | bad "+q("#rcPrinted").classList.contains("bad")); click("#rcClose"); await wait(10); window.__down=0;
-  jobs.length=0; click("#ordBtn"); await wait(10); qa('#ordList [data-oa="pay"]')[0].click(); await wait(25); const pa=q('[data-pa="cash"]'); pa.value="5000"; pa.dispatchEvent(new Event("input",{bubbles:true})); await wait(15); click("#pOk"); await wait(450); log("20 RECEIPT 58MM: "+jobs.map(who).join()+" | "+note()+" | width "+Math.max(...jobs[0].lines.filter(l=>/^-+$/.test(l.t)).map(l=>l.t.length))); click("#rcClose"); await wait(10);
+  jobs.length=0; click("#ordBtn"); await wait(10); qa('#ordList [data-oa="pay"]')[0].click(); await wait(25); const pa=q('[data-pa="cash"]'); pa.value="5000"; pa.dispatchEvent(new Event("input",{bubbles:true})); await wait(15); click("#pOk"); await wait(60); log("19B ASKS FIRST: nothing yet "+!jobs.length+" | "+q("#rcPrint").textContent); click("#rcPrint"); await wait(450); log("20 RECEIPT 58MM: "+jobs.map(who).join()+" | "+note()+" | width "+Math.max(...jobs[0].lines.filter(l=>/^-+$/.test(l.t)).map(l=>l.t.length))); click("#rcClose"); await wait(10);
   for(const [lb,d,it] of [["R2","Restaurant","Fish"],["R3","Pool","Burger"]]){ jobs.length=0; await add(it,d); await snd(lb); jobs.length=0; click("#ordBtn"); await wait(10); [...qa('#ordList .ord')].find(o=>o.querySelector(".h").textContent.startsWith(lb)).querySelector('[data-oa="pay"]').click(); await wait(25); const c=q('[data-pa="cash"]'); c.value="5000"; c.dispatchEvent(new Event("input",{bubbles:true})); await wait(15); click("#pOk"); await wait(450); log("20a "+d+" RECEIPT: "+jobs.map(who).join()+" | "+note()); click("#rcClose"); await wait(10); }
   localStorage.setItem("kaytia_machine","OTHER"); jobs.length=0; await add("Tusker","Bar"); await snd("T8"); log("21 ANOTHER MACHINE: "+jobs.length); localStorage.setItem("kaytia_machine","TEST-PC");
 }catch(e){log("X "+e.message)}

@@ -15,7 +15,7 @@ const tile=(n,d)=>qa("#grid .it").find(b=>b.textContent.includes(n)&&(!d||b.quer
 const login=async p=>{for (const k of p+"E") { q('#kp [data-k="'+k+'"]').click(); await wait(15); } await wait(450);};
 const send=async l=>{click("#sendBtn"); await wait(20); if(q("#mSend").classList.contains("show")){q("#lbl").value=l; click("#sendGo");} await wait(600);};
 try{
-  click('[data-go="pos"]'); await wait(200); posKioskOff(); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
+  click('[data-go="pos"]'); await wait(200); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
   await login("1111");
   log("1 LOGIN: view "+q("#posOutlet").textContent+" | tiles "+qa("#grid .it").map(b=>b.querySelector(".nm").textContent+"@"+b.querySelector(".cg").textContent+" "+b.querySelector(".pr").textContent).join(", ")+" | cats "+qa("#cats .cat").map(c=>c.textContent).join("/"));
   ${outPng ? 'await add("Tusker","Bar",2); await add("Fish","Restaurant");' : `
@@ -26,7 +26,7 @@ try{
   click('#cats [data-c="Mains"]'); await wait(10); log("5 CATEGORY in tab: "+tiles()); await tab("Bar"); log("6 BAR resets category: "+tiles()+" | cat on "+q("#cats .cat.on").textContent); await tab(""); log("7 ALL: "+qa("#grid .it").length+" tiles");
   await send("T1"); await wait(600); log("8 SENT: "+qa("#rc .sl-ot").map(x=>x.textContent).join("+")+" | "+billPlace(orders[0].lines)); click("#rcClose"); await wait(10);
   click("#chSP"); await wait(15); click('#spList [data-d="Bar"]'); await wait(20); log("9 ONE POINT: tabs "+qa("#spTabs button").length+" | "+tiles()); click("#chSP"); await wait(15); click('#spList [data-d="All sale points"]'); await wait(20); log("10 BACK: tabs "+qa("#spTabs button").length);
-  click("#lock"); await wait(25); posKioskOff(); await login("3333"); log("11 ONE-POINT WAITER: tabs "+qa("#spTabs button").length);`}
+  click("#lock"); await wait(25); await login("3333"); log("11 ONE-POINT WAITER: tabs "+qa("#spTabs button").length);`}
 }catch(e){log("X "+e.message)}
 document.documentElement.setAttribute("data-test",__E.join(" @@ "));document.title="done";})();</script>`;
 const html = fs.readFileSync(file, "utf8").replace("<head>", "<head>" + head).replace(/<\/body>(?![\s\S]*<\/body>)/, tail + "</body>");

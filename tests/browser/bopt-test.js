@@ -17,7 +17,7 @@ const pick=async n=>{ if(bill(n)){bill(n).click(); await wait(20);} };
 const open=()=>orders.map(o=>o.label+"="+totals(o.lines,o).g).join(", "), closeB=()=>q("#mBopt").classList.remove("show");
 const login=async p=>{for (const k of p+"E") { q('#kp [data-k="'+k+'"]').click(); await wait(15); } await wait(450);};
 try{
-  click('[data-go="pos"]'); await wait(200); posKioskOff(); dayStart("t"); ["Boss Manager","Sue Super","Jane Waiter"].forEach(n=>shiftStart(n,0,"t"));
+  click('[data-go="pos"]'); await wait(200); dayStart("t"); ["Boss Manager","Sue Super","Jane Waiter"].forEach(n=>shiftStart(n,0,"t"));
   await login("1111"); q('#spTabs [data-t="Bar"]').click(); await wait(30); log("1 USER "+user.n+" | button "+q("#billBtn").textContent);
   ${shot === "wheel" ? 'await add("Tusker"); click("#billBtn"); await wait(30);' : shot === "disc" ? 'await add("Tusker",3); await opt("disc"); await pin("0000"); q("#bopVal").value="10"; q("#bopVal").dispatchEvent(new Event("input",{bubbles:true})); q("#bopWhy").value="Loyal guest"; await wait(10);' : shot === "main" ? 'await add("Tusker",2); await wait(20);' : `
   click("#billBtn"); await wait(15); log("2 WHEEL: "+qa(".bw-i span").map(s=>s.textContent).join(" / ")); click('[data-bo="disc"]'); await wait(20); log("3 NO BILL: "+note()); closeB();
@@ -41,7 +41,7 @@ try{
   // void, return to stock
   const a0=STK.Bar.a; await opt("void"); await pin("0000"); await pick("T2"); click("#bopVAll"); log("33 VOID: "+q("#bopVSum").textContent+" | back "+q("#bopBack").checked); await save(); log("34 NO REASON: "+msg()); q("#bopWhy").value="Wrong table"; await save(); log("35 VOIDED: "+note()+" | "+open()+" | Bar a "+a0+" -> "+STK.Bar.a);
   // manager skips PIN; receipt and sale
-  click("#lock"); await wait(25); posKioskOff(); await login("0000"); q('#spTabs [data-t="Bar"]').click(); await wait(30);
+  click("#lock"); await wait(25); await login("0000"); q('#spTabs [data-t="Bar"]').click(); await wait(30);
   await opt("disc"); log("36 MANAGER NO PIN: "+!q("#bopPin")+" | "+q("#bopBody .stk").textContent); closeB();
   const o=orders[0]; openPay([o]); await wait(20); log("37 PAY: "+q("#pTotal").textContent+" | "+q("#pBills").textContent); q("#pAmt").value="1000"; click("#pOk"); await wait(35); bosave();
   log("38 RECEIPT: "+q("#rc .sl-t").innerText.replace(/\\s+/g," ")+" || "+q("#rc .sl-tots").innerText.replace(/\\s+/g," ")); click("#rcClose"); await wait(10);

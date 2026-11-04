@@ -44,6 +44,7 @@ $("#vSub").onclick = e => {
   if (a === "rep_xlsx") return repXlsx(b.dataset.k);
   if (a === "rep_xlsxpage") return pageXlsx(b);
   if (a.slice(0, 3) === "ws_") return wsAct(a, b);
+  if (a.slice(0, 3) === "cu_") return cuAct(a, b);
   if (a.slice(0, 3) === "tb_") return tbAct(a, b);
   if (a.slice(0, 4) === "psu_") return psuAct(a, b);
   if (a.slice(0, 4) === "mod_") return modAct(a, b);
@@ -120,7 +121,7 @@ $("#vSub").onclick = e => {
   if (a === "sstart") {
     const u = v("shU");
     if (!u) return toast("Choose who the shift is for.");
-    const r = shiftStart(u, parseFloat($("#shF").value), boUser.n);
+    const r = shiftStart(u, parseFloat($("#shF").value), boUser.n, false, true);
     toast(r || "Shift started for " + u + ".");
     return all();
   }
@@ -201,23 +202,6 @@ $("#vSub").onclick = e => {
     if (!(q > 0)) return toast("Enter a quantity.");
     stock[b.dataset.k] += q;
     toast("Stock received.");
-  } else if (a === "addc") {
-    const n = v("cn"),
-      l = num("cc");
-    if (!n || !(l >= 0)) return toast("Enter a name and limit.");
-    CU.push({ n, limit: l, owes: 0 });
-  } else if (a === "pay") {
-    const c = CU[b.dataset.i],
-      q = num("cp_" + b.dataset.i);
-    if (!(q > 0)) return toast("Enter an amount.");
-    c.owes = Math.max(0, c.owes - q);
-    (FD_SETTINGS.custPays = FD_SETTINGS.custPays || []).push({
-      at: new Date().toISOString(),
-      n: c.n,
-      amt: q,
-      by: boUser.n
-    });
-    toast("Payment recorded.");
   }
   bosave();
   all();

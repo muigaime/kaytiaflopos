@@ -251,12 +251,12 @@ function itemSpDone(k, sp, F, units, price, msg) {
 /** The POS shows the new selling points / products without signing out. */
 function spRefreshPos() {
   if (user) {
-    DEPTS = user.d.filter(posSells);
-    if (!DEPTS.length) DEPTS = [ALLD.filter(posSells)[0] || ALLD[0]];
+    DEPTS = deptsFor(user);
     if (dept !== ALLP && !DEPTS.includes(dept)) dept = DEPTS[0];
     if (dept === ALLP && DEPTS.length < 2) dept = DEPTS[0];
   }
   try {
+    machineLabel();
     drawDepts();
     renderCats();
     drawGrid();

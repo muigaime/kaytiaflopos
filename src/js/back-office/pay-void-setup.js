@@ -7,10 +7,12 @@ function payModesHTML() {
       locked
         ? '<span class="tag">Always on</span>'
         : `<button class="pv-sw ${on ? "on" : ""}" data-a="pv_pmtog" data-k="${esc(k)}" role="switch" aria-checked="${on}" aria-label="Show on the POS"><i></i></button>`,
-    built = PAY_BUILT.map(
-      ([k, n, s]) =>
-        `<tr><td><b>${esc(n)}</b><small class="pr-code">${esc(s)}</small></td><td><span class="tag">Built in</span></td><td class="n">${sw(k, payModeOn(k), k === "cash")}</td><td></td></tr>`
-    ).join(""),
+    built = PAY_BUILT.filter(([k]) => k !== "room" || fdOn())
+      .map(
+        ([k, n, s]) =>
+          `<tr><td><b>${esc(n)}</b><small class="pr-code">${esc(s)}</small></td><td><span class="tag">Built in</span></td><td class="n">${sw(k, payModeOn(k), k === "cash")}</td><td></td></tr>`
+      )
+      .join(""),
     mine = payMine()
       .map(c =>
         pvEdit && pvEdit.pm === c.k

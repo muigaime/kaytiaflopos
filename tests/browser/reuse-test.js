@@ -15,7 +15,7 @@ const tile=n=>{const hit=()=>qa("#grid .it").find(b=>b.textContent.includes(n));
 const login=async p=>{for (const k of p+"E") { q('#kp [data-k="'+k+'"]').click(); await wait(15); } await wait(450);};
 const send=async l=>{click("#sendBtn"); await wait(20); if(q("#mSend").classList.contains("show")){q("#lbl").value=l; click("#sendGo");} await wait(600);};
 try{
-  click('[data-go="pos"]'); await wait(200); posKioskOff(); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
+  click('[data-go="pos"]'); await wait(200); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
   await login("1111");
   const newB=async l=>{click("#newSale"); await wait(15); q("#fTable").value=l; click("#sendBtn"); await wait(25);}, age=l=>{orders.find(o=>o.label===l).at=new Date(Date.now()-6*60e3); billsExpire();}, snd=async l=>{await send(l); await wait(400); click("#rcClose"); await wait(10);}, ol=()=>orders.map(o=>o.label+":"+o.no+"/"+o.ord).join(" "), B=()=>q("#fBill").value;
   shiftOf("Jane Waiter").openedAt=new Date(Date.now()-36e5).toISOString(); await newB("A"); log("1 "+ol()); age("A"); click("#newSale"); await wait(15); log("2 LAST ONE EXPIRED, SAME NUMBER AGAIN: box "+B()+" | orders "+ol()); await add("Tusker","Bar"); await snd("T1"); log("3 USED: "+ol());
@@ -25,7 +25,7 @@ try{
   age("C"); age("E"); log("9 TWO EXPIRED: "+ol()+" | free "+JSON.stringify(FREE_BILLS)+" rno "+rno); bosave(); const s=JSON.parse(localStorage.getItem("kaytia_pos_bo_v1")); log("10 SAVED: FB "+JSON.stringify(s.FB)+" RN "+s.RN);
   await newB("G"); await newB("H"); await add("Tusker","Bar"); await snd("I"); log("11 BOTH REUSED THEN NEXT: "+ol());
   click("#billBtn"); await wait(10); click('[data-bo="void"]'); await wait(15); q("#bopPin").value="0000"; click('[data-bg="auth"]'); await wait(15); qa("#bopBody .bop-b").find(b=>b.textContent.includes(" G")||b.textContent.startsWith("G")).click(); await wait(15); click('[data-bg="save"]'); await wait(20); log("12 CLOSED BY HAND: "+((qa("#fsn").pop()||{}).textContent)+" | free "+JSON.stringify(FREE_BILLS)); await newB("J"); log("13 REUSED: "+ol());
-  await add("Tusker","Bar"); click("#newSale"); await wait(10); click("#newSale"); await wait(15); const held=B(); click("#lock"); await wait(25); posKioskOff(); await login("3333"); click("#newSale"); await wait(15); log("14 HELD NUMBER "+held+" GOES BACK, NEXT WAITER GETS: "+B()); click("#lock"); await wait(25); posKioskOff(); await login("1111");
+  await add("Tusker","Bar"); click("#newSale"); await wait(10); click("#newSale"); await wait(15); const held=B(); click("#lock"); await wait(25); await login("3333"); click("#newSale"); await wait(15); log("14 HELD NUMBER "+held+" GOES BACK, NEXT WAITER GETS: "+B()); click("#lock"); await wait(25); await login("1111");
   log("15 LOG: "+BILLLOG.filter(x=>x.act==="Expired").map(x=>x.no+" "+x.detail).join(" ; "));
 }catch(e){log("X "+e.message)}
 document.documentElement.setAttribute("data-test",__E.join(" @@ "));document.title="done";})();</script>`;

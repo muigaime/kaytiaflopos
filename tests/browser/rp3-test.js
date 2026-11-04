@@ -15,9 +15,9 @@ const tile=n=>{const hit=()=>qa("#grid .it").find(b=>b.textContent.includes(n));
 const login=async p=>{for (const k of p+"E") { q('#kp [data-k="'+k+'"]').click(); await wait(15); } await wait(450);};
 const send=async l=>{click("#sendBtn"); await wait(20); if(q("#mSend").classList.contains("show")){q("#lbl").value=l; click("#sendGo");} await wait(600);};
 try{
-  click('[data-go="pos"]'); await wait(200); posKioskOff(); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
+  click('[data-go="pos"]'); await wait(200); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
   await login("1111");
-  click("#lock"); await wait(25); posKioskOff(); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400); const nav=async n=>{qa("#nav .nv").find(x=>x.dataset.n===n).click(); await wait(80);};
+  click("#lock"); await wait(25); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400); const nav=async n=>{qa("#nav .nv").find(x=>x.dataset.n===n).click(); await wait(80);};
   const shown=()=>qa(".rp-group:not(.rp-recent):not([hidden]) .rp-item:not([hidden]) span").map(x=>x.textContent).join(", "), type=async v=>{const f=q("#rpFind"); f.value=v; f.dispatchEvent(new Event("input",{bubbles:true})); await wait(10);}, key=async k=>{q("#rpFind").dispatchEvent(new KeyboardEvent("keydown",{key:k,bubbles:true})); await wait(25);};
   await nav("Reports"); log("1 FIRST VISIT: focus "+document.activeElement.id+" | recent "+!!q(".rp-recent"));
   for (const w of ["mpesa","waiter","free","refund","profit","void","money","zzzz"]) { await type(w); log("2 "+w+": "+(shown()||q(".rp-none").textContent)); }

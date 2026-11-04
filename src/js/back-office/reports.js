@@ -24,7 +24,11 @@ document.addEventListener("kf:newday", repToday);
 /** Report columns follow the payment modes the business has added. */
 function pmSync() {
   mnSync();
-  PMK.length = PMH.length = 6;
+  PMK.length = PMH.length = 5;
+  if (fdOn() || SALES.some(s => (s.mx || {}).room)) {
+    PMK.push("room");
+    PMH.push("#Room");
+  }
   payCustoms().forEach(c => {
     PMK.push(c.k);
     PMH.push("#" + c.n);
@@ -278,7 +282,7 @@ function billGroups() {
     Z = new Date(rt + "T23:59:59"),
     open = orders
       .filter(x => {
-        const at = new Date(x.at);
+        const at = new Date(saleAt(x)); // its business date, as settled bills use
         return at >= A && at <= Z && (rd === "All" || billPoints(x.lines).includes(rd));
       })
       .map(x => {
@@ -1686,8 +1690,7 @@ const V = {
    .join("")}</table></div>`;
   },
   cred() {
-    return `<div class="pn"><h4>Add credit customer</h4><div class="fr"><input id="cn" placeholder="Customer name"><input id="cc" type="number" placeholder="Credit limit"><button class="chip on" data-a="addc">Add</button></div></div>
- <div class="pn tw"><table class="t"><tr><th>Customer</th><th class="n">Limit</th><th class="n">Owes</th><th>Record payment</th></tr>${CU.map((c, i) => `<tr><td>${esc(c.n)}</td><td class="n">${c.limit.toLocaleString()}</td><td class="n">${c.owes.toLocaleString()}</td><td><div class="fr"><input type="number" id="cp_${i}" placeholder="Amount"><button class="mini" data-a="pay" data-i="${i}">Save</button></div></td></tr>`).join("")}</table></div>`;
+    return customersHTML();
   }
 };
 let hrr = "occ";
@@ -1787,7 +1790,7 @@ function rrData(k) {
     const m = {};
     RESERVATIONS.forEach(r =>
       r.pays.forEach(p => {
-        const d = toYmd(p.at);
+        const d = bizDateOf(p.at);
         if (d >= a && d <= b) (m[d] = m[d] || { cash: 0, mpesa: 0, account: 0 })[p.method] += p.amt;
       })
     );
@@ -1818,14 +1821,14 @@ function rrData(k) {
         mv = (r.mrate || 0) * ((r.adults || 1) + ((r.children || 0) * FD_SETTINGS.child) / 100);
       for (let i = 0; i < nightsBetween(r.in, r.out); i++) {
         const d = addDays(r.in, i);
-        if (d >= a && d <= b && d <= todayYmd()) {
+        if (d >= a && d <= b && d <= fdToday()) {
           t.n++;
           t.room += r.rate;
           t.meal += mv;
         }
       }
       r.charges.forEach(c => {
-        const d = toYmd(c.at);
+        const d = bizDateOf(c.at);
         if (d >= a && d <= b) t.ex += c.amt;
       });
     });
@@ -1920,7 +1923,7 @@ function rrData(k) {
       ]
     ];
   }
-  const w = addDays(todayYmd(), 7),
+  const w = addDays(fdToday(), 7),
     R = [];
   RESERVATIONS.filter(r => r.status === "reserved" && r.in <= w).forEach(r =>
     R.push(["Arrival", r.guest, r.room, r.in])
@@ -1998,6 +2001,9 @@ function roomsReportHTML() {
  <div class="fr" style="align-items:center;justify-content:space-between"><h3 style="margin:0">${RRL[hrr]}</h3><span>${printTools("rooms")}</span></div><div class="cs">${["rv", "pay", "rt", "gl"].includes(hrr) ? rrRange().join(" to ") : "Live position"}</div>${tb(cols, rows, foot, "Nothing to show for this report and period.")}`;
 }
 function roomsCard() {
+  const on = fdOn();
+  $("#rml").parentElement.style.display = $("#rooms").style.display = on ? "" : "none";
+  if (!on) return;
   $("#rooms").innerHTML = roomsKpiHTML(); // dashboard: the summary cards only
   const occ = ROOMS.filter(r => roomStatus(r) === "occ").length,
     [a, b] = rrRange(),
@@ -2072,10 +2078,15 @@ const V0 = {
         .slice()
         .reverse()
         .slice(0, 20),
-      free = USERS.filter(u => !shiftOf(u.n) && (u.role !== "Waiter" || posOpt("boWaiterShift"))),
+      free = USERS.filter(
+        u =>
+          !shiftOf(u.n) &&
+          u.role !== "Housekeeper" &&
+          (u.role !== "Waiter" || posOpt("boWaiterShift") || shiftDoneOf(u.n))
+      ),
       pays = PAYOUTS.slice().reverse().slice(0, 40);
     return `${shiftAuthHTML()}<div class="pn"><h4>Business day</h4>${d ? `<div>Business date <b>${dateGB(dayDate(d))}</b> · open since ${dm(d.openedAt)} ${hm(d.openedAt)} by ${esc(d.openedBy)} · ${os.length} open shift(s)${dayLate()}</div><div class="fr"><button class="mini" data-a="dend">End day</button><button class="mini" data-a="pcur">Print day so far</button></div>` : `<div>No day is open. The new business date will be <b>${dateGB(nextBizDate())}</b>.</div><div class="fr"><button class="chip on" data-a="dstart">Start new day</button></div>`}</div>
- ${d ? `<div class="pn"><h4>Start a shift and give the float</h4><div class="stk">Or the cashier can enter the float when starting the shift. A float can be changed under Open shifts.</div><div class="fr"><select id="shU">${free.map(u => `<option>${esc(u.n)}</option>`).join("")}</select><input id="shF" type="number" placeholder="Opening float (KES)"><button class="chip on" data-a="sstart">Start shift</button></div></div>` : ""}
+ ${d ? `<div class="pn"><h4>Start a shift and give the float</h4><div class="stk">Or the cashier can enter the float when starting the shift. A float can be changed under Open shifts. Anyone who has closed a shift today can only get another one here.</div><div class="fr"><select id="shU">${free.map(u => `<option>${esc(u.n)}</option>`).join("")}</select><input id="shF" type="number" placeholder="Opening float (KES)"><button class="chip on" data-a="sstart">Start shift</button></div></div>` : ""}
  <div class="pn tw"><h4>Open shifts</h4>${
    os.length
      ? `<table class="t"><tr><th>Staff</th><th>Since</th><th>Float (KES)</th><th class="n">Bills</th><th class="n">Cash sales</th><th class="n">Paid out</th><th class="n">Expected</th><th>Counted cash</th><th></th></tr>${os

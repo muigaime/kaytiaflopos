@@ -15,12 +15,12 @@ const tile=n=>{const hit=()=>qa("#grid .it").find(b=>b.textContent.includes(n));
 const login=async p=>{for (const k of p+"E") { q('#kp [data-k="'+k+'"]').click(); await wait(15); } await wait(450);};
 const send=async l=>{click("#sendBtn"); await wait(20); if(q("#mSend").classList.contains("show")){q("#lbl").value=l; click("#sendGo");} await wait(600);};
 try{
-  click('[data-go="pos"]'); await wait(200); posKioskOff(); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
+  click('[data-go="pos"]'); await wait(200); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
   await login("1111");
   const c=ITEMS.find(i=>i.n==="Corkage"); log("1 AFTER RELOAD: "+JSON.stringify([c.d,c.c,c.p,c.r])+" | avail "+avail(c));
   const m0=MOV.length; await add("Corkage","Bar",3); await wait(20); log("2 CART: "+JSON.stringify(cart)+" | total "+totals().g); await send("T1"); await wait(300); click("#rcClose"); await wait(10); log("3 SENT: "+JSON.stringify(orders[0].lines)+" | stock moves "+(MOV.length-m0));
   click("#ordBtn"); await wait(15); q('#ordList [data-oa="pay"]').click(); await wait(30); const pa=q('[data-pa="cash"]'); pa.value="5000"; pa.dispatchEvent(new Event("input",{bubbles:true})); await wait(15); click("#pOk"); await wait(250); log("4 PAID: "+JSON.stringify(SALES.at(-1).lines.map(l=>[l.n,l.q,l.p]))+" | g "+SALES.at(-1).g+" | bills "+orders.length); click("#rcClose"); await wait(10);
-  click("#lock"); await wait(25); posKioskOff(); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400); const nav=async n=>{qa("#nav .nv").find(x=>x.dataset.n===n).click(); await wait(80);};
+  click("#lock"); await wait(25); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400); const nav=async n=>{qa("#nav .nv").find(x=>x.dataset.n===n).click(); await wait(80);};
   await nav("Reports"); log("5 REPORT OPENS: "+qa("#vSub table tr").length); await nav("Inventory"); click('[data-a="inv_tab"][data-t="position"]'); await wait(50); log("6 STOCK POSITION OK: "+qa("#vSub table tr").length); await nav("Recipes & Production"); await wait(40); log("7 RECIPES OK: "+!!q("#vSub .inv")); await nav("Selling points"); click('[data-a="pl_open"]'); await wait(40); log("8 PRICE LIST: "+q("#plView").textContent.includes("Corkage")); click('[data-a="pl_close"]'); await wait(20); click('[data-a="sp_open"][data-o="Bar"]'); await wait(50); log("9 STOCK TAKE TAB OK: "+(click('[data-a="sp_sub"][data-k="count"]'),await wait(30),!!q("#spCount")));
 }catch(e){log("X "+e.message)}
 document.documentElement.setAttribute("data-test",__E.join(" @@ "));document.title="done";})();</script>`;

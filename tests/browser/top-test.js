@@ -15,11 +15,11 @@ const tile=n=>{const hit=()=>qa("#grid .it").find(b=>b.textContent.includes(n));
 const login=async p=>{for (const k of p+"E") { q('#kp [data-k="'+k+'"]').click(); await wait(15); } await wait(450);};
 const send=async l=>{click("#sendBtn"); await wait(20); if(q("#mSend").classList.contains("show")){q("#lbl").value=l; click("#sendGo");} await wait(600);};
 try{
-  click('[data-go="pos"]'); await wait(200); posKioskOff(); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
+  click('[data-go="pos"]'); await wait(200); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
   await login("1111");
   const newB=async l=>{click("#newSale"); await wait(15); q("#fTable").value=l; click("#sendBtn"); await wait(25);}, snd=async l=>{await send(l); await wait(400); click("#rcClose"); await wait(10);}, right=()=>qa("#trTL > *").map(e=>e.classList.contains("tr-sec")?"["+e.textContent+"]":e.classList.contains("tr-e")?"("+e.textContent+")":e.querySelector("b").textContent+(e.classList.contains("fresh")?"*":"")).join(" "), left=()=>qa("#trL .tr-b").map(b=>b.querySelector("b").textContent).join(",");
   await add("Tusker","Bar"); await snd("T1"); await add("Fish","Restaurant"); await snd("T2");
-  click("#lock"); await wait(25); posKioskOff(); await login("0000"); click("#billBtn"); await wait(10); click('[data-bo="split"]'); await wait(20); log("1 NO EMPTY YET: "+right()); q("#mBopt").classList.remove("show");
+  click("#lock"); await wait(25); await login("0000"); click("#billBtn"); await wait(10); click('[data-bo="split"]'); await wait(20); log("1 NO EMPTY YET: "+right()); q("#mBopt").classList.remove("show");
   await newB("E1"); await add("Tusker","Bar"); await snd("T3"); await newB("E2");
   click("#billBtn"); await wait(10); click('[data-bo="split"]'); await wait(20); log("2 RIGHT: "+right()); log("3 LEFT HAS NO EMPTIES: "+left());
   const qt=q("#trT"); qt.value="E1"; qt.dispatchEvent(new Event("input",{bubbles:true})); await wait(10); log("4 SEARCH EMPTY: "+right()); qt.value="T1"; qt.dispatchEvent(new Event("input",{bubbles:true})); await wait(10); log("5 SEARCH OTHER: "+right()); qt.value=""; qt.dispatchEvent(new Event("input",{bubbles:true})); await wait(10);

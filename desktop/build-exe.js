@@ -58,6 +58,8 @@ const OUT = process.argv[2] || "C:\\Users\\LIAM\\Desktop\\compiled";
   });
   fs.mkdirSync(OUT, { recursive: true });
   fs.copyFileSync(exe, path.join(OUT, "KaytiaFlow.exe"));
+  // The same program: it installs, or updates what's already on C:, whatever it's called.
+  fs.copyFileSync(exe, path.join(OUT, "KaytiaFlow_Update.exe"));
   for (const f of ["README.txt", "kaytia.env.example"])
     fs.copyFileSync(path.join(HERE, f), path.join(OUT, f));
   fs.rmSync(work, { recursive: true, force: true });

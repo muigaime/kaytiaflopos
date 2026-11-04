@@ -1,5 +1,5 @@
-// ---- A waiter's own shift screen: start, sales, pending bills, send them to a cashier, end ----
-// Cashiers count a till and use Shift Management. A waiter only needs this.
+// ---- A waiter's screen when they can't sell: why, their sales, and pending bills to send to a cashier ----
+// Cashiers count a till and use Shift Management. A waiter's own shift runs by itself.
 const msSales = n => SALES.filter(s => (s.waiter || s.user) === n);
 const msOn = (L, ymd) => L.filter(s => ymdOf(saleAt(s)) === ymd);
 const msBills = L => new Set(L.filter(s => !s.ret).map(s => s.no)).size;
@@ -113,7 +113,7 @@ function msPendingHTML(n) {
     open = msEdit && P.find(o => o.no === msEdit.no);
   return `<div class="shc"><h4>Pending bills</h4>${
     P.length
-      ? `<div style="overflow:auto"><table class="sht"><tr><th>Bill</th><th>Table</th><th class="n">Total</th><th></th></tr>${P.map(o => `<tr><td>${hx(o.no)}</td><td>${hx(o.label)}</td><td class="n">${R2(totals(o.lines, o).g)}</td><td class="n">${can("sendPending") ? `<button class="mini" data-sa="ms_open" data-no="${hx(o.no)}">Send to cashier</button>` : ""}</td></tr>`).join("")}</table></div>${open ? msSendHTML(open) : ""}<div class="stk" style="margin-top:8px">You can't end your shift until these are cleared or sent to a cashier.</div>`
+      ? `<div style="overflow:auto"><table class="sht"><tr><th>Bill</th><th>Table</th><th class="n">Total</th><th></th></tr>${P.map(o => `<tr><td>${hx(o.no)}</td><td>${hx(o.label)}</td><td class="n">${R2(totals(o.lines, o).g)}</td><td class="n">${can("sendPending") ? `<button class="mini" data-sa="ms_open" data-no="${hx(o.no)}">Send to cashier</button>` : ""}</td></tr>`).join("")}</table></div>${open ? msSendHTML(open) : ""}<div class="stk" style="margin-top:8px">Clear these or send them to a cashier.</div>`
       : `<div class="stk">You have no pending bills.</div>`
   }</div>`;
 }
@@ -160,6 +160,7 @@ function payMoneyHTML(L) {
     : "";
 }
 function msDraw(msg) {
+  waiterAuto();
   const n = user.n,
     d = curDay(),
     sh = shiftOf(n),
@@ -175,39 +176,15 @@ function msDraw(msg) {
     main = `<div class="shc"><div class="status bad">The day has not been started.</div>${canDay() ? `<div class="stk">The new business date will be <b>${dateGB(nextBizDate())}</b>.</div><button class="chip on" data-sa="dstart">Start new day</button>` : `<div class="stk">Back Office or a cashier has to start the new day. You can start your shift after that.</div>`}</div>`;
   else if (!sh && shiftHeld()) main = shiftHeldHTML();
   else if (!sh)
-    main = `<div class="shc"><button class="chip on ms-go" data-sa="ms_start">Start shift</button></div>`;
-  else
-    main = `<div class="shc ms-open"><div class="status ok">Shift open since ${hm(sh.openedAt)}</div><div class="ms-acts"><button class="chip on" data-sa="ms_end">End shift</button></div></div>`;
+    main = `<div class="shc"><div class="status">${wcShifts(n).some(s => s.cleared) ? "You've been cleared for today. A manager can open another shift in Back Office." : "You can sell again once the new day starts."}</div></div>`;
+  else main = "";
   $("#shMgr").innerHTML =
-    `<div class="shm"><div class="shm-top"><h2>My shift</h2><button class="mini" data-sa="exit">Exit</button></div>${msg ? `<div class="status">${msg}</div>` : ""}${bizLateNote()}${main}
-  <div class="ms-tiles">${tile("Sales today", "KES " + R2(msSum(today)))}${tile("Bills today", msBills(today))}${tile("Last 7 days", "KES " + R2(msSum(week)))}${tile("Pending bills", P.length, "KES " + R2(pend))}</div>
-  <div class="shc">${msChart(n)}</div>${!sh && d && shiftHeld() ? "" : msPendingHTML(n)}</div>`;
-}
-/** A waiter counts no cash: the shift just ends, and nothing prints. */
-function msEnd() {
-  const sh = shiftOf(user.n),
-    r = shiftEnd(sh, Math.max(0, shiftCalc(sh).expected), user.n);
-  if (r) return msDraw(r);
-  shiftBadge();
-  msDraw("Shift ended.");
+    `<div class="shm"><div class="shm-top"><h2>My bills</h2><button class="mini" data-sa="exit">Exit</button></div>${msg ? `<div class="status">${msg}</div>` : ""}${bizLateNote()}${main}${!sh && d && shiftHeld() ? "" : msPendingHTML(n)}
+  <div class="ms-tiles">${tile("Pending bills", P.length, "KES " + R2(pend))}${tile("Sales today", "KES " + R2(msSum(today)))}${tile("Bills today", msBills(today))}${tile("Last 7 days", "KES " + R2(msSum(week)))}</div>
+  <div class="shc">${msChart(n)}</div></div>`;
 }
 function msAct(a, b) {
   const n = user.n;
-  if (a === "ms_start") {
-    if (dayOver()) return msDraw();
-    const r = shiftStart(n, 0, n);
-    if (r) return msDraw(r);
-    shiftBadge();
-    return $("#shMgr").classList.remove("show");
-  }
-  if (a === "ms_end") {
-    const left = pendingOf(n).length;
-    if (left)
-      return msDraw(
-        `You have ${left} pending bill${left === 1 ? "" : "s"}. Clear ${left === 1 ? "it" : "them"} or send ${left === 1 ? "it" : "them"} to a cashier before ending your shift.`
-      );
-    return msEnd();
-  }
   if (a === "ms_open") {
     const o = orders.find(x => x.no === b.dataset.no);
     msEdit = {

@@ -41,8 +41,15 @@ V.settings = () => {
   <div class="fr" style="align-items:end"><label>VAT (%)<input data-iv="hs.taxB" inputmode="decimal" value="${esc(invF.hs.taxB)}"></label><label>Tax C (%)<input data-iv="hs.taxC" inputmode="decimal" value="${esc(invF.hs.taxC)}"></label><button class="chip on" style="flex:none" data-a="hs_tax">Save tax rates</button></div></div>`,
     paymodes: payModesHTML,
     voids: voidReasonsHTML,
-    cats: categoriesHTML,
     printers: () => machinesHTML() + printerSetupHTML() + printersHTML(),
+    modules: () => {
+      if (!mdlOpen) {
+        setTimeout(() => $("#modPw") && $("#modPw").focus(), 30);
+        return `<div class="pn"><h4>Modules</h4><div class="stk">Enter the modules password to open this page.</div><div class="fr" style="align-items:end"><label>Password<input id="modPw" type="password" autocomplete="new-password" aria-label="Modules password"></label><button class="chip on" style="flex:none" data-a="hs_modgo">Open modules</button></div></div>`;
+      }
+      const on = fdOn();
+      return `<div class="pn"><div class="fr" style="align-items:center;justify-content:space-between"><h4 style="margin:0">Modules</h4><button class="mini" style="flex:none" data-a="hs_modlock">Lock</button></div><div class="stk">Switch off what this business doesn't use. Nothing is deleted: switch it back on and everything returns as it was.</div><div class="tw"><table class="t"><tr><td><b>Front Desk and room reports</b><small class="pr-code">Rooms, bookings, check-in, housekeeping, guest bills, Room reports and Post to room. Switch it off for a business with no rooms.</small></td><td><span class="tag ${on ? "ok" : ""}">${on ? "On" : "Off"}</span></td><td class="n"><button class="pv-sw ${on ? "on" : ""}" data-a="hs_fdtog" role="switch" aria-checked="${on}" aria-label="Front Desk and room reports"><i></i></button></td></tr></table></div></div>`;
+    },
     backup: backupHTML,
     network: networkHTML
   };
@@ -59,7 +66,74 @@ function taxSave() {
   toast("Tax rates saved. New bills will use them.");
   all();
 }
+// ---- The Modules page opens with its own password, whoever is signed in. It locks again on leaving. ----
+// Only hashes are kept here: the browser's own, and the fallback H uses where the browser has none.
+const MOD_PASS = [
+  "e3e02f8e72cb08c8a232b09650d2c79e16456725bb2c609dbce961e4b0b516f4",
+  "x3766526800"
+];
+let mdlOpen = false,
+  mdlFails = 0,
+  mdlLocked = 0;
+const mdlLock = () => (mdlOpen = false);
+async function mdlUnlock() {
+  const el = $("#modPw");
+  if (!el) return;
+  if (Date.now() < mdlLocked) return toast("Too many tries. Wait 30 seconds.");
+  const typed = el.value;
+  el.value = "";
+  if (typed && MOD_PASS.includes(await H("module|" + typed))) {
+    mdlFails = 0;
+    mdlOpen = true;
+    auditAdd("Settings", "Modules page opened");
+    return all();
+  }
+  if (++mdlFails >= 5) {
+    mdlLocked = Date.now() + 3e4;
+    mdlFails = 0;
+  }
+  auditAdd("Failed sign-in", "Wrong modules password", { pri: "high" });
+  toast("That is not the modules password.");
+  el.focus();
+}
+$("#vSub").addEventListener("keydown", e => {
+  if (e.target.id !== "modPw" || e.key !== "Enter") return;
+  e.preventDefault();
+  mdlUnlock();
+});
+/** Guests still in the house, booked or owing would be left with no way to reach them. */
+function fdModuleToggle() {
+  if (!mdlOpen) return;
+  if (!boCan("set.manage")) return boDenied();
+  if (fdOn()) {
+    const inn = RESERVATIONS.filter(r => r.status === "inhouse").length,
+      due = RESERVATIONS.filter(r => r.status === "reserved").length,
+      owe = RESERVATIONS.filter(r => r.status === "out" && folioOf(r).bal > 0.009).length,
+      why = [
+        inn && plural(inn, "guest") + " in the house",
+        due && plural(due, "booking") + " still open",
+        owe && plural(owe, "checked-out guest") + " still owing"
+      ].filter(Boolean);
+    if (why.length) return toast(`The Front Desk can't be switched off yet: ${why.join(", ")}.`);
+  }
+  FD_SETTINGS.frontDeskOff = fdOn();
+  const on = fdOn();
+  auditAdd("Settings", `Front Desk and room reports switched ${on ? "on" : "off"}`);
+  bosave();
+  fdModuleApply();
+  applyBoRights();
+  go("Settings");
+  mdlOpen = true; // going back to Settings locks the page; this person just used it
+  all();
+  toast(on ? "Front Desk and room reports are on." : "Front Desk and room reports are off.");
+}
 async function settingsAct(a, b) {
+  if (a === "modgo") return mdlUnlock();
+  if (a === "modlock") {
+    mdlLock();
+    return all();
+  }
+  if (a === "fdtog") return fdModuleToggle();
   if (a === "tax") return taxSave();
   if (["tab", "logorm", "payadd", "paydel", "daytime"].includes(a)) return generalAct(a, b);
   if (a === "test") {

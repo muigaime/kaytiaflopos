@@ -90,7 +90,7 @@ function raw(port, p, { host, headers = {}, method = "GET", ip = "127.0.0.1" } =
   await A.ev(`fetch("/lan/main",{method:"POST",headers:{"content-type":"application/json"},body:"{}"}).then(r=>r.ok)`);
   await A.reload();
   await A.ev(helpers);
-  await A.ev(`(async()=>{ T.click('[data-go="pos"]'); await T.wait(300); posKioskOff(); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t")); await T.login("1111"); return true; })()`);
+  await A.ev(`(async()=>{ T.click('[data-go="pos"]'); await T.wait(300); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t")); await T.login("1111"); return true; })()`);
   log("1B POS:", await A.ev(`({user:user&&user.n,day:!!curDay(),shift:!!(user&&shiftOf(user.n)),login:document.querySelector("#login").style.display,tabs:!!document.querySelector("#spTabs"),modals:[...document.querySelectorAll(".modal.show")].map(x=>x.id),gate:(document.querySelector("#fsGate")||{}).hidden,ids:SHIFTS.length,licence:typeof LIC})`)); await A.shot(path.join(RUN,"lan-a.png"));
   await A.ev(`T.sell("Tusker",2,"M1")`);
   await sleep(5000);
@@ -106,7 +106,7 @@ function raw(port, p, { host, headers = {}, method = "GET", ip = "127.0.0.1" } =
   log("5 TILL HAS MAIN'S DATA:", await B.ev(facts));
   log("5B MACHINE NAME KEPT:", await B.ev(`localStorage.getItem("kaytia_machine")`), "| license on till is its own:", await B.ev(`JSON.parse(localStorage.getItem("kaytia_pos_bo_v1")).LI?.code||""`) !== await A.ev(`JSON.parse(localStorage.getItem("kaytia_pos_bo_v1")).LI?.code||""`));
   await B.ev(helpers);
-  await B.ev(`(async()=>{ T.click('[data-go="pos"]'); await T.wait(300); posKioskOff(); await T.login("3333"); return true; })()`);
+  await B.ev(`(async()=>{ T.click('[data-go="pos"]'); await T.wait(300); await T.login("3333"); return true; })()`);
   // Main reloads so that it knows a till exists and numbers bills in its series
   await sleep(4000);
   log("6 SERIES:", "main", await A.ev(`window.__lan`), "till", await B.ev(`window.__lan`));

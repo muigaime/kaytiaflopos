@@ -15,10 +15,10 @@ const tile=n=>{const hit=()=>qa("#grid .it").find(b=>b.textContent.includes(n));
 const login=async p=>{for (const k of p+"E") { q('#kp [data-k="'+k+'"]').click(); await wait(15); } await wait(450);};
 const send=async l=>{click("#sendBtn"); await wait(20); if(q("#mSend").classList.contains("show")){q("#lbl").value=l; click("#sendGo");} await wait(600);};
 try{
-  click('[data-go="pos"]'); await wait(200); posKioskOff(); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
+  click('[data-go="pos"]'); await wait(200); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
   await login("1111");
   await add("Tusker","Bar",2); await send("T1"); await wait(300); click("#rcClose"); await wait(10); click("#ordBtn"); await wait(15); q('#ordList [data-oa="pay"]').click(); await wait(30); const pa=q('[data-pa="cash"]'); pa.value="5000"; pa.dispatchEvent(new Event("input",{bubbles:true})); await wait(15); click("#pOk"); await wait(250); click("#rcClose"); await wait(10);
-  click("#lock"); await wait(25); posKioskOff(); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="wrongpass"; await wait(700); click("#boGo"); await wait(900); q("#boP").value="admin123"; await wait(100); click("#boGo"); await wait(1400); const nav=async n=>{qa("#nav .nv").find(x=>x.dataset.n===n).click(); await wait(100);};
+  click("#lock"); await wait(25); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="wrongpass"; await wait(700); click("#boGo"); await wait(900); q("#boP").value="admin123"; await wait(100); click("#boGo"); await wait(1400); const nav=async n=>{qa("#nav .nv").find(x=>x.dataset.n===n).click(); await wait(100);};
   await nav("Products List"); const pr=q('[data-pr="1"]'); pr.value="222"; pr.dispatchEvent(new Event("change",{bubbles:true})); await wait(30);
   STK["Main Store"]=STK["Main Store"]||{}; mv("Main Store","a",5,"RECEIVE","Test delivery","","GRN-1","Boss"); mv("Bar","a",-1,"DAMAGE","Broken","","DMG","Boss"); BILLLOG.push({at:new Date().toISOString(),act:"Void",no:"00009",label:"T9",dept:"Bar",by:"Boss",user:"Jane Waiter",why:"Wrong order",detail:"Whole bill",amt:-500,points:["Bar"]});
   await nav("Audit log"); const rows=()=>qa("#alBody .al-row").length, sel=async(k,v)=>{const e=q('[data-al="'+k+'"]'); e.value=v; e.dispatchEvent(new Event("change",{bubbles:true})); await wait(40);}, nat=()=>[...new Set(qa("#alBody .al-row .pr-cat").map(x=>x.textContent))].join(", ");

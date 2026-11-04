@@ -55,7 +55,6 @@ const NAV = [
   [
     "Operations",
     [
-      ["Point of Sale", "pos"],
       ["Sales &amp; Orders", "cart"],
       ["Shifts &amp; Day", "id"],
       ["Purchasing", "dl"],

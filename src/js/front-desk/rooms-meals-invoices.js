@@ -4,7 +4,7 @@ function roomPanel() {
   const x = roomStatus(r),
     st = stayOf(r.no),
     rv = RESERVATIONS.find(
-      q => q.room === r.no && q.status === "reserved" && q.in <= todayYmd() && q.out > todayYmd()
+      q => q.room === r.no && q.status === "reserved" && q.in <= fdToday() && q.out > fdToday()
     );
   let b = "";
   if (x === "occ")
@@ -26,14 +26,14 @@ const revenueByDay = (a, b) => {
     const mv = (r.mrate || 0) * ((r.adults || 1) + ((r.children || 0) * FD_SETTINGS.child) / 100);
     for (let i = 0; i < nightsBetween(r.in, r.out); i++) {
       const d = addDays(r.in, i);
-      if (d >= a && d <= b && d <= todayYmd()) {
+      if (d >= a && d <= b && d <= fdToday()) {
         const o = O(d);
         o.room += r.rate;
         o.meal += mv;
       }
     }
     r.charges.forEach(c => {
-      const d = toYmd(c.at);
+      const d = bizDateOf(c.at);
       if (d >= a && d <= b) O(d).ex += c.amt;
     });
   });
@@ -49,7 +49,7 @@ function mealRows(a, b) {
       mv = (r.mrate || 0) * ((r.adults || 1) + ((r.children || 0) * FD_SETTINGS.child) / 100);
     for (let i = 0; i < nightsBetween(r.in, r.out); i++) {
       const d = addDays(r.in, i);
-      if (d >= a && d <= b && d <= todayYmd()) {
+      if (d >= a && d <= b && d <= fdToday()) {
         const o = (day[d] = day[d] || { rooms: 0, covers: 0, rev: 0 }),
           p = (plan[r.plan] = plan[r.plan] || { rooms: 0, covers: 0, rev: 0 });
         o.rooms++;
@@ -66,9 +66,7 @@ function mealRows(a, b) {
 function mealCard() {
   return `<div class="fd-card"><h4>Meal plans (per person per night)</h4><div class="fd-form">${["BB", "HB", "FB"].map(k => `<label>${MEAL_PLANS[k]} (KES)<input type="number" data-mp="${k}" value="${FD_SETTINGS.meals[k] || 0}"></label>`).join("")}<label>Child price (% of adult)<input type="number" data-mc="1" value="${FD_SETTINGS.child}"></label></div><div class="stk">Room rates stay room-only. The meal plan is added on top and shown as its own line on bills, invoices and reports.</div></div>`;
 }
-const dateRangeBarHTML = () =>
-  `<div class="fd-card"><div class="fd-form"><label>From<input type="date" data-rg="0" value="${fdDateRange[0]}"></label><label>To<input type="date" data-rg="1" value="${fdDateRange[1]}"></label></div></div>`;
 function guestInvoiceHTML(r, by) {
   const f = folioOf(r);
-  return `<div class="rd"><h2>${hx(FD_SETTINGS.name.toUpperCase())}</h2><div class="c">GUEST INVOICE</div><div class="c">${new Date().toLocaleString("en-GB")}</div><hr><table>${rr("Guest", hx(r.guest))}${rr("Room", r.room + " · " + r.type)}${rr("Arrival", r.in)}${rr("Departure", r.out)}${rr("Nights", f.n)}</table><hr><table>${rr("Room " + f.n + " x " + R2(r.rate), R2(f.room))}${f.meal > 0 ? rr(MEAL_PLANS[r.plan] + " (" + (r.adults || 1) + " adult" + (r.children || 0 ? "+" + r.children + " child" : "") + ") x" + f.n, R2(f.meal)) : ""}${r.charges.map(c => rr(hx(c.cat + ": " + c.desc), R2(c.amt))).join("")}${rr("TOTAL", R2(f.total), 1)}</table><hr><div class="sec">PAYMENTS</div>${r.pays.length ? `<table>${r.pays.map(p => rr(toYmd(p.at) + " " + (PAY_METHODS[p.method] || p.method), R2(p.amt))).join("")}</table>` : "<div>None</div>"}<hr><table>${rr("Balance due", R2(f.bal), 1)}</table><hr><div class="c">Thank you for staying with us</div><div class="c">Printed by ${hx(by || "")}</div></div>`;
+  return `<div class="rd"><h2>${hx(FD_SETTINGS.name.toUpperCase())}</h2><div class="c">GUEST INVOICE</div><div class="c">${new Date().toLocaleString("en-GB")}</div><hr><table>${rr("Guest", hx(r.guest))}${rr("Room", r.room + " · " + r.type)}${rr("Arrival", r.in)}${rr("Departure", r.out)}${rr("Nights", f.n)}</table><hr><table>${rr("Room " + f.n + " x " + R2(r.rate), R2(f.room))}${f.meal > 0 ? rr(MEAL_PLANS[r.plan] + " (" + (r.adults || 1) + " adult" + (r.children || 0 ? "+" + r.children + " child" : "") + ") x" + f.n, R2(f.meal)) : ""}${r.charges.map(c => rr(hx(c.cat + ": " + c.desc), R2(c.amt))).join("")}${rr("TOTAL", R2(f.total), 1)}</table><hr><div class="sec">PAYMENTS</div>${r.pays.length ? `<table>${r.pays.map(p => rr(bizDateOf(p.at) + " " + (PAY_METHODS[p.method] || p.method), R2(p.amt))).join("")}</table>` : "<div>None</div>"}<hr><table>${rr("Balance due", R2(f.bal), 1)}</table><hr><div class="c">Thank you for staying with us</div><div class="c">Printed by ${hx(by || "")}</div></div>`;
 }

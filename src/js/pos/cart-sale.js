@@ -309,7 +309,6 @@ function tapConfirm(btn, fn, msg) {
   }, 2500);
 }
 function resetSale() {
-  cartSwaps = [];
   // A printed number has been seen by a guest, so it isn't used again.
   if (draft && draft.printed) draft = null;
   cart = {};
@@ -752,7 +751,7 @@ $("#printBtn").onclick = () => {
     const print = by => {
       if (draft) billMark(draft, by, user.n, cart);
       drawCart();
-      showRc(
+      rcFill(
         waiterCopies(
           guestBillHTML({
             pt: billPoints(cart)[0],
@@ -772,7 +771,7 @@ $("#printBtn").onclick = () => {
         null,
         "Close"
       );
-      printSlips("GUEST BILL");
+      printSlips("GUEST BILL").then(r => rcDone(r, "Bill printed."));
     };
     if (draft && draft.printed && !BILL_AUTH.includes(user.role))
       return pinAsk("Reprint bill " + draft.no, PIN_REPRINT, print);
@@ -781,7 +780,8 @@ $("#printBtn").onclick = () => {
 };
 $("#lock").onclick = e => {
   const go = () => {
-    posKioskOn(); // the next person starts in full screen
+    fsEnter(); // the next person starts maximised
+    if (user && shiftOf(user.n)) shiftOf(user.n).lastOut = new Date().toISOString();
     user = null;
     pin = "";
     pdraw();

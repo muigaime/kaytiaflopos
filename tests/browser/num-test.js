@@ -15,9 +15,9 @@ const tile=n=>{const hit=()=>qa("#grid .it").find(b=>b.textContent.includes(n));
 const login=async p=>{for (const k of p+"E") { q('#kp [data-k="'+k+'"]').click(); await wait(15); } await wait(450);};
 const send=async l=>{click("#sendBtn"); await wait(20); if(q("#mSend").classList.contains("show")){q("#lbl").value=l; click("#sendGo");} await wait(600);};
 try{
-  click('[data-go="pos"]'); await wait(200); posKioskOff(); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
+  click('[data-go="pos"]'); await wait(200); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
   await login("1111");
-  const relog=async p=>{click("#lock"); await wait(25); posKioskOff(); await login(p);}, pay=async o=>{openPay(o); await wait(20); q("#pAmt").value="9000"; click("#pOk"); await wait(35); const t=q("#rc").innerText.replace(/\\s+/g," "); click("#rcClose"); await wait(10); return t;}, snd=async l=>{await send(l); await wait(450); click("#rcClose"); await wait(10);}, ol=()=>orders.map(o=>o.label+" bill "+o.no+" order "+o.ord).join(" ; ");
+  const relog=async p=>{click("#lock"); await wait(25); await login(p);}, pay=async o=>{openPay(o); await wait(20); q("#pAmt").value="9000"; click("#pOk"); await wait(35); const t=q("#rc").innerText.replace(/\\s+/g," "); click("#rcClose"); await wait(10); return t;}, snd=async l=>{await send(l); await wait(450); click("#rcClose"); await wait(10);}, ol=()=>orders.map(o=>o.label+" bill "+o.no+" order "+o.ord).join(" ; ");
   ${outPng ? '' : `
   log("1 NEXT BILL SHOWN: "+q("#fBill").value);
   await add("Tusker","Bar"); await send("T1"); await wait(450); log("2 TICKET: "+q("#rc .sl-order").innerText.replace(/\\s+/g," ").slice(0,110)); click("#rcClose"); await wait(10);
@@ -32,7 +32,7 @@ try{
   await relog("3333"); await add("Tusker"); await snd("S1"); log("11 OTHER WAITER: "+orders.at(-1).no+" order "+orders.at(-1).ord);
   bosave(); const sv=JSON.parse(localStorage.getItem("kaytia_pos_bo_v1")); log("12 SAVED RN "+sv.RN+" ON "+sv.ON);
   sv.S[0].no="NBO-000777"; sv.OR.push({no:"ORD-004",label:"Old",dept:"Bar",lines:{1:1},rounds:1,at:new Date().toISOString(),waiter:"Solo Sam"}); sv.BL=[{at:new Date().toISOString(),act:"Void",no:"ORD-004",label:"x",dept:"Bar",by:"b",user:"u",why:"",detail:"d",amt:0}]; delete sv.RN; localStorage.setItem("kaytia_pos_bo_v1",JSON.stringify(sv));`}
-  posKioskOff(); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400);
+  q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400);
   log("13 BRAND: "+q("#bo .lg").innerText.replace(/\\s+/g," ")+" | img "+!!q("#bo .lg img")+" | title "+document.title);
   q('#nav .nv[data-n="Sales & Orders"]').click(); await wait(30);
   const sr=()=>qa("#salesList .so-r summary").map(x=>x.innerText.replace(/\\s+/g," ").trim()).join("\\n   "), hd=()=>q(".so-head").innerText.replace(/\\s+/g," ");

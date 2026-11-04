@@ -15,11 +15,11 @@ const tile=n=>{const hit=()=>qa("#grid .it").find(b=>b.textContent.includes(n));
 const login=async p=>{for (const k of p+"E") { q('#kp [data-k="'+k+'"]').click(); await wait(15); } await wait(450);};
 const send=async l=>{click("#sendBtn"); await wait(20); if(q("#mSend").classList.contains("show")){q("#lbl").value=l; click("#sendGo");} await wait(600);};
 try{
-  click('[data-go="pos"]'); await wait(200); posKioskOff(); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
+  click('[data-go="pos"]'); await wait(200); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
   await login("1111");
   const today=bizDate(), mk=(no,g,dept,h,pay)=>({no,g,bd:today,tax:g*0.138,net:g*0.862,dept,label:"T1",user:"Jane Waiter",waiter:"Jane Waiter",at:new Date(today+"T"+String(h).padStart(2,"0")+":30:00"),mx:{[pay]:g},lines:[{id:1,n:"Tusker",q:g/200,p:200,t:"B"}]});
   for(let i=0;i<8;i++) SALES.push(mk("B"+i,200*(i+1),i%2?"Bar":"Restaurant",9+i,i%3?"cash":"mpesa"));
-  click("#lock"); await wait(25); posKioskOff(); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400); const nav=async n=>{qa("#nav .nv").find(x=>x.dataset.n===n).click(); await wait(100);};
+  click("#lock"); await wait(25); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400); const nav=async n=>{qa("#nav .nv").find(x=>x.dataset.n===n).click(); await wait(100);};
   const set=(s,v)=>{const e=q(s); e.value=v; e.dispatchEvent(new Event("input",{bubbles:true})); e.dispatchEvent(new Event("change",{bubbles:true}));};
   await nav("Reports"); log("1 OPENS: "+q(".rp-head h3").textContent+" | "+q(".rp-head p").textContent+" | on "+q(".rp-item.on").textContent+" | groups "+qa(".rp-gh").map(x=>x.textContent).join()+" | items "+qa(".rp-item").length+" | pill "+q(".pr-pill.on").textContent);
   const every=qa(".rp-item").map(b=>b.dataset.r); let bad=[]; for(const k of every){ const bt=q('[data-r="'+k+'"]'); if(bt) bt.click(); else set("[data-rpsel]",k); await wait(25); const h=q(".rp-head h3"), w=q(".rp-head p").textContent; if(!h||!w) bad.push(k); if(q(".rp-item.on")&&q(".rp-item.on").dataset.r!==k) bad.push("on:"+k); if(q("[data-rpsel]")&&q("[data-rpsel]").value!==k) bad.push("sel:"+k); if(!q('[data-a="rep_full"]')) bad.push("btn:"+k);} log("2 ALL "+every.length+" OPEN: problems ["+bad.join()+"] | jump "+!!q("[data-rpsel]"));

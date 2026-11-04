@@ -91,7 +91,13 @@ const billsFor = (u, pts) =>
 const visOrders = () => billsFor(user, DEPTS);
 const hhmm = d => d.toLocaleTimeString("en-KE", { hour: "2-digit", minute: "2-digit" });
 const cnt = c => Object.values(c).reduce((a, b) => a + b, 0);
-function showRc(html, charge, closeLbl) {
+let rcAsk = false; // the receipt is waiting for Yes or No
+/** Puts slips on the (hidden) popup, ready to print. */
+function rcFill(html, charge, closeLbl) {
+  rcAsk = false;
+  $("#rcPrint").textContent = "Print";
+  $("#rcPrint").className = "mini";
+  $("#rcClose").className = "chip on";
   $("#rc").innerHTML = html;
   $("#rcClose").textContent = closeLbl;
   const b = $("#rcCharge");
@@ -102,7 +108,15 @@ function showRc(html, charge, closeLbl) {
         openPay([charge]);
       }
     : null;
+}
+function showRc(html, charge, closeLbl) {
+  rcFill(html, charge, closeLbl);
   $("#mRc").classList.add("show");
+}
+/** Printed: a word on the screen. Not printed, or no printer set up: the slip, so it can't be lost. */
+function rcDone(result, msg) {
+  if (result === "ok") fsNote(msg);
+  else $("#mRc").classList.add("show");
 }
 function tblFill() {
   $("#tblL").innerHTML = TBL.map(t => `<option value="${slipEsc(t.n)}">`).join("");
@@ -260,28 +274,13 @@ function doSend(label) {
     itemStockMove(get(id), q);
   }
   o.rounds++;
-  // Swaps made before sending go on this order's stamp, and into the report, now that it's a bill.
-  const swaps = cartSwaps.filter(x => round[x.toId]);
-  swaps.forEach(x => {
-    swapLog(o, x);
-    (o.ex = o.ex || []).push({
-      at: new Date(),
-      by: x.user,
-      from: x.from,
-      to: x.to,
-      q: x.q,
-      reason: x.reason,
-      authBy: x.by
-    });
-  });
-  cartSwaps = [];
   const both = posOpt("orderAndBill") && can("printGuest") && Object.keys(o.lines).length > 0;
   if (both) o.printed = true;
   cart = {};
   cur = null;
   $("#mSend").classList.remove("show");
   drawCart();
-  showRc(
+  rcFill(
     (tickets = orderTickets(round, {
       no: o.no,
       ord: o.ord,
@@ -294,8 +293,7 @@ function doSend(label) {
       rider: o.rider,
       round: o.rounds,
       note: kmsg,
-      adj: o,
-      swaps
+      adj: o
     }))
       .map(x => x.html)
       .join("") +
@@ -304,8 +302,13 @@ function doSend(label) {
     null,
     "Close"
   );
-  printOrderTickets(tickets).then(() => both && printSlips("GUEST BILL", true));
-  logoutAfterRc = posOpt("autoLogout");
+  printOrderTickets(tickets).then(async r => {
+    if (both && (await printSlips("GUEST BILL", true)) !== "ok") r = "bad";
+    rcDone(r, both ? "Order sent and bill printed." : "Order sent.");
+    if (!posOpt("autoLogout")) return;
+    if (r === "ok") $("#lock").click();
+    else logoutAfterRc = true; // once the popup is closed
+  });
   kmsg = "";
   rider = null;
   ["fTable", "fGuest", "fCov", "fRoom"].forEach(i => ($("#" + i).value = ""));
@@ -377,8 +380,8 @@ $("#ordList").onclick = e => {
       ordersKeep();
       // Select stays open behind the bill, so its colour changes straight away.
       if ($("#mSel").classList.contains("show")) selRender();
-      showRc(billSlip(o), o, "Close");
-      printSlips("GUEST BILL");
+      rcFill(billSlip(o), o, "Close");
+      printSlips("GUEST BILL").then(r => rcDone(r, "Bill printed."));
     };
     if (o.printed && !BILL_AUTH.includes(user.role))
       return pinAsk("Reprint bill " + o.no, PIN_REPRINT, print);

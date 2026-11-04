@@ -49,7 +49,7 @@ let ci = 0,
   cf = [];
 function cmd() {
   const q = $("#cq").value.toLowerCase();
-  cf = [...CMD.filter(c => c.n.toLowerCase().includes(q)), ...repCommands(q)];
+  cf = [...CMD.filter(c => boPageOk(c.n) && c.n.toLowerCase().includes(q)), ...repCommands(q)];
   ci = Math.min(ci, Math.max(0, cf.length - 1));
   $("#cl").innerHTML =
     cf

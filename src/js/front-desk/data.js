@@ -80,6 +80,8 @@ const toYmd = d => {
     );
   },
   todayYmd = () => toYmd(new Date()),
+  // Rooms run on the business date, like the POS: a guest arriving at 00:30 belongs to the day still open.
+  fdToday = () => bizDate(),
   addDays = (x, n) => toYmd(new Date(new Date(x + "T00:00:00").getTime() + n * 864e5)),
   nightsBetween = (a, b) =>
     Math.max(1, Math.round((new Date(b + "T00:00:00") - new Date(a + "T00:00:00")) / 864e5));
@@ -122,7 +124,7 @@ const roomStatus = r =>
       ? "occ"
       : RESERVATIONS.some(
             x =>
-              x.room === r.no && x.status === "reserved" && x.in <= todayYmd() && x.out > todayYmd()
+              x.room === r.no && x.status === "reserved" && x.in <= fdToday() && x.out > fdToday()
           )
         ? "res"
         : r.status === "dirty"
@@ -146,44 +148,58 @@ const FD_ICONS = {
 };
 const FD_MENU = [
   [
-    "Inhouse Guest Management",
+    "Rooms and stays",
     [
-      ["grid", "Rooms Grid", "grid"],
-      ["checkin", "Guest Check In", "user"],
-      ["book", "Room Booking", "cal"],
-      ["group", "Group Booking", "users"],
-      ["dates", "Change Date", "cal2"],
-      ["shift", "Shift Management", "clock"],
-      ["post", "Cash Sale / Post Expenses", "wallet"],
-      ["pending", "Pending Payments", "wallet"]
+      ["grid", "Rooms", "grid"],
+      ["checkin", "Check in", "user"],
+      ["book", "Room booking", "cal"],
+      ["group", "Group booking", "users"],
+      ["dates", "Change dates", "cal2"]
     ]
   ],
   [
-    "House Keeping and Rooms Management",
+    "Guests and money",
     [
-      ["hk", "Room Housekeeping", "broom"],
-      ["occ", "Occupancy Rooms Reports", "chart"],
-      ["set", "Front Desk Settings", "gear"]
+      ["guests", "Guests", "list"],
+      ["pending", "Pending payments", "wallet"],
+      ["post", "Cash sale and expenses", "doc"]
     ]
   ],
   [
-    "Front Desk Reports",
+    "Running the house",
     [
-      ["rsales", "Periodic Sales Report", "doc"],
-      ["rpay", "Periodic Payment Report", "doc"],
-      ["rrev", "Periodic Revenue Report", "doc"],
-      ["rmeal", "Breakfast Report", "doc"],
-      ["rguests", "Guests and Invoices List", "list"],
-      ["rold", "Retrieve Old Summaries", "list"]
+      ["hk", "Housekeeping", "broom"],
+      ["shift", "Shift management", "clock"],
+      ["set", "Settings", "gear"]
     ]
   ]
 ];
+const FD_TITLES = {
+  grid: ["Rooms", "Every room at a glance. Tap one to check in, book it or open its folio."],
+  checkin: ["Check in", "Arrivals due today, and walk-in guests."],
+  book: ["Room booking", "Reserve a room, with or without a deposit."],
+  group: ["Group booking", "Several rooms on one bill."],
+  gfolio: ["Group folio", "Charges and payments for the whole group."],
+  dates: ["Change dates", "Extend or shorten a stay."],
+  guests: ["Guests", "Who is in the house, who is due, and every past guest's folio and invoice."],
+  pending: ["Pending payments", "Guests who still owe."],
+  post: ["Cash sale and expenses", "Charges to a room, cash sales and cash paid out."],
+  hk: ["Housekeeping", "Change a room's status as soon as the work is done."],
+  set: ["Settings", "Room types, meal plans, rooms and rates."],
+  folio: ["Guest folio", "Charges, payments and the invoice."],
+  accts: ["Customer accounts", "Balances and payments."],
+  newacct: ["New customer account", ""]
+};
+/** What the signed-in person's role allows here: desk, hk (housekeeping) or set (settings). */
+const fdCan = k => !!user && !!user.fd && !!user.fd[k];
+const fdPageRight = v => (v === "hk" ? "hk" : v === "set" ? "set" : "desk");
 let fdView = "grid",
   fdSelectedRoom = null,
   fdSelectedRes = null,
   fdPresetRoom = "",
   fdPending = false,
-  fdDateRange = [addDays(todayYmd(), -29), todayYmd()],
+  fdRoomF = "",
+  fdHkF = "",
   fdNotice = null;
 const tableHTML = (h, r) =>
   `<div style="overflow:auto"><table class="sht"><tr>${h.map(x => `<th>${x}</th>`).join("")}</tr>${r.length ? r.map(x => `<tr>${x.map(c => `<td>${c}</td>`).join("")}</tr>`).join("") : `<tr><td colspan="${h.length}" class="stk">Nothing to show.</td></tr>`}</table></div>`;

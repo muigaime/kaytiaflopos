@@ -1,10 +1,10 @@
 // ---- module switching and manager login ----
 function boShow() {
+  mdlLock();
   const ok = !!boUser;
   $("#boLogin").style.display = ok ? "none" : "grid";
   $("#app").style.display = ok ? "" : "none";
   if (ok) {
-    posKioskOff(); // signed in to Back Office: the POS rule no longer applies
     setUser(boUser.n);
     applyBoRights();
     all();
@@ -27,12 +27,15 @@ function boShow() {
   }
 }
 function boOpen() {
+  $("#fd").classList.remove("show"); // left behind the main menu; its sign-in still holds
+  $("#fl").classList.remove("show");
   $("#start").style.display = "none";
   $("#bo").classList.add("show");
   boShow();
 }
 function posOpen() {
-  posKioskOn();
+  fsEnter();
+  fdExit(false); // Front Desk stays behind the main menu; the POS must not open on top of it or as its user
   boUser = null;
   $("#bo").classList.remove("show");
   $("#start").style.display = "none";
@@ -64,6 +67,8 @@ const boTry = async () => {
   g.disabled = false;
   g.textContent = "Sign in";
   if (ok && a.off) return bad("This account is disabled. Ask your administrator.");
+  if (ok && !ALL_KEYS.some(k => !k.startsWith("fo.") && roleHas(a.role || SUPER, k)))
+    return bad("This account is for the Front Desk. Sign in there.");
   if (ok) {
     fails = 0;
     m.style.display = "none";
@@ -89,6 +94,70 @@ const boTry = async () => {
   }
 };
 $("#boGo").onclick = boTry;
+// ---- Front Desk sign-in: a user from Users & roles whose role has the right ----
+let flFails = 0,
+  flLock = 0;
+async function fdLoginTry() {
+  const m = $("#flMsg"),
+    g = $("#flGo"),
+    u = $("#flU").value.trim().toLowerCase(),
+    p = $("#flP").value,
+    bad = t => {
+      m.textContent = t;
+      m.style.display = "block";
+      const c = $("#fl .fl-card");
+      c.classList.remove("shake");
+      void c.offsetWidth;
+      c.classList.add("shake");
+    };
+  if (!u || !p) return bad("Enter your username and password.");
+  if (Date.now() < flLock) return bad("Too many attempts. Try again in 30 seconds.");
+  g.disabled = true;
+  const a = ADM.find(x => x.u === u),
+    ok = a && a.ph === (await H(u + "|" + p));
+  g.disabled = false;
+  if (!ok) {
+    if (++flFails >= 5) {
+      flLock = Date.now() + 3e4;
+      flFails = 0;
+    }
+    auditAdd("Failed sign-in", `Wrong password for username "${u}"`, {
+      who: u,
+      mod: "Front Desk"
+    });
+    $("#flP").value = "";
+    return bad("Wrong username or password.");
+  }
+  flFails = 0;
+  $("#flP").value = "";
+  const role = a.role || SUPER,
+    fd = {
+      desk: roleHas(role, "fo.desk"),
+      hk: roleHas(role, "fo.hk"),
+      set: roleHas(role, "fo.settings"),
+      day: roleHas(role, "shift.manage")
+    };
+  if (a.off) return bad("This account is disabled. Ask your administrator.");
+  if (!roleHas(role, "fo.open") || !(fd.desk || fd.hk || fd.set)) {
+    auditAdd("Failed sign-in", `${a.n}'s role has no Front Desk right`, {
+      who: a.n,
+      mod: "Front Desk"
+    });
+    return bad("Your role doesn't include the Front Desk. Ask your administrator.");
+  }
+  m.style.display = "none";
+  auditAdd("Sign in", "Signed in to the Front Desk", { who: a.n, mod: "Front Desk" });
+  fdEnter({ n: a.n, u: a.u, role, d: [], fd });
+}
+$("#flGo").onclick = fdLoginTry;
+$("#flU").onkeydown = e => {
+  if (e.key !== "Enter") return;
+  if ($("#flU").value.trim()) $("#flP").focus();
+  else fdLoginTry();
+};
+$("#flP").onkeydown = e => {
+  if (e.key === "Enter") fdLoginTry();
+};
 // Enter on the username moves to the password; Enter on the password signs in.
 $("#boU").onkeydown = e => {
   if (e.key !== "Enter") return;
@@ -119,12 +188,17 @@ $("#boBack").onclick = () => {
   $("#bo").classList.remove("show");
   $("#start").style.display = "grid";
 };
-$("#openPos").onclick = posOpen;
 $("#boMenu").onclick = () => {
   boUser = null;
   bosave();
   $("#bo").classList.remove("show");
   $("#start").style.display = "grid";
+};
+$("#boOut").onclick = () => {
+  auditAdd("Sign out", "Signed out of Back Office", { who: boUser.n, mod: "Back Office" });
+  boUser = null;
+  bosave();
+  boShow();
 };
 const stHi = () => {
   $("#stHi").textContent = (h =>
@@ -153,6 +227,8 @@ document.querySelectorAll(".bkm").forEach(
 );
 setInterval(bosave, 4000);
 addEventListener("pagehide", bosave);
+machineLabel();
+fdModuleApply();
 drawCats();
 drawCart();
 if (location.hash === "#backoffice") boOpen();

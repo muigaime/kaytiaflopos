@@ -15,14 +15,14 @@ const tile=n=>{const hit=()=>qa("#grid .it").find(b=>b.textContent.includes(n));
 const login=async p=>{for (const k of p+"E") { q('#kp [data-k="'+k+'"]').click(); await wait(15); } await wait(450);};
 const send=async l=>{click("#sendBtn"); await wait(20); if(q("#mSend").classList.contains("show")){q("#lbl").value=l; click("#sendGo");} await wait(600);};
 try{
-  click('[data-go="pos"]'); await wait(200); posKioskOff(); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
+  click('[data-go="pos"]'); await wait(200); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
   await login("1111");
   const files=[]; const mk=URL.createObjectURL.bind(URL); URL.createObjectURL=b=>{ if(b&&b.type&&b.type.includes("spreadsheet")) files.push(b); return mk(b); }; const clicks=[]; const ac=HTMLAnchorElement.prototype.click; HTMLAnchorElement.prototype.click=function(){ if(this.download) clicks.push(this.download); else ac.call(this); };
   const b64=async b=>{const u=new Uint8Array(await b.arrayBuffer()); let s=""; for(let i=0;i<u.length;i++) s+=String.fromCharCode(u[i]); return btoa(s);};
   const snd=async l=>{await send(l); await wait(350); click("#rcClose"); await wait(10);}, pay=async m=>{click("#ordBtn"); await wait(10); qa('#ordList [data-oa="pay"]')[0].click(); await wait(25); const e=q('[data-pa="'+m+'"]'); e.value="50000"; e.dispatchEvent(new Event("input",{bubbles:true})); await wait(15); click("#pOk"); await wait(250); click("#rcClose"); await wait(10);};
   for(let i=0;i<14;i++){ await add("Tusker","Bar",i%3+1); if(i%2) await add("Fish","Restaurant",1+(i%2)); await snd("T"+(i+1)); await pay(i%3?"cash":"mpesa"); }
   await add("Tusker","Bar"); await snd("Long Terrace Table Name With Many Words For Wrapping And More Words");
-  click("#lock"); await wait(25); posKioskOff(); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400);
+  click("#lock"); await wait(25); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400);
   const nav=async n=>{qa("#nav .nv").find(x=>x.dataset.n===n).click(); await wait(70);}, tst=()=>q("#toast").textContent;
   await nav("Reports"); log("1 BUTTON: "+!!q('[data-a="rep_xlsx"]')+" | beside print "+!!q('[data-a="rep_print"]'));
   const opts=qa("[data-r]").map(b=>[b.dataset.r,b.textContent.trim()]); log("2 REPORTS: "+opts.length); const pick=async v=>{const b=q('[data-r="'+v+'"]'); if(b) b.click(); else {const s=q("[data-rpsel]"); s.value=v; s.dispatchEvent(new Event("change",{bubbles:true}));} await wait(40);}; let okAll=0, emptyAll=[]; for(const [v,n] of opts){ await pick(v); const before=files.length; click('[data-a="rep_xlsx"]'); await wait(25); if(files.length>before) okAll++; else emptyAll.push(n+": "+tst()); } log("3 ALL REPORTS: exported "+okAll+" of "+opts.length+" | empty: "+emptyAll.join(" ; "));

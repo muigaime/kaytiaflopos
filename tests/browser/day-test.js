@@ -15,10 +15,10 @@ const tile=n=>{const hit=()=>qa("#grid .it").find(b=>b.textContent.includes(n));
 const login=async p=>{for (const k of p+"E") { q('#kp [data-k="'+k+'"]').click(); await wait(15); } await wait(450);};
 const send=async l=>{click("#sendBtn"); await wait(20); if(q("#mSend").classList.contains("show")){q("#lbl").value=l; click("#sendGo");} await wait(600);};
 try{
-  click('[data-go="pos"]'); await wait(200); posKioskOff(); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
+  click('[data-go="pos"]'); await wait(200); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
   await login("1111");
   const nav2=async n=>{qa("#nav .nv").find(x=>x.dataset.n===n).click(); await wait(60);};
-  const snd=async l=>{await send(l); await wait(350); click("#rcClose"); await wait(10);}, sh=()=>q("#shMgr").textContent.replace(/\s+/g," "), showing=()=>q("#shMgr").classList.contains("show"), sa=async a=>{click('#shMgr [data-sa="'+a+'"]'); await wait(25);}, relog=async p=>{$("#shMgr").classList.remove("show"); click("#lock"); await wait(25); posKioskOff(); await login(p); await wait(420);}, toBO=async()=>{$("#shMgr").classList.remove("show"); click("#lock"); await wait(25); posKioskOff(); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400); qa("#nav .nv").find(x=>x.dataset.n==="Shifts & Day").click(); await wait(60);}, toPOS=async p=>{click("#boMenu"); await wait(30); click('[data-go="pos"]'); await wait(80); posKioskOff(); await login(p); await wait(420);}, tst=()=>q("#toast").textContent, A=async s=>{click('[data-a="'+s+'"]'); await wait(40);};
+  const snd=async l=>{await send(l); await wait(350); click("#rcClose"); await wait(10);}, sh=()=>q("#shMgr").textContent.replace(/\s+/g," "), showing=()=>q("#shMgr").classList.contains("show"), sa=async a=>{click('#shMgr [data-sa="'+a+'"]'); await wait(25);}, relog=async p=>{$("#shMgr").classList.remove("show"); click("#lock"); await wait(25); await login(p); await wait(420);}, toBO=async()=>{$("#shMgr").classList.remove("show"); click("#lock"); await wait(25); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400); qa("#nav .nv").find(x=>x.dataset.n==="Shifts & Day").click(); await wait(60);}, toPOS=async p=>{click("#boMenu"); await wait(30); click('[data-go="pos"]'); await wait(80); await login(p); await wait(420);}, tst=()=>q("#toast").textContent, A=async s=>{click('[data-a="'+s+'"]'); await wait(40);};
   USERS.find(u=>u.n==="Jane Waiter").role="Cashier";
   const today=ymdOf(new Date()), tom=ymdOf(new Date(Date.now()+864e5));
   log("1 BIZ DATE = TODAY: "+(bizDate()===today)+" | day date "+curDay().date);
@@ -38,8 +38,8 @@ try{
   q("#shFloat").value="500"; await sa("sstart"); log("15 STARTED: "+!!shiftOf("Jane Waiter")+" | float "+shiftOf("Jane Waiter").float+" | auth "+shiftAuths().at(-1).status+" | bill still open "+orders.some(o=>o.no===bill));
   log("16 NO DAY BUTTON IN SHIFT: "+!q('#shMgr [data-sa="closeday"]')); shiftEnd(shiftOf("Jane Waiter"),500,"t");
   await relog("1111"); log("17 NEXT TIME NEEDS ASKING AGAIN: "+!q('#shMgr [data-sa="sstart"]'));
-  $("#shMgr").classList.remove("show"); const J=USERS.find(u=>u.n==="Jane Waiter"); orders.splice(0,orders.length); await relog("1111"); log("18 NO PENDING, STARTS ALONE: "+!!q('#shMgr [data-sa="sstart"]')); await sa("sstart");
-  q("#shFloat")&&(q("#shFloat").value="0"); if(!shiftOf(J.n)){q("#shFloat").value="0"; await sa("sstart");} log("19 "+!!shiftOf(J.n)); shiftEnd(shiftOf(J.n),0,"t");
+  $("#shMgr").classList.remove("show"); const J=USERS.find(u=>u.n==="Jane Waiter"); orders.splice(0,orders.length); await relog("1111"); log("18 NO PENDING, ALREADY DONE TODAY: no start "+!q('#shMgr [data-sa="sstart"]')+" | "+/Shift closed/.test(sh())); if(q('#shMgr [data-sa="sstart"]')) throw new Error("a second shift could start"); shiftStart(J.n,0,"t",false,true);
+  log("19 "+!!shiftOf(J.n)); shiftEnd(shiftOf(J.n),0,"t");
   openShifts().forEach(s=>shiftEnd(s,0,"t"));
   log("20 WAITER ENDING DAY BLOCKED BY CODE: "+(canDay()?"has right":"no right"));
   const e0=dayEnd("t"); log("21 DAY ENDED: ["+e0+"] open "+!!curDay()+" | date stays "+(bizDate()===today));

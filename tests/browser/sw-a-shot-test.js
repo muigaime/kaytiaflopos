@@ -15,7 +15,7 @@ const tile=n=>{const hit=()=>qa("#grid .it").find(b=>b.textContent.includes(n));
 const login=async p=>{for (const k of p+"E") { q('#kp [data-k="'+k+'"]').click(); await wait(15); } await wait(450);};
 const send=async l=>{click("#sendBtn"); await wait(20); if(q("#mSend").classList.contains("show")){q("#lbl").value=l; click("#sendGo");} await wait(600);};
 try{
-  click('[data-go="pos"]'); await wait(200); posKioskOff(); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
+  click('[data-go="pos"]'); await wait(200); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
   await login("1111");
   const jobs=[]; const rf0=window.fetch; window.fetch=async(u,o)=>{ if(String(u).includes("/api/print/ticket")){ jobs.push(JSON.parse(o.body)); return {ok:true,json:async()=>({})}; } return rf0(u,o); };
   ITEMS.push({id:901,n:"Guinness",d:"Bar",c:"Beer",p:200,t:"B",r:{}},{id:902,n:"Soup",d:"Restaurant",c:"Mains",p:1000,t:"B",r:{}},{id:903,n:"Chapati",d:"Bar",c:"Mains",p:200,t:"B",r:{}});

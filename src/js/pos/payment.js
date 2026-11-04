@@ -143,7 +143,7 @@ function payPanelHTML() {
       )}</select><input id="pPostA" type="number" inputmode="decimal" min="0" step="any" value="${due}">${payrollAlone() ? "" : '<input id="pStaffPin" type="password" inputmode="numeric" autocomplete="off" placeholder="Manager or Super Cashier PIN">'}<button class="pay-mini" data-post="payroll">Add</button><button class="pay-mini" data-panel="">Cancel</button></div>`;
   }
   if (payPanel === "acct")
-    return `<div class="pay-panel"><h4>Post to account</h4><select id="pCu">${CU.map((c, i) => `<option value="${i}">${slipEsc(c.n)} · limit ${c.limit.toLocaleString()} · owes ${c.owes.toLocaleString()}</option>`).join("") || '<option value="">No credit customers yet</option>'}</select><input id="pPostA" type="number" inputmode="decimal" min="0" step="any" value="${due}"><button class="pay-mini" data-post="acct">Add</button><button class="pay-mini" data-panel="">Cancel</button></div>`;
+    return `<div class="pay-panel"><h4>Post to account</h4><select id="pCu">${CU.map((c, i) => (c.off ? "" : `<option value="${i}">${slipEsc(c.n)} · limit ${c.limit.toLocaleString()} · owes ${c.owes.toLocaleString()}</option>`)).join("") || '<option value="">No credit customers yet</option>'}</select><input id="pPostA" type="number" inputmode="decimal" min="0" step="any" value="${due}"><button class="pay-mini" data-post="acct">Add</button><button class="pay-mini" data-panel="">Cancel</button></div>`;
   if (payPanel === "room") {
     const L = RESERVATIONS.filter(r => r.status === "inhouse");
     return `<div class="pay-panel"><h4>Post to room</h4><select id="pRm">${L.map(r => `<option value="${slipEsc(r.id)}">Room ${slipEsc(r.room)} · ${slipEsc(r.guest)}</option>`).join("") || '<option value="">No guests in-house</option>'}</select><input id="pPostA" type="number" inputmode="decimal" min="0" step="any" value="${due}"><button class="pay-mini" data-post="room">Add</button><button class="pay-mini" data-panel="">Cancel</button></div>`;
@@ -597,8 +597,6 @@ function payClear() {
       );
     });
   if (direct) {
-    cartSwaps.filter(x => cart[x.toId]).forEach(x => swapLog(targets[0], x));
-    cartSwaps = [];
     sync();
     cart = {};
     kmsg = "";
@@ -616,11 +614,11 @@ function payClear() {
   if (payNoRc) {
     fsNote(targets.length > 1 ? `${targets.length} bills cleared.` : "Bill cleared.");
   } else {
-    $("#rc").innerHTML = html;
-    $("#rcCharge").style.display = "none";
-    $("#rcClose").textContent = "New sale";
-    $("#mRc").classList.add("show");
-    printSlips("RECEIPT");
+    showRc('<div class="sl-scr rc-ask">Print the receipt?</div>' + html, null, "No");
+    rcAsk = true;
+    $("#rcPrint").textContent = "Yes, print";
+    $("#rcPrint").className = "chip on";
+    $("#rcClose").className = "mini";
   }
   drawCart();
 }

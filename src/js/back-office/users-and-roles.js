@@ -13,6 +13,7 @@ const urCols = [
 const urYes = r => (roleHas(urRole, r.k) ? "YES" : "NO");
 const urCell = (r, c) => (c === "yes" ? urYes(r) : String(r[c]));
 const urShown = r =>
+  (fdOn() || r.m !== "FRONTOFFICE") &&
   urCols.every(([c]) => {
     const w = (urF[c] || "").trim().toLowerCase();
     return !w || urCell(r, c).toLowerCase().includes(w);
@@ -20,18 +21,23 @@ const urShown = r =>
 const roleCount = role => ADM.filter(a => (a.role || SUPER) === role).length;
 const roleGranted = role => BO_RIGHTS.filter(r => roleHas(role, r.k)).length;
 function urUsersHTML() {
-  return `<div class="pn"><h4>Create a back office user</h4><div class="ur-new"><label>Full name<input id="mn" autocomplete="off" placeholder="First Last"></label><label>Username<input id="mu" autocomplete="off" placeholder="At least 3 letters or digits"></label><label>Password<input id="mp" type="password" autocomplete="new-password" placeholder="At least 6 characters"></label><label>Role<select id="mr"><option value="">Choose a role</option>${BO_ROLES.map(r => `<option>${r}</option>`).join("")}<option>${SUPER}</option></select></label><button class="chip on" data-a="ur_add">Create user</button></div></div>
+  return `<div class="pn"><h4>Create a back office user</h4><div class="ur-new"><label>Full name<input id="mn" autocomplete="off" placeholder="First Last"></label><label>Username<input id="mu" autocomplete="off" placeholder="At least 3 letters or digits"></label><label>Password<input id="mp" type="password" autocomplete="new-password" placeholder="At least 6 characters"></label><label>Role<select id="mr"><option value="">Choose a role</option>${boRoles()
+    .map(r => `<option>${r}</option>`)
+    .join(
+      ""
+    )}<option>${SUPER}</option></select></label><button class="chip on" data-a="ur_add">Create user</button></div></div>
  <div class="pn tw"><h4>Back office users (${ADM.length})</h4><table class="t ur-t"><tr><th>Name</th><th>Username</th><th>Role</th><th>Status</th><th>New password</th><th></th></tr>${ADM.map(
    (a, i) => {
      const me = boUser && a.u === boUser.u;
-     return `<tr class="${a.off ? "off" : ""}"><td><span class="ws-a">${esc(a.n[0])}</span> <b>${esc(a.n)}</b>${me ? ' <small class="ur-me">You</small>' : ""}</td><td>${esc(a.u)}</td><td><select data-ura="${i}" ${me ? "disabled" : ""}>${[...BO_ROLES, SUPER].map(r => `<option ${(a.role || SUPER) === r ? "selected" : ""}>${r}</option>`).join("")}</select></td><td><button class="mini ur-st ${a.off ? "no" : "yes"}" data-a="ur_off" data-i="${i}" ${me ? "disabled" : ""}>${a.off ? "Disabled" : "Active"}</button></td><td><span class="ur-pw"><input type="password" id="np_${i}" autocomplete="new-password" placeholder="New password"><button class="mini" data-a="ur_pw" data-i="${i}">Change</button></span></td><td>${me ? "" : `<button class="mini" data-a="ur_del" data-i="${i}">Delete</button>`}</td></tr>`;
+     return `<tr class="${a.off ? "off" : ""}"><td><span class="ws-a">${esc(a.n[0])}</span> <b>${esc(a.n)}</b>${me ? ' <small class="ur-me">You</small>' : ""}</td><td>${esc(a.u)}</td><td><select data-ura="${i}" ${me ? "disabled" : ""}>${[...boRoles(), SUPER].map(r => `<option ${(a.role || SUPER) === r ? "selected" : ""}>${r}</option>`).join("")}</select></td><td><button class="mini ur-st ${a.off ? "no" : "yes"}" data-a="ur_off" data-i="${i}" ${me ? "disabled" : ""}>${a.off ? "Disabled" : "Active"}</button></td><td><span class="ur-pw"><input type="password" id="np_${i}" autocomplete="new-password" placeholder="New password"><button class="mini" data-a="ur_pw" data-i="${i}">Change</button></span></td><td>${me ? "" : `<button class="mini" data-a="ur_del" data-i="${i}">Delete</button>`}</td></tr>`;
    }
  ).join("")}</table></div>`;
 }
 function urRightsHTML() {
   const sup = urRole === SUPER,
     S = BO_RIGHTS.filter(urShown).length;
-  return `<div class="pn"><div class="ur-top"><label>User group<select data-urg>${[...BO_ROLES, SUPER].map(r => `<option ${r === urRole ? "selected" : ""}>${r}</option>`).join("")}</select></label><div class="ur-sum"><b id="urCount">${roleGranted(urRole)}</b> of ${BO_RIGHTS.length} rights granted · ${plural(roleCount(urRole), "user")}</div>${sup ? '<span class="ur-note">Super Admin always has every right.</span>' : `<span class="ur-acts"><button class="mini" data-a="ur_bulk" data-v="1">Grant all shown</button><button class="mini" data-a="ur_bulk" data-v="0">Revoke all shown</button><button class="mini" data-a="ur_reset">Reset to standard</button></span>`}</div>
+  return `<div class="pn"><div class="ur-top"><label>User group<select data-urg>${[...boRoles(), SUPER].map(r => `<option ${r === urRole ? "selected" : ""}>${r}</option>`).join("")}</select></label><div class="ur-sum"><b id="urCount">${roleGranted(urRole)}</b> of ${BO_RIGHTS.length} rights granted · ${plural(roleCount(urRole), "user")}</div>${sup ? '<span class="ur-note">Super Admin always has every right.</span>' : `<span class="ur-acts"><button class="mini" data-a="ur_bulk" data-v="1">Grant all shown</button><button class="mini" data-a="ur_bulk" data-v="0">Revoke all shown</button><button class="mini" data-a="ur_reset">${roleCustom().includes(urRole) ? "Clear all rights" : "Reset to standard"}</button>${roleCustom().includes(urRole) ? '<button class="mini" data-a="ur_rdel">Delete this role</button>' : ""}</span>`}</div>
+ <div class="ur-newrole"><label>Add a new role<input id="urNew" maxlength="30" autocomplete="off" placeholder="e.g. Night Auditor"></label><button class="chip on" data-a="ur_radd">Add role</button><span class="stk">A new role starts with no rights. Grant them below.</span></div>
  <div class="ur-wrap"><table class="ur-m"><thead><tr>${urCols.map(([c, l]) => `<th class="${c === "yes" ? "c" : ""}">${l}</th>`).join("")}</tr><tr class="ur-f">${urCols.map(([c, l]) => `<td><input data-urf="${c}" value="${esc(urF[c] || "")}" placeholder="Filter" aria-label="Filter ${l}"></td>`).join("")}</tr></thead><tbody>${BO_RIGHTS.map(
    r => {
      const y = roleHas(urRole, r.k);
@@ -102,6 +108,31 @@ async function urAct(a, b) {
     delete ROLE_OVER[urRole];
     bosave();
     toast(`${urRole} is back to the standard rights.`);
+    return all();
+  }
+  if (a === "ur_radd") {
+    const n = $("#urNew").value.trim().replace(/\s+/g, " ");
+    if (!/^[A-Za-z0-9 &._-]{2,30}$/.test(n))
+      return toast("Use 2 to 30 letters or numbers for the role name.");
+    if ([...boRoles(), SUPER].some(r => r.toLowerCase() === n.toLowerCase()))
+      return toast(`${n} is already a role.`);
+    roleCustom().push(n);
+    urRole = n;
+    auditAdd("Users", `Role ${n} added`);
+    bosave();
+    toast(`${n} added. Now grant its rights.`);
+    return all();
+  }
+  if (a === "ur_rdel") {
+    if (!roleCustom().includes(urRole)) return;
+    if (ADM.some(x => x.role === urRole))
+      return toast(`Move the users on ${urRole} to another role first.`);
+    roleCustom().splice(roleCustom().indexOf(urRole), 1);
+    delete ROLE_OVER[urRole];
+    auditAdd("Users", `Role ${urRole} deleted`);
+    urRole = BO_ROLES[0];
+    bosave();
+    toast("Role deleted.");
     return all();
   }
   if (a === "ur_add") {

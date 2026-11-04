@@ -141,7 +141,7 @@ async function printSlips(doc, keepNote) {
     last = rule;
     if (rule) jobs.push({ s, rule });
   });
-  if (!jobs.length) return;
+  if (!jobs.length) return "none";
   const word = doc === "RECEIPT" ? "Receipt" : "Guest bill",
     done = new Map(),
     box = keepNote && $("#rcPrinted"),
@@ -166,6 +166,7 @@ async function printSlips(doc, keepNote) {
       (bad ? "<br><b>Press Print to print it here instead.</b>" : ""),
     !bad && !orderBad
   );
+  return bad ? "bad" : "ok";
 }
 /** The printers Windows has on the computer running the print server. */
 async function installedPrinters() {
@@ -262,7 +263,8 @@ function voidTicketLines(station, d) {
 async function printOrderTickets(tickets, lines = orderTicketLines, word = "order") {
   const show = printedNote;
   const routed = tickets.filter(x => x.printer);
-  if (!routed.length) return;
+  if (!tickets.length) return "ok";
+  if (!routed.length) return "none";
   show("Sending to the printers…", true);
   const R = await Promise.all(
     routed.map(async x => ({
@@ -289,4 +291,5 @@ async function printOrderTickets(tickets, lines = orderTicketLines, word = "orde
     ).join("<br>") + (bad.length ? "<br><b>Press Print to print it here instead.</b>" : ""),
     !bad.length
   );
+  return bad.length || routed.length < tickets.length ? "bad" : "ok";
 }

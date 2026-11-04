@@ -15,9 +15,9 @@ const tile=n=>{const hit=()=>qa("#grid .it").find(b=>b.textContent.includes(n));
 const login=async p=>{for (const k of p+"E") { q('#kp [data-k="'+k+'"]').click(); await wait(15); } await wait(450);};
 const send=async l=>{click("#sendBtn"); await wait(20); if(q("#mSend").classList.contains("show")){q("#lbl").value=l; click("#sendGo");} await wait(600);};
 try{
-  click('[data-go="pos"]'); await wait(200); posKioskOff(); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
+  click('[data-go="pos"]'); await wait(200); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
   await login("1111");
-  const toBO=async()=>{click("#lock"); await wait(25); posKioskOff(); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400);}, nav=async n=>{qa("#nav .nv").find(x=>x.dataset.n===n).click(); await wait(70);}, tst=()=>q("#toast").textContent, tab=async t=>{click('[data-a="inv_tab"][data-t="'+t+'"]'); await wait(40);}, S=()=>{bosave(); return JSON.parse(localStorage.getItem("kaytia_pos_bo_v1"));}, ms=()=>{const s=S(); return "store "+s.K["Main Store"].a+" bar "+(s.K.Bar.a||0)+" pool "+(s.K.Pool.a||0);}, rq=id=>S().RQ.find(r=>r.id===id), iss=id=>S().IS.find(x=>x.id===id);
+  const toBO=async()=>{click("#lock"); await wait(25); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400);}, nav=async n=>{qa("#nav .nv").find(x=>x.dataset.n===n).click(); await wait(70);}, tst=()=>q("#toast").textContent, tab=async t=>{click('[data-a="inv_tab"][data-t="'+t+'"]'); await wait(40);}, S=()=>{bosave(); return JSON.parse(localStorage.getItem("kaytia_pos_bo_v1"));}, ms=()=>{const s=S(); return "store "+s.K["Main Store"].a+" bar "+(s.K.Bar.a||0)+" pool "+(s.K.Pool.a||0);}, rq=id=>S().RQ.find(r=>r.id===id), iss=id=>S().IS.find(x=>x.id===id);
   log("1 STUCK NOTE CLEARED ON OPEN: "+iss("ISS-OLD").status+" | "+rq("REQ-3").status+" | "+ms());
   log("2 DIRECT NOTE STILL WAITING: "+iss("ISS-DIRECT").status);
   await toBO(); await nav("Inventory"); await tab("appr"); log("3 APPROVALS: "+qa('[data-a="ap_open"][data-act="approve"]').map(b=>b.dataset.id).join());

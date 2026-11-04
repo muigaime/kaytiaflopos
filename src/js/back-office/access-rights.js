@@ -10,7 +10,15 @@ const BO_RIGHTS = [
   ["shift.view", "View shifts and the business day.", "SHIFTS", "ACCESS"],
   ["shift.day", "Start and end the business day.", "SHIFTS", "DAY"],
   ["shift.manage", "Open and close staff shifts.", "SHIFTS", "STAFF SHIFTS"],
-  ["fo.open", "Open the Front Desk.", "FRONTOFFICE", "ACCESS"],
+  ["fo.open", "Sign in to the Front Desk.", "FRONTOFFICE", "ACCESS"],
+  ["fo.desk", "Work the desk: rooms, bookings, guests and payments.", "FRONTOFFICE", "DESK"],
+  ["fo.hk", "Housekeeping: change room status.", "FRONTOFFICE", "HOUSEKEEPING"],
+  [
+    "fo.settings",
+    "Change Front Desk settings: rooms, rates and meal plans.",
+    "FRONTOFFICE",
+    "SETTINGS"
+  ],
   ["rep.rooms", "View room reports.", "FRONTOFFICE", "REPORTS"],
   ["pur.lpo", "Create and manage purchase orders.", "PURCHASING", "ORDERS"],
   ["pur.receive", "Receive goods into a store.", "PURCHASING", "RECEIVING"],
@@ -68,7 +76,7 @@ const ALL_KEYS = BO_RIGHTS.map(r => r.k);
 const except = (...L) => ALL_KEYS.filter(k => !L.includes(k));
 const ROLE_DEFAULTS = {
   "General Manager": except("users.manage"),
-  Manager: except("users.manage", "set.manage"),
+  Manager: except("users.manage", "set.manage", "fo.settings"),
   Director: [
     "home.money",
     "sales.view",
@@ -182,7 +190,8 @@ const ROLE_DEFAULTS = {
     "vn.view",
     "rep.print"
   ],
-  Housekeeping: ["fo.open", "rep.rooms", "rep.print"],
+  Housekeeping: ["fo.open", "fo.hk"],
+  "Front Office": ["fo.open", "fo.desk", "fo.hk", "rep.rooms", "rep.print", "cust.view"],
   Chef: [
     "inv.req",
     "inv.reports",
@@ -199,6 +208,8 @@ const ROLE_DEFAULTS = {
   Sales: [
     "sales.view",
     "fo.open",
+    "fo.desk",
+    "fo.hk",
     "rep.rooms",
     "cust.view",
     "cust.manage",
@@ -208,6 +219,9 @@ const ROLE_DEFAULTS = {
   ]
 };
 const BO_ROLES = [...Object.keys(ROLE_DEFAULTS)];
+/** Roles the business added itself. They start with no rights. */
+const roleCustom = () => FD_SETTINGS.customRoles || (FD_SETTINGS.customRoles = []);
+const boRoles = () => [...BO_ROLES, ...roleCustom()];
 /** Does this role have this right, counting any changes made on the rights table? */
 const roleHas = (role, k) => {
   if (role === SUPER) return true;
@@ -253,6 +267,7 @@ const PAGE_RIGHTS = {
   License: ["users.manage"]
 };
 const boPageOk = n => {
+  if (!fdOn() && (n === "Front Desk" || n === "Room reports")) return false;
   const L = PAGE_RIGHTS[String(n).replace("&amp;", "&")];
   return !L || anyOf(...L);
 };
@@ -296,8 +311,6 @@ const ACT_RIGHTS = {
   sfloat: "shift.manage",
   sdecl: "shift.manage",
   send: "shift.manage",
-  addc: "cust.manage",
-  pay: "cust.pay",
   addp: "prod.manage",
   rep_print: "rep.print",
   inv_stnew: "inv.stores",
@@ -358,7 +371,6 @@ function applyBoRights() {
     }
     s.style.display = any ? "" : "none";
   });
-  $("#openPos").style.display = boCan("pos.open") ? "" : "none";
   $("#newreq").style.display = boCan("inv.req") ? "" : "none";
   $("#urole").textContent = boUser ? boUser.role || SUPER : "";
   const money = boCan("home.money"),

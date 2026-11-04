@@ -15,7 +15,7 @@ const tile=n=>{const hit=()=>qa("#grid .it").find(b=>b.textContent.includes(n));
 const login=async p=>{for (const k of p+"E") { q('#kp [data-k="'+k+'"]').click(); await wait(15); } await wait(450);};
 const send=async l=>{click("#sendBtn"); await wait(20); if(q("#mSend").classList.contains("show")){q("#lbl").value=l; click("#sendGo");} await wait(600);};
 try{
-  click('[data-go="pos"]'); await wait(200); posKioskOff(); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
+  click('[data-go="pos"]'); await wait(200); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
   await login("1111");
   window.__P=[]; window.open=()=>({document:{write(h){window.__P.push(h);},close(){}},focus(){},print(){}});
   const note=()=>(qa("#fsn").pop()||{}).textContent||"", tab=async m=>{click('#mPay .tabs [data-m="'+m+'"]'); await wait(10);}, addp=async v=>{q("#pAmt").value=v; }, ok=async()=>{click("#pOk"); await wait(35); const t=q("#rc").innerText.replace(/\\s+/g," "); click("#rcClose"); await wait(10); return t;}, snd=async l=>{await send(l); await wait(400); click("#rcClose"); await wait(10);}, tbl=s=>[...s.rows].map(r=>[...r.cells].map(c=>c.textContent).join(",")).join("\\n   ");
@@ -26,7 +26,7 @@ try{
   openPay([orders[0]]); await wait(20); set("#pAmt","400"); await ok();
   bosave(); const S=JSON.parse(localStorage.getItem("kaytia_pos_bo_v1")).S; log("8 SALES: "+S.map(s=>s.no+" "+s.dept+" "+JSON.stringify(s.mx)+(s.comp?" comp "+JSON.stringify(s.comp):"")).join(" ; "));
   const shc=shiftOf("Jane Waiter"); log("9 SHIFT CASH EXPECTED: "+shiftCalc(shc).expected+" pdq "+shiftCalc(shc).pdq+" comp "+shiftCalc(shc).comp);
-  posKioskOff(); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400);
+  q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400);
   qa("#nav .nv").find(x=>x.dataset.n==="Reports").click(); await wait(30); q('[data-r="ps"]').click(); await wait(30);
   ${outPng ? '' : `
   log("10 META: "+q(".rp-meta").innerText.replace(/\\s+/g," ")+" | picker "+!!q("[data-rpsel]"));

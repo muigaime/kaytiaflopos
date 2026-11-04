@@ -15,11 +15,11 @@ const tile=n=>{const hit=()=>qa("#grid .it").find(b=>b.textContent.includes(n));
 const login=async p=>{for (const k of p+"E") { q('#kp [data-k="'+k+'"]').click(); await wait(15); } await wait(450);};
 const send=async l=>{click("#sendBtn"); await wait(20); if(q("#mSend").classList.contains("show")){q("#lbl").value=l; click("#sendGo");} await wait(600);};
 try{
-  click('[data-go="pos"]'); await wait(200); posKioskOff(); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
+  click('[data-go="pos"]'); await wait(200); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
   await login("1111");
   const maxId=Math.max(...ITEMS.map(i=>i.id)); for(let k=1;k<=70;k++) ITEMS.push({...ITEMS[0],id:maxId+k,n:(k===3?"A very long product name with café & (brackets) that will not fit in the column at all because it goes on and on and on":"Wine "+k),c:k%2?"Wine":"Spirits",p:100*k+0.5}); ITEMS.push({...ITEMS[0],id:maxId+99,n:"Ugali side",sell:"acc",p:0});
   let dl=[]; const oc=HTMLAnchorElement.prototype.click; HTMLAnchorElement.prototype.click=function(){dl.push(this.download)};
-  click("#lock"); await wait(25); posKioskOff(); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400); qa("#nav .nv").find(x=>x.dataset.n==="Selling points").click(); await wait(80);
+  click("#lock"); await wait(25); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400); qa("#nav .nv").find(x=>x.dataset.n==="Selling points").click(); await wait(80);
   click('[data-a="pl_open"]'); await wait(40); log("1 VIEW: "+q("#plView h3").textContent+" | "+q("#plView .itm-h p").textContent+" | sections "+qa("#plView section h4").map(x=>x.textContent).join()+" | side hidden "+!q("#plView").textContent.includes("Ugali side"));
   const sel=(k,v)=>{const e=q('#plView [data-pl="'+k+'"]'); e.value=v; e.dispatchEvent(new Event("change",{bubbles:true}));};
   sel("pt","Bar"); await wait(40); log("2 ONE POINT: "+qa("#plView section h4").map(x=>x.textContent).join()+" | "+q("#plView .itm-h p").textContent+" | row "+qa("#plView table tr")[1].textContent); sel("cat","Wine"); await wait(40); log("3 CATEGORY: "+q("#plView .itm-h p").textContent+" | all Wine "+qa("#plView table tr").slice(1).every(r=>r.cells[2].textContent==="Wine")); sel("pt","Restaurant"); await wait(40); log("4 POINT RESETS CATEGORY: "+q('#plView [data-pl="cat"]').value+" | "+qa("#plView section h4").map(x=>x.textContent).join());

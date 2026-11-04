@@ -28,16 +28,14 @@ try{
   log("6 OTHER CLIENT: "+LIC.apply(await mk({i:"KF-0000-0000-0000"}))); log("7 EXPIRED KEY: "+LIC.apply(await mk({e:day(-2)})));
   log("8 TRIAL DAY 14: "+(setS({start:Date.now()-14*DAY}),st())+" | "+LIC.label()); setS({start:Date.now()-15*DAY-1000}); LIC.gate(); log("9 TRIAL OVER: "+st()+" | lock screen "+lockOn()+" | "+q("#licLock h2").textContent+" | code shown "+q("#licCode").value);
   q("#licKey").value="nonsense"; click("#licGo"); await wait(10); log("10 BAD KEY ON SCREEN: "+q("#licMsg").textContent+" | still locked "+lockOn());
-  click('[data-go="pos"]'); await wait(40); log("11 POS BEHIND LOCK: lock on top "+lockOn()+" z "+getComputedStyle(q("#licLock")).zIndex); posKioskOff();
-  q("#licKey").value=" "+good+"\\n"; click("#licGo"); await wait(15); log("12 ACTIVATED: "+st()+" | locked "+lockOn()+" | "+LIC.label());
+  click('[data-go="pos"]'); await wait(40); log("11 POS BEHIND LOCK: lock on top "+lockOn()+" z "+getComputedStyle(q("#licLock")).zIndex);   q("#licKey").value=" "+good+"\\n"; click("#licGo"); await wait(15); log("12 ACTIVATED: "+st()+" | locked "+lockOn()+" | "+LIC.label());
   await login("1111"); log("13 WAITER SIGNS IN: "+q("#posOutlet").textContent+" | lock "+lockOn());
   const lk=await mk({t:"lock"}); log("14 LOCK KEY: ["+LIC.apply(lk)+"] "+st()+" | screen "+lockOn()+" | "+q("#licLock h2").textContent);
   log("15 OLD KEY REPLAY: "+LIC.apply(good)+" | locked "+lockOn());
   const fresh=await mk({e:day(10)}); log("16 NEW KEY UNLOCKS: ["+LIC.apply(fresh)+"] "+st()+" | "+LIC.label()+" | locked "+lockOn());
   const exp=LIC.s.key; setS({last:Date.now()+3*DAY}); LIC.gate(); log("17 CLOCK BACK: "+st()+" | screen "+lockOn()+" | "+q("#licLock h2").textContent); setS({last:Date.now()}); LIC.gate(); log("18 CLOCK FIXED: "+st()+" | screen "+lockOn());
   const raw=JSON.parse(localStorage.getItem("kaytia_license")); raw.start=Date.now(); raw.key=""; localStorage.setItem("kaytia_license",JSON.stringify(raw)); LIC.load(); LIC.gate(); log("19 EDITED BY HAND: "+st()+" | screen "+lockOn()); const again=await mk({}); LIC.apply(again); log("20 KEY FIXES IT: "+st()+" | "+LIC.label()+" | screen "+lockOn());
-  const code0=LIC.s.code; click("#lock"); await wait(25); posKioskOff();
-  q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400); const lt=qa("#nav .nv").find(x=>x.dataset.n==="License"); lt.click(); await wait(30);
+  const code0=LIC.s.code; click("#lock"); await wait(25);   q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400); const lt=qa("#nav .nv").find(x=>x.dataset.n==="License"); lt.click(); await wait(30);
   log("21 PAGE: "+q("#vSub h1").textContent+" | "+q(".lic-st").innerText.replace(/\\s+/g," ")+" | code "+q("#licPgCode").value+" | keys "+qa("#vSub table.t tr").length);
   q("#licPgKey").value=await mk({e:day(5)}); click('[data-a="lic_apply"]'); await wait(30); log("22 PAGE KEY: "+tst()+" | "+q(".lic-st").innerText.replace(/\\s+/g," ")); qa("#nav .nv").find(x=>x.dataset.n==="Home").click(); await wait(25); log("23 HOME NOTE: "+q("#licBar").innerText.replace(/\\s+/g," "));
   bosave(); localStorage.removeItem("kaytia_license"); LIC.load(); log("24 RESTORED FROM MAIN DATA: same code "+(LIC.s.code===code0)+" | "+st());

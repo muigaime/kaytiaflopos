@@ -22,6 +22,7 @@ const API_PORT = Number(process.env.KAYTIA_API_PORT ?? 4000);
 const MAIN_PORT_DEFAULT = 5500;
 const EXE = process.execPath;
 const SHORTCUT = "Kaytia POS.lnk";
+const INSTALLED = "KaytiaFlow.exe";
 const CONFIG = path.join(HOME, "config.json");
 const DATA = path.join(HOME, "data");
 const REVS = path.join(DATA, "revisions");
@@ -85,17 +86,40 @@ $s.Save()`;
     KF_DESKTOP: process.env.KAYTIA_DESKTOP ?? ""
   });
 }
-/** Run from anywhere else: copy across to C:, make the shortcut, and start from there. */
+/** The installed copy is locked while it runs, so a running one is closed first. Its data is already on disk. */
+async function copyOverInstalled(target: string) {
+  for (let i = 0; i < 6; i++) {
+    try {
+      fs.copyFileSync(EXE, target);
+      return true;
+    } catch {
+      if (i === 0) {
+        console.log("Closing the running Kaytia Flow...");
+        await new Promise(r => execFile("taskkill", ["/IM", INSTALLED, "/F"], () => r(null)));
+      }
+      await new Promise(r => setTimeout(r, 1500));
+    }
+  }
+  return false;
+}
+/** Run from anywhere else, under any file name: install or update C:, make the shortcut, and start from there. */
 async function installIfNeeded(): Promise<boolean> {
   if (path.dirname(EXE).toLowerCase() === HOME.toLowerCase()) return false;
-  console.log(`Installing to ${HOME}...`);
   fs.mkdirSync(HOME, { recursive: true });
-  const target = path.join(HOME, path.basename(EXE));
-  try {
-    fs.copyFileSync(EXE, target);
-  } catch {
+  const target = path.join(HOME, INSTALLED),
+    updating = fs.existsSync(target);
+  console.log(`${updating ? "Updating" : "Installing to"} ${HOME}...`);
+  if (updating) {
+    // The version before, in case this one has to be undone. Only the program: the data folders aren't touched.
+    try {
+      fs.copyFileSync(target, path.join(HOME, "KaytiaFlow.previous.exe"));
+    } catch (e) {
+      console.log("Could not keep a copy of the old version:", (e as Error).message);
+    }
+  }
+  if (!(await copyOverInstalled(target))) {
     console.log(`\nCould not update ${target}.`);
-    console.log("Kaytia Flow may already be running. Close its window and try again.");
+    console.log("Close Kaytia Flow and try again.");
     await new Promise(r => setTimeout(r, 15000));
     process.exit(1);
   }
@@ -103,9 +127,19 @@ async function installIfNeeded(): Promise<boolean> {
     const from = path.join(path.dirname(EXE), f);
     if (fs.existsSync(from)) fs.copyFileSync(from, path.join(HOME, f));
   }
-  await makeShortcut(target).catch(e => console.log("Could not make the desktop shortcut:", e.message));
-  console.log(`Done. "Kaytia POS" is on your desktop.`);
-  spawn("cmd", ["/c", "start", "", target], { detached: true, stdio: "ignore", env: process.env }).unref();
+  await makeShortcut(target).catch(e =>
+    console.log("Could not make the desktop shortcut:", e.message)
+  );
+  console.log(
+    updating
+      ? "Updated. Your data was not touched. Refresh the browser page."
+      : `Done. "Kaytia POS" is on your desktop.`
+  );
+  spawn("cmd", ["/c", "start", "", target], {
+    detached: true,
+    stdio: "ignore",
+    env: process.env
+  }).unref();
   return true;
 }
 
@@ -115,7 +149,8 @@ function loadEnv() {
   if (!fs.existsSync(file)) return false;
   for (const raw of fs.readFileSync(file, "utf8").split(/\r?\n/)) {
     const m = /^\s*([A-Z_][A-Z0-9_]*)\s*=\s*(.*?)\s*$/.exec(raw);
-    if (m && process.env[m[1]] === undefined) process.env[m[1]] = m[2].replace(/^(["'])(.*)\1$/, "$2");
+    if (m && process.env[m[1]] === undefined)
+      process.env[m[1]] = m[2].replace(/^(["'])(.*)\1$/, "$2");
   }
   return true;
 }
@@ -166,8 +201,13 @@ function dailyBackup(text: string) {
     file = path.join(BACKUPS, `kaytia-${day}.json.gz`);
   // Refreshed through the day, so that it always holds the day's latest.
   writeSafe(file, zlib.gzipSync(text));
-  const all = fs.readdirSync(BACKUPS).filter(f => /^kaytia-\d{4}-\d\d-\d\d\.json\.gz$/.test(f)).sort();
-  all.slice(0, Math.max(0, all.length - KEEP_DAILY)).forEach(f => fs.rmSync(path.join(BACKUPS, f), { force: true }));
+  const all = fs
+    .readdirSync(BACKUPS)
+    .filter(f => /^kaytia-\d{4}-\d\d-\d\d\.json\.gz$/.test(f))
+    .sort();
+  all
+    .slice(0, Math.max(0, all.length - KEEP_DAILY))
+    .forEach(f => fs.rmSync(path.join(BACKUPS, f), { force: true }));
 }
 function readRev(rev: number): unknown | null {
   try {
@@ -180,7 +220,8 @@ const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b)
 type SyncIn = { base: number | null; data: unknown; force?: boolean };
 // What each computer last sent, and from which starting point. A computer that's busy, or that lost the answer,
 // sends again from the same point. Its earlier changes are already in, so only what's new since then may count.
-const clientFile = (id: string) => path.join(DATA, "clients", `${id.replace(/[^\w-]/g, "")}.json.gz`);
+const clientFile = (id: string) =>
+  path.join(DATA, "clients", `${id.replace(/[^\w-]/g, "")}.json.gz`);
 function readClient(id: string): { base: number | null; data: unknown } | null {
   try {
     return JSON.parse(zlib.gunzipSync(fs.readFileSync(clientFile(id))).toString());
@@ -205,7 +246,10 @@ function syncOnMain(q: SyncIn, client: string): SyncOut {
   if (q.base === null || q.base === undefined) {
     if (q.data) {
       fs.mkdirSync(BACKUPS, { recursive: true });
-      writeSafe(path.join(BACKUPS, `joined-${Date.now()}.json.gz`), zlib.gzipSync(JSON.stringify(q.data)));
+      writeSafe(
+        path.join(BACKUPS, `joined-${Date.now()}.json.gz`),
+        zlib.gzipSync(JSON.stringify(q.data))
+      );
     }
     return { rev: cur.rev, data: cur.data };
   }
@@ -245,7 +289,12 @@ const isLocal = (req: Request) => ["127.0.0.1", "::1"].includes(address(req));
 function isPrivate(ip: string) {
   if (["127.0.0.1", "::1"].includes(ip)) return true;
   const [a = 0, b = 0] = ip.split(".").map(Number);
-  return a === 10 || (a === 192 && b === 168) || (a === 172 && b >= 16 && b <= 31) || (a === 169 && b === 254);
+  return (
+    a === 10 ||
+    (a === 192 && b === 168) ||
+    (a === 172 && b >= 16 && b <= 31) ||
+    (a === 169 && b === 254)
+  );
 }
 /** Only this computer's own browser, on its own address: no other website can reach the data through it. */
 function ownBrowserOnly(req: Request, res: Response, next: NextFunction) {
@@ -253,7 +302,8 @@ function ownBrowserOnly(req: Request, res: Response, next: NextFunction) {
     origin = req.get("origin"),
     okHost = [`localhost:${PORT}`, `127.0.0.1:${PORT}`, `[::1]:${PORT}`].includes(host),
     okOrigin = !origin || origin === `http://${host}`;
-  if (!isLocal(req) || !okHost || !okOrigin) return void res.status(403).json({ error: "This computer only." });
+  if (!isLocal(req) || !okHost || !okOrigin)
+    return void res.status(403).json({ error: "This computer only." });
   next();
 }
 const tries = new Map<string, { n: number; at: number }>();
@@ -268,7 +318,8 @@ function badTry(ip: string) {
 
 async function main() {
   process.title = "Kaytia Flow";
-  if (!process.env.KAYTIA_NO_INSTALL && (await installIfNeeded())) return void setTimeout(() => process.exit(0), 3000);
+  if (!process.env.KAYTIA_NO_INSTALL && (await installIfNeeded()))
+    return void setTimeout(() => process.exit(0), 3000);
   const hasEnv = loadEnv();
   const cfg = loadConfig();
   if (!process.env.KAYTIA_NO_INSTALL) await makeShortcut(EXE).catch(() => {});
@@ -289,8 +340,10 @@ async function main() {
   door.use((req, res, next) => {
     const ip = address(req);
     if (!isPrivate(ip)) return void res.status(403).json({ error: "Local network only." });
-    if (cfg.role !== "main") return void res.status(409).json({ error: "This computer is not the Main." });
-    if (tooMany(ip)) return void res.status(429).json({ error: "Too many wrong codes. Wait a minute." });
+    if (cfg.role !== "main")
+      return void res.status(409).json({ error: "This computer is not the Main." });
+    if (tooMany(ip))
+      return void res.status(429).json({ error: "Too many wrong codes. Wait a minute." });
     if (req.get("x-kaytia-code") !== cfg.code) {
       badTry(ip);
       return void res.status(401).json({ error: "That connect code isn't right." });
@@ -314,25 +367,36 @@ async function main() {
     res.json({ idx: till.idx, epoch: cfg.epoch, name: os.hostname() });
   });
   door.get("/rev", (_req, res) => void res.json({ ok: true, rev: readStore().rev }));
-  door.post("/sync", big, (req, res) => void res.json(syncOnMain(req.body as SyncIn, String(req.body?.client ?? "till"))));
+  door.post(
+    "/sync",
+    big,
+    (req, res) => void res.json(syncOnMain(req.body as SyncIn, String(req.body?.client ?? "till")))
+  );
   app.use("/net", door);
 
   // ---- this computer's own browser
   const lan = express.Router();
   lan.use(ownBrowserOnly);
-  lan.get("/status", (_req, res) =>
-    void res.json({
-      kaytia: true,
-      role: cfg.role,
-      idx: cfg.idx,
-      numbered: cfg.role === "till" || Object.keys(cfg.tills).length > 0,
-      epoch: cfg.epoch,
-      home: HOME,
-      main: cfg.main ?? ""
-    })
+  lan.get(
+    "/status",
+    (_req, res) =>
+      void res.json({
+        kaytia: true,
+        role: cfg.role,
+        idx: cfg.idx,
+        numbered: cfg.role === "till" || Object.keys(cfg.tills).length > 0,
+        epoch: cfg.epoch,
+        home: HOME,
+        main: cfg.main ?? ""
+      })
   );
   lan.get("/rev", async (_req, res) => {
-    if (cfg.role === "main") return void res.json({ ok: true, rev: readStore().rev, numbered: Object.keys(cfg.tills).length > 0 });
+    if (cfg.role === "main")
+      return void res.json({
+        ok: true,
+        rev: readStore().rev,
+        numbered: Object.keys(cfg.tills).length > 0
+      });
     try {
       const r = await toMain(cfg, "/net/rev", undefined, 4000);
       res.json(r.status === 200 ? r.json : { ok: false });
@@ -349,18 +413,20 @@ async function main() {
       res.status(503).json({ offline: true });
     }
   });
-  lan.get("/info", (_req, res) =>
-    void res.json({
-      role: cfg.role,
-      chosen: !!cfg.chosen,
-      computer: os.hostname(),
-      addresses: lanAddresses().map(a => (PORT === MAIN_PORT_DEFAULT ? a : `${a}:${PORT}`)),
-      code: cfg.code,
-      tills: Object.values(cfg.tills),
-      main: cfg.main ?? "",
-      rev: cfg.role === "main" ? readStore().rev : null,
-      home: HOME
-    })
+  lan.get(
+    "/info",
+    (_req, res) =>
+      void res.json({
+        role: cfg.role,
+        chosen: !!cfg.chosen,
+        computer: os.hostname(),
+        addresses: lanAddresses().map(a => (PORT === MAIN_PORT_DEFAULT ? a : `${a}:${PORT}`)),
+        code: cfg.code,
+        tills: Object.values(cfg.tills),
+        main: cfg.main ?? "",
+        rev: cfg.role === "main" ? readStore().rev : null,
+        home: HOME
+      })
   );
   lan.post("/main", big, (_req, res) => {
     if (cfg.role === "till") {
@@ -376,9 +442,17 @@ async function main() {
     res.json({ ok: true });
   });
   lan.post("/connect", big, async (req, res) => {
-    const host = withPort(String(req.body?.host ?? "").trim().replace(/^https?:\/\//, "").replace(/\/.*$/, "")),
-      code = String(req.body?.code ?? "").trim().toUpperCase();
-    if (!/^[\w.-]+:\d+$/.test(host)) return void res.status(400).json({ error: "Enter the Main computer's address." });
+    const host = withPort(
+        String(req.body?.host ?? "")
+          .trim()
+          .replace(/^https?:\/\//, "")
+          .replace(/\/.*$/, "")
+      ),
+      code = String(req.body?.code ?? "")
+        .trim()
+        .toUpperCase();
+    if (!/^[\w.-]+:\d+$/.test(host))
+      return void res.status(400).json({ error: "Enter the Main computer's address." });
     if (!code) return void res.status(400).json({ error: "Enter the connect code." });
     try {
       const r = await fetch(`http://${host}/net/pair`, {
@@ -387,13 +461,30 @@ async function main() {
         body: JSON.stringify({ id: cfg.id, name: os.hostname() }),
         signal: AbortSignal.timeout(8000)
       });
-      const j = (await r.json().catch(() => ({}))) as { idx?: number; epoch?: string; name?: string; error?: string };
-      if (!r.ok || j.idx === undefined) return void res.status(400).json({ error: j.error ?? "The Main computer said no." });
-      Object.assign(cfg, { role: "till", chosen: true, main: host, mainCode: code, idx: j.idx, epoch: j.epoch });
+      const j = (await r.json().catch(() => ({}))) as {
+        idx?: number;
+        epoch?: string;
+        name?: string;
+        error?: string;
+      };
+      if (!r.ok || j.idx === undefined)
+        return void res.status(400).json({ error: j.error ?? "The Main computer said no." });
+      Object.assign(cfg, {
+        role: "till",
+        chosen: true,
+        main: host,
+        mainCode: code,
+        idx: j.idx,
+        epoch: j.epoch
+      });
       saveConfig(cfg);
       res.json({ ok: true, main: j.name, idx: j.idx });
     } catch {
-      res.status(400).json({ error: `Couldn't reach ${host}. Check the address, that Kaytia Flow is running there, and that its firewall allows it.` });
+      res
+        .status(400)
+        .json({
+          error: `Couldn't reach ${host}. Check the address, that Kaytia Flow is running there, and that its firewall allows it.`
+        });
     }
   });
   app.use("/lan", lan);
@@ -432,8 +523,16 @@ async function main() {
   await listen(api as unknown as http.RequestListener, API_PORT, "::1");
 
   console.log(`Running at ${url}`);
-  console.log(cfg.role === "main" ? `This is the Main computer. Data is saved in ${DATA}` : `This is a till, connected to ${cfg.main}`);
-  console.log(apiOk ? "Printing and email ready." : `Port ${API_PORT} is in use, so printing and email won't work from here.`);
+  console.log(
+    cfg.role === "main"
+      ? `This is the Main computer. Data is saved in ${DATA}`
+      : `This is a till, connected to ${cfg.main}`
+  );
+  console.log(
+    apiOk
+      ? "Printing and email ready."
+      : `Port ${API_PORT} is in use, so printing and email won't work from here.`
+  );
   console.log(hasEnv ? "Mail settings loaded." : "Email isn't set up yet (see README.txt).");
   console.log("\nKeep this window open while you work. Close it to stop Kaytia Flow.");
   if (!process.env.KAYTIA_NO_BROWSER) exec(`start "" "${cfg.chosen ? url : `${url}/connect`}"`);

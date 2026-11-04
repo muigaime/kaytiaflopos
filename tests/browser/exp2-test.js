@@ -15,7 +15,7 @@ const tile=n=>{const hit=()=>qa("#grid .it").find(b=>b.textContent.includes(n));
 const login=async p=>{for (const k of p+"E") { q('#kp [data-k="'+k+'"]').click(); await wait(15); } await wait(450);};
 const send=async l=>{click("#sendBtn"); await wait(20); if(q("#mSend").classList.contains("show")){q("#lbl").value=l; click("#sendGo");} await wait(600);};
 try{
-  click('[data-go="pos"]'); await wait(200); posKioskOff(); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
+  click('[data-go="pos"]'); await wait(200); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
   await login("1111");
   click("#newSale"); await wait(15); q("#fTable").value="Z1"; click("#sendBtn"); await wait(25); orders.find(o=>o.label==="Z1").at=new Date(Date.now()-6*60e3); log("1 BEFORE: "+orders.length); await wait(16000); log("2 AFTER 16 SECONDS, UNTOUCHED: "+orders.length+" | note "+((document.querySelector("#fsn")||{}).textContent||"")+" | log "+BILLLOG.map(x=>x.act).join(","));
 }catch(e){log("X "+e.message)}

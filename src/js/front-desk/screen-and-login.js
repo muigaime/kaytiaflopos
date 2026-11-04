@@ -1,4 +1,5 @@
 function fdDraw() {
+  if (!fdCan(fdPageRight(fdView))) fdView = fdCan("desk") ? "grid" : fdCan("hk") ? "hk" : "set";
   fdBrand();
   $("#fdWho").textContent =
     (user ? user.n + " · " : "") +
@@ -8,17 +9,27 @@ function fdDraw() {
       month: "long",
       year: "numeric"
     });
-  $("#fdRib").innerHTML = FD_MENU.map(
-    ([t, b]) =>
-      `<div class="fd-g"><div class="fd-gb">${b.map(([k, l, ic]) => `<button class="fd-b ${fdView === k ? "on" : ""}" data-v="${k}"><svg viewBox="0 0 24 24">${FD_ICONS[ic]}</svg>${l}</button>`).join("")}</div><div class="lb">${t}</div></div>`
-  ).join("");
+  const menu = FD_MENU.map(([t, b]) => [t, b.filter(([k]) => fdCan(fdPageRight(k)))]).filter(
+      ([, b]) => b.length
+    ),
+    T = FD_TITLES[fdView] || [FD_SETTINGS.name, ""];
+  $("#fdRib").innerHTML = menu
+    .map(
+      ([t, b]) =>
+        `<div class="fd-g"><div class="lb">${t}</div><div class="fd-gb">${b.map(([k, l, ic]) => `<button class="fd-b ${fdView === k ? "on" : ""}" data-v="${k}" ${fdView === k ? 'aria-current="page"' : ""}><svg viewBox="0 0 24 24">${FD_ICONS[ic]}</svg><span>${l}</span></button>`).join("")}</div></div>`
+    )
+    .join("");
+  $("#fdTitle").textContent = T[0];
+  $("#fdSub").textContent = T[1];
+  $("#fdQuick").innerHTML = fdCan("desk")
+    ? `<button class="mini" data-v="book">New booking</button><button class="chip on" data-v="checkin">Check in a guest</button>`
+    : "";
   $("#fdNote").innerHTML = fdNotice
     ? `<div class="fd-note ${fdNotice.ok ? "ok" : "no"}">${hx(fdNotice.t)}</div>`
     : "";
   $("#fdBody").innerHTML = FD_VIEWS[fdView]();
 }
 function fdShow() {
-  posKioskOff(); // signed in to Front Desk: the POS rule no longer applies
   ensureRoomTypes();
   if (!ROOMS.length) fdSeed();
   $("#start").style.display = "none";
@@ -26,10 +37,23 @@ function fdShow() {
   fdDraw();
 }
 let fdUser = null,
-  posUser = null,
-  fdLoginFails = 0,
-  fdLoginLockedUntil = 0;
+  posUser = null;
+/** Shows or hides everything outside the Back Office that belongs to the Front Desk. */
+function fdModuleApply() {
+  const on = fdOn(),
+    show = (el, yes) => el && (el.style.display = yes ? "" : "none");
+  show($('#start [data-go="fd"]'), on);
+  show($("#stFdKey"), on);
+  const room = $("#fRoom");
+  if (room) {
+    show(room, on);
+    show(room.previousElementSibling, on);
+  }
+  if (!on && ($("#fd").classList.contains("show") || $("#fl").classList.contains("show")))
+    fdExit(true);
+}
 function fdOpen() {
+  if (!fdOn()) return;
   try {
     swipeArm(false);
   } catch (e) {}
@@ -41,16 +65,17 @@ function fdOpen() {
 function fdLoginShow() {
   fdBrand();
   $("#fd").classList.remove("show");
-  $("#flS").innerHTML = USERS.map((u, i) => `<option value="${i}">${hx(u.n)}</option>`).join("");
+  $("#flU").value = "";
   $("#flP").value = "";
   $("#flP").type = "password";
   $("#flMsg").style.display = "none";
   $("#flHi").textContent = (h =>
     h < 12 ? "Good morning," : h < 17 ? "Good afternoon," : "Good evening,")(new Date().getHours());
   $("#fl").classList.add("show");
-  setTimeout(() => $("#flP").focus(), 60);
+  setTimeout(() => $("#flU").focus(), 60);
 }
 function fdEnter(u) {
+  fdView = "grid"; // fdDraw moves them to the first page they have
   fdUser = u;
   posUser = user;
   user = u;
@@ -75,34 +100,6 @@ function fdLogout() {
   fdExit(false);
   fdLoginShow();
 }
-function fdLoginTry() {
-  const u = USERS[+$("#flS").value],
-    m = $("#flMsg"),
-    bad = t => {
-      m.textContent = t;
-      m.style.display = "block";
-      const c = $("#fl .fl-card");
-      c.classList.remove("shake");
-      void c.offsetWidth;
-      c.classList.add("shake");
-    };
-  if (Date.now() < fdLoginLockedUntil) return bad("Too many attempts. Try again in 30 seconds.");
-  if (u && u.pin === $("#flP").value) {
-    fdLoginFails = 0;
-    m.style.display = "none";
-    fdEnter(u);
-  } else {
-    if (++fdLoginFails >= 5) {
-      fdLoginLockedUntil = Date.now() + 3e4;
-      fdLoginFails = 0;
-    }
-    bad("Wrong PIN. Please try again.");
-  }
-}
-$("#flGo").onclick = fdLoginTry;
-$("#flP").onkeydown = e => {
-  if (e.key === "Enter") fdLoginTry();
-};
 $("#flEye").onclick = () => {
   const p = $("#flP");
   p.type = p.type === "password" ? "text" : "password";

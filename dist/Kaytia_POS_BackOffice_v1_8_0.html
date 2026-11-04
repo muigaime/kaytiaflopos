@@ -8586,78 +8586,6 @@ body > .modal select:focus {
 }
 
 /* ---------------------------------------------------------------- full screen lock */
-#fsGate {
-  position: fixed;
-  inset: 0;
-  z-index: 100000;
-  display: none;
-  place-items: center;
-  padding: 16px;
-  background: rgba(14, 10, 6, 0.94);
-  color: #241b12;
-}
-#fsGate.show {
-  display: grid;
-}
-#fsGate .fsg-box {
-  width: min(420px, 100%);
-  display: grid;
-  gap: 12px;
-  padding: 24px;
-  background: #fffdf8;
-  border-top: 3px solid #c7a25a;
-  border-radius: 6px;
-}
-#fsGate h3 {
-  margin: 0;
-  font-family: "Playfair Display", Georgia, "Times New Roman", serif;
-  font-size: 23px;
-  font-weight: 500;
-}
-#fsGate p {
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.45;
-  color: #75695a;
-}
-#fsgPin {
-  padding: 12px 14px;
-  font-size: 18px;
-  letter-spacing: 0.2em;
-  background: transparent;
-  border: 1px solid #c7a25a;
-  border-radius: 8px;
-  color: #241b12;
-}
-#fsgPin::placeholder {
-  font-size: 14px;
-  letter-spacing: normal;
-}
-#fsgMsg {
-  min-height: 18px;
-  font-size: 13px;
-  color: #a4342a;
-}
-#fsGate .fsg-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-#fsGate button {
-  min-height: 46px;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  border: 1px solid #e2d9c8;
-  background: transparent;
-  color: #241b12;
-}
-#fsGate #fsgOk {
-  background: linear-gradient(180deg, #e3c98e, #c7a25a 55%, #9c7a36);
-  border-color: #9c7a36;
-  color: #1c1408;
-}
-
 /* ---------------------------------------------------------------- printed slips (80mm, black only) */
 #mRc .box {
   max-width: 372px;
@@ -14213,7 +14141,10 @@ tr[data-grp].on td {
 }
 #bo#bo .stm-tile > b {
   color: #241b12;
-  font: 700 23px/1.2 Georgia, "Times New Roman", serif;
+  font:
+    700 23px/1.2 Georgia,
+    "Times New Roman",
+    serif;
 }
 #bo#bo .stm-tile.gold {
   background: #241b12;
@@ -14678,9 +14609,6 @@ tr[data-grp].on td {
   opacity: 0.7;
 }
 /* POS sign-in: Clear, Clock in or out, and Exit on one row */
-#login .bt {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
 /* HR & Payroll: the professional layer */
 #bo .hr-title {
   display: flex;
@@ -14967,7 +14895,10 @@ tr[data-grp].on td {
   z-index: 90;
   padding: 3px 10px;
   color: #1f7a4d;
-  font: 600 11px Arial, Helvetica, sans-serif;
+  font:
+    600 11px Arial,
+    Helvetica,
+    sans-serif;
   background: #eff8f3;
   border: 1px solid #bfe0cd;
   border-radius: 99px;
@@ -14980,6 +14911,854 @@ tr[data-grp].on td {
 }
 #lanPill[hidden] {
   display: none;
+}
+/* POS in a normal window: the bill packs tighter, and its item list gives way first */
+@media (max-height: 880px) and (min-width: 901px) {
+  .pos.pos .rp {
+    gap: 6px;
+  }
+  .pos.pos .paper {
+    gap: 4px;
+    padding: 8px 14px;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+  .pos.pos .rh {
+    font-size: 11px;
+  }
+  .pos.pos .rh2 {
+    margin: 0;
+    padding-bottom: 4px;
+    font-size: 16px;
+  }
+  .pos.pos .fm {
+    gap: 1px 6px;
+  }
+  .pos.pos .fm input {
+    height: 23px;
+    min-height: 0;
+    padding-block: 0;
+    font-size: 12.5px;
+  }
+  .pos.pos .tbl {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    min-height: 84px;
+    overflow: hidden;
+  }
+  .pos.pos #lines {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+  }
+  .pos.pos #lines .empty {
+    padding: 10px;
+  }
+  .pos.pos .mid {
+    flex: none;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 3px;
+    margin: 0;
+  }
+  .pos.pos .ml {
+    flex-direction: row;
+    gap: 6px;
+    margin: 0;
+  }
+  .pos.pos .ml .b,
+  .pos.pos .ml .b:first-child {
+    flex: 1;
+    min-height: 28px;
+    padding: 2px 6px;
+    font-size: 12px;
+  }
+  .pos.pos .tt {
+    grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 0 8px;
+    margin: 0;
+    padding: 0;
+  }
+  .pos.pos .tt .val {
+    margin: 0;
+    padding: 1px 0;
+    font-size: 13px;
+  }
+  .pos.pos .tt .gl {
+    grid-column: 1 / 2;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 12.5px;
+  }
+  .pos.pos .tt .val.gv {
+    grid-column: 2 / -1;
+    margin: 0;
+    padding: 1px 0;
+    font-size: 21px;
+    line-height: 1.15;
+  }
+  .pos.pos .acts {
+    gap: 6px;
+  }
+  .pos.pos .act {
+    min-height: 34px;
+    padding-block: 3px;
+    font-size: 12.5px;
+  }
+  .pos.pos .act.a1,
+  .pos.pos .act.a3,
+  .pos.pos .act.a7 {
+    min-height: 42px;
+    font-size: 14px;
+  }
+}
+/* Settings: what each registered machine sells */
+#bo .mac-t th small {
+  margin-left: 6px;
+  color: var(--mute);
+  font-weight: 500;
+}
+#bo .mac-sps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+}
+#bo .mac-sps label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+  white-space: nowrap;
+}
+#bo .mac-acts {
+  white-space: nowrap;
+  text-align: right;
+}
+#bo .mac-acts .mini + .mini {
+  margin-left: 6px;
+}
+#bo .mac-sps input {
+  flex: none;
+  width: auto;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+}
+/* The login page names the sale point only when this computer is attached to one */
+#login .meta .sp.here {
+  display: inline-block;
+}
+/* ==================== Front Desk: walnut sidebar, ivory pages ==================== */
+#fd .fd-wrap {
+  display: grid;
+  grid-template-columns: 252px minmax(0, 1fr);
+  gap: 0;
+  max-width: none;
+  min-height: 100%;
+  padding: 0;
+}
+#fd .fd-side {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow-y: auto;
+  background: linear-gradient(180deg, #1d1710, #120e09);
+  color: #e9dfc8;
+}
+#fd .fd-brand {
+  display: grid;
+  gap: 3px;
+  padding: 22px 20px 18px;
+  border-bottom: 1px solid rgba(201, 162, 74, 0.28);
+}
+#fd .fd-brand .fh-s {
+  color: #c9a24a;
+  font-size: 10px;
+  letter-spacing: 0.32em;
+}
+#fd .fd-brand b {
+  font-family: var(--serif);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: #fff;
+}
+#fd .fd-brand small {
+  color: #c9a24a;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+#fd .fd-rib {
+  display: block;
+  flex: 1;
+  padding: 8px 12px 14px;
+  overflow: visible;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+#fd .fd-g {
+  display: block;
+  border: 0;
+}
+#fd .fd-g .lb {
+  padding: 16px 10px 7px;
+  background: none;
+  color: #c9a24a;
+  font-family: inherit;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.17em;
+  text-align: left;
+  text-transform: uppercase;
+}
+#fd .fd-gb {
+  display: grid;
+  gap: 2px;
+  padding: 0;
+}
+#fd .fd-b {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 10px;
+  border-radius: 9px;
+  color: #d9ceb5;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+}
+#fd .fd-b svg {
+  flex: none;
+  width: 19px;
+  height: 19px;
+  stroke: #b7a988;
+}
+#fd .fd-b:hover {
+  background: rgba(201, 162, 74, 0.12);
+  color: #fff;
+}
+#fd .fd-b.on {
+  background: linear-gradient(90deg, rgba(201, 162, 74, 0.3), rgba(201, 162, 74, 0.06));
+  box-shadow: inset 3px 0 0 #c9a24a;
+  color: #fff;
+  font-weight: 600;
+}
+#fd .fd-b.on svg {
+  stroke: #e6c768;
+}
+#fd .fd-b:focus-visible,
+#fd .fd-foot button:focus-visible {
+  outline: 2px solid #e6c768;
+  outline-offset: 1px;
+}
+#fd .fd-foot {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 14px;
+  border-top: 1px solid rgba(201, 162, 74, 0.28);
+}
+#fd .fd-foot .sub {
+  grid-column: 1 / -1;
+  color: #b9ad90;
+  font-size: 12px;
+  line-height: 1.4;
+}
+#fd .fd-foot .bkm,
+#fd .fd-foot .mini {
+  position: static;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 36px;
+  margin: 0;
+  padding: 0 8px;
+  border: 1px solid rgba(201, 162, 74, 0.45);
+  border-radius: 8px;
+  background: transparent;
+  box-shadow: none;
+  color: #f4ead2;
+  font-size: 12.5px;
+}
+#fd .fd-foot .bkm svg {
+  width: 14px;
+  height: 14px;
+}
+#fd .fd-foot .bkm:hover,
+#fd .fd-foot .mini:hover {
+  background: rgba(201, 162, 74, 0.2);
+}
+#fd .fd-main {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  min-width: 0;
+  padding: 24px 28px 40px;
+}
+#fd .fd-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+#fd .fd-head h1 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1.15;
+}
+#fd .fd-head p {
+  margin: 4px 0 0;
+  color: var(--mute);
+  font-size: 13.5px;
+}
+#fd .fd-quick {
+  display: flex;
+  gap: 8px;
+}
+#fd .fd-quick button {
+  flex: none;
+  min-height: 40px;
+  margin: 0;
+  padding: 0 16px;
+}
+#fd #fdNote:empty {
+  display: none;
+}
+#fd .fd-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+#fd .fd-t {
+  display: grid;
+  gap: 2px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-top: 2px solid var(--sg);
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+}
+#fd button.fd-t {
+  cursor: pointer;
+}
+#fd button.fd-t:hover {
+  box-shadow: 0 6px 18px rgba(80, 60, 20, 0.12);
+}
+#fd .fd-t span {
+  color: var(--sgd);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+#fd .fd-t b {
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 600;
+}
+#fd .fd-t small {
+  color: var(--mute);
+  font-size: 12px;
+}
+#fd .fd-leg {
+  gap: 8px;
+}
+#fd .fd-leg button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+#fd .fd-leg button b {
+  margin-left: 5px;
+}
+#fd .fd-leg button:hover {
+  border-color: var(--sg);
+}
+#fd .fd-leg button.on {
+  border-color: #1d1710;
+  background: #1d1710;
+  color: #fff;
+}
+#fd .fd-grid {
+  grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
+  gap: 12px;
+}
+#fd .fd-two {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 14px;
+}
+#fd .fd-gh {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+#fd .fd-gh input {
+  flex: 0 1 320px;
+  min-height: 38px;
+  padding: 0 12px;
+}
+#fd .fd-hkbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+#fd .fd-hkbar .shp {
+  display: flex;
+  gap: 8px;
+  margin: 0;
+}
+#fd .fd-hk {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+#fd .fd-hkr {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-left: 4px solid #1f9d62;
+  border-radius: 12px;
+  background: var(--card);
+}
+#fd .hs-occ {
+  border-left-color: #2b7bb9;
+}
+#fd .hs-res {
+  border-left-color: #e08a1e;
+}
+#fd .hs-dirty {
+  border-left-color: #8a6d4b;
+}
+#fd .hs-ooo {
+  border-left-color: #c0392b;
+}
+#fd .fd-hkt {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: baseline;
+  gap: 10px;
+}
+#fd .fd-hkt b {
+  font-family: var(--serif);
+  font-size: 24px;
+  font-weight: 600;
+}
+#fd .fd-hkt span {
+  color: var(--mute);
+  font-size: 13px;
+}
+#fd .fd-hkt em {
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: none;
+  color: var(--ink);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+#fd .fd-hka {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+}
+#fd .fd-hka button {
+  flex: 1 1 110px;
+  min-height: 42px;
+  margin: 0;
+}
+@media (max-width: 900px) {
+  #fd .fd-wrap {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  #fd .fd-side {
+    position: static;
+    height: auto;
+  }
+  #fd .fd-rib {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+  }
+  #fd .fd-g {
+    flex: none;
+  }
+  #fd .fd-gb {
+    display: flex;
+  }
+  #fd .fd-b {
+    width: auto;
+    white-space: nowrap;
+  }
+  #fd .fd-main {
+    padding: 16px;
+  }
+}
+/* Back Office top bar */
+#bo #boOut {
+  margin-left: 6px;
+}
+/* The page-wide header and main rules belong to the POS */
+#fd .fd-main {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: none;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+}
+#fd .fd-head {
+  position: static;
+  z-index: auto;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+/* Settle: the receipt asks */
+.rc-ask {
+  margin-top: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+}
+/* Users & roles: adding a role */
+#bo .ur-newrole {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 10px;
+  margin: 12px 0;
+}
+#bo .ur-newrole label {
+  flex: 0 1 280px;
+}
+#bo .ur-newrole button {
+  flex: none;
+}
+/* ==================== Customers ==================== */
+#bo .cu-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+#bo .cu-bar .find {
+  flex: 1 1 260px;
+}
+#bo .cu-bar .find input {
+  width: 100%;
+}
+#bo .cu-new {
+  flex: none;
+  margin-left: auto;
+}
+#bo .cu-t td {
+  vertical-align: middle;
+}
+#bo .cu-t tr[hidden] {
+  display: none;
+}
+#bo .cu-t .ws-a {
+  display: inline-grid;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+#bo .cu-nm {
+  display: inline-grid;
+  gap: 1px;
+  vertical-align: middle;
+}
+#bo .cu-nm small {
+  color: var(--mute);
+  font-size: 12px;
+}
+#bo .cu-m {
+  display: inline-block;
+  width: 84px;
+  height: 7px;
+  overflow: hidden;
+  vertical-align: middle;
+  border-radius: 99px;
+  background: var(--line);
+}
+#bo .cu-m i {
+  display: block;
+  height: 100%;
+  border-radius: 99px;
+  background: #1f8a5b;
+}
+#bo .cu-m.over i {
+  background: #b3392b;
+}
+#bo .cu-pc {
+  margin-left: 6px;
+  color: var(--mute);
+  font-size: 12px;
+}
+#bo .cu-a {
+  white-space: nowrap;
+}
+#bo .cu-a .mini {
+  margin-left: 6px;
+}
+#bo .cu-box {
+  width: min(760px, 94vw);
+  max-height: 90vh;
+  overflow-y: auto;
+  text-align: left;
+}
+#bo .cu-small {
+  width: min(480px, 94vw);
+}
+#bo .cu-h {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+#bo .cu-h h3 {
+  margin: 0;
+  font-size: 22px;
+}
+#bo .cu-h p {
+  margin: 2px 0 0;
+  color: var(--mute);
+  font-size: 13px;
+}
+#bo .cu-box section {
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+}
+#bo .cu-box section h4 {
+  margin: 0 0 8px;
+  color: var(--mute);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+#bo .cu-g {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 14px;
+}
+#bo .cu-g label,
+#bo .cu-n {
+  display: grid;
+  gap: 4px;
+  font-size: 12.5px;
+}
+#bo .cu-w {
+  grid-column: 1 / -1;
+}
+#bo .cu-g label.cu-c {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+}
+#bo .cu-c input {
+  flex: none;
+  width: auto;
+}
+#bo .cu-n textarea {
+  width: 100%;
+}
+#bo .cu-f {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 12px;
+}
+#bo .cu-f button {
+  flex: none;
+}
+.cu-doc header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #1d1710;
+}
+.cu-doc h2 {
+  margin: 0;
+  font-size: 22px;
+}
+.cu-doc header p {
+  margin: 2px 0 0;
+}
+.cu-doc-m {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px 14px;
+  margin: 12px 0;
+}
+.cu-doc-m span {
+  display: block;
+  color: #6d6252;
+  font-size: 11px;
+}
+.cu-doc table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.cu-doc th,
+.cu-doc td {
+  padding: 6px 8px;
+  border-bottom: 1px solid #ddd3bf;
+  text-align: left;
+}
+.cu-doc .n {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.cu-doc tfoot td {
+  border-top: 2px solid #1d1710;
+  border-bottom: 0;
+  font-weight: 700;
+}
+/* ==================== Waiter clearance form ==================== */
+.wc header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #1d1710;
+}
+.wc h2 {
+  margin: 0;
+  font-size: 22px;
+}
+.wc header p {
+  margin: 2px 0 0;
+  font-weight: 600;
+}
+.wc-d {
+  text-align: right;
+  font-weight: 700;
+}
+.wc-d small {
+  display: block;
+  font-weight: 400;
+}
+.wc-m {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 12px 0;
+}
+.wc-m span {
+  display: block;
+  color: #6d6252;
+  font-size: 11px;
+}
+.wc-st {
+  display: grid;
+  gap: 2px;
+  margin: 10px 0 14px;
+  padding: 10px 12px;
+  border: 2px solid #1f8a5b;
+  border-radius: 6px;
+}
+.wc-st.no {
+  border-color: #b3392b;
+}
+.wc-st b {
+  font-size: 16px;
+}
+.wc h4 {
+  margin: 12px 0 4px;
+  font-size: 13px;
+}
+.wc table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.wc th,
+.wc td {
+  padding: 5px 8px;
+  border-bottom: 1px solid #ddd3bf;
+  text-align: left;
+}
+.wc .n {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.wc-none {
+  margin: 2px 0;
+  color: #6d6252;
+  font-size: 13px;
+}
+.wc-dec {
+  margin: 16px 0 34px;
+  font-size: 13px;
+}
+.wc-signs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+}
+.wc-sign {
+  display: grid;
+  gap: 3px;
+}
+.wc-line {
+  display: block;
+  height: 30px;
+  border-bottom: 1px solid #1d1710;
+}
+.wc-sign small {
+  font-size: 11px;
+}
+#bo .cu-box {
+  padding: 22px 26px;
+}
+.rc-ask {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin: 0 0 10px;
+  padding: 8px;
+  border-radius: 8px;
+  background: var(--tint, #f6efde);
 }
 </style>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -15021,23 +15800,6 @@ tr[data-grp].on td {
 </script>
 
     <!-- The company logo, kept once here: Start, Back Office and Front Desk screens copy it. -->
-
-    <!-- POS: full screen lock (a Manager PIN is needed to leave) -->
-    <div id="fsGate">
-      <div class="fsg-box">
-        <h3 id="fsgT"></h3>
-        <p id="fsgS"></p>
-        <input
-          id="fsgPin"
-          type="password"
-          inputmode="numeric"
-          autocomplete="off"
-          placeholder="Manager PIN"
-        />
-        <div id="fsgMsg"></div>
-        <div class="fsg-row"><button id="fsgBack"></button><button id="fsgOk">Confirm</button></div>
-      </div>
-    </div>
 
     <!-- ==================== POS: cashier PIN login ==================== -->
     <div id="login">
@@ -15087,7 +15849,7 @@ tr[data-grp].on td {
             (all). Demo cards: KT0001, KT0002, KT0003.</span
           >
         </div>
-        <div class="bt"><button data-k="C">CLEAR</button><button data-k="T">CLOCK IN / OUT</button><button data-k="X">EXIT</button></div>
+        <div class="bt"><button data-k="C">CLEAR</button><button data-k="X">EXIT</button></div>
       </div>
     </div>
     <!-- ==================== POS: "application closed" screen ==================== -->
@@ -15398,16 +16160,22 @@ tr[data-grp].on td {
           <h3 id="flHi">Good evening,</h3>
           <p class="fl-s">Please sign in to begin your shift.</p>
           <div class="fl-f">
-            <label for="flS">Staff member</label
+            <label for="flU">Username</label
             ><span class="fl-i"
               ><svg viewBox="0 0 24 24">
                 <circle cx="12" cy="8" r="4" />
                 <path d="M4 21c0-4 4-6 8-6s8 2 8 6" /></svg
-              ><select id="flS"></select
-            ></span>
+              ><input
+                id="flU"
+                type="text"
+                placeholder="Enter your username"
+                autocomplete="off"
+                autocapitalize="off"
+                spellcheck="false"
+            /></span>
           </div>
           <div class="fl-f">
-            <label for="flP">Personal PIN</label
+            <label for="flP">Password</label
             ><span class="fl-i"
               ><svg viewBox="0 0 24 24">
                 <rect x="5" y="11" width="14" height="9" rx="2" />
@@ -15415,9 +16183,8 @@ tr[data-grp].on td {
               ><input
                 id="flP"
                 type="password"
-                inputmode="numeric"
-                placeholder="Enter your PIN"
-                autocomplete="off" /><button type="button" id="flEye" aria-label="Show or hide PIN">
+                placeholder="Enter your password"
+                autocomplete="off" /><button type="button" id="flEye" aria-label="Show or hide password">
                 <svg viewBox="0 0 24 24">
                   <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z" />
                   <circle cx="12" cy="12" r="3" />
@@ -15434,19 +16201,31 @@ tr[data-grp].on td {
     <!-- ==================== Front Desk: app (body is drawn by js/front-desk/views.js) ==================== -->
     <div id="fd">
       <div class="fd-wrap">
-        <div class="fd-hero">
-          <button class="bkm" id="fdBack" aria-label="Back to main menu">
-            <svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6" /></svg><span>Main menu</span>
-          </button>
-          <div class="fh-t">
-            <span class="fh-s">★ ★ ★ ★ ★</span><b id="fdHotel">Mwangaza Grand Hotel</b
-            ><span class="sub" id="fdWho"></span>
+        <aside class="fd-side">
+          <div class="fd-brand">
+            <span class="fh-s">★ ★ ★ ★ ★</span><b id="fdHotel">Mwangaza Grand Hotel</b>
+            <small>Front Desk</small>
           </div>
-          <button class="mini" id="fdOut">Sign out</button>
-        </div>
-        <div class="fd-rib" id="fdRib"></div>
-        <div id="fdNote"></div>
-        <div id="fdBody" style="display: grid; gap: 12px"></div>
+          <nav class="fd-rib" id="fdRib" aria-label="Front Desk"></nav>
+          <div class="fd-foot">
+            <span class="sub" id="fdWho"></span>
+            <button class="bkm" id="fdBack" aria-label="Back to main menu">
+              <svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6" /></svg><span>Main menu</span>
+            </button>
+            <button class="mini" id="fdOut">Sign out</button>
+          </div>
+        </aside>
+        <main class="fd-main">
+          <header class="fd-head">
+            <div>
+              <h1 id="fdTitle"></h1>
+              <p id="fdSub"></p>
+            </div>
+            <div class="fd-quick" id="fdQuick"></div>
+          </header>
+          <div id="fdNote"></div>
+          <div id="fdBody" style="display: grid; gap: 14px"></div>
+        </main>
       </div>
     </div>
     <!-- ID / passport document viewer -->
@@ -15801,7 +16580,12 @@ const MACHINE = (() => {
     if (name()) add(name());
     else draw();
   }
-  return { name, list, clean, problem, add, use, gate };
+  /** The sale points this computer is attached to. None means it isn't limited. */
+  function points() {
+    const m = list().find(x => x.n === name());
+    return m && m.sp ? m.sp.filter(posSells) : [];
+  }
+  return { name, list, clean, problem, add, use, gate, points };
 })();
 addEventListener("DOMContentLoaded", () => MACHINE.gate());
 // ---- The audit trail: things that happen and leave no other record, such as sign-ins and price changes ----
@@ -15844,6 +16628,8 @@ const PAY_BUILT = [
   ["credit", "Post to account", "Charged to a customer's account."],
   ["room", "Post to room", "Charged to a guest's room."]
 ];
+/** A business without rooms switches the Front Desk off in Settings → Modules. Its data stays. */
+const fdOn = () => typeof FD_SETTINGS === "undefined" || !FD_SETTINGS.frontDeskOff;
 const payCfg = () => {
   if (typeof FD_SETTINGS === "undefined") return { off: {}, custom: [] };
   return FD_SETTINGS.payModes || (FD_SETTINGS.payModes = { off: {}, custom: [] });
@@ -15857,7 +16643,7 @@ const payCustoms = () =>
     ? [...payMine(), PAY_PAYROLL]
     : payMine();
 const payCustomsOn = () => payCustoms().filter(c => c.on !== false);
-const payModeOn = k => k === "cash" || !payCfg().off[k];
+const payModeOn = k => k === "cash" || ((k === "room" ? fdOn() : true) && !payCfg().off[k]);
 function payName(k) {
   const b = PAY_BUILT.find(x => x[0] === k),
     c = payCustoms().find(x => x.k === k);
@@ -16736,6 +17522,15 @@ function nextBizDate() {
     next = ymdOf(new Date(y, m - 1, n + 1));
   return next > today ? next : today;
 }
+/** The business date a moment belongs to: the day that was open then. Before any day, the clock's date. */
+function bizDateOf(at) {
+  const t = new Date(at).getTime(),
+    d = DAYS.find(
+      x =>
+        new Date(x.openedAt).getTime() <= t && (!x.closedAt || t <= new Date(x.closedAt).getTime())
+    );
+  return d ? dayDate(d) : ymdOf(new Date(at));
+}
 const dateGB = ymd => ymd.split("-").reverse().join("/");
 /** A moment shown on a business date: the date of the day, the clock's time. */
 function onBizDate(ymd, at = new Date()) {
@@ -16747,6 +17542,20 @@ const bizNow = () => onBizDate(bizDate());
 /** When a sale counts in reports. Sales from before business dates use their clock time. */
 const saleAt = s => (s.bd ? new Date(s.bd + "T12:00:00") : s.at);
 const saleShown = s => (s.bd ? onBizDate(s.bd, s.at) : s.at);
+/** Their shift for today, opened and closed. Nobody opens a second one at the till, unless Back Office has agreed to it. */
+const shiftDoneOf = n => {
+  const d = curDay(),
+    x = shiftAuthOf(n);
+  return d && !(x && x.status === "ok")
+    ? SHIFTS.filter(
+        s => s.day === d.id && s.user === n && s.closedAt && s.openedBy !== "Bill clearing"
+      ).pop()
+    : null;
+};
+/** A waiter's shift opens when they sign in and closes with the day. */
+const waiterShift = s => (USERS.find(u => u.n === s.user) || {}).role === "Waiter";
+/** Waiters and cashiers: opening and closing the shift is their clocking in and out. */
+const shiftRole = u => /waiter|cashier/i.test((u && u.role) || "");
 // ---- A waiter starts their own shift. With bills still pending, Back Office has to agree first.
 const shiftAuths = () => FD_SETTINGS.shiftAuth || (FD_SETTINGS.shiftAuth = []);
 const shiftAuthOf = n =>
@@ -16838,12 +17647,14 @@ function dayStart(by) {
   document.dispatchEvent(new Event("kf:newday"));
   return "";
 }
-function shiftStart(u, fl, by, clearing) {
+function shiftStart(u, fl, by, clearing, again) {
   if (!curDay()) return "Start the day first.";
   if (dayOver() && !clearing)
     return "The working day has ended. Clear the bills and end the day first.";
   if (!u) return "Choose a cashier.";
   if (shiftOf(u)) return u + " already has an open shift.";
+  if (!clearing && !again && shiftDoneOf(u))
+    return u + " has already done a shift today. A manager can open another in Back Office.";
   if (!(fl >= 0)) return "Enter the opening cash float (0 or more).";
   SHIFTS.push({
     id: "S" + (SHIFTS.length + 1),
@@ -16860,6 +17671,7 @@ function shiftStart(u, fl, by, clearing) {
 }
 function shiftEnd(sh, counted, by) {
   if (!sh) return "Shift not found.";
+  if (sh.closedAt) return "This shift is already closed.";
   if (!(counted >= 0)) return "Enter the actual cash counted in the till.";
   const c = shiftCalc(sh);
   Object.assign(sh, {
@@ -16889,8 +17701,9 @@ function dayEnd(by) {
   if (!d) return "No day is open.";
   const stop = dayEndStop();
   if (stop) return stop;
-  const os = openShifts();
+  const os = openShifts().filter(s => !waiterShift(s));
   if (os.length) return "End these shifts first: " + os.map(s => s.user).join(", ") + ".";
+  openShifts().forEach(s => shiftEnd(s, Math.max(0, shiftCalc(s).expected), "Day end"));
   const a = SALES.filter(s => s.at >= new Date(d.openedAt));
   Object.assign(d, {
     closedAt: new Date().toISOString(),
@@ -16975,7 +17788,7 @@ function shiftReport(sh, act, by) {
     ac = sh.closedAt ? sh.counted : act,
     vr = ac >= 0 ? ac - c.expected : null,
     pays = pOf(sh);
-  return `<div class="rd">${rhead("SHIFT SUMMARY")}<table>${rr("Shift no", sh.id)}${rr("Cashier", hx(sh.user))}${rr("Opened", dm(sh.openedAt) + " " + hm(sh.openedAt))}${rr("Closed", sh.closedAt ? dm(sh.closedAt) + " " + hm(sh.closedAt) : "Still open")}</table><hr><div class="sec">PAYMODES (KSH)</div><table>${rr("CASH", R2(c.cash))}${rr("M-PESA", R2(c.mpesa))}${rr("PDQ", R2(c.pdq || 0))}${rr("Complimentary", R2(c.comp || 0))}${rr("Room", R2(c.room || 0))}${rr("Tips", R2(c.tips || 0))}${rr("CREDIT", R2(c.credit))}${payExtraRows(c.sales, (n, v) => rr(hx(n), R2(v)))}${rr("TOTAL", R2(c.cash + c.mpesa + (c.pdq || 0) + (c.comp || 0) + (c.room || 0) + c.credit + payExtraSum(c.sales)), 1)}</table><hr><div class="sec">SALES</div><table>${rr("Bills", c.bills)}${rr("Gross sales", R2(c.gross))}${rr("Taxes", R2(c.tax))}${rr("Net sales", R2(c.gross - c.tax), 1)}</table><hr><div class="sec">CASH RECONCILIATION</div><table>${rr("Opening float", R2(sh.float))}${rr("+ Cash sales", R2(c.cash))}${rr("- Cash paid out", R2(c.paid))}${rr("Expected in till", R2(c.expected), 1)}${rr("Actual in till", ac >= 0 ? R2(ac) : "not counted")}${rr("Variance", vr === null ? "-" : sg(vr), 1)}</table><hr><div class="sec">CASH PAYOUTS / EXPENSES</div>${pays.length ? `<table>${pays.map(x => rr(hm(x.at) + " " + hx(x.cat) + ": " + hx(x.desc), R2(x.amt))).join("")}${rr("TOTAL PAID OUT", R2(c.paid), 1)}</table>` : "<div>None</div>"}<hr><div class="c">Printed by ${hx(by || sh.user)}</div></div>`;
+  return `<div class="rd">${rhead("SHIFT SUMMARY")}<table>${rr("Shift no", sh.id)}${rr("Cashier", hx(sh.user))}${rr("Opened", dm(sh.openedAt) + " " + hm(sh.openedAt))}${rr("Closed", sh.closedAt ? dm(sh.closedAt) + " " + hm(sh.closedAt) : "Still open")}</table><hr><div class="sec">PAYMODES (KSH)</div><table>${rr("CASH", R2(c.cash))}${rr("M-PESA", R2(c.mpesa))}${rr("PDQ", R2(c.pdq || 0))}${rr("Complimentary", R2(c.comp || 0))}${fdOn() || c.room ? rr("Room", R2(c.room || 0)) : ""}${rr("Tips", R2(c.tips || 0))}${rr("CREDIT", R2(c.credit))}${payExtraRows(c.sales, (n, v) => rr(hx(n), R2(v)))}${rr("TOTAL", R2(c.cash + c.mpesa + (c.pdq || 0) + (c.comp || 0) + (c.room || 0) + c.credit + payExtraSum(c.sales)), 1)}</table><hr><div class="sec">SALES</div><table>${rr("Bills", c.bills)}${rr("Gross sales", R2(c.gross))}${rr("Taxes", R2(c.tax))}${rr("Net sales", R2(c.gross - c.tax), 1)}</table><hr><div class="sec">CASH RECONCILIATION</div><table>${rr("Opening float", R2(sh.float))}${rr("+ Cash sales", R2(c.cash))}${rr("- Cash paid out", R2(c.paid))}${rr("Expected in till", R2(c.expected), 1)}${rr("Actual in till", ac >= 0 ? R2(ac) : "not counted")}${rr("Variance", vr === null ? "-" : sg(vr), 1)}</table><hr><div class="sec">CASH PAYOUTS / EXPENSES</div>${pays.length ? `<table>${pays.map(x => rr(hm(x.at) + " " + hx(x.cat) + ": " + hx(x.desc), R2(x.amt))).join("")}${rr("TOTAL PAID OUT", R2(c.paid), 1)}</table>` : "<div>None</div>"}<hr><div class="c">Printed by ${hx(by || sh.user)}</div></div>`;
 }
 /** Items sold in each department, added up, with what paid for them. Returns take their quantities back off. */
 function daySalesHTML(a) {
@@ -17017,7 +17830,7 @@ function dayReport(d, by) {
       s => s.at >= new Date(d.openedAt) && (!d.closedAt || s.at <= new Date(d.closedAt))
     ),
     paid = sSum(pays, p => p.amt);
-  return `<div class="rd">${rhead("END OF DAY SUMMARY")}<table>${rr("Day", d.id)}${rr("Business date", dateGB(dayDate(d)))}${rr("Opened", dm(d.openedAt) + " " + hm(d.openedAt) + " by " + hx(d.openedBy))}${rr("Closed", d.closedAt ? dm(d.closedAt) + " " + hm(d.closedAt) + " by " + hx(d.closedBy) : "Still open")}</table><hr><div class="sec">SALES</div><table>${rr("Bills", a.length)}${rr("Gross sales", R2(sSum(a, s => s.g)))}${rr("Taxes", R2(sSum(a, s => s.tax)))}${rr("Net sales", R2(sSum(a, s => s.g - s.tax)), 1)}</table><hr><div class="sec">PAYMODES (KSH)</div><table>${rr("CASH", R2(sPm(a, "cash")))}${rr("M-PESA", R2(sPm(a, "mpesa")))}${rr("PDQ", R2(sPm(a, "pdq")))}${rr("Complimentary", R2(sPm(a, "comp")))}${rr("Room", R2(sPm(a, "room")))}${rr("Tips", R2(sSum(a, s => Object.values(s.tips || {}).reduce((x, y) => x + y, 0))))}${rr("CREDIT", R2(sPm(a, "credit")))}${payExtraRows(a, (n, v) => rr(hx(n), R2(v)))}</table><hr><div class="sec">SALES BY DEPARTMENT</div><hr>${daySalesHTML(a)}<div class="sec">SHIFTS</div>${sh.length ? `<table>${sh.map(x => rr(hx(x.user) + " " + hm(x.openedAt) + "-" + (x.closedAt ? hm(x.closedAt) : "open"), x.closedAt ? "var " + sg(x.variance) : "open")).join("")}</table>` : "<div>None</div>"}<hr><div class="sec">CASH PAYOUTS / EXPENSES</div>${pays.length ? `<table>${pays.map(x => rr(hx(x.cat) + ": " + hx(x.desc) + " (" + hx(x.user) + ")", R2(x.amt))).join("")}${rr("TOTAL PAID OUT", R2(paid), 1)}</table>` : "<div>None</div>"}<hr><table>${rr("Total cash variance", sg(sSum(sh, x => x.variance || 0)), 1)}</table><hr><div class="c">Printed by ${hx(by || d.closedBy || d.openedBy)}</div></div>`;
+  return `<div class="rd">${rhead("END OF DAY SUMMARY")}<table>${rr("Day", d.id)}${rr("Business date", dateGB(dayDate(d)))}${rr("Opened", dm(d.openedAt) + " " + hm(d.openedAt) + " by " + hx(d.openedBy))}${rr("Closed", d.closedAt ? dm(d.closedAt) + " " + hm(d.closedAt) + " by " + hx(d.closedBy) : "Still open")}</table><hr><div class="sec">SALES</div><table>${rr("Bills", a.length)}${rr("Gross sales", R2(sSum(a, s => s.g)))}${rr("Taxes", R2(sSum(a, s => s.tax)))}${rr("Net sales", R2(sSum(a, s => s.g - s.tax)), 1)}</table><hr><div class="sec">PAYMODES (KSH)</div><table>${rr("CASH", R2(sPm(a, "cash")))}${rr("M-PESA", R2(sPm(a, "mpesa")))}${rr("PDQ", R2(sPm(a, "pdq")))}${rr("Complimentary", R2(sPm(a, "comp")))}${fdOn() || sPm(a, "room") ? rr("Room", R2(sPm(a, "room"))) : ""}${rr("Tips", R2(sSum(a, s => Object.values(s.tips || {}).reduce((x, y) => x + y, 0))))}${rr("CREDIT", R2(sPm(a, "credit")))}${payExtraRows(a, (n, v) => rr(hx(n), R2(v)))}</table><hr><div class="sec">SALES BY DEPARTMENT</div><hr>${daySalesHTML(a)}<div class="sec">SHIFTS</div>${sh.length ? `<table>${sh.map(x => rr(hx(x.user) + " " + hm(x.openedAt) + "-" + (x.closedAt ? hm(x.closedAt) : "open"), x.closedAt ? "var " + sg(x.variance) : "open")).join("")}</table>` : "<div>None</div>"}<hr><div class="sec">CASH PAYOUTS / EXPENSES</div>${pays.length ? `<table>${pays.map(x => rr(hx(x.cat) + ": " + hx(x.desc) + " (" + hx(x.user) + ")", R2(x.amt))).join("")}${rr("TOTAL PAID OUT", R2(paid), 1)}</table>` : "<div>None</div>"}<hr><table>${rr("Total cash variance", sg(sSum(sh, x => x.variance || 0)), 1)}</table><hr><div class="c">Printed by ${hx(by || d.closedBy || d.openedBy)}</div></div>`;
 }
 const $ = s => document.querySelector(s),
   KES = n =>
@@ -17660,7 +18473,6 @@ function tapConfirm(btn, fn, msg) {
   }, 2500);
 }
 function resetSale() {
-  cartSwaps = [];
   // A printed number has been seen by a guest, so it isn't used again.
   if (draft && draft.printed) draft = null;
   cart = {};
@@ -18103,7 +18915,7 @@ $("#printBtn").onclick = () => {
     const print = by => {
       if (draft) billMark(draft, by, user.n, cart);
       drawCart();
-      showRc(
+      rcFill(
         waiterCopies(
           guestBillHTML({
             pt: billPoints(cart)[0],
@@ -18123,7 +18935,7 @@ $("#printBtn").onclick = () => {
         null,
         "Close"
       );
-      printSlips("GUEST BILL");
+      printSlips("GUEST BILL").then(r => rcDone(r, "Bill printed."));
     };
     if (draft && draft.printed && !BILL_AUTH.includes(user.role))
       return pinAsk("Reprint bill " + draft.no, PIN_REPRINT, print);
@@ -18132,7 +18944,8 @@ $("#printBtn").onclick = () => {
 };
 $("#lock").onclick = e => {
   const go = () => {
-    posKioskOn(); // the next person starts in full screen
+    fsEnter(); // the next person starts maximised
+    if (user && shiftOf(user.n)) shiftOf(user.n).lastOut = new Date().toISOString();
     user = null;
     pin = "";
     pdraw();
@@ -18290,7 +19103,7 @@ function payPanelHTML() {
       )}</select><input id="pPostA" type="number" inputmode="decimal" min="0" step="any" value="${due}">${payrollAlone() ? "" : '<input id="pStaffPin" type="password" inputmode="numeric" autocomplete="off" placeholder="Manager or Super Cashier PIN">'}<button class="pay-mini" data-post="payroll">Add</button><button class="pay-mini" data-panel="">Cancel</button></div>`;
   }
   if (payPanel === "acct")
-    return `<div class="pay-panel"><h4>Post to account</h4><select id="pCu">${CU.map((c, i) => `<option value="${i}">${slipEsc(c.n)} · limit ${c.limit.toLocaleString()} · owes ${c.owes.toLocaleString()}</option>`).join("") || '<option value="">No credit customers yet</option>'}</select><input id="pPostA" type="number" inputmode="decimal" min="0" step="any" value="${due}"><button class="pay-mini" data-post="acct">Add</button><button class="pay-mini" data-panel="">Cancel</button></div>`;
+    return `<div class="pay-panel"><h4>Post to account</h4><select id="pCu">${CU.map((c, i) => (c.off ? "" : `<option value="${i}">${slipEsc(c.n)} · limit ${c.limit.toLocaleString()} · owes ${c.owes.toLocaleString()}</option>`)).join("") || '<option value="">No credit customers yet</option>'}</select><input id="pPostA" type="number" inputmode="decimal" min="0" step="any" value="${due}"><button class="pay-mini" data-post="acct">Add</button><button class="pay-mini" data-panel="">Cancel</button></div>`;
   if (payPanel === "room") {
     const L = RESERVATIONS.filter(r => r.status === "inhouse");
     return `<div class="pay-panel"><h4>Post to room</h4><select id="pRm">${L.map(r => `<option value="${slipEsc(r.id)}">Room ${slipEsc(r.room)} · ${slipEsc(r.guest)}</option>`).join("") || '<option value="">No guests in-house</option>'}</select><input id="pPostA" type="number" inputmode="decimal" min="0" step="any" value="${due}"><button class="pay-mini" data-post="room">Add</button><button class="pay-mini" data-panel="">Cancel</button></div>`;
@@ -18744,8 +19557,6 @@ function payClear() {
       );
     });
   if (direct) {
-    cartSwaps.filter(x => cart[x.toId]).forEach(x => swapLog(targets[0], x));
-    cartSwaps = [];
     sync();
     cart = {};
     kmsg = "";
@@ -18763,11 +19574,11 @@ function payClear() {
   if (payNoRc) {
     fsNote(targets.length > 1 ? `${targets.length} bills cleared.` : "Bill cleared.");
   } else {
-    $("#rc").innerHTML = html;
-    $("#rcCharge").style.display = "none";
-    $("#rcClose").textContent = "New sale";
-    $("#mRc").classList.add("show");
-    printSlips("RECEIPT");
+    showRc('<div class="sl-scr rc-ask">Print the receipt?</div>' + html, null, "No");
+    rcAsk = true;
+    $("#rcPrint").textContent = "Yes, print";
+    $("#rcPrint").className = "chip on";
+    $("#rcClose").className = "mini";
   }
   drawCart();
 }
@@ -18895,7 +19706,13 @@ const billsFor = (u, pts) =>
 const visOrders = () => billsFor(user, DEPTS);
 const hhmm = d => d.toLocaleTimeString("en-KE", { hour: "2-digit", minute: "2-digit" });
 const cnt = c => Object.values(c).reduce((a, b) => a + b, 0);
-function showRc(html, charge, closeLbl) {
+let rcAsk = false; // the receipt is waiting for Yes or No
+/** Puts slips on the (hidden) popup, ready to print. */
+function rcFill(html, charge, closeLbl) {
+  rcAsk = false;
+  $("#rcPrint").textContent = "Print";
+  $("#rcPrint").className = "mini";
+  $("#rcClose").className = "chip on";
   $("#rc").innerHTML = html;
   $("#rcClose").textContent = closeLbl;
   const b = $("#rcCharge");
@@ -18906,7 +19723,15 @@ function showRc(html, charge, closeLbl) {
         openPay([charge]);
       }
     : null;
+}
+function showRc(html, charge, closeLbl) {
+  rcFill(html, charge, closeLbl);
   $("#mRc").classList.add("show");
+}
+/** Printed: a word on the screen. Not printed, or no printer set up: the slip, so it can't be lost. */
+function rcDone(result, msg) {
+  if (result === "ok") fsNote(msg);
+  else $("#mRc").classList.add("show");
 }
 function tblFill() {
   $("#tblL").innerHTML = TBL.map(t => `<option value="${slipEsc(t.n)}">`).join("");
@@ -19064,28 +19889,13 @@ function doSend(label) {
     itemStockMove(get(id), q);
   }
   o.rounds++;
-  // Swaps made before sending go on this order's stamp, and into the report, now that it's a bill.
-  const swaps = cartSwaps.filter(x => round[x.toId]);
-  swaps.forEach(x => {
-    swapLog(o, x);
-    (o.ex = o.ex || []).push({
-      at: new Date(),
-      by: x.user,
-      from: x.from,
-      to: x.to,
-      q: x.q,
-      reason: x.reason,
-      authBy: x.by
-    });
-  });
-  cartSwaps = [];
   const both = posOpt("orderAndBill") && can("printGuest") && Object.keys(o.lines).length > 0;
   if (both) o.printed = true;
   cart = {};
   cur = null;
   $("#mSend").classList.remove("show");
   drawCart();
-  showRc(
+  rcFill(
     (tickets = orderTickets(round, {
       no: o.no,
       ord: o.ord,
@@ -19098,8 +19908,7 @@ function doSend(label) {
       rider: o.rider,
       round: o.rounds,
       note: kmsg,
-      adj: o,
-      swaps
+      adj: o
     }))
       .map(x => x.html)
       .join("") +
@@ -19108,8 +19917,13 @@ function doSend(label) {
     null,
     "Close"
   );
-  printOrderTickets(tickets).then(() => both && printSlips("GUEST BILL", true));
-  logoutAfterRc = posOpt("autoLogout");
+  printOrderTickets(tickets).then(async r => {
+    if (both && (await printSlips("GUEST BILL", true)) !== "ok") r = "bad";
+    rcDone(r, both ? "Order sent and bill printed." : "Order sent.");
+    if (!posOpt("autoLogout")) return;
+    if (r === "ok") $("#lock").click();
+    else logoutAfterRc = true; // once the popup is closed
+  });
   kmsg = "";
   rider = null;
   ["fTable", "fGuest", "fCov", "fRoom"].forEach(i => ($("#" + i).value = ""));
@@ -19181,8 +19995,8 @@ $("#ordList").onclick = e => {
       ordersKeep();
       // Select stays open behind the bill, so its colour changes straight away.
       if ($("#mSel").classList.contains("show")) selRender();
-      showRc(billSlip(o), o, "Close");
-      printSlips("GUEST BILL");
+      rcFill(billSlip(o), o, "Close");
+      printSlips("GUEST BILL").then(r => rcDone(r, "Bill printed."));
     };
     if (o.printed && !BILL_AUTH.includes(user.role))
       return pinAsk("Reprint bill " + o.no, PIN_REPRINT, print);
@@ -19192,8 +20006,6 @@ $("#ordList").onclick = e => {
 // ---- swap items: one item for another of the same price, with a right and a manager's PIN ----
 const REAS = ["Customer changed mind", "Wrong item served", "Spoiled / wasted", "Out of stock"];
 let ex = {};
-// Swaps on a sale that hasn't been sent yet. They're stamped on its order, and recorded, when it's sent.
-let cartSwaps = [];
 let exFails = 0,
   exLock = 0;
 const swapText = x => `${x.q} x ${x.from} -> ${x.q} x ${x.to}`;
@@ -19220,21 +20032,20 @@ function swapLog(o, x) {
     back: !!x.back
   });
 }
-const exLines = () => (ex.o ? ex.o.lines : cart),
-  exDept = () => (ex.o ? (billPoints(ex.o.lines).length > 1 ? ALLP : ex.o.dept) : dept);
+const exLines = () => ex.o.lines,
+  exDept = () => (billPoints(ex.o.lines).length > 1 ? ALLP : ex.o.dept);
 function exOpen(o) {
   if (!can("swap")) return fsNote("You don't have the right to swap items.");
-  const L = o ? o.lines : cart;
-  if (!Object.keys(L).length) return fsNote("Nothing to swap yet.");
+  if (!Object.keys(o.lines).length) return fsNote("Nothing to swap yet.");
   ex = {
     o,
-    old: !o && selId && L[selId] ? selId : null,
+    old: null,
     qty: 1,
     nw: null,
     cat: "All",
     reason: REAS[0],
     // Cooked food can't go back on the shelf: kitchens and restaurants don't return swapped items to stock.
-    back: o ? !["Kitchen", "Restaurant"].includes((OUTLET_INFO[o.dept] || {}).type) : null
+    back: !["Kitchen", "Restaurant"].includes((OUTLET_INFO[o.dept] || {}).type)
   };
   exRender();
   $("#mEx").classList.add("show");
@@ -19242,9 +20053,7 @@ function exOpen(o) {
 function exRender() {
   const L = exLines(),
     d = exDept();
-  $("#exT").textContent = ex.o
-    ? "Swap items · " + ex.o.label + " · " + d
-    : "Swap items · current order";
+  $("#exT").textContent = "Swap items · " + ex.o.label + " · " + d;
   $("#exOld").innerHTML = Object.entries(L)
     .map(
       ([id, q]) =>
@@ -19267,7 +20076,7 @@ function exRender() {
   $("#exNew").innerHTML = same
     .filter(i => ex.cat === "All" || i.c === ex.cat)
     .map(i => {
-      const a = avail(i) - (ex.o ? 0 : inCart(i.id)),
+      const a = avail(i),
         low = a < ex.qty;
       return `<button class="exi ${ex.nw == i.id ? "on" : ""}" data-en="${i.id}" ${low ? "disabled" : ""}><b>${i.n}</b><span>${KES(i.p)}${low ? " · low stock" : ""}</span></button>`;
     })
@@ -19277,7 +20086,6 @@ function exRender() {
   $("#exReasons").innerHTML = REAS.map(
     r => `<button class="chip ${r === ex.reason ? "on" : ""}" data-er="${r}">${r}</button>`
   ).join("");
-  $("#exBackRow").style.display = ex.o ? "flex" : "none";
   $("#exBack").checked = !!ex.back;
   $("#exAuth").style.display = BILL_AUTH.includes(user.role) ? "none" : "";
   const ok = ex.old && ex.nw;
@@ -19348,7 +20156,7 @@ $("#exGo").onclick = () => {
     by,
     user: user.n
   };
-  if (ex.o) {
+  {
     const o = ex.o;
     if (ex.back) itemStockMove(oi, -q);
     if (avail(ni) < q) {
@@ -19395,30 +20203,21 @@ $("#exGo").onclick = () => {
         };
         return [{ station, printer, point: it.d, d, html: exchangeSlipHTML({ ...d, station }) }];
       });
-    showRc(
+    rcFill(
       tickets.map(x => x.html).join("") + '<div class="sl-scr" id="rcPrinted"></div>',
       null,
       "Close"
     );
-    printOrderTickets(tickets, swapTicketLines, "swap");
+    printOrderTickets(tickets, swapTicketLines, "swap").then(r => rcDone(r, "Swap sent."));
     if ($("#mSel").classList.contains("show")) selRender();
     drawCart();
-  } else {
-    if (avail(ni) - inCart(ni.id) < q) return fsNote("Not enough " + ni.n + " in stock.");
-    cart[ex.old] -= q;
-    if (cart[ex.old] <= 0) {
-      delete cart[ex.old];
-      if (selId == ex.old) selId = null;
-    }
-    cart[ex.nw] = (cart[ex.nw] || 0) + q;
-    cartSwaps.push(rec);
-    $("#mEx").classList.remove("show");
-    drawCart();
-    fsNote("Swapped " + q + "× " + oi.n + " for " + ni.n + ".");
   }
 };
 $("#exBtn").onclick = () => {
-  if (Object.keys(cart).length) return exOpen(null);
+  // Only what has gone to the kitchen or bar can be swapped. Before that, just change the order.
+  if (cur) return exOpen(cur);
+  if (Object.keys(cart).length)
+    return fsNote("Send the order first. Only a sent order can be swapped.");
   selOpen();
   fsNote("Tap Swap on a bill to swap its items.");
 };
@@ -19791,7 +20590,20 @@ function rcPrint() {
   );
   window.print();
 }
-$("#rcPrint").onclick = rcPrint;
+$("#rcPrint").onclick = async () => {
+  if (!rcAsk) return rcPrint();
+  rcAsk = false;
+  $("#rcPrint").textContent = "Print";
+  $("#rcPrint").className = "mini";
+  $("#rcClose").textContent = "New sale";
+  $("#rcClose").className = "chip on";
+  const q = $("#rc .rc-ask");
+  if (q) q.remove();
+  const r = await printSlips("RECEIPT");
+  if (r === "none")
+    rcPrint(); // no receipt printer set up: the print dialog
+  else if (r === "ok") $("#rcClose").click();
+};
 // ---- sending tickets to their own printers, through the master server ----
 // A browser cannot choose a printer without its print dialog, so tickets go to POST /api/print/ticket,
 // which talks to the network printer. If that fails the slip stays on screen to print by hand.
@@ -19935,7 +20747,7 @@ async function printSlips(doc, keepNote) {
     last = rule;
     if (rule) jobs.push({ s, rule });
   });
-  if (!jobs.length) return;
+  if (!jobs.length) return "none";
   const word = doc === "RECEIPT" ? "Receipt" : "Guest bill",
     done = new Map(),
     box = keepNote && $("#rcPrinted"),
@@ -19960,6 +20772,7 @@ async function printSlips(doc, keepNote) {
       (bad ? "<br><b>Press Print to print it here instead.</b>" : ""),
     !bad && !orderBad
   );
+  return bad ? "bad" : "ok";
 }
 /** The printers Windows has on the computer running the print server. */
 async function installedPrinters() {
@@ -20056,7 +20869,8 @@ function voidTicketLines(station, d) {
 async function printOrderTickets(tickets, lines = orderTicketLines, word = "order") {
   const show = printedNote;
   const routed = tickets.filter(x => x.printer);
-  if (!routed.length) return;
+  if (!tickets.length) return "ok";
+  if (!routed.length) return "none";
   show("Sending to the printers…", true);
   const R = await Promise.all(
     routed.map(async x => ({
@@ -20083,6 +20897,7 @@ async function printOrderTickets(tickets, lines = orderTicketLines, word = "orde
     ).join("<br>") + (bad.length ? "<br><b>Press Print to print it here instead.</b>" : ""),
     !bad.length
   );
+  return bad.length || routed.length < tickets.length ? "bad" : "ok";
 }
 // ---- Bill options: discount, void, merge, split ----
 // Every option needs a Manager or Super Cashier: signed in, or typing their PIN. Each change goes in BILLLOG
@@ -20449,12 +21264,14 @@ function boptVoidSave() {
     },
     voidSlipHTML
   );
-  showRc(
+  rcFill(
     tickets.map(x => x.html).join("") + '<div class="sl-scr" id="rcPrinted"></div>',
     null,
     "Close"
   );
-  printOrderTickets(tickets, voidTicketLines, "void alert");
+  printOrderTickets(tickets, voidTicketLines, "void alert").then(r =>
+    rcDone(r, "Void alert sent.")
+  );
 }
 
 // ---------------------------------------------------------------- clicks
@@ -21049,7 +21866,11 @@ const CASHIER_POSTS = ["postRoom", "postPayroll"];
 const cashierHas = (role, k) => role === "Cashier" && CASHIER_POSTS.includes(k);
 const can = k => allowedAlways(user) || cashierHas(user.role, k) || !!user.perm[k];
 /** Only given when ticked in Waiter setup, even for staff from before that page. */
-const canDay = () => !!user && (BILL_AUTH.includes(user.role) || !!(user.perm && user.perm.newDay));
+const canDay = () =>
+  !!user &&
+  (BILL_AUTH.includes(user.role) ||
+    !!(user.perm && user.perm.newDay) ||
+    !!(user.fd && user.fd.day));
 /** Bill options: a waiter with this right acts alone; anyone else needs a PIN. */
 const actsAlone = k => !!user && (BILL_AUTH.includes(user.role) || !!(user.perm && user.perm[k]));
 const canAddTo = o => allowedAlways(user) || o.waiter === user.n || !!user.perm.addAll;
@@ -21094,15 +21915,45 @@ const pmsg = (t, bad) => {
 const pdraw = () => {
   $("#pinDisp").textContent = "●".repeat(pin.length);
 };
+/** Where this person sells on this computer: their sale points, within the ones the machine is attached to. */
+function pointsHere(u) {
+  const M = MACHINE.points(),
+    mine = u.d.filter(posSells);
+  return M.length ? mine.filter(d => M.includes(d)) : mine;
+}
+function deptsFor(u) {
+  const P = pointsHere(u);
+  return P.length ? P : [MACHINE.points()[0] || ALLD.filter(posSells)[0] || ALLD[0]];
+}
+function machineLabel() {
+  const M = MACHINE.points();
+  $("#login .meta .sp").classList.toggle("here", M.length > 0);
+  $("#login .meta .sp").textContent =
+    "SALE POINT: " + (M.length ? M.join(", ") : ALLP).toUpperCase();
+}
 function loginAs(u) {
+  if (u.role === "Housekeeper") {
+    pin = "";
+    pdraw();
+    return pmsg("Housekeepers sign in to the Front Desk with a user account.", true);
+  }
+  const here = MACHINE.points();
+  if (here.length && !pointsHere(u).length) {
+    pin = "";
+    pdraw();
+    auditAdd("Failed sign-in", `${u.n} isn't set up for ${here.join(", ")}, on ${MACHINE.name()}`, {
+      who: u.n,
+      mod: "POS"
+    });
+    return pmsg(`${u.n} can't sell at ${here.join(", ")}, the sale point of this computer.`, true);
+  }
   LIC.gate();
   billsExpire();
   tblFill();
   draftRelease();
   user = u;
   auditAdd("Sign in", "Signed in to the POS", { who: u.n, mod: "POS" });
-  DEPTS = u.d.filter(posSells);
-  if (!DEPTS.length) DEPTS = [ALLD.filter(posSells)[0] || ALLD[0]];
+  DEPTS = deptsFor(u);
   dept = DEPTS.length > 1 && can("switchSP") ? ALLP : DEPTS[0];
   applyRights();
   spTab = DEPTS[0];
@@ -21114,6 +21965,9 @@ function loginAs(u) {
   $("#login").style.display = "none";
   pmsg("Enter your PIN, or swipe your staff card.");
   posAccess();
+  waiterAuto();
+  if (shiftOf(u.n)) shiftOf(u.n).lastOut = "";
+  shiftBadge();
   setTimeout(() => {
     if (fdPending) {
       fdPending = false;
@@ -21124,7 +21978,9 @@ function loginAs(u) {
     if (!(curDay() && shiftOf(u.n)))
       shiftOpen(
         curDay()
-          ? "Start your shift to begin selling."
+          ? shiftDoneOf(u.n)
+            ? ""
+            : "Start your shift to begin selling."
           : canDay()
             ? "Start the day to begin trading."
             : ""
@@ -21135,40 +21991,7 @@ function loginAs(u) {
   drawCats();
   drawCart();
 }
-/** Clocking in or out with a PIN, without signing in. A POS PIN works, and so does one set in HR. */
-function staffClock() {
-  const H = FD_SETTINGS.hr || {},
-    u = USERS.find(x => x.pin === pin),
-    e =
-      pin &&
-      (H.emps || []).find(x => x.status !== "Left" && (x.pin === pin || (u && x.user === u.n)));
-  pin = "";
-  pdraw();
-  if (!e) return pmsg("That PIN isn't on the staff list.", true);
-  const now = new Date(),
-    at = now.toTimeString().slice(0, 5);
-  H.time = H.time || [];
-  const open = H.time.find(t => t.emp === e.id && !t.out);
-  if (open) open.out = at;
-  else
-    H.time.push({
-      id: "T-" + now.getTime().toString(36).toUpperCase(),
-      emp: e.id,
-      date: ymdOf(now),
-      in: at,
-      out: "",
-      by: e.name,
-      src: "Staff PIN"
-    });
-  auditAdd("Attendance", `${e.name} clocked ${open ? "out" : "in"} at ${at}`, {
-    who: e.name,
-    mod: "POS"
-  });
-  if (window.bosave) window.bosave();
-  pmsg(`${e.name} clocked ${open ? "out" : "in"} at ${at}.`);
-}
 function pkey(k) {
-  if (k === "T") return staffClock();
   if (k === "C") {
     pin = "";
     pmsg("Enter your PIN, or swipe your staff card.");
@@ -21198,54 +22021,15 @@ function fsNote(m) {
 function fsOn() {
   return document.fullscreenElement || document.webkitFullscreenElement;
 }
-// ---- the POS stays full screen: opening it maximises, and only a manager can leave ----
-// A browser can always leave full screen (a held Esc), so when that happens the POS is covered until it is
-// maximised again or a manager agrees. The guard ends when someone signs in to Back Office or Front Desk.
-let posGuard = false, // the rule is in force
-  fsAllowed = false, // a manager has agreed to a normal window, until the next open or log out
-  gateMode = "", // why the lock is up: "left" | "minimise" | "exit"
-  gateFails = 0,
-  gateLock = 0;
-const gateUp = () => $("#fsGate").classList.contains("show");
-function gateClose() {
-  $("#fsGate").classList.remove("show");
-  gateMode = "";
-}
-function gateOpen(mode) {
-  gateMode = mode;
-  const left = mode === "left";
-  $("#fsgT").textContent = left
-    ? "Full screen is required"
-    : mode === "exit"
-      ? "Close the POS?"
-      : "Minimise the POS?";
-  $("#fsgS").textContent = left
-    ? "The POS must stay full screen. Return to it, or enter a Manager PIN to use a normal window."
-    : "A Manager PIN is required.";
-  $("#fsgBack").textContent = left ? "Return to full screen" : "Cancel";
-  $("#fsgPin").value = "";
-  $("#fsgMsg").textContent = "";
-  $("#fsGate").classList.add("show");
-  if (!left) $("#fsgPin").focus();
-}
+// ---- the POS opens maximised. Anyone can go to a normal window and back. ----
 function fsEnter() {
   const el = document.documentElement,
-    rq = el.requestFullscreen || el.webkitRequestFullscreen,
-    refused = () => {
-      if (posGuard && !fsAllowed && !fsOn()) gateOpen("left");
-    };
-  if (!rq) return refused();
+    rq = el.requestFullscreen || el.webkitRequestFullscreen;
+  if (!rq) return;
   try {
     const r = rq.call(el);
-    if (r && r.then)
-      // Where the browser allows it, Esc reaches the page instead of leaving full screen.
-      r.then(() => {
-        if (navigator.keyboard && navigator.keyboard.lock)
-          navigator.keyboard.lock(["Escape"]).catch(() => {});
-      }).catch(refused);
-  } catch (e) {
-    refused();
-  }
+    if (r && r.catch) r.catch(() => {}); // the browser said no: a normal window is fine
+  } catch (e) {}
 }
 function fsLeave() {
   if (!fsOn()) return;
@@ -21253,68 +22037,13 @@ function fsLeave() {
     (document.exitFullscreen || document.webkitExitFullscreen).call(document);
   } catch (e) {}
 }
-/** Every time the POS opens, or the next person is about to sign in. */
-function posKioskOn() {
-  posGuard = true;
-  fsAllowed = false;
-  if (fsOn()) gateClose();
-  else fsEnter();
-}
-function posKioskOff() {
-  posGuard = false;
-  fsAllowed = false;
-  gateClose();
-}
 function fsToggle() {
-  if (!fsOn()) {
-    fsAllowed = false;
-    return fsEnter();
-  }
-  if (posGuard) return gateOpen("minimise");
-  fsLeave();
+  fsOn() ? fsLeave() : fsEnter();
 }
-function gateOk() {
-  if (Date.now() < gateLock) return ($("#fsgMsg").textContent = "Too many tries. Wait 30 seconds.");
-  const mgr = USERS.find(u => u.role === "Manager" && u.pin === $("#fsgPin").value);
-  if (!mgr) {
-    $("#fsgPin").value = "";
-    if (++gateFails >= 5) {
-      gateLock = Date.now() + 3e4;
-      gateFails = 0;
-    }
-    $("#fsgMsg").textContent = "That is not a manager's PIN.";
-    return $("#fsgPin").focus();
-  }
-  gateFails = 0;
-  const mode = gateMode;
-  gateClose();
-  if (mode === "exit") {
-    posGuard = false;
-    return exitApp();
-  }
-  fsAllowed = true;
-  fsLeave();
-}
-$("#fsgOk").onclick = gateOk;
-$("#fsgPin").onkeydown = e => {
-  e.stopPropagation();
-  if (e.key === "Enter") gateOk();
-};
-$("#fsgBack").onclick = () => {
-  const left = gateMode === "left";
-  gateClose();
-  if (left) {
-    fsAllowed = false;
-    fsEnter();
-  }
-};
 function fsLabel() {
   document
     .querySelectorAll("#fsb,#fsl")
     .forEach(b => (b.textContent = fsOn() ? "⤡ Minimise" : "⛶ Maximise"));
-  if (fsOn()) {
-    if (gateMode === "left") gateClose();
-  } else if (posGuard && !fsAllowed && !gateUp()) gateOpen("left");
 }
 ["fullscreenchange", "webkitfullscreenchange"].forEach(ev =>
   document.addEventListener(ev, fsLabel)
@@ -21322,10 +22051,7 @@ function fsLabel() {
 $("#fsb").onclick = fsToggle;
 $("#fsl").onclick = fsToggle;
 function exitApp() {
-  if (fsOn())
-    try {
-      (document.exitFullscreen || document.webkitExitFullscreen).call(document);
-    } catch (e) {}
+  fsLeave();
   cart = {};
   user = null;
   pin = "";
@@ -21339,7 +22065,7 @@ function exitApp() {
   setTimeout(() => $("#bye").classList.add("show"), 250);
 }
 $("#again").onclick = () => {
-  posKioskOn();
+  fsEnter();
   $("#bye").classList.remove("show");
   $("#login").style.display = "grid";
   drawCart();
@@ -21348,12 +22074,10 @@ $(".bt").onclick = e => {
   const b = e.target.closest("[data-k]");
   if (!b) return;
   if (b.dataset.k === "C") pkey("C");
-  // Closing also leaves full screen, so it needs a manager while the rule is in force.
-  else if (b.dataset.k === "X") posGuard ? gateOpen("exit") : exitApp();
+  else if (b.dataset.k === "X") exitApp();
 };
 document.addEventListener("keydown", e => {
   if (
-    gateUp() ||
     $("#login").style.display === "none" ||
     $("#bo").classList.contains("show") ||
     $("#start").style.display !== "none"
@@ -21405,7 +22129,7 @@ $("#swd").onclick = () => {
 window.addEventListener(
   "keydown",
   e => {
-    if (!swipe || gateUp() || $("#login").style.display === "none") return;
+    if (!swipe || $("#login").style.display === "none") return;
     e.stopPropagation();
     e.preventDefault();
     if (e.key === "Enter") {
@@ -21502,7 +22226,7 @@ setInterval(tick, 30000);
           </button>
           <div class="lsep"></div>
           <p class="lalt">
-            Tip: press <kbd>P</kbd> POS, <kbd>B</kbd> Back Office or <kbd>F</kbd> Front Desk
+            Tip: press <kbd>P</kbd> POS, <kbd>B</kbd> Back Office<span id="stFdKey"> or <kbd>F</kbd> Front Desk</span>
           </p>
           <p class="lalt" style="font-size: 11.5px">
             Kaytia Flow · Version 1.8.0 · Build 26 Oct 2026
@@ -21629,7 +22353,8 @@ setInterval(tick, 30000);
               <svg class="i"><use href="#i-search" /></svg>Search modules, actions…<kbd>Ctrl K</kbd>
             </button>
             <select class="sel" id="br"></select
-            ><button class="sq" id="boMenu">Start menu</button><span class="sp"></span>
+            ><button class="sq" id="boMenu">Start menu</button
+            ><button class="sq" id="boOut">Log out</button><span class="sp"></span>
             <button class="ib" id="bell" aria-label="Notifications">
               <svg class="i"><use href="#i-bell" /></svg><span class="dot" id="nc">0</span>
             </button>
@@ -21675,9 +22400,7 @@ setInterval(tick, 30000);
                     <button data-p="today" class="on">Today</button><button data-p="7">7 days</button
                     ><button data-p="30">30 days</button>
                   </div>
-                  <button class="btn a" id="openPos">
-                    <svg class="i"><use href="#i-pos" /></svg>Open POS</button
-                  ><button class="btn p" id="newreq">
+                  <button class="btn p" id="newreq">
                     <svg class="i"><use href="#i-plus" /></svg>Stock request
                   </button>
                 </div>
@@ -21861,7 +22584,8 @@ const SI = {
   sum: '<path d="M7 3h8l4 4v14H7zM15 3v4h4M10 12h6M10 16h6"/>',
   rep: '<path d="M3 4h3l2 11h10l2-8H7M9 20h.01M17 20h.01"/>',
   pay: '<rect x="3" y="7" width="18" height="12" rx="2"/><path d="M16 13h2M3 11h18"/>',
-  exit: '<path d="M6 6l12 12M18 6L6 18"/>'
+  exit: '<path d="M6 6l12 12M18 6L6 18"/>',
+  clear: '<path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h9"/>'
 };
 const rb = (a, ic, l, c) =>
   `<button class="rb ${c || ""}" data-sa="${a}"><svg viewBox="0 0 24 24">${SI[ic]}</svg>${l}</button>`;
@@ -21871,7 +22595,17 @@ function posAccess() {
 function shiftBadge() {
   const b = $("#shiftBtn"),
     sh = user && shiftOf(user.n);
-  b.textContent = !curDay() ? "Day closed" : sh ? "● Shift open" : "Start shift";
+  // Only a cashier runs a shift on the POS. A waiter's button opens their own pending bills.
+  const w = !!user && user.role === "Waiter";
+  b.textContent = w
+    ? `My bills (${pendingOf(user.n).length})`
+    : !curDay()
+      ? "Day closed"
+      : sh
+        ? "● Shift open"
+        : user && shiftDoneOf(user.n)
+          ? "Shift closed"
+          : "Start shift";
   const ld = $("#ldate");
   if (ld)
     ld.textContent = onBizDate(bizDate()).toLocaleDateString("en-GB", {
@@ -21880,17 +22614,25 @@ function shiftBadge() {
       month: "long",
       year: "numeric"
     });
-  b.style.background = sh ? "#12804a" : "";
-  b.style.color = sh ? "#fff" : "";
+  b.style.background = sh && !w ? "#12804a" : "";
+  b.style.color = sh && !w ? "#fff" : "";
+}
+/** A waiter doesn't start a shift: it opens as soon as they can sell. */
+function waiterAuto() {
+  if (!user || user.role !== "Waiter" || !curDay() || dayOver() || shiftOf(user.n) || shiftHeld())
+    return;
+  if (wcShifts(user.n).some(s => s.cleared)) return; // gone home; Back Office can open another
+  shiftStart(user.n, 0, "Automatic", false, true);
 }
 function shiftOk() {
   if (!user) return true;
+  waiterAuto();
   if (!curDay()) {
     shiftOpen("The business day has not been started.");
     return false;
   }
   if (!shiftOf(user.n)) {
-    shiftOpen("Start your shift before taking payments.");
+    shiftOpen(shiftDoneOf(user.n) ? "" : "Start your shift before taking payments.");
     return false;
   }
   return true;
@@ -21915,8 +22657,11 @@ function shDraw(msg) {
     h += `<div class="shc"><div class="status ok">Day open since ${hm(d.openedAt)}</div><div class="stk">Sign in as a cashier to manage a shift.</div></div>`;
   else if (!sh && dayOver()) h += dayOverHTML();
   else if (!sh && shiftHeld()) h += shiftHeldHTML();
+  else if (!sh && shiftDoneOf(user.n)) h += shiftDoneHTML();
   else if (!sh)
     h += `<div class="shc"><h4>Start your shift</h4><div class="status ok">Business date ${dateGB(dayDate(d))} · started by ${hx(d.openedBy)}</div><div class="shf"><span>Cashier</span><input readonly value="${hx(user.n)}"><span>Opening float (KES)</span><input id="shFloat" type="number" inputmode="decimal" placeholder="0.00"></div><button class="chip on" data-sa="sstart">Start my shift</button><div class="stk">${openShifts().length} shift(s) open today.</div>${canDay() && !dayEndStop() ? `<button class="mini" data-sa="dend">End day</button>` : ""}</div>`;
+  else if (shView === "wclear") h += wcListHTML();
+  else if (shView === "wcform") h += wcFormHTML();
   else if (shView === "summary")
     h += `<div class="shc"><h4>Shift summary</h4>${shiftReport(sh, parseFloat(shAct), user.n)}<div class="row"><button class="mini" data-sa="back">← Back</button><button class="chip on" data-sa="printnow">Print summary</button></div></div>`;
   else if (shView === "bills") {
@@ -21939,9 +22684,9 @@ function shDraw(msg) {
       pays = pOf(sh),
       ac = parseFloat(shAct),
       pend = orders.reduce((a, o) => a + totals(o.lines, o).g, 0);
-    h += `<div class="shm-rib">${rb("refresh", "refresh", "Refresh shift data")}${rb("close", "close", "Close shift")}${canDay() && !dayEndStop() ? rb("closeday", "day", "Close shift and day", "st") : ""}${rb("summary", "sum", "Shift summary")}${rb("salesrep", "rep", "Sales report")}${rb("payout", "pay", "Cash payout")}</div>
+    h += `<div class="shm-rib">${rb("refresh", "refresh", "Refresh shift data")}${rb("close", "close", "Close shift")}${canDay() && !dayEndStop() ? rb("closeday", "day", "Close shift and day", "st") : ""}${rb("summary", "sum", "Shift summary")}${rb("salesrep", "rep", "Sales report")}${rb("payout", "pay", "Cash payout")}${rb("wc_list", "clear", "Waiter clearance")}</div>
   <div class="shm-grid"><div style="display:grid;gap:14px;min-width:0"><div class="shc"><div class="shf"><span>Shift no</span><input readonly value="${sh.id}"><span>Shift date</span><input readonly value="${new Date(sh.openedAt).toLocaleDateString("en-GB")}"><span>Shift time</span><input readonly value="${hm(sh.openedAt)}"><span>Cashier name</span><input readonly value="${hx(sh.user)}"></div></div>
-  <div class="shc"><h4>Payments received</h4><table class="sht"><tr><th>Paymode</th><th>Currency</th><th class="n">Amount</th></tr><tr><td>CASH</td><td>KSH</td><td class="n">${R2(c.cash)}</td></tr><tr><td>M-PESA</td><td>KSH</td><td class="n">${R2(c.mpesa)}</td></tr><tr><td>PDQ</td><td>KSH</td><td class="n">${R2(c.pdq)}</td></tr>${payExtraRows(c.sales, (n, v) => `<tr><td>${hx(n)}</td><td>KSH</td><td class="n">${R2(v)}</td></tr>`)}<tr><td>COMPLIMENTARY</td><td>KSH</td><td class="n">${R2(c.comp)}</td></tr><tr><td>ROOM</td><td>KSH</td><td class="n">${R2(c.room)}</td></tr><tr><td>CREDIT</td><td>KSH</td><td class="n">${R2(c.credit)}</td></tr><tr class="tt"><td colspan="2">Total</td><td class="n">${R2(c.cash + c.mpesa + c.pdq + c.comp + c.room + c.credit)}</td></tr></table></div>
+  <div class="shc"><h4>Payments received</h4><table class="sht"><tr><th>Paymode</th><th>Currency</th><th class="n">Amount</th></tr><tr><td>CASH</td><td>KSH</td><td class="n">${R2(c.cash)}</td></tr><tr><td>M-PESA</td><td>KSH</td><td class="n">${R2(c.mpesa)}</td></tr><tr><td>PDQ</td><td>KSH</td><td class="n">${R2(c.pdq)}</td></tr>${payExtraRows(c.sales, (n, v) => `<tr><td>${hx(n)}</td><td>KSH</td><td class="n">${R2(v)}</td></tr>`)}<tr><td>COMPLIMENTARY</td><td>KSH</td><td class="n">${R2(c.comp)}</td></tr>${fdOn() || c.room ? `<tr><td>ROOM</td><td>KSH</td><td class="n">${R2(c.room)}</td></tr>` : ""}<tr><td>CREDIT</td><td>KSH</td><td class="n">${R2(c.credit)}</td></tr><tr class="tt"><td colspan="2">Total</td><td class="n">${R2(c.cash + c.mpesa + c.pdq + c.comp + c.room + c.credit)}</td></tr></table></div>
   <div class="shc" id="poBox"><h4>Cash payouts (expenses) this shift</h4><div class="shp"><select id="poCat"><option>Supplies</option><option>Transport</option><option>Cleaning</option><option>Staff meal</option><option>Repairs</option><option>Other</option></select><input id="poDesc" placeholder="Description" autocomplete="off"><input id="poAmt" type="number" inputmode="decimal" placeholder="Amount"><button class="chip on" data-sa="padd">Add payout</button></div>${pays.length ? `<table class="sht"><tr><th>Time</th><th>Category</th><th>Description</th><th class="n">Amount</th><th></th></tr>${pays.map(x => `<tr><td>${hm(x.at)}</td><td>${hx(x.cat)}</td><td>${hx(x.desc)}</td><td class="n">${R2(x.amt)}</td><td><button class="mini" data-sa="pdel" data-id="${x.id}">✕</button></td></tr>`).join("")}<tr class="tt"><td colspan="3">Total paid out</td><td class="n">${R2(c.paid)}</td><td></td></tr></table>` : '<div class="stk">No payouts yet. Cash taken from the till for expenses is recorded here and deducted from expected cash.</div>'}</div></div>
   <div style="display:grid;gap:14px;min-width:0"><div class="shc"><div class="shf"><span>Total sales</span><input readonly value="${R2(c.gross)}"><span>Cash sales</span><input readonly value="${R2(c.cash)}"><span>Cash paid out</span><input readonly value="${R2(c.paid)}"><span>Opening float</span><input readonly value="${R2(sh.float)}"><span>Expected cash in till</span><input readonly value="${R2(c.expected)}"><span>Actual cash in till</span><input id="shAct" type="number" inputmode="decimal" placeholder="Count the drawer" value="${shAct}"><span>Cash variance</span><input id="shVar" readonly value="${ac >= 0 ? sg(ac - c.expected) : ""}"><label class="ck"><input type="checkbox" id="shTh" ${shOpt.thermal ? "checked" : ""}> Thermal (narrow) report</label><label class="ck"><input type="checkbox" id="shAuto" ${shOpt.auto ? "checked" : ""}> Auto print reports on closing</label><span>Pending total</span><input readonly value="${R2(pend)}"></div></div>
   <div class="shc"><div class="shf"><span>Gross sales</span><input readonly value="${R2(c.gross)}"><span>Taxes</span><input readonly value="${R2(c.tax)}"><span>Net sales</span><input readonly value="${R2(c.gross - c.tax)}"></div></div></div></div>`;
@@ -21982,6 +22727,11 @@ function dayOverHTML() {
     ? `<div class="shc"><h4>End the day</h4><div class="stk">All the bills are cleared. End the day and the date changes, then you can start your shift.</div><button class="chip on" data-sa="dend">End day</button></div>`
     : `<div class="shc"><h4>End the day</h4><div class="stk">All the bills are cleared. Back Office or a cashier with the right has to end the day before you can start your shift.</div></div>`;
 }
+/** They've done today's shift: there's no second start. */
+function shiftDoneHTML() {
+  const s = shiftDoneOf(user.n);
+  return `<div class="shc"><h4>Shift closed</h4><div class="status ok">Your shift today closed at ${hm(s.closedAt)}.</div><div class="stk">Each person has one shift a day. If you need another, ask a manager to open it in Back Office.</div>${user.role !== "Waiter" && canDay() && !dayEndStop() ? `<button class="mini" data-sa="dend">End day</button>` : ""}</div>`;
+}
 function shiftHeldHTML() {
   const P = pendingOf(user.n),
     x = shiftAuthOf(user.n),
@@ -22000,7 +22750,7 @@ function shClose(withDay) {
   if (withDay) {
     const stop = dayEndStop();
     if (stop) return shDraw(stop);
-    const o = openShifts().filter(x => x !== sh);
+    const o = openShifts().filter(x => x !== sh && !waiterShift(x));
     if (o.length)
       return shDraw(
         "Other shifts are still open: " + o.map(x => x.user).join(", ") + ". Close them first."
@@ -22034,6 +22784,7 @@ $("#shMgr").onclick = e => {
   }
   if (a === "refresh") return shDraw();
   if (a.startsWith("ms_")) return msAct(a, b);
+  if (a.startsWith("wc_")) return wcAct(a, b);
   if (a === "back") {
     shView = "main";
     return shDraw();
@@ -22146,8 +22897,8 @@ setInterval(shiftBadge, 3000);
 shiftBadge();
 setInterval(posAccess, 500);
 posAccess();
-// ---- A waiter's own shift screen: start, sales, pending bills, send them to a cashier, end ----
-// Cashiers count a till and use Shift Management. A waiter only needs this.
+// ---- A waiter's screen when they can't sell: why, their sales, and pending bills to send to a cashier ----
+// Cashiers count a till and use Shift Management. A waiter's own shift runs by itself.
 const msSales = n => SALES.filter(s => (s.waiter || s.user) === n);
 const msOn = (L, ymd) => L.filter(s => ymdOf(saleAt(s)) === ymd);
 const msBills = L => new Set(L.filter(s => !s.ret).map(s => s.no)).size;
@@ -22261,7 +23012,7 @@ function msPendingHTML(n) {
     open = msEdit && P.find(o => o.no === msEdit.no);
   return `<div class="shc"><h4>Pending bills</h4>${
     P.length
-      ? `<div style="overflow:auto"><table class="sht"><tr><th>Bill</th><th>Table</th><th class="n">Total</th><th></th></tr>${P.map(o => `<tr><td>${hx(o.no)}</td><td>${hx(o.label)}</td><td class="n">${R2(totals(o.lines, o).g)}</td><td class="n">${can("sendPending") ? `<button class="mini" data-sa="ms_open" data-no="${hx(o.no)}">Send to cashier</button>` : ""}</td></tr>`).join("")}</table></div>${open ? msSendHTML(open) : ""}<div class="stk" style="margin-top:8px">You can't end your shift until these are cleared or sent to a cashier.</div>`
+      ? `<div style="overflow:auto"><table class="sht"><tr><th>Bill</th><th>Table</th><th class="n">Total</th><th></th></tr>${P.map(o => `<tr><td>${hx(o.no)}</td><td>${hx(o.label)}</td><td class="n">${R2(totals(o.lines, o).g)}</td><td class="n">${can("sendPending") ? `<button class="mini" data-sa="ms_open" data-no="${hx(o.no)}">Send to cashier</button>` : ""}</td></tr>`).join("")}</table></div>${open ? msSendHTML(open) : ""}<div class="stk" style="margin-top:8px">Clear these or send them to a cashier.</div>`
       : `<div class="stk">You have no pending bills.</div>`
   }</div>`;
 }
@@ -22308,6 +23059,7 @@ function payMoneyHTML(L) {
     : "";
 }
 function msDraw(msg) {
+  waiterAuto();
   const n = user.n,
     d = curDay(),
     sh = shiftOf(n),
@@ -22323,39 +23075,15 @@ function msDraw(msg) {
     main = `<div class="shc"><div class="status bad">The day has not been started.</div>${canDay() ? `<div class="stk">The new business date will be <b>${dateGB(nextBizDate())}</b>.</div><button class="chip on" data-sa="dstart">Start new day</button>` : `<div class="stk">Back Office or a cashier has to start the new day. You can start your shift after that.</div>`}</div>`;
   else if (!sh && shiftHeld()) main = shiftHeldHTML();
   else if (!sh)
-    main = `<div class="shc"><button class="chip on ms-go" data-sa="ms_start">Start shift</button></div>`;
-  else
-    main = `<div class="shc ms-open"><div class="status ok">Shift open since ${hm(sh.openedAt)}</div><div class="ms-acts"><button class="chip on" data-sa="ms_end">End shift</button></div></div>`;
+    main = `<div class="shc"><div class="status">${wcShifts(n).some(s => s.cleared) ? "You've been cleared for today. A manager can open another shift in Back Office." : "You can sell again once the new day starts."}</div></div>`;
+  else main = "";
   $("#shMgr").innerHTML =
-    `<div class="shm"><div class="shm-top"><h2>My shift</h2><button class="mini" data-sa="exit">Exit</button></div>${msg ? `<div class="status">${msg}</div>` : ""}${bizLateNote()}${main}
-  <div class="ms-tiles">${tile("Sales today", "KES " + R2(msSum(today)))}${tile("Bills today", msBills(today))}${tile("Last 7 days", "KES " + R2(msSum(week)))}${tile("Pending bills", P.length, "KES " + R2(pend))}</div>
-  <div class="shc">${msChart(n)}</div>${!sh && d && shiftHeld() ? "" : msPendingHTML(n)}</div>`;
-}
-/** A waiter counts no cash: the shift just ends, and nothing prints. */
-function msEnd() {
-  const sh = shiftOf(user.n),
-    r = shiftEnd(sh, Math.max(0, shiftCalc(sh).expected), user.n);
-  if (r) return msDraw(r);
-  shiftBadge();
-  msDraw("Shift ended.");
+    `<div class="shm"><div class="shm-top"><h2>My bills</h2><button class="mini" data-sa="exit">Exit</button></div>${msg ? `<div class="status">${msg}</div>` : ""}${bizLateNote()}${main}${!sh && d && shiftHeld() ? "" : msPendingHTML(n)}
+  <div class="ms-tiles">${tile("Pending bills", P.length, "KES " + R2(pend))}${tile("Sales today", "KES " + R2(msSum(today)))}${tile("Bills today", msBills(today))}${tile("Last 7 days", "KES " + R2(msSum(week)))}</div>
+  <div class="shc">${msChart(n)}</div></div>`;
 }
 function msAct(a, b) {
   const n = user.n;
-  if (a === "ms_start") {
-    if (dayOver()) return msDraw();
-    const r = shiftStart(n, 0, n);
-    if (r) return msDraw(r);
-    shiftBadge();
-    return $("#shMgr").classList.remove("show");
-  }
-  if (a === "ms_end") {
-    const left = pendingOf(n).length;
-    if (left)
-      return msDraw(
-        `You have ${left} pending bill${left === 1 ? "" : "s"}. Clear ${left === 1 ? "it" : "them"} or send ${left === 1 ? "it" : "them"} to a cashier before ending your shift.`
-      );
-    return msEnd();
-  }
   if (a === "ms_open") {
     const o = orders.find(x => x.no === b.dataset.no);
     msEdit = {
@@ -22381,6 +23109,99 @@ function msAct(a, b) {
     return msDraw();
   }
   if (a === "ms_send") return msSendBill(n);
+}
+// ---- Waiter clearance: the form a waiter takes home-time to the cashier and supervisor to sign ----
+let wcWho = "";
+const wcShifts = n => {
+  const d = curDay();
+  return d ? SHIFTS.filter(s => s.day === d.id && s.user === n) : [];
+};
+/** Waiters on today's business date: anyone with a shift, or with bills still open. */
+const wcWaiters = () =>
+  USERS.filter(
+    u => u.role === "Waiter" && (wcShifts(u.n).length || orders.some(o => o.waiter === u.n))
+  );
+function wcFacts(n) {
+  const S = wcShifts(n),
+    P = pendingOf(n),
+    sent = orders.filter(o => o.waiter === n && o.handedTo),
+    amt = L => L.reduce((a, o) => a + totals(o.lines, o).g, 0),
+    sold = msOn(msSales(n), bizDate());
+  return {
+    S,
+    P,
+    sent,
+    open: S.find(s => !s.closedAt),
+    cleared: S.find(s => s.cleared),
+    first: S[0],
+    pend: amt(P),
+    sentAmt: amt(sent),
+    sales: msSum(sold),
+    bills: msBills(sold),
+    amt
+  };
+}
+function wcListHTML() {
+  const L = wcWaiters();
+  return `<div class="shc"><h4>Waiter clearance</h4><div class="stk">When a waiter finishes, open their form. They go home once it's signed by the cashier and a supervisor.</div>${
+    L.length
+      ? `<div style="overflow:auto"><table class="sht"><tr><th>Waiter</th><th>Shift from</th><th class="n">Pending bills</th><th class="n">Pending (KES)</th><th>Status</th><th></th></tr>${L.map(
+          u => {
+            const F = wcFacts(u.n);
+            return `<tr><td>${hx(u.n)}</td><td>${F.first ? hm(F.first.openedAt) : "-"}</td><td class="n">${F.P.length}</td><td class="n">${R2(F.pend)}</td><td>${F.cleared ? "Cleared" : F.P.length ? "Has pending bills" : "Ready to clear"}</td><td class="n"><button class="mini" data-sa="wc_open" data-n="${hx(u.n)}">Open form</button></td></tr>`;
+          }
+        ).join("")}</table></div>`
+      : '<div class="stk">No waiters on shift today.</div>'
+  }<button class="mini" data-sa="back">← Back</button></div>`;
+}
+/** The form itself: on screen and on paper. */
+function wcFormDoc(n, by) {
+  const F = wcFacts(n),
+    ok = !F.P.length,
+    row = (l, v) => `<div><span>${l}</span><b>${hx(v)}</b></div>`,
+    table = (L, none, who) =>
+      L.length
+        ? `<table><thead><tr><th>Bill</th><th>Table</th>${who ? "<th>With</th>" : ""}<th class="n">Total (KES)</th></tr></thead><tbody>${L.map(o => `<tr><td>${hx(o.no)}</td><td>${hx(o.label)}</td>${who ? `<td>${hx(o.handedTo)}</td>` : ""}<td class="n">${R2(totals(o.lines, o).g)}</td></tr>`).join("")}</tbody></table>`
+        : `<p class="wc-none">${none}</p>`,
+    sign = (l, name) =>
+      `<div class="wc-sign"><span class="wc-line"></span><b>${l}</b><small>${name ? hx(name) : "Name: ____________________"}</small><small>Date and time: ______________</small></div>`,
+    now = new Date();
+  return `<div class="wc"><header><div><h2>${hx(FD_SETTINGS.name)}</h2><p>Waiter clearance form</p></div><div class="wc-d">${dateGB(bizDate())}<small>Printed ${hm(now)}</small></div></header>
+  <div class="wc-m">${row("Waiter", n)}${row("Shift from", F.first ? hm(F.first.openedAt) : "-")}${row("Bills served today", F.bills)}${row("Sales today", "KES " + R2(F.sales))}</div>
+  <div class="wc-st ${ok ? "ok" : "no"}"><b>${ok ? "Cleared to go home" : "Not cleared"}</b><span>${ok ? "No pending bills." : `${F.P.length} pending bill${F.P.length === 1 ? "" : "s"} · KES ${R2(F.pend)}. Clear them or send them to a cashier first.`}</span></div>
+  <h4>Pending bills</h4>${table(F.P, "None.")}
+  <h4>Bills handed to a cashier</h4>${table(F.sent, "None.", true)}
+  <p class="wc-dec">I confirm these figures are correct and I have handed over all my bills.</p>
+  <div class="wc-signs">${sign("Waiter", n)}${sign("Cashier", by)}${sign("Supervisor")}</div></div>`;
+}
+function wcFormHTML() {
+  const F = wcFacts(wcWho),
+    can2 = !F.P.length && !!F.open;
+  return `<div class="shc">${wcFormDoc(wcWho, user.n)}<div class="row"><button class="mini" data-sa="wc_list">← Back</button><button class="mini" data-sa="wc_print">Print form</button>${can2 ? '<button class="chip on" data-sa="wc_end">Clear and end shift</button>' : ""}</div></div>`;
+}
+function wcAct(a, b) {
+  if (a === "wc_list") {
+    shView = "wclear";
+    return shDraw();
+  }
+  if (a === "wc_open") {
+    wcWho = b.dataset.n;
+    shView = "wcform";
+    return shDraw();
+  }
+  if (a === "wc_print") return printHTML(wcFormDoc(wcWho, user.n), false, "A4");
+  if (a === "wc_end") {
+    const F = wcFacts(wcWho);
+    if (F.P.length) return shDraw(`${wcWho} still has pending bills.`);
+    if (!F.open) return shDraw();
+    const r = shiftEnd(F.open, Math.max(0, shiftCalc(F.open).expected), user.n);
+    if (r) return shDraw(r);
+    F.open.cleared = { at: new Date().toISOString(), by: user.n };
+    auditAdd("Clearance", `${wcWho} cleared to go home by ${user.n}`, { mod: "POS" });
+    sync();
+    shDraw(`${wcWho} is cleared and their shift has ended.`);
+    printHTML(wcFormDoc(wcWho, user.n), false, "A4");
+  }
 }
 </script>
 
@@ -22468,6 +23289,8 @@ const toYmd = d => {
     );
   },
   todayYmd = () => toYmd(new Date()),
+  // Rooms run on the business date, like the POS: a guest arriving at 00:30 belongs to the day still open.
+  fdToday = () => bizDate(),
   addDays = (x, n) => toYmd(new Date(new Date(x + "T00:00:00").getTime() + n * 864e5)),
   nightsBetween = (a, b) =>
     Math.max(1, Math.round((new Date(b + "T00:00:00") - new Date(a + "T00:00:00")) / 864e5));
@@ -22510,7 +23333,7 @@ const roomStatus = r =>
       ? "occ"
       : RESERVATIONS.some(
             x =>
-              x.room === r.no && x.status === "reserved" && x.in <= todayYmd() && x.out > todayYmd()
+              x.room === r.no && x.status === "reserved" && x.in <= fdToday() && x.out > fdToday()
           )
         ? "res"
         : r.status === "dirty"
@@ -22534,44 +23357,58 @@ const FD_ICONS = {
 };
 const FD_MENU = [
   [
-    "Inhouse Guest Management",
+    "Rooms and stays",
     [
-      ["grid", "Rooms Grid", "grid"],
-      ["checkin", "Guest Check In", "user"],
-      ["book", "Room Booking", "cal"],
-      ["group", "Group Booking", "users"],
-      ["dates", "Change Date", "cal2"],
-      ["shift", "Shift Management", "clock"],
-      ["post", "Cash Sale / Post Expenses", "wallet"],
-      ["pending", "Pending Payments", "wallet"]
+      ["grid", "Rooms", "grid"],
+      ["checkin", "Check in", "user"],
+      ["book", "Room booking", "cal"],
+      ["group", "Group booking", "users"],
+      ["dates", "Change dates", "cal2"]
     ]
   ],
   [
-    "House Keeping and Rooms Management",
+    "Guests and money",
     [
-      ["hk", "Room Housekeeping", "broom"],
-      ["occ", "Occupancy Rooms Reports", "chart"],
-      ["set", "Front Desk Settings", "gear"]
+      ["guests", "Guests", "list"],
+      ["pending", "Pending payments", "wallet"],
+      ["post", "Cash sale and expenses", "doc"]
     ]
   ],
   [
-    "Front Desk Reports",
+    "Running the house",
     [
-      ["rsales", "Periodic Sales Report", "doc"],
-      ["rpay", "Periodic Payment Report", "doc"],
-      ["rrev", "Periodic Revenue Report", "doc"],
-      ["rmeal", "Breakfast Report", "doc"],
-      ["rguests", "Guests and Invoices List", "list"],
-      ["rold", "Retrieve Old Summaries", "list"]
+      ["hk", "Housekeeping", "broom"],
+      ["shift", "Shift management", "clock"],
+      ["set", "Settings", "gear"]
     ]
   ]
 ];
+const FD_TITLES = {
+  grid: ["Rooms", "Every room at a glance. Tap one to check in, book it or open its folio."],
+  checkin: ["Check in", "Arrivals due today, and walk-in guests."],
+  book: ["Room booking", "Reserve a room, with or without a deposit."],
+  group: ["Group booking", "Several rooms on one bill."],
+  gfolio: ["Group folio", "Charges and payments for the whole group."],
+  dates: ["Change dates", "Extend or shorten a stay."],
+  guests: ["Guests", "Who is in the house, who is due, and every past guest's folio and invoice."],
+  pending: ["Pending payments", "Guests who still owe."],
+  post: ["Cash sale and expenses", "Charges to a room, cash sales and cash paid out."],
+  hk: ["Housekeeping", "Change a room's status as soon as the work is done."],
+  set: ["Settings", "Room types, meal plans, rooms and rates."],
+  folio: ["Guest folio", "Charges, payments and the invoice."],
+  accts: ["Customer accounts", "Balances and payments."],
+  newacct: ["New customer account", ""]
+};
+/** What the signed-in person's role allows here: desk, hk (housekeeping) or set (settings). */
+const fdCan = k => !!user && !!user.fd && !!user.fd[k];
+const fdPageRight = v => (v === "hk" ? "hk" : v === "set" ? "set" : "desk");
 let fdView = "grid",
   fdSelectedRoom = null,
   fdSelectedRes = null,
   fdPresetRoom = "",
   fdPending = false,
-  fdDateRange = [addDays(todayYmd(), -29), todayYmd()],
+  fdRoomF = "",
+  fdHkF = "",
   fdNotice = null;
 const tableHTML = (h, r) =>
   `<div style="overflow:auto"><table class="sht"><tr>${h.map(x => `<th>${x}</th>`).join("")}</tr>${r.length ? r.map(x => `<tr>${x.map(c => `<td>${c}</td>`).join("")}</tr>`).join("") : `<tr><td colspan="${h.length}" class="stk">Nothing to show.</td></tr>`}</table></div>`;
@@ -22595,7 +23432,7 @@ function roomPanel() {
   const x = roomStatus(r),
     st = stayOf(r.no),
     rv = RESERVATIONS.find(
-      q => q.room === r.no && q.status === "reserved" && q.in <= todayYmd() && q.out > todayYmd()
+      q => q.room === r.no && q.status === "reserved" && q.in <= fdToday() && q.out > fdToday()
     );
   let b = "";
   if (x === "occ")
@@ -22617,14 +23454,14 @@ const revenueByDay = (a, b) => {
     const mv = (r.mrate || 0) * ((r.adults || 1) + ((r.children || 0) * FD_SETTINGS.child) / 100);
     for (let i = 0; i < nightsBetween(r.in, r.out); i++) {
       const d = addDays(r.in, i);
-      if (d >= a && d <= b && d <= todayYmd()) {
+      if (d >= a && d <= b && d <= fdToday()) {
         const o = O(d);
         o.room += r.rate;
         o.meal += mv;
       }
     }
     r.charges.forEach(c => {
-      const d = toYmd(c.at);
+      const d = bizDateOf(c.at);
       if (d >= a && d <= b) O(d).ex += c.amt;
     });
   });
@@ -22640,7 +23477,7 @@ function mealRows(a, b) {
       mv = (r.mrate || 0) * ((r.adults || 1) + ((r.children || 0) * FD_SETTINGS.child) / 100);
     for (let i = 0; i < nightsBetween(r.in, r.out); i++) {
       const d = addDays(r.in, i);
-      if (d >= a && d <= b && d <= todayYmd()) {
+      if (d >= a && d <= b && d <= fdToday()) {
         const o = (day[d] = day[d] || { rooms: 0, covers: 0, rev: 0 }),
           p = (plan[r.plan] = plan[r.plan] || { rooms: 0, covers: 0, rev: 0 });
         o.rooms++;
@@ -22657,11 +23494,9 @@ function mealRows(a, b) {
 function mealCard() {
   return `<div class="fd-card"><h4>Meal plans (per person per night)</h4><div class="fd-form">${["BB", "HB", "FB"].map(k => `<label>${MEAL_PLANS[k]} (KES)<input type="number" data-mp="${k}" value="${FD_SETTINGS.meals[k] || 0}"></label>`).join("")}<label>Child price (% of adult)<input type="number" data-mc="1" value="${FD_SETTINGS.child}"></label></div><div class="stk">Room rates stay room-only. The meal plan is added on top and shown as its own line on bills, invoices and reports.</div></div>`;
 }
-const dateRangeBarHTML = () =>
-  `<div class="fd-card"><div class="fd-form"><label>From<input type="date" data-rg="0" value="${fdDateRange[0]}"></label><label>To<input type="date" data-rg="1" value="${fdDateRange[1]}"></label></div></div>`;
 function guestInvoiceHTML(r, by) {
   const f = folioOf(r);
-  return `<div class="rd"><h2>${hx(FD_SETTINGS.name.toUpperCase())}</h2><div class="c">GUEST INVOICE</div><div class="c">${new Date().toLocaleString("en-GB")}</div><hr><table>${rr("Guest", hx(r.guest))}${rr("Room", r.room + " · " + r.type)}${rr("Arrival", r.in)}${rr("Departure", r.out)}${rr("Nights", f.n)}</table><hr><table>${rr("Room " + f.n + " x " + R2(r.rate), R2(f.room))}${f.meal > 0 ? rr(MEAL_PLANS[r.plan] + " (" + (r.adults || 1) + " adult" + (r.children || 0 ? "+" + r.children + " child" : "") + ") x" + f.n, R2(f.meal)) : ""}${r.charges.map(c => rr(hx(c.cat + ": " + c.desc), R2(c.amt))).join("")}${rr("TOTAL", R2(f.total), 1)}</table><hr><div class="sec">PAYMENTS</div>${r.pays.length ? `<table>${r.pays.map(p => rr(toYmd(p.at) + " " + (PAY_METHODS[p.method] || p.method), R2(p.amt))).join("")}</table>` : "<div>None</div>"}<hr><table>${rr("Balance due", R2(f.bal), 1)}</table><hr><div class="c">Thank you for staying with us</div><div class="c">Printed by ${hx(by || "")}</div></div>`;
+  return `<div class="rd"><h2>${hx(FD_SETTINGS.name.toUpperCase())}</h2><div class="c">GUEST INVOICE</div><div class="c">${new Date().toLocaleString("en-GB")}</div><hr><table>${rr("Guest", hx(r.guest))}${rr("Room", r.room + " · " + r.type)}${rr("Arrival", r.in)}${rr("Departure", r.out)}${rr("Nights", f.n)}</table><hr><table>${rr("Room " + f.n + " x " + R2(r.rate), R2(f.room))}${f.meal > 0 ? rr(MEAL_PLANS[r.plan] + " (" + (r.adults || 1) + " adult" + (r.children || 0 ? "+" + r.children + " child" : "") + ") x" + f.n, R2(f.meal)) : ""}${r.charges.map(c => rr(hx(c.cat + ": " + c.desc), R2(c.amt))).join("")}${rr("TOTAL", R2(f.total), 1)}</table><hr><div class="sec">PAYMENTS</div>${r.pays.length ? `<table>${r.pays.map(p => rr(bizDateOf(p.at) + " " + (PAY_METHODS[p.method] || p.method), R2(p.amt))).join("")}</table>` : "<div>None</div>"}<hr><table>${rr("Balance due", R2(f.bal), 1)}</table><hr><div class="c">Thank you for staying with us</div><div class="c">Printed by ${hx(by || "")}</div></div>`;
 }
 const ROOMTYPES = [];
 let checkInForm = {},
@@ -22887,8 +23722,8 @@ function groupFormReset() {
     pname: "",
     pphone: "",
     ac: "0",
-    in: todayYmd(),
-    out: addDays(todayYmd(), 1),
+    in: fdToday(),
+    out: addDays(fdToday(), 1),
     disc: 0,
     sel: [],
     pm: "later",
@@ -22905,7 +23740,7 @@ const groupFreeRooms = () =>
         r =>
           r.status !== "ooo" &&
           isFree(r.no, groupForm.in, groupForm.out) &&
-          (groupForm.in > todayYmd() || roomStatus(r) === "vac")
+          (groupForm.in > fdToday() || roomStatus(r) === "vac")
       )
     : [];
 const groupReservations = g =>
@@ -22924,7 +23759,7 @@ const groupPayerName = g => (g.payer === "company" ? (CU[g.ac] || {}).n || "Comp
 function groupCheckIn(g) {
   const R = groupReservations(g).filter(r => r.status === "reserved");
   if (!R.length) return "No rooms are waiting to check in.";
-  if (g.in > todayYmd()) return "The group is not due until " + g.in + ".";
+  if (g.in > fdToday()) return "The group is not due until " + g.in + ".";
   const miss = R.filter(r => !guestIsRegistered(guestsOf(r)[0]));
   if (miss.length)
     return (
@@ -23154,7 +23989,7 @@ function docTarget(ctx) {
   }
 }
 function hkHTML(only, by) {
-  const T = todayYmd(),
+  const T = fdToday(),
     c = roomStatusCounts(),
     rows = ROOMS.slice()
       .sort((a, b) => a.no.localeCompare(b.no, undefined, { numeric: true }))
@@ -23176,22 +24011,36 @@ function hkHTML(only, by) {
 }
 const FD_VIEWS = {
   grid() {
-    const c = roomStatusCounts();
-    return `<div class="fd-leg">${Object.keys(ROOM_STATUS_LABELS)
-      .map(k => `<span><i class="fs-${k}"></i>${ROOM_STATUS_LABELS[k]} <b>${c[k] || 0}</b></span>`)
-      .join("")}</div><div class="fd-grid">${ROOMS.map(r => {
-      const x = roomStatus(r),
-        st = stayOf(r.no),
-        rv = RESERVATIONS.find(
-          q =>
-            q.room === r.no && q.status === "reserved" && q.in <= todayYmd() && q.out > todayYmd()
-        );
-      return `<button class="fd-room fs-${x} ${fdSelectedRoom === r.no ? "sel" : ""}" data-f="room" data-no="${r.no}"><b>${r.no}</b><span>${r.type}</span><em>${st ? hx(st.guest) : rv ? "Due: " + hx(rv.guest) : ROOM_STATUS_LABELS[x]}</em><small>KES ${r.rate.toLocaleString()}</small></button>`;
-    }).join("")}</div>${roomPanel()}`;
+    const c = roomStatusCounts(),
+      T = fdToday(),
+      tile = (l, v, s, go) =>
+        `<${go ? `button data-v="${go}"` : "div"} class="fd-t"><span>${l}</span><b>${v}</b><small>${s}</small></${go ? "button" : "div"}>`,
+      arr = RESERVATIONS.filter(r => r.status === "reserved" && r.in <= T && !r.grp).length,
+      dep = RESERVATIONS.filter(r => r.status === "inhouse" && r.out <= T).length,
+      L = ROOMS.filter(r => !fdRoomF || roomStatus(r) === fdRoomF);
+    return `<div class="fd-kpi fd-tiles">${tile("Occupancy", ROOMS.length ? Math.round(((c.occ || 0) / ROOMS.length) * 100) + "%" : "0%", `${c.occ || 0} of ${ROOMS.length} rooms`)}${tile("Ready to sell", c.vac || 0, "Vacant and clean")}${tile("Arrivals", arr, "Due to check in", "checkin")}${tile("Departures", dep, "Due to leave", "guests")}${tile("To clean", c.dirty || 0, "Waiting for housekeeping", "hk")}</div>
+    <div class="fd-leg" role="group" aria-label="Show rooms by status"><button class="${fdRoomF ? "" : "on"}" data-f="rflt" data-k="">All <b>${ROOMS.length}</b></button>${Object.keys(
+      ROOM_STATUS_LABELS
+    )
+      .map(
+        k =>
+          `<button class="${fdRoomF === k ? "on" : ""}" data-f="rflt" data-k="${k}"><i class="fs-${k}"></i>${ROOM_STATUS_LABELS[k]} <b>${c[k] || 0}</b></button>`
+      )
+      .join("")}</div><div class="fd-grid">${
+      L.map(r => {
+        const x = roomStatus(r),
+          st = stayOf(r.no),
+          rv = RESERVATIONS.find(
+            q =>
+              q.room === r.no && q.status === "reserved" && q.in <= fdToday() && q.out > fdToday()
+          );
+        return `<button class="fd-room fs-${x} ${fdSelectedRoom === r.no ? "sel" : ""}" data-f="room" data-no="${r.no}"><b>${r.no}</b><span>${r.type}</span><em>${st ? hx(st.guest) : rv ? "Due: " + hx(rv.guest) : ROOM_STATUS_LABELS[x]}</em><small>KES ${r.rate.toLocaleString()}</small></button>`;
+      }).join("") || '<div class="stk">No rooms with this status.</div>'
+    }</div>${roomPanel()}`;
   },
   checkin() {
     ensureRoomTypes();
-    const arr = RESERVATIONS.filter(r => r.status === "reserved" && r.in <= todayYmd() && !r.grp);
+    const arr = RESERVATIONS.filter(r => r.status === "reserved" && r.in <= fdToday() && !r.grp);
     if (fdPresetRoom) {
       const r = roomByNo(fdPresetRoom);
       if (r) {
@@ -23249,7 +24098,7 @@ const FD_VIEWS = {
        `<option value="${k}" ${checkInForm.plan === k ? "selected" : ""}>${MEAL_PLANS[k]}${k === "RO" ? "" : " · +KES " + R2(mealPlanPrice(k)) + " pp"}</option>`
    )
    .join("")}</select></label></div>
- <div class="ci-sec">Payment</div><div class="fd-form"><label>When will the guest pay?<select data-cs="pm" data-rd="1"><option value="later" ${checkInForm.pm === "later" ? "selected" : ""}>Pay later (leave pending)</option><option value="dep" ${checkInForm.pm === "dep" ? "selected" : ""}>Make a partial payment now</option><option value="full" ${checkInForm.pm === "full" ? "selected" : ""}>Pay in full now</option></select></label>${checkInForm.pm === "later" ? "" : `${checkInForm.pm === "dep" ? cs("dep", "Partial payment (KES)", "number") : `<label>Amount (KES)<input readonly value="${R2(ttl)}"></label>`}<label>Method<select data-cs="m" data-rd="1"><option value="cash" ${checkInForm.m === "cash" ? "selected" : ""}>Cash</option><option value="mpesa" ${checkInForm.m === "mpesa" ? "selected" : ""}>M-Pesa</option><option value="account" ${checkInForm.m === "account" ? "selected" : ""}>Customer account</option></select></label>${checkInForm.m === "account" ? `<label>Customer account<select data-cs="ac">${CU.map((c, i) => `<option value="${i}" ${String(i) === String(checkInForm.ac) ? "selected" : ""}>${hx(c.n)}</option>`).join("")}</select></label>` : ""}`}</div>${checkInForm.pm === "later" ? '<div class="stk">The room charge stays pending on the guest folio. It can be paid any time, before or after check-out.</div>' : ""}
+ <div class="ci-sec">Payment</div><div class="fd-form"><label>When will the guest pay?<select data-cs="pm" data-rd="1"><option value="later" ${checkInForm.pm === "later" ? "selected" : ""}>Pay later (leave pending)</option><option value="dep" ${checkInForm.pm === "dep" ? "selected" : ""}>Make a partial payment now</option><option value="full" ${checkInForm.pm === "full" ? "selected" : ""}>Pay in full now</option></select></label>${checkInForm.pm === "later" ? "" : `${checkInForm.pm === "dep" ? cs("dep", "Partial payment (KES)", "number") : `<label>Amount (KES)<input readonly value="${R2(ttl)}"></label>`}<label>Method<select data-cs="m" data-rd="1"><option value="cash" ${checkInForm.m === "cash" ? "selected" : ""}>Cash</option><option value="mpesa" ${checkInForm.m === "mpesa" ? "selected" : ""}>M-Pesa</option><option value="account" ${checkInForm.m === "account" ? "selected" : ""}>Customer account</option></select></label>${checkInForm.m === "account" ? `<label>Customer account<select data-cs="ac">${CU.map((c, i) => (c.off ? "" : `<option value="${i}" ${String(i) === String(checkInForm.ac) ? "selected" : ""}>${hx(c.n)}</option>`)).join("")}</select></label>` : ""}`}</div>${checkInForm.pm === "later" ? '<div class="stk">The room charge stays pending on the guest folio. It can be paid any time, before or after check-out.</div>' : ""}
  ${warn ? `<div class="fd-note no">${warn}</div>` : ""}<div class="stk">Room KES ${R2(parseFloat(rate) || 0)}${mp > 0 ? " + " + MEAL_PLANS[checkInForm.plan] + " KES " + R2(mp) : ""} per night × ${nn} night(s) = <b>KES ${R2(ttl)}</b></div>
  <button class="chip on" data-f="walkgo">Check in guest</button></div>${roomTypeProfileHTML(t, vac)}</div>`;
   },
@@ -23257,7 +24106,7 @@ const FD_VIEWS = {
     const up = RESERVATIONS.filter(r => r.status === "reserved" && !r.grp).sort((a, b) =>
       a.in < b.in ? -1 : 1
     );
-    return `<div class="fd-card"><h4>Room booking (reservation)</h4><div class="fd-form">${inputHTML("b_g", "Guest name")}${inputHTML("b_p", "Phone")}${inputHTML("b_i", "ID / passport no.")}<select id="b_r">${roomOptionsHTML(ROOMS, fdPresetRoom)}</select><label>Check-in<input id="b_in" type="date" value="${todayYmd()}"></label><label>Check-out<input id="b_out" type="date" value="${addDays(todayYmd(), 1)}"></label><label>Adults<input id="b_a" type="number" min="1" value="1"></label><label>Children<input id="b_c" type="number" min="0" value="0"></label><label>Meal plan<select id="b_plan">${Object.keys(
+    return `<div class="fd-card"><h4>Room booking (reservation)</h4><div class="fd-form">${inputHTML("b_g", "Guest name")}${inputHTML("b_p", "Phone")}${inputHTML("b_i", "ID / passport no.")}<select id="b_r">${roomOptionsHTML(ROOMS, fdPresetRoom)}</select><label>Check-in<input id="b_in" type="date" value="${fdToday()}"></label><label>Check-out<input id="b_out" type="date" value="${addDays(fdToday(), 1)}"></label><label>Adults<input id="b_a" type="number" min="1" value="1"></label><label>Children<input id="b_c" type="number" min="0" value="0"></label><label>Meal plan<select id="b_plan">${Object.keys(
       MEAL_PLANS
     )
       .map(
@@ -23327,66 +24176,79 @@ const FD_VIEWS = {
     return `<div class="fd-card"><h4>Create new customer account</h4><div class="fd-form">${inputHTML("n_n", "Customer or company name")}<input id="n_l" type="number" placeholder="Credit limit (KES)"><button class="chip on" data-f="acnew">Create account</button></div></div>`;
   },
   hk() {
-    return `<div class="fd-card"><h4>Room housekeeping</h4><div class="shp"><button class="chip on" data-f="hkprint">Print A4 · all rooms</button><button class="mini" data-f="hkprint" data-only="1">Print A4 · rooms to clean</button></div>${tableHTML(
-      ["Room", "Type", "Status", ""],
-      ROOMS.map(r => {
+    const c = roomStatusCounts(),
+      btn = (r, set, l, main) =>
+        `<button class="${main ? "chip on" : "mini"}" data-f="hkset" data-no="${r.no}" data-set="${set}">${l}</button>`,
+      acts = (r, x) =>
+        x === "occ"
+          ? '<span class="stk">Guest in the room</span>'
+          : x === "dirty"
+            ? btn(r, "vac", "Mark clean", 1) + btn(r, "ooo", "Out of order")
+            : x === "ooo"
+              ? btn(r, "vac", "Back in service", 1) + btn(r, "dirty", "Mark dirty")
+              : btn(r, "dirty", "Mark dirty") + btn(r, "ooo", "Out of order"),
+      L = ROOMS.filter(r => !fdHkF || roomStatus(r) === fdHkF);
+    return `<div class="fd-card fd-hkbar"><div class="fd-leg" role="group" aria-label="Show rooms by status"><button class="${fdHkF ? "" : "on"}" data-f="hkf" data-k="">All <b>${ROOMS.length}</b></button>${Object.keys(
+      ROOM_STATUS_LABELS
+    )
+      .map(
+        k =>
+          `<button class="${fdHkF === k ? "on" : ""}" data-f="hkf" data-k="${k}"><i class="fs-${k}"></i>${ROOM_STATUS_LABELS[k]} <b>${c[k] || 0}</b></button>`
+      )
+      .join(
+        ""
+      )}</div><div class="shp"><button class="mini" data-f="hkprint" data-only="1">Print rooms to clean</button><button class="mini" data-f="hkprint">Print all rooms</button></div></div>
+    <div class="fd-hk">${
+      L.map(r => {
         const x = roomStatus(r);
+        return `<div class="fd-hkr hs-${x}"><div class="fd-hkt"><b>${r.no}</b><span>${hx(r.type)}</span><em class="fs-${x}">${ROOM_STATUS_LABELS[x]}</em></div><div class="fd-hka">${acts(r, x)}</div></div>`;
+      }).join("") || '<div class="stk">No rooms with this status.</div>'
+    }</div>`;
+  },
+  guests() {
+    const T = fdToday(),
+      ih = RESERVATIONS.filter(r => r.status === "inhouse"),
+      ar = RESERVATIONS.filter(r => r.status === "reserved" && r.in === T),
+      dp = ih.filter(r => r.out <= T),
+      all = RESERVATIONS.filter(r => r.status !== "cancelled")
+        .sort((a, b) => (a.in < b.in ? 1 : -1))
+        .slice(0, 300),
+      folio = r => `<button class="mini" data-f="folio" data-id="${r.id}">Folio</button>`;
+    return `<div class="fd-card"><h4>In the house<small>${ih.length}</small></h4>${tableHTML(
+      ["Guest", "Room", "Arrival", "Departure", "Charges", "Paid", "Balance", ""],
+      ih.map(r => {
+        const f = folioOf(r);
+        return [hx(r.guest), r.room, r.in, r.out, R2(f.total), R2(f.paid), R2(f.bal), folio(r)];
+      })
+    )}</div>
+    <div class="fd-two"><div class="fd-card"><h4>Arrivals today<small>${ar.length}</small></h4>${tableHTML(
+      ["Guest", "Room", "Departure", ""],
+      ar.map(r => [
+        hx(r.guest),
+        r.room,
+        r.out,
+        `<button class="mini" data-f="ci" data-id="${r.id}">Check in</button>`
+      ])
+    )}</div><div class="fd-card"><h4>Departures due<small>${dp.length}</small></h4>${tableHTML(
+      ["Guest", "Room", "Departure", "Balance", ""],
+      dp.map(r => [hx(r.guest), r.room, r.out, R2(folioOf(r).bal), folio(r)])
+    )}</div></div>
+    <div class="fd-card"><div class="fd-gh"><h4>All guests</h4><input id="fdGq" type="search" placeholder="Find a guest, room or ID number" autocomplete="off" aria-label="Find a guest"></div><div id="fdGuests">${tableHTML(
+      ["Guest", "ID no.", "Room", "Arrival", "Departure", "Status", "Balance", ""],
+      all.map(r => {
+        const l = (r.guests || [])[0] || {};
         return [
-          r.no,
-          r.type,
-          `<span class="tag" style="background:none;color:#fff;background:${{ vac: "#1f9d62", occ: "#2b7bb9", res: "#e08a1e", dirty: "#8a6d4b", ooo: "#c0392b" }[x]}">${ROOM_STATUS_LABELS[x]}</span>`,
-          x === "occ" || (x === "res" && 0)
-            ? ""
-            : x === "dirty"
-              ? `<button class="mini" data-f="hkset" data-no="${r.no}" data-set="vac">Mark clean</button>`
-              : x === "ooo"
-                ? `<button class="mini" data-f="hkset" data-no="${r.no}" data-set="vac">Back in service</button>`
-                : x === "occ"
-                  ? ""
-                  : `<button class="mini" data-f="hkset" data-no="${r.no}" data-set="dirty">Mark dirty</button> <button class="mini" data-f="hkset" data-no="${r.no}" data-set="ooo">Out of order</button>`
+          hx(r.guest),
+          hx(l.idn || r.idno || ""),
+          r.room,
+          r.in,
+          r.out,
+          r.status === "inhouse" ? "In house" : r.status === "out" ? "Checked out" : "Reserved",
+          R2(folioOf(r).bal),
+          `${folio(r)} <button class="mini" data-f="inv" data-id="${r.id}">Invoice</button>`
         ];
       })
-    )}</div>`;
-  },
-  occ() {
-    const c = roomStatusCounts(),
-      ih = RESERVATIONS.filter(r => r.status === "inhouse"),
-      ar = RESERVATIONS.filter(r => r.status === "reserved" && r.in === todayYmd()),
-      dp = ih.filter(r => r.out <= todayYmd());
-    return `<div class="fd-kpi">${[
-      ["Rooms", ROOMS.length],
-      ["Occupied", c.occ || 0],
-      ["Vacant", c.vac || 0],
-      ["Reserved today", c.res || 0],
-      ["Dirty", c.dirty || 0],
-      ["Out of order", c.ooo || 0],
-      ["Occupancy", ROOMS.length ? Math.round(((c.occ || 0) / ROOMS.length) * 100) + "%" : "0%"]
-    ]
-      .map(([a, b]) => `<div><span>${a}</span><b>${b}</b></div>`)
-      .join("")}</div>
- <div class="fd-card"><h4>In-house guests</h4>${tableHTML(
-   ["Guest", "Room", "Arrival", "Departure", "Charges", "Paid", "Balance", ""],
-   ih.map(r => {
-     const f = folioOf(r);
-     return [
-       hx(r.guest),
-       r.room,
-       r.in,
-       r.out,
-       R2(f.total),
-       R2(f.paid),
-       R2(f.bal),
-       `<button class="mini" data-f="folio" data-id="${r.id}">Folio</button>`
-     ];
-   })
- )}</div>
- <div class="fd-card"><h4>Arrivals today</h4>${tableHTML(
-   ["Guest", "Room", "Departure"],
-   ar.map(r => [hx(r.guest), r.room, r.out])
- )}<h4>Departures due today or overdue</h4>${tableHTML(
-   ["Guest", "Room", "Departure", "Balance"],
-   dp.map(r => [hx(r.guest), r.room, r.out, R2(folioOf(r).bal)])
- )}</div>`;
+    )}</div></div>`;
   },
   set() {
     return (
@@ -23409,124 +24271,6 @@ const FD_VIEWS = {
  )}</div>`
     );
   },
-  rsales() {
-    const m = revenueByDay(fdDateRange[0], fdDateRange[1]),
-      k = Object.keys(m).sort(),
-      S = x => sSum(k, d => m[d][x]);
-    return (
-      dateRangeBarHTML() +
-      `<div class="fd-card"><h4>Periodic sales report</h4>${tableHTML(["Date", "Room revenue", "Breakfast and meals", "Extras and charges", "Total"], k.map(d => [d, R2(m[d].room), R2(m[d].meal), R2(m[d].ex), R2(m[d].room + m[d].meal + m[d].ex)]).concat([["<b>Total</b>", "<b>" + R2(S("room")) + "</b>", "<b>" + R2(S("meal")) + "</b>", "<b>" + R2(S("ex")) + "</b>", "<b>" + R2(S("room") + S("meal") + S("ex")) + "</b>"]]))}<div class="stk">Room revenue is the room rate only. Breakfast and other meal plans are shown separately.</div></div>`
-    );
-  },
-  rpay() {
-    const m = {};
-    RESERVATIONS.forEach(r =>
-      r.pays.forEach(p => {
-        const d = toYmd(p.at);
-        if (d >= fdDateRange[0] && d <= fdDateRange[1]) {
-          (m[d] = m[d] || { cash: 0, mpesa: 0, account: 0 })[p.method] += p.amt;
-        }
-      })
-    );
-    const k = Object.keys(m).sort(),
-      S = x => sSum(k, d => m[d][x]);
-    return (
-      dateRangeBarHTML() +
-      `<div class="fd-card"><h4>Periodic payment report</h4>${tableHTML(["Date", "Cash", "M-Pesa", "Customer account", "Total"], k.map(d => [d, R2(m[d].cash), R2(m[d].mpesa), R2(m[d].account), R2(m[d].cash + m[d].mpesa + m[d].account)]).concat([["<b>Total</b>", "<b>" + R2(S("cash")) + "</b>", "<b>" + R2(S("mpesa")) + "</b>", "<b>" + R2(S("account")) + "</b>", "<b>" + R2(S("cash") + S("mpesa") + S("account")) + "</b>"]]))}</div>`
-    );
-  },
-  rrev() {
-    const o = {};
-    RESERVATIONS.filter(r => r.status === "inhouse" || r.status === "out").forEach(r => {
-      const t = (o[r.type] = o[r.type] || { n: 0, room: 0, meal: 0, ex: 0 }),
-        mv = (r.mrate || 0) * ((r.adults || 1) + ((r.children || 0) * FD_SETTINGS.child) / 100);
-      for (let i = 0; i < nightsBetween(r.in, r.out); i++) {
-        const d = addDays(r.in, i);
-        if (d >= fdDateRange[0] && d <= fdDateRange[1] && d <= todayYmd()) {
-          t.n++;
-          t.room += r.rate;
-          t.meal += mv;
-        }
-      }
-      r.charges.forEach(c => {
-        const d = toYmd(c.at);
-        if (d >= fdDateRange[0] && d <= fdDateRange[1]) t.ex += c.amt;
-      });
-    });
-    const k = Object.keys(o);
-    return (
-      dateRangeBarHTML() +
-      `<div class="fd-card"><h4>Periodic revenue report (by room type)</h4>${tableHTML(["Room type", "Nights sold", "Average room rate", "Room revenue", "Breakfast and meals", "Extras", "Total"], k.map(t => [t, o[t].n, R2(o[t].n ? o[t].room / o[t].n : 0), R2(o[t].room), R2(o[t].meal), R2(o[t].ex), R2(o[t].room + o[t].meal + o[t].ex)]).concat([["<b>Total</b>", "<b>" + sSum(k, t => o[t].n) + "</b>", "", "<b>" + R2(sSum(k, t => o[t].room)) + "</b>", "<b>" + R2(sSum(k, t => o[t].meal)) + "</b>", "<b>" + R2(sSum(k, t => o[t].ex)) + "</b>", "<b>" + R2(sSum(k, t => o[t].room + o[t].meal + o[t].ex)) + "</b>"]]))}<div class="stk">The average room rate excludes breakfast and meals.</div></div>`
-    );
-  },
-  rmeal() {
-    const M = mealRows(fdDateRange[0], fdDateRange[1]),
-      ks = Object.keys(M.day).sort(),
-      ps = Object.keys(M.plan);
-    return (
-      dateRangeBarHTML() +
-      `<div class="fd-card"><h4>Breakfast and meals report</h4>${tableHTML(["Date", "Rooms with meals", "Covers", "Meal revenue"], ks.map(d => [d, M.day[d].rooms, M.day[d].covers, R2(M.day[d].rev)]).concat([["<b>Total</b>", "<b>" + sSum(ks, d => M.day[d].rooms) + "</b>", "<b>" + sSum(ks, d => M.day[d].covers) + "</b>", "<b>" + R2(sSum(ks, d => M.day[d].rev)) + "</b>"]]))}<h4>By meal plan</h4>${tableHTML(
-        ["Meal plan", "Room-nights", "Covers", "Revenue"],
-        ps.map(p => [MEAL_PLANS[p], M.plan[p].rooms, M.plan[p].covers, R2(M.plan[p].rev)])
-      )}<div class="stk">A cover is one guest on a meal plan for one night. Children are charged ${FD_SETTINGS.child}% of the adult price.</div></div>`
-    );
-  },
-  rguests() {
-    const L = RESERVATIONS.filter(
-      r => r.status !== "cancelled" && r.in >= fdDateRange[0] && r.in <= fdDateRange[1]
-    ).sort((a, b) => (a.in < b.in ? 1 : -1));
-    return (
-      dateRangeBarHTML() +
-      `<div class="fd-card"><h4>Guests and invoices list</h4>${tableHTML(
-        [
-          "Guest",
-          "Nationality",
-          "ID no.",
-          "Room",
-          "Arrival",
-          "Departure",
-          "Status",
-          "Total",
-          "Paid",
-          "Balance",
-          ""
-        ],
-        L.map(r => {
-          const f = folioOf(r),
-            l = (r.guests || [])[0] || {};
-          return [
-            hx(r.guest),
-            hx(l.nat || ""),
-            hx(l.idn || r.idno || ""),
-            r.room,
-            r.in,
-            r.out,
-            r.status === "inhouse" ? "In house" : r.status === "out" ? "Checked out" : "Reserved",
-            R2(f.total),
-            R2(f.paid),
-            R2(f.bal),
-            `<button class="mini" data-f="folio" data-id="${r.id}">Folio</button> <button class="mini" data-f="inv" data-id="${r.id}">Invoice</button>`
-          ];
-        })
-      )}</div>`
-    );
-  },
-  rold() {
-    const L = DAYS.filter(d => d.closedAt)
-      .slice()
-      .reverse();
-    return `<div class="fd-card"><h4>Retrieve old summaries (closed days)</h4>${tableHTML(
-      ["Date", "Open", "Bills", "Sales", "Cash variance", ""],
-      L.map((d, i) => [
-        dm(d.openedAt),
-        hm(d.openedAt) + " to " + hm(d.closedAt),
-        d.bills,
-        R2(d.gross),
-        sg(d.variance || 0),
-        `<button class="mini" data-f="pday" data-i="${i}">Print summary</button>`
-      ])
-    )}</div>`;
-  },
   group() {
     ensureRoomTypes();
     const ok = groupFreeRooms();
@@ -23543,7 +24287,7 @@ const FD_VIEWS = {
       gf = (k, l, ty, x) =>
         `<label>${l}<input data-gb="${k}" ${ty ? `type="${ty}"` : ""} ${x || ""} value="${hx(groupForm[k])}"></label>`,
       acs = l =>
-        `<label>${l}<select data-gb="ac">${CU.map((c, i) => `<option value="${i}" ${String(i) === String(groupForm.ac) ? "selected" : ""}>${hx(c.n)}</option>`).join("")}</select></label>`,
+        `<label>${l}<select data-gb="ac">${CU.map((c, i) => (c.off ? "" : `<option value="${i}" ${String(i) === String(groupForm.ac) ? "selected" : ""}>${hx(c.n)}</option>`)).join("")}</select></label>`,
       list = GROUPS.slice()
         .reverse()
         .map(g => {
@@ -23564,7 +24308,7 @@ const FD_VIEWS = {
         });
     return `<div class="fd-card"><h4>Group booking</h4>
  <div class="ci-sec">Group and payer</div><div class="fd-form">${gf("name", "Group or event name")}<label>Who pays?<select data-gb="payer" data-rd="1"><option value="company" ${groupForm.payer === "company" ? "selected" : ""}>Company pays</option><option value="person" ${groupForm.payer === "person" ? "selected" : ""}>Person pays</option></select></label>${groupForm.payer === "person" ? gf("pname", "Paying person's name") : acs("Company account")}${gf("pphone", "Contact phone")}</div>
- <div class="ci-sec">Dates and group rate</div><div class="fd-form"><label>Check-in<input type="date" data-gb="in" data-rd="1" value="${groupForm.in}" min="${todayYmd()}"></label><label>Check-out<input type="date" data-gb="out" data-rd="1" value="${groupForm.out}" min="${addDays(groupForm.in, 1)}"></label>${gf("disc", "Group discount %", "number", 'min="0" max="50" data-rd="1"')}<label>Meal plan<select data-gb="plan" data-rd="1">${Object.keys(
+ <div class="ci-sec">Dates and group rate</div><div class="fd-form"><label>Check-in<input type="date" data-gb="in" data-rd="1" value="${groupForm.in}" min="${fdToday()}"></label><label>Check-out<input type="date" data-gb="out" data-rd="1" value="${groupForm.out}" min="${addDays(groupForm.in, 1)}"></label>${gf("disc", "Group discount %", "number", 'min="0" max="50" data-rd="1"')}<label>Meal plan<select data-gb="plan" data-rd="1">${Object.keys(
    MEAL_PLANS
  )
    .map(
@@ -23576,7 +24320,7 @@ const FD_VIEWS = {
  ${gbReg(rooms)}
  <div class="ci-sec">Payment</div><div class="fd-form"><label>When will the payer pay?<select data-gb="pm" data-rd="1"><option value="later" ${groupForm.pm === "later" ? "selected" : ""}>Pay later (leave pending)</option><option value="dep" ${groupForm.pm === "dep" ? "selected" : ""}>Pay a deposit now</option><option value="full" ${groupForm.pm === "full" ? "selected" : ""}>Pay in full now</option></select></label>${groupForm.pm === "later" ? "" : `${groupForm.pm === "dep" ? gf("dep", "Deposit (KES)", "number") : `<label>Amount (KES)<input readonly value="${R2(total)}"></label>`}<label>Method<select data-gb="m" data-rd="1"><option value="cash" ${groupForm.m === "cash" ? "selected" : ""}>Cash</option><option value="mpesa" ${groupForm.m === "mpesa" ? "selected" : ""}>M-Pesa</option><option value="account" ${groupForm.m === "account" ? "selected" : ""}>${groupForm.payer === "company" ? "Company account" : "Customer account"}</option></select></label>${groupForm.payer === "person" && groupForm.m === "account" ? acs("Customer account") : ""}`}</div>
  <div class="stk">${groupForm.sel.length} room(s) × ${nn} night(s)${disc ? " at " + disc + "% off" : ""} = <b>KES ${R2(total)}</b>. ${groupForm.pm === "later" ? "The full amount stays pending on the group folio." : ""}</div>
- <div class="shp"><button class="chip on" data-f="gbgo">Create group booking</button>${groupForm.in <= todayYmd() ? '<button class="mini" data-f="gbgo" data-now="1">Create and check in now</button>' : ""}</div></div>
+ <div class="shp"><button class="chip on" data-f="gbgo">Create group booking</button>${groupForm.in <= fdToday() ? '<button class="mini" data-f="gbgo" data-now="1">Create and check in now</button>' : ""}</div></div>
  <div class="fd-card"><h4>Group bookings</h4>${tableHTML(["Group", "Payer", "Rooms", "Dates", "Status", "Total", "Paid", "Balance", ""], list)}</div>`;
   },
   gfolio() {
@@ -23619,7 +24363,7 @@ const FD_VIEWS = {
    ])
  )}
  <div class="status ${B > 0.009 ? "bad" : "ok"}">Group balance due: KES ${R2(B)}</div>
- ${st !== "cancelled" && B > 0.009 ? `<div class="fd-form"><label>Amount (KES)<input id="g_a" type="number" value="${B}"></label><label>Method<select id="g_m"><option value="cash">Cash</option><option value="mpesa">M-Pesa</option><option value="account" ${g.payer === "company" ? "selected" : ""}>Customer account</option></select></label><label>Account<select id="g_c">${CU.map((c, i) => `<option value="${i}" ${i === g.ac ? "selected" : ""}>${hx(c.n)}</option>`).join("")}</select></label><button class="chip on" data-f="gpay">Receive group payment</button></div>` : ""}
+ ${st !== "cancelled" && B > 0.009 ? `<div class="fd-form"><label>Amount (KES)<input id="g_a" type="number" value="${B}"></label><label>Method<select id="g_m"><option value="cash">Cash</option><option value="mpesa">M-Pesa</option><option value="account" ${g.payer === "company" ? "selected" : ""}>Customer account</option></select></label><label>Account<select id="g_c">${CU.map((c, i) => (c.off ? "" : `<option value="${i}" ${i === g.ac ? "selected" : ""}>${hx(c.n)}</option>`)).join("")}</select></label><button class="chip on" data-f="gpay">Receive group payment</button></div>` : ""}
  <div class="shp">${st === "reserved" ? `<button class="chip on" data-f="gci" data-id="${g.id}">Check in group</button><button class="mini" data-f="gcancel" data-id="${g.id}">Cancel group</button>` : ""}${st === "in house" ? `<button class="chip on" data-f="gout" data-id="${g.id}">Check out group</button>${B > 0.009 ? `<button class="mini" data-f="gout" data-pend="1" data-id="${g.id}">Check out · leave KES ${R2(B)} pending</button>` : ""}` : ""}<button class="mini" data-f="ginv" data-id="${g.id}">Print group invoice</button><button class="mini" data-f="glist" data-id="${g.id}">Print guest list</button></div></div>${gReg(g)}`;
   },
   pending() {
@@ -23671,7 +24415,7 @@ const FD_VIEWS = {
            ]
          ]
        : [],
-     r.charges.map(c => [toYmd(c.at), hx(c.cat + ": " + c.desc), R2(c.amt)]),
+     r.charges.map(c => [bizDateOf(c.at), hx(c.cat + ": " + c.desc), R2(c.amt)]),
      [["", "<b>Total charges</b>", "<b>" + R2(f.total) + "</b>"]]
    )
  )}
@@ -23679,16 +24423,17 @@ const FD_VIEWS = {
    r.pays.length
      ? tableHTML(
          ["Date", "Payment", "Amount"],
-         r.pays.map(p => [toYmd(p.at), PAY_METHODS[p.method] || p.method, R2(p.amt)])
+         r.pays.map(p => [bizDateOf(p.at), PAY_METHODS[p.method] || p.method, R2(p.amt)])
        )
      : ""
  }
  <div class="status ${f.bal > 0 ? "bad" : "ok"}">Balance due: KES ${R2(f.bal)}</div>
- ${r.status === "inhouse" || r.status === "reserved" || (r.status === "out" && f.bal > 0.009) ? `<div class="fd-form"><label>Amount (KES)<input id="m_a" type="number" value="${f.bal > 0 ? f.bal : ""}"></label><label>Method<select id="m_m"><option value="cash">Cash</option><option value="mpesa">M-Pesa</option><option value="account">Customer account</option></select></label><label>Account<select id="m_c">${CU.map((c, i) => `<option value="${i}">${hx(c.n)}</option>`).join("")}</select></label><button class="chip on" data-f="paygo">Receive payment</button></div>` : ""}
+ ${r.status === "inhouse" || r.status === "reserved" || (r.status === "out" && f.bal > 0.009) ? `<div class="fd-form"><label>Amount (KES)<input id="m_a" type="number" value="${f.bal > 0 ? f.bal : ""}"></label><label>Method<select id="m_m"><option value="cash">Cash</option><option value="mpesa">M-Pesa</option><option value="account">Customer account</option></select></label><label>Account<select id="m_c">${CU.map((c, i) => (c.off ? "" : `<option value="${i}">${hx(c.n)}</option>`)).join("")}</select></label><button class="chip on" data-f="paygo">Receive payment</button></div>` : ""}
  <div class="shp">${r.status === "reserved" ? `<button class="chip on" data-f="ci" data-id="${r.id}">Check in</button><button class="mini" data-f="chg" data-id="${r.id}">Change dates</button>` : ""}${r.status === "inhouse" ? `<button class="chip on" data-f="out" data-id="${r.id}">Check out</button>${f.bal > 0.009 ? `<button class="mini" data-f="out" data-pend="1" data-id="${r.id}">Check out · leave KES ${R2(f.bal)} pending</button>` : ""}<button class="mini" data-f="chg" data-id="${r.id}">Change dates</button>` : ""}${r.grp ? `<button class="mini" data-f="gopen" data-id="${r.grp}">Group folio</button>` : ""}<button class="mini" data-f="inv" data-id="${r.id}">Print invoice</button></div></div>`;
   }
 };
 function fdDraw() {
+  if (!fdCan(fdPageRight(fdView))) fdView = fdCan("desk") ? "grid" : fdCan("hk") ? "hk" : "set";
   fdBrand();
   $("#fdWho").textContent =
     (user ? user.n + " · " : "") +
@@ -23698,17 +24443,27 @@ function fdDraw() {
       month: "long",
       year: "numeric"
     });
-  $("#fdRib").innerHTML = FD_MENU.map(
-    ([t, b]) =>
-      `<div class="fd-g"><div class="fd-gb">${b.map(([k, l, ic]) => `<button class="fd-b ${fdView === k ? "on" : ""}" data-v="${k}"><svg viewBox="0 0 24 24">${FD_ICONS[ic]}</svg>${l}</button>`).join("")}</div><div class="lb">${t}</div></div>`
-  ).join("");
+  const menu = FD_MENU.map(([t, b]) => [t, b.filter(([k]) => fdCan(fdPageRight(k)))]).filter(
+      ([, b]) => b.length
+    ),
+    T = FD_TITLES[fdView] || [FD_SETTINGS.name, ""];
+  $("#fdRib").innerHTML = menu
+    .map(
+      ([t, b]) =>
+        `<div class="fd-g"><div class="lb">${t}</div><div class="fd-gb">${b.map(([k, l, ic]) => `<button class="fd-b ${fdView === k ? "on" : ""}" data-v="${k}" ${fdView === k ? 'aria-current="page"' : ""}><svg viewBox="0 0 24 24">${FD_ICONS[ic]}</svg><span>${l}</span></button>`).join("")}</div></div>`
+    )
+    .join("");
+  $("#fdTitle").textContent = T[0];
+  $("#fdSub").textContent = T[1];
+  $("#fdQuick").innerHTML = fdCan("desk")
+    ? `<button class="mini" data-v="book">New booking</button><button class="chip on" data-v="checkin">Check in a guest</button>`
+    : "";
   $("#fdNote").innerHTML = fdNotice
     ? `<div class="fd-note ${fdNotice.ok ? "ok" : "no"}">${hx(fdNotice.t)}</div>`
     : "";
   $("#fdBody").innerHTML = FD_VIEWS[fdView]();
 }
 function fdShow() {
-  posKioskOff(); // signed in to Front Desk: the POS rule no longer applies
   ensureRoomTypes();
   if (!ROOMS.length) fdSeed();
   $("#start").style.display = "none";
@@ -23716,10 +24471,23 @@ function fdShow() {
   fdDraw();
 }
 let fdUser = null,
-  posUser = null,
-  fdLoginFails = 0,
-  fdLoginLockedUntil = 0;
+  posUser = null;
+/** Shows or hides everything outside the Back Office that belongs to the Front Desk. */
+function fdModuleApply() {
+  const on = fdOn(),
+    show = (el, yes) => el && (el.style.display = yes ? "" : "none");
+  show($('#start [data-go="fd"]'), on);
+  show($("#stFdKey"), on);
+  const room = $("#fRoom");
+  if (room) {
+    show(room, on);
+    show(room.previousElementSibling, on);
+  }
+  if (!on && ($("#fd").classList.contains("show") || $("#fl").classList.contains("show")))
+    fdExit(true);
+}
 function fdOpen() {
+  if (!fdOn()) return;
   try {
     swipeArm(false);
   } catch (e) {}
@@ -23731,16 +24499,17 @@ function fdOpen() {
 function fdLoginShow() {
   fdBrand();
   $("#fd").classList.remove("show");
-  $("#flS").innerHTML = USERS.map((u, i) => `<option value="${i}">${hx(u.n)}</option>`).join("");
+  $("#flU").value = "";
   $("#flP").value = "";
   $("#flP").type = "password";
   $("#flMsg").style.display = "none";
   $("#flHi").textContent = (h =>
     h < 12 ? "Good morning," : h < 17 ? "Good afternoon," : "Good evening,")(new Date().getHours());
   $("#fl").classList.add("show");
-  setTimeout(() => $("#flP").focus(), 60);
+  setTimeout(() => $("#flU").focus(), 60);
 }
 function fdEnter(u) {
+  fdView = "grid"; // fdDraw moves them to the first page they have
   fdUser = u;
   posUser = user;
   user = u;
@@ -23765,34 +24534,6 @@ function fdLogout() {
   fdExit(false);
   fdLoginShow();
 }
-function fdLoginTry() {
-  const u = USERS[+$("#flS").value],
-    m = $("#flMsg"),
-    bad = t => {
-      m.textContent = t;
-      m.style.display = "block";
-      const c = $("#fl .fl-card");
-      c.classList.remove("shake");
-      void c.offsetWidth;
-      c.classList.add("shake");
-    };
-  if (Date.now() < fdLoginLockedUntil) return bad("Too many attempts. Try again in 30 seconds.");
-  if (u && u.pin === $("#flP").value) {
-    fdLoginFails = 0;
-    m.style.display = "none";
-    fdEnter(u);
-  } else {
-    if (++fdLoginFails >= 5) {
-      fdLoginLockedUntil = Date.now() + 3e4;
-      fdLoginFails = 0;
-    }
-    bad("Wrong PIN. Please try again.");
-  }
-}
-$("#flGo").onclick = fdLoginTry;
-$("#flP").onkeydown = e => {
-  if (e.key === "Enter") fdLoginTry();
-};
 $("#flEye").onclick = () => {
   const p = $("#flP");
   p.type = p.type === "password" ? "text" : "password";
@@ -23830,9 +24571,18 @@ function recPay(r, method, amt, ci) {
   sync();
   return "";
 }
+$("#fd").addEventListener("input", e => {
+  if (e.target.id !== "fdGq") return;
+  const q = e.target.value.trim().toLowerCase();
+  document.querySelectorAll("#fdGuests tr").forEach(tr => {
+    if (!tr.querySelector("th"))
+      tr.style.display = tr.textContent.toLowerCase().includes(q) ? "" : "none";
+  });
+});
 $("#fd").onclick = e => {
   const vb = e.target.closest("[data-v]");
   if (vb) {
+    if (!fdCan(fdPageRight(vb.dataset.v))) return;
     fdView = vb.dataset.v;
     fdNotice = null;
     fdPresetRoom = "";
@@ -23844,12 +24594,17 @@ $("#fd").onclick = e => {
   }
   const b = e.target.closest("[data-f]");
   if (!b) return;
+  // Each action belongs to a right, whatever is on the screen.
+  const act = b.dataset.f,
+    onHk = ["hkset", "hkprint", "hkf"].includes(act),
+    onSet = ["radd", "rdel", "rtnew", "rtedit", "rtcancel", "rtdel", "rtsave"].includes(act);
+  if (onSet ? !fdCan("set") : !fdCan("desk") && !(onHk && fdCan("hk"))) return;
   const f = b.dataset.f,
     id = b.dataset.id,
     no = b.dataset.no,
     g = i => $("#" + i).value.trim(),
     n = i => parseFloat($("#" + i).value),
-    T = todayYmd();
+    T = fdToday();
   let r = RESERVATIONS.find(x => x.id === id);
   if (f === "room") {
     fdSelectedRoom = no;
@@ -23865,10 +24620,21 @@ $("#fd").onclick = e => {
   } else if (f === "bookroom") {
     fdPresetRoom = no;
     fdView = "book";
+  } else if (f === "rflt") {
+    fdRoomF = b.dataset.k;
+  } else if (f === "hkf") {
+    fdHkF = b.dataset.k;
   } else if (f === "hkset") {
     const rm = roomByNo(no);
     if (stayOf(no)) fdNotify("The room is occupied.");
-    else rm.status = b.dataset.set;
+    else {
+      rm.status = b.dataset.set;
+      auditAdd("Room status", `Room ${no} set to ${ROOM_STATUS_LABELS[roomStatus(rm)]}`, {
+        who: user ? user.n : "Front Desk",
+        mod: "Front Desk"
+      });
+      sync();
+    }
   } else if (f === "ci") {
     const rm = roomByNo(r.room),
       x = roomStatus(rm);
@@ -24424,11 +25190,6 @@ $("#fd").onclick = e => {
       );
       fdNotify("Room " + no + " removed.", 1);
     }
-  } else if (f === "pday") {
-    const d = DAYS.filter(x => x.closedAt)
-      .slice()
-      .reverse()[+b.dataset.i];
-    printHTML(dayReport(d, user && user.n));
     return;
   }
   sync();
@@ -24529,10 +25290,6 @@ $("#fd").onchange = e => {
     fdSelectedRes = t.value;
     return fdDraw();
   }
-  if (t.dataset.rg !== undefined) {
-    fdDateRange[+t.dataset.rg] = t.value;
-    return fdDraw();
-  }
   if (t.dataset.rate) {
     const rm = roomByNo(t.dataset.rate),
       v = parseFloat(t.value);
@@ -24541,7 +25298,6 @@ $("#fd").onchange = e => {
     sync();
   }
 };
-$("#fdBack").onclick = () => fdExit(true);
 </script>
 
     <!-- Script group 4: Back Office. data-private: the build wraps this whole group in one
@@ -24902,7 +25658,15 @@ const BO_RIGHTS = [
   ["shift.view", "View shifts and the business day.", "SHIFTS", "ACCESS"],
   ["shift.day", "Start and end the business day.", "SHIFTS", "DAY"],
   ["shift.manage", "Open and close staff shifts.", "SHIFTS", "STAFF SHIFTS"],
-  ["fo.open", "Open the Front Desk.", "FRONTOFFICE", "ACCESS"],
+  ["fo.open", "Sign in to the Front Desk.", "FRONTOFFICE", "ACCESS"],
+  ["fo.desk", "Work the desk: rooms, bookings, guests and payments.", "FRONTOFFICE", "DESK"],
+  ["fo.hk", "Housekeeping: change room status.", "FRONTOFFICE", "HOUSEKEEPING"],
+  [
+    "fo.settings",
+    "Change Front Desk settings: rooms, rates and meal plans.",
+    "FRONTOFFICE",
+    "SETTINGS"
+  ],
   ["rep.rooms", "View room reports.", "FRONTOFFICE", "REPORTS"],
   ["pur.lpo", "Create and manage purchase orders.", "PURCHASING", "ORDERS"],
   ["pur.receive", "Receive goods into a store.", "PURCHASING", "RECEIVING"],
@@ -24960,7 +25724,7 @@ const ALL_KEYS = BO_RIGHTS.map(r => r.k);
 const except = (...L) => ALL_KEYS.filter(k => !L.includes(k));
 const ROLE_DEFAULTS = {
   "General Manager": except("users.manage"),
-  Manager: except("users.manage", "set.manage"),
+  Manager: except("users.manage", "set.manage", "fo.settings"),
   Director: [
     "home.money",
     "sales.view",
@@ -25074,7 +25838,8 @@ const ROLE_DEFAULTS = {
     "vn.view",
     "rep.print"
   ],
-  Housekeeping: ["fo.open", "rep.rooms", "rep.print"],
+  Housekeeping: ["fo.open", "fo.hk"],
+  "Front Office": ["fo.open", "fo.desk", "fo.hk", "rep.rooms", "rep.print", "cust.view"],
   Chef: [
     "inv.req",
     "inv.reports",
@@ -25091,6 +25856,8 @@ const ROLE_DEFAULTS = {
   Sales: [
     "sales.view",
     "fo.open",
+    "fo.desk",
+    "fo.hk",
     "rep.rooms",
     "cust.view",
     "cust.manage",
@@ -25100,6 +25867,9 @@ const ROLE_DEFAULTS = {
   ]
 };
 const BO_ROLES = [...Object.keys(ROLE_DEFAULTS)];
+/** Roles the business added itself. They start with no rights. */
+const roleCustom = () => FD_SETTINGS.customRoles || (FD_SETTINGS.customRoles = []);
+const boRoles = () => [...BO_ROLES, ...roleCustom()];
 /** Does this role have this right, counting any changes made on the rights table? */
 const roleHas = (role, k) => {
   if (role === SUPER) return true;
@@ -25145,6 +25915,7 @@ const PAGE_RIGHTS = {
   License: ["users.manage"]
 };
 const boPageOk = n => {
+  if (!fdOn() && (n === "Front Desk" || n === "Room reports")) return false;
   const L = PAGE_RIGHTS[String(n).replace("&amp;", "&")];
   return !L || anyOf(...L);
 };
@@ -25188,8 +25959,6 @@ const ACT_RIGHTS = {
   sfloat: "shift.manage",
   sdecl: "shift.manage",
   send: "shift.manage",
-  addc: "cust.manage",
-  pay: "cust.pay",
   addp: "prod.manage",
   rep_print: "rep.print",
   inv_stnew: "inv.stores",
@@ -25250,7 +26019,6 @@ function applyBoRights() {
     }
     s.style.display = any ? "" : "none";
   });
-  $("#openPos").style.display = boCan("pos.open") ? "" : "none";
   $("#newreq").style.display = boCan("inv.req") ? "" : "none";
   $("#urole").textContent = boUser ? boUser.role || SUPER : "";
   const money = boCan("home.money"),
@@ -25325,7 +26093,6 @@ const NAV = [
   [
     "Operations",
     [
-      ["Point of Sale", "pos"],
       ["Sales &amp; Orders", "cart"],
       ["Shifts &amp; Day", "id"],
       ["Purchasing", "dl"],
@@ -25435,11 +26202,13 @@ function heroBar() {
             : `${ch >= 0 ? "▲" : "▼"} ${Math.abs(ch).toFixed(1)}% on the period before`,
           "heroFig"
         )) +
-    fig(
-      "Occupancy",
-      (ROOMS.length ? Math.round((occ / ROOMS.length) * 100) : 0) + "%",
-      `${occ} of ${ROOMS.length} rooms`
-    ) +
+    (fdOn()
+      ? fig(
+          "Occupancy",
+          (ROOMS.length ? Math.round((occ / ROOMS.length) * 100) : 0) + "%",
+          `${occ} of ${ROOMS.length} rooms`
+        )
+      : "") +
     fig(
       "Open bills",
       orders.length,
@@ -25449,13 +26218,6 @@ function heroBar() {
 }
 function mods() {
   const M = [
-    [
-      "Point of Sale",
-      "pos",
-      "#1d5c8a",
-      KES(sum(sel(0), s => s.g)) + " " + PL[per],
-      orders.length + " open orders"
-    ],
     ["Sales & Orders", "cart", "#2b7bb9", sel(0).length + " sales", br],
     [
       "Shifts & Day",
@@ -25464,13 +26226,20 @@ function mods() {
       curDay() ? "Day open" : "Day closed",
       openShifts().length + " open shifts"
     ],
-    [
-      "Front Desk",
-      "id",
-      "#2f9e75",
-      ROOMS.filter(r => roomStatus(r) === "occ").length + " of " + ROOMS.length + " rooms occupied",
-      "Bookings and guest bills"
-    ],
+    ...(fdOn()
+      ? [
+          [
+            "Front Desk",
+            "id",
+            "#2f9e75",
+            ROOMS.filter(r => roomStatus(r) === "occ").length +
+              " of " +
+              ROOMS.length +
+              " rooms occupied",
+            "Bookings and guest bills"
+          ]
+        ]
+      : []),
     ["Products List", "box", "#c8553d", ITEMS.length + " items", "Prices and tax"],
     ["Tables", "pos", "#3a8fb7", TBL.length + " on the list", "Tables and takeaways"],
     [
@@ -25690,9 +26459,9 @@ function insights() {
       orders.length + " open orders waiting to be charged",
       "Total " +
         KES(orders.reduce((a, o) => a + totals(o.lines).g, 0)) +
-        ". Open the POS to settle them.",
-      "Open POS",
-      "go:Point of Sale"
+        ". Settle them on the POS.",
+      "See orders",
+      "go:Sales & Orders"
     ]);
   $("#ins").innerHTML = L.length
     ? L.map(
@@ -25830,7 +26599,11 @@ document.addEventListener("kf:newday", repToday);
 /** Report columns follow the payment modes the business has added. */
 function pmSync() {
   mnSync();
-  PMK.length = PMH.length = 6;
+  PMK.length = PMH.length = 5;
+  if (fdOn() || SALES.some(s => (s.mx || {}).room)) {
+    PMK.push("room");
+    PMH.push("#Room");
+  }
   payCustoms().forEach(c => {
     PMK.push(c.k);
     PMH.push("#" + c.n);
@@ -26084,7 +26857,7 @@ function billGroups() {
     Z = new Date(rt + "T23:59:59"),
     open = orders
       .filter(x => {
-        const at = new Date(x.at);
+        const at = new Date(saleAt(x)); // its business date, as settled bills use
         return at >= A && at <= Z && (rd === "All" || billPoints(x.lines).includes(rd));
       })
       .map(x => {
@@ -27492,8 +28265,7 @@ const V = {
    .join("")}</table></div>`;
   },
   cred() {
-    return `<div class="pn"><h4>Add credit customer</h4><div class="fr"><input id="cn" placeholder="Customer name"><input id="cc" type="number" placeholder="Credit limit"><button class="chip on" data-a="addc">Add</button></div></div>
- <div class="pn tw"><table class="t"><tr><th>Customer</th><th class="n">Limit</th><th class="n">Owes</th><th>Record payment</th></tr>${CU.map((c, i) => `<tr><td>${esc(c.n)}</td><td class="n">${c.limit.toLocaleString()}</td><td class="n">${c.owes.toLocaleString()}</td><td><div class="fr"><input type="number" id="cp_${i}" placeholder="Amount"><button class="mini" data-a="pay" data-i="${i}">Save</button></div></td></tr>`).join("")}</table></div>`;
+    return customersHTML();
   }
 };
 let hrr = "occ";
@@ -27593,7 +28365,7 @@ function rrData(k) {
     const m = {};
     RESERVATIONS.forEach(r =>
       r.pays.forEach(p => {
-        const d = toYmd(p.at);
+        const d = bizDateOf(p.at);
         if (d >= a && d <= b) (m[d] = m[d] || { cash: 0, mpesa: 0, account: 0 })[p.method] += p.amt;
       })
     );
@@ -27624,14 +28396,14 @@ function rrData(k) {
         mv = (r.mrate || 0) * ((r.adults || 1) + ((r.children || 0) * FD_SETTINGS.child) / 100);
       for (let i = 0; i < nightsBetween(r.in, r.out); i++) {
         const d = addDays(r.in, i);
-        if (d >= a && d <= b && d <= todayYmd()) {
+        if (d >= a && d <= b && d <= fdToday()) {
           t.n++;
           t.room += r.rate;
           t.meal += mv;
         }
       }
       r.charges.forEach(c => {
-        const d = toYmd(c.at);
+        const d = bizDateOf(c.at);
         if (d >= a && d <= b) t.ex += c.amt;
       });
     });
@@ -27726,7 +28498,7 @@ function rrData(k) {
       ]
     ];
   }
-  const w = addDays(todayYmd(), 7),
+  const w = addDays(fdToday(), 7),
     R = [];
   RESERVATIONS.filter(r => r.status === "reserved" && r.in <= w).forEach(r =>
     R.push(["Arrival", r.guest, r.room, r.in])
@@ -27804,6 +28576,9 @@ function roomsReportHTML() {
  <div class="fr" style="align-items:center;justify-content:space-between"><h3 style="margin:0">${RRL[hrr]}</h3><span>${printTools("rooms")}</span></div><div class="cs">${["rv", "pay", "rt", "gl"].includes(hrr) ? rrRange().join(" to ") : "Live position"}</div>${tb(cols, rows, foot, "Nothing to show for this report and period.")}`;
 }
 function roomsCard() {
+  const on = fdOn();
+  $("#rml").parentElement.style.display = $("#rooms").style.display = on ? "" : "none";
+  if (!on) return;
   $("#rooms").innerHTML = roomsKpiHTML(); // dashboard: the summary cards only
   const occ = ROOMS.filter(r => roomStatus(r) === "occ").length,
     [a, b] = rrRange(),
@@ -27878,10 +28653,15 @@ const V0 = {
         .slice()
         .reverse()
         .slice(0, 20),
-      free = USERS.filter(u => !shiftOf(u.n) && (u.role !== "Waiter" || posOpt("boWaiterShift"))),
+      free = USERS.filter(
+        u =>
+          !shiftOf(u.n) &&
+          u.role !== "Housekeeper" &&
+          (u.role !== "Waiter" || posOpt("boWaiterShift") || shiftDoneOf(u.n))
+      ),
       pays = PAYOUTS.slice().reverse().slice(0, 40);
     return `${shiftAuthHTML()}<div class="pn"><h4>Business day</h4>${d ? `<div>Business date <b>${dateGB(dayDate(d))}</b> · open since ${dm(d.openedAt)} ${hm(d.openedAt)} by ${esc(d.openedBy)} · ${os.length} open shift(s)${dayLate()}</div><div class="fr"><button class="mini" data-a="dend">End day</button><button class="mini" data-a="pcur">Print day so far</button></div>` : `<div>No day is open. The new business date will be <b>${dateGB(nextBizDate())}</b>.</div><div class="fr"><button class="chip on" data-a="dstart">Start new day</button></div>`}</div>
- ${d ? `<div class="pn"><h4>Start a shift and give the float</h4><div class="stk">Or the cashier can enter the float when starting the shift. A float can be changed under Open shifts.</div><div class="fr"><select id="shU">${free.map(u => `<option>${esc(u.n)}</option>`).join("")}</select><input id="shF" type="number" placeholder="Opening float (KES)"><button class="chip on" data-a="sstart">Start shift</button></div></div>` : ""}
+ ${d ? `<div class="pn"><h4>Start a shift and give the float</h4><div class="stk">Or the cashier can enter the float when starting the shift. A float can be changed under Open shifts. Anyone who has closed a shift today can only get another one here.</div><div class="fr"><select id="shU">${free.map(u => `<option>${esc(u.n)}</option>`).join("")}</select><input id="shF" type="number" placeholder="Opening float (KES)"><button class="chip on" data-a="sstart">Start shift</button></div></div>` : ""}
  <div class="pn tw"><h4>Open shifts</h4>${
    os.length
      ? `<table class="t"><tr><th>Staff</th><th>Since</th><th>Float (KES)</th><th class="n">Bills</th><th class="n">Cash sales</th><th class="n">Paid out</th><th class="n">Expected</th><th>Counted cash</th><th></th></tr>${os
@@ -27898,6 +28678,196 @@ const V0 = {
   }
 };
 Object.assign(V, V0);
+// ---- Customers: credit customers, their terms, what they owe, statements and payments ----
+const CU_TYPES = ["Company", "Individual", "Government", "NGO"];
+const cuS = { f: "all", ed: null, pay: null, st: null };
+const cuPays = c => (FD_SETTINGS.custPays || []).filter(p => p.n === c.n);
+const cuUsed = c => (c.limit > 0 ? c.owes / c.limit : c.owes > 0 ? 1 : 0);
+const cuOver = c => c.limit > 0 && c.owes > c.limit;
+function cuState(c) {
+  if (c.off) return ["", "On hold"];
+  if (cuOver(c)) return ["bad", "Over limit"];
+  if (cuUsed(c) >= 0.8) return ["warn", "Near limit"];
+  return ["ok", "Active"];
+}
+const cuFilters = [
+  ["all", "All", () => true],
+  ["owing", "Owing", c => c.owes > 0],
+  ["over", "Over limit", cuOver],
+  ["hold", "On hold", c => c.off]
+];
+/** What was charged to this customer and what they've paid, oldest first, with a running balance. */
+function cuStatement(c) {
+  const ci = CU.indexOf(c),
+    rows = [
+      ...SALES.filter(s => s.slip && (s.slip.credits || []).some(x => x.ci === ci)).map(s => ({
+        at: new Date(s.at),
+        ref: s.no,
+        what: `Bill ${s.no}${s.label ? " · " + s.label : ""}`,
+        dr: s.slip.credits.filter(x => x.ci === ci).reduce((a, x) => a + x.amt, 0),
+        cr: 0
+      })),
+      ...cuPays(c).map(p => ({
+        at: new Date(p.at),
+        ref: p.ref || "",
+        what: "Payment received" + (p.by ? " · " + p.by : ""),
+        dr: 0,
+        cr: p.amt
+      }))
+    ].sort((a, b) => a.at - b.at);
+  // Whatever the bills on record don't explain was owed before bills recorded who it was for.
+  const open = c.owes - rows.reduce((a, r) => a + r.dr - r.cr, 0);
+  let bal = open;
+  rows.forEach(r => (r.bal = bal += r.dr - r.cr));
+  return { open, rows };
+}
+function cuStatementHTML(c) {
+  const S = cuStatement(c),
+    line = (l, v) => (v ? `<div><span>${l}</span><b>${esc(v)}</b></div>` : "");
+  return `<div class="cu-doc"><header><div><h2>${esc(FD_SETTINGS.name)}</h2><p>Customer statement</p></div><div class="cu-doc-d">${dateGB(ymdOf(new Date()))}</div></header>
+  <div class="cu-doc-m">${line("Customer", c.n)}${line("Contact", c.contact)}${line("Phone", c.phone)}${line("Email", c.email)}${line("KRA PIN", c.kra)}${line("Credit terms", c.terms ? c.terms + " days" : "")}</div>
+  <table><thead><tr><th>Date</th><th>Details</th><th>Reference</th><th class="n">Charged</th><th class="n">Paid</th><th class="n">Balance</th></tr></thead><tbody>
+  <tr><td></td><td>Brought forward</td><td></td><td></td><td></td><td class="n">${m2(S.open)}</td></tr>
+  ${S.rows.map(r => `<tr><td>${dateGB(ymdOf(r.at))}</td><td>${esc(r.what)}</td><td>${esc(r.ref)}</td><td class="n">${r.dr ? m2(r.dr) : ""}</td><td class="n">${r.cr ? m2(r.cr) : ""}</td><td class="n">${m2(r.bal)}</td></tr>`).join("")}
+  </tbody><tfoot><tr><td colspan="5">Balance due</td><td class="n">KES ${m2(c.owes)}</td></tr></tfoot></table></div>`;
+}
+function cuFormHTML() {
+  const c = cuS.ed.i < 0 ? {} : CU[cuS.ed.i],
+    f = (l, k, attrs = "", wide = "") =>
+      `<label class="${wide}">${l}<input id="cu_${k}" value="${esc(c[k] === undefined ? "" : c[k])}" ${attrs}></label>`;
+  return `<div class="modal show" id="cuEd" style="z-index:66"><div class="box itm cu-box"><header class="cu-h"><div><h3>${cuS.ed.i < 0 ? "New customer" : "Edit " + esc(c.n)}</h3><p>Credit customers can be charged from the POS and the Front Desk.</p></div><button class="mini" data-a="cu_edno">Close</button></header>
+  <section><h4>Customer</h4><div class="cu-g">${f("Customer or company name", "n", 'maxlength="80" autocomplete="off"', "cu-w")}<label>Type<select id="cu_type">${CU_TYPES.map(t => `<option ${t === (c.type || "Company") ? "selected" : ""}>${t}</option>`).join("")}</select></label>${f("Account code", "code", 'maxlength="20" placeholder="Your own reference"')}${f("KRA PIN", "kra", 'maxlength="11" style="text-transform:uppercase" placeholder="A000000000B"')}${f("ID or registration no", "idNo", 'maxlength="30"')}</div></section>
+  <section><h4>Contact</h4><div class="cu-g">${f("Contact person", "contact", 'maxlength="60"')}${f("Job title", "job", 'maxlength="40"')}${f("Phone", "phone", 'type="tel" maxlength="20" placeholder="07XX XXX XXX"')}${f("Other phone", "phone2", 'type="tel" maxlength="20"')}${f("Email", "email", 'type="email" maxlength="80"', "cu-w")}</div></section>
+  <section><h4>Address</h4><div class="cu-g">${f("Physical address", "addr", 'maxlength="120"', "cu-w")}${f("Town", "town", 'maxlength="40"')}${f("P.O. Box", "box", 'maxlength="30"')}</div></section>
+  <section><h4>Credit terms</h4><div class="cu-g">${f("Credit limit (KES)", "limit", 'type="number" min="0" step="any"')}${f("Days to pay", "terms", 'type="number" min="0" step="1" placeholder="e.g. 30"')}<label class="cu-c cu-w"><input id="cu_off" type="checkbox" ${c.off ? "checked" : ""}> On hold: can't be charged until this is cleared</label></div></section>
+  <section><h4>Notes</h4><label class="cu-n">Anything staff should know<textarea id="cu_notes" rows="2" maxlength="300">${esc(c.notes || "")}</textarea></label></section>
+  <footer class="cu-f"><button class="mini" data-a="cu_edno">Cancel</button><button class="chip on" data-a="cu_save">Save customer</button></footer></div></div>`;
+}
+function cuPayHTML() {
+  const c = CU[cuS.pay];
+  return `<div class="modal show" id="cuPay" style="z-index:66"><div class="box itm cu-box cu-small"><header class="cu-h"><div><h3>Receive payment</h3><p>${esc(c.n)} owes KES ${m2(c.owes)}</p></div><button class="mini" data-a="cu_payno">Close</button></header>
+  <div class="cu-g"><label>Amount (KES)<input id="cu_amt" type="number" min="0" step="any" value="${c.owes > 0 ? c.owes : ""}"></label><label>Receipt or reference no<input id="cu_ref" maxlength="30" autocomplete="off"></label></div>
+  <footer class="cu-f"><button class="mini" data-a="cu_payno">Cancel</button><button class="chip on" data-a="cu_paygo">Record payment</button></footer></div></div>`;
+}
+function cuStHTML() {
+  const c = CU[cuS.st];
+  return `<div class="modal show" id="cuSt" style="z-index:66"><div class="box itm cu-box"><header class="cu-h"><div><h3>Statement</h3><p>${esc(c.n)}</p></div><span><button class="mini" data-a="cu_stprint">Print</button> <button class="mini" data-a="cu_stno">Close</button></span></header>${cuStatementHTML(c)}</div></div>`;
+}
+function customersHTML() {
+  const edit = boCan("cust.manage"),
+    pay = boCan("cust.pay"),
+    month = ymdOf(new Date()).slice(0, 7),
+    got = (FD_SETTINGS.custPays || [])
+      .filter(p => ymdOf(new Date(p.at)).slice(0, 7) === month)
+      .reduce((a, p) => a + p.amt, 0),
+    pick = cuFilters.find(x => x[0] === cuS.f) || cuFilters[0],
+    L = CU.map((c, i) => [c, i]).filter(([c]) => pick[2](c));
+  return `<div class="stm-tiles">${msTile("Customers", CU.length)}${msTile("Owed to you", "KES " + m2(sum(CU, c => c.owes)))}${msTile("Over their limit", CU.filter(cuOver).length, "", CU.some(cuOver) ? "warn" : "")}${msTile("Received this month", "KES " + m2(got))}</div>
+  <div class="pn cu-list"><div class="cu-bar"><label class="find"><input id="cuQ" type="search" placeholder="Find a name, phone, PIN or code" autocomplete="off" aria-label="Find a customer"></label><span class="pr-pills">${cuFilters.map(([k, l, t]) => `<button class="pr-pill ${k === pick[0] ? "on" : ""}" data-a="cu_f" data-k="${k}">${l} <b>${CU.filter(t).length}</b></button>`).join("")}</span>${edit ? '<button class="chip on cu-new" data-a="cu_new">New customer</button>' : ""}</div>
+  ${
+    L.length
+      ? `<div class="tw"><table class="t cu-t"><thead><tr><th>Customer</th><th>Contact</th><th>Terms</th><th class="n">Limit</th><th class="n">Owes</th><th>Credit used</th><th>Status</th><th></th></tr></thead><tbody>${L.map(
+          ([c, i]) => {
+            const st = cuState(c),
+              used = Math.round(cuUsed(c) * 100);
+            return `<tr data-cu-row="${esc([c.n, c.contact, c.phone, c.phone2, c.email, c.kra, c.code, c.town].filter(Boolean).join(" ").toLowerCase())}"><td><span class="ws-a">${esc((c.n || "?")[0])}</span> <span class="cu-nm"><b>${esc(c.n)}</b><small>${esc(c.type || "Company")}${c.code ? " · " + esc(c.code) : ""}${c.kra ? " · " + esc(c.kra) : ""}</small></span></td><td><span class="cu-nm">${esc(c.contact || "-")}<small>${esc(c.phone || "")}</small></span></td><td>${c.terms ? esc(c.terms) + " days" : "-"}</td><td class="n">${m2(c.limit)}</td><td class="n"><b>${m2(c.owes)}</b></td><td><span class="cu-m ${cuOver(c) ? "over" : ""}" role="img" aria-label="${used}% of the limit used"><i style="width:${Math.min(100, used)}%"></i></span><small class="cu-pc">${used}%</small></td><td><span class="tag ${st[0]}">${st[1]}</span></td><td class="n cu-a"><button class="mini" data-a="cu_st" data-i="${i}">Statement</button>${pay ? `<button class="mini" data-a="cu_pay" data-i="${i}" ${c.owes > 0 ? "" : "disabled"}>Receive</button>` : ""}${edit ? `<button class="mini" data-a="cu_edit" data-i="${i}">Edit</button>` : ""}</td></tr>`;
+          }
+        ).join("")}</tbody></table></div>`
+      : '<div class="empty">No customers here.</div>'
+  }</div>${cuS.ed ? cuFormHTML() : ""}${cuS.pay !== null ? cuPayHTML() : ""}${cuS.st !== null ? cuStHTML() : ""}`;
+}
+function cuSave() {
+  const v = k => $("#cu_" + k).value.trim(),
+    n = v("n"),
+    limit = parseFloat(v("limit") || 0),
+    terms = v("terms") === "" ? "" : parseInt(v("terms"), 10),
+    kra = v("kra").toUpperCase(),
+    email = v("email"),
+    me = cuS.ed.i < 0 ? null : CU[cuS.ed.i];
+  if (!n) return toast("Enter the customer's name.");
+  if (CU.some(c => c !== me && c.n.toLowerCase() === n.toLowerCase()))
+    return toast(`${n} is already a customer.`);
+  if (!(limit >= 0)) return toast("Enter a credit limit of 0 or more.");
+  if (terms !== "" && !(terms >= 0)) return toast("Enter the days to pay as a number.");
+  if (kra && !/^[A-Z][0-9]{9}[A-Z]$/.test(kra))
+    return toast("A KRA PIN has a letter, nine digits and a letter.");
+  if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))
+    return toast("That email address doesn't look right.");
+  const rec = {
+    n,
+    limit,
+    terms,
+    kra,
+    email,
+    off: $("#cu_off").checked,
+    type: v("type"),
+    notes: v("notes")
+  };
+  ["code", "idNo", "contact", "job", "phone", "phone2", "addr", "town", "box"].forEach(
+    k => (rec[k] = v(k))
+  );
+  if (me) {
+    // Payments are filed under the name, so they follow it.
+    if (me.n !== n)
+      (FD_SETTINGS.custPays || []).forEach(p => {
+        if (p.n === me.n) p.n = n;
+      });
+    Object.assign(me, rec);
+  } else CU.push({ ...rec, owes: 0, since: new Date().toISOString() });
+  auditAdd("Customers", `${me ? "Updated" : "Added"} customer ${n}`);
+  cuS.ed = null;
+  bosave();
+  toast(`${n} saved.`);
+  all();
+}
+function cuPayGo() {
+  const c = CU[cuS.pay],
+    q = parseFloat($("#cu_amt").value);
+  if (!(q > 0)) return toast("Enter an amount.");
+  if (q > c.owes + 0.009) return toast(`${c.n} only owes KES ${m2(c.owes)}.`);
+  c.owes = Math.max(0, c.owes - q);
+  (FD_SETTINGS.custPays = FD_SETTINGS.custPays || []).push({
+    at: new Date().toISOString(),
+    n: c.n,
+    amt: q,
+    ref: $("#cu_ref").value.trim(),
+    by: boUser.n
+  });
+  auditAdd("Customers", `Payment of KES ${m2(q)} received from ${c.n}`);
+  cuS.pay = null;
+  bosave();
+  toast("Payment recorded.");
+  all();
+}
+function cuAct(a, b) {
+  const i = +b.dataset.i;
+  if (a === "cu_f") cuS.f = b.dataset.k;
+  else if (a === "cu_new" || a === "cu_edit") {
+    if (!boCan("cust.manage")) return boDenied();
+    cuS.ed = { i: a === "cu_new" ? -1 : i };
+  } else if (a === "cu_edno") cuS.ed = null;
+  else if (a === "cu_save") {
+    if (!boCan("cust.manage")) return boDenied();
+    return cuSave();
+  } else if (a === "cu_pay") {
+    if (!boCan("cust.pay")) return boDenied();
+    cuS.pay = i;
+  } else if (a === "cu_payno") cuS.pay = null;
+  else if (a === "cu_paygo") {
+    if (!boCan("cust.pay")) return boDenied();
+    return cuPayGo();
+  } else if (a === "cu_st") cuS.st = i;
+  else if (a === "cu_stno") cuS.st = null;
+  else if (a === "cu_stprint") return printHTML(cuStatementHTML(CU[cuS.st]), false, "A4");
+  all();
+}
+$("#vSub").addEventListener("input", e => {
+  if (e.target.id !== "cuQ") return;
+  const q = e.target.value.trim().toLowerCase();
+  document.querySelectorAll("#vSub [data-cu-row]").forEach(tr => {
+    tr.hidden = !!q && !tr.dataset.cuRow.includes(q);
+  });
+});
 // ---- inventory: stores, item setup, receive, purchase orders, requisitions, issue, damage, stock master ----
 // Stores (STORES) hold purchased stock. Selling points (ALLD) get stock from a store by requisition or issue.
 let invT = "stores",
@@ -32479,12 +33449,12 @@ function itemSpDone(k, sp, F, units, price, msg) {
 /** The POS shows the new selling points / products without signing out. */
 function spRefreshPos() {
   if (user) {
-    DEPTS = user.d.filter(posSells);
-    if (!DEPTS.length) DEPTS = [ALLD.filter(posSells)[0] || ALLD[0]];
+    DEPTS = deptsFor(user);
     if (dept !== ALLP && !DEPTS.includes(dept)) dept = DEPTS[0];
     if (dept === ALLP && DEPTS.length < 2) dept = DEPTS[0];
   }
   try {
+    machineLabel();
     drawDepts();
     renderCats();
     drawGrid();
@@ -34381,8 +35351,15 @@ V.settings = () => {
   <div class="fr" style="align-items:end"><label>VAT (%)<input data-iv="hs.taxB" inputmode="decimal" value="${esc(invF.hs.taxB)}"></label><label>Tax C (%)<input data-iv="hs.taxC" inputmode="decimal" value="${esc(invF.hs.taxC)}"></label><button class="chip on" style="flex:none" data-a="hs_tax">Save tax rates</button></div></div>`,
     paymodes: payModesHTML,
     voids: voidReasonsHTML,
-    cats: categoriesHTML,
     printers: () => machinesHTML() + printerSetupHTML() + printersHTML(),
+    modules: () => {
+      if (!mdlOpen) {
+        setTimeout(() => $("#modPw") && $("#modPw").focus(), 30);
+        return `<div class="pn"><h4>Modules</h4><div class="stk">Enter the modules password to open this page.</div><div class="fr" style="align-items:end"><label>Password<input id="modPw" type="password" autocomplete="new-password" aria-label="Modules password"></label><button class="chip on" style="flex:none" data-a="hs_modgo">Open modules</button></div></div>`;
+      }
+      const on = fdOn();
+      return `<div class="pn"><div class="fr" style="align-items:center;justify-content:space-between"><h4 style="margin:0">Modules</h4><button class="mini" style="flex:none" data-a="hs_modlock">Lock</button></div><div class="stk">Switch off what this business doesn't use. Nothing is deleted: switch it back on and everything returns as it was.</div><div class="tw"><table class="t"><tr><td><b>Front Desk and room reports</b><small class="pr-code">Rooms, bookings, check-in, housekeeping, guest bills, Room reports and Post to room. Switch it off for a business with no rooms.</small></td><td><span class="tag ${on ? "ok" : ""}">${on ? "On" : "Off"}</span></td><td class="n"><button class="pv-sw ${on ? "on" : ""}" data-a="hs_fdtog" role="switch" aria-checked="${on}" aria-label="Front Desk and room reports"><i></i></button></td></tr></table></div></div>`;
+    },
     backup: backupHTML,
     network: networkHTML
   };
@@ -34399,7 +35376,74 @@ function taxSave() {
   toast("Tax rates saved. New bills will use them.");
   all();
 }
+// ---- The Modules page opens with its own password, whoever is signed in. It locks again on leaving. ----
+// Only hashes are kept here: the browser's own, and the fallback H uses where the browser has none.
+const MOD_PASS = [
+  "e3e02f8e72cb08c8a232b09650d2c79e16456725bb2c609dbce961e4b0b516f4",
+  "x3766526800"
+];
+let mdlOpen = false,
+  mdlFails = 0,
+  mdlLocked = 0;
+const mdlLock = () => (mdlOpen = false);
+async function mdlUnlock() {
+  const el = $("#modPw");
+  if (!el) return;
+  if (Date.now() < mdlLocked) return toast("Too many tries. Wait 30 seconds.");
+  const typed = el.value;
+  el.value = "";
+  if (typed && MOD_PASS.includes(await H("module|" + typed))) {
+    mdlFails = 0;
+    mdlOpen = true;
+    auditAdd("Settings", "Modules page opened");
+    return all();
+  }
+  if (++mdlFails >= 5) {
+    mdlLocked = Date.now() + 3e4;
+    mdlFails = 0;
+  }
+  auditAdd("Failed sign-in", "Wrong modules password", { pri: "high" });
+  toast("That is not the modules password.");
+  el.focus();
+}
+$("#vSub").addEventListener("keydown", e => {
+  if (e.target.id !== "modPw" || e.key !== "Enter") return;
+  e.preventDefault();
+  mdlUnlock();
+});
+/** Guests still in the house, booked or owing would be left with no way to reach them. */
+function fdModuleToggle() {
+  if (!mdlOpen) return;
+  if (!boCan("set.manage")) return boDenied();
+  if (fdOn()) {
+    const inn = RESERVATIONS.filter(r => r.status === "inhouse").length,
+      due = RESERVATIONS.filter(r => r.status === "reserved").length,
+      owe = RESERVATIONS.filter(r => r.status === "out" && folioOf(r).bal > 0.009).length,
+      why = [
+        inn && plural(inn, "guest") + " in the house",
+        due && plural(due, "booking") + " still open",
+        owe && plural(owe, "checked-out guest") + " still owing"
+      ].filter(Boolean);
+    if (why.length) return toast(`The Front Desk can't be switched off yet: ${why.join(", ")}.`);
+  }
+  FD_SETTINGS.frontDeskOff = fdOn();
+  const on = fdOn();
+  auditAdd("Settings", `Front Desk and room reports switched ${on ? "on" : "off"}`);
+  bosave();
+  fdModuleApply();
+  applyBoRights();
+  go("Settings");
+  mdlOpen = true; // going back to Settings locks the page; this person just used it
+  all();
+  toast(on ? "Front Desk and room reports are on." : "Front Desk and room reports are off.");
+}
 async function settingsAct(a, b) {
+  if (a === "modgo") return mdlUnlock();
+  if (a === "modlock") {
+    mdlLock();
+    return all();
+  }
+  if (a === "fdtog") return fdModuleToggle();
   if (a === "tax") return taxSave();
   if (["tab", "logorm", "payadd", "paydel", "daytime"].includes(a)) return generalAct(a, b);
   if (a === "test") {
@@ -34529,12 +35573,20 @@ function psuCard(title, note, printers, P = psuPoints()) {
 function machinesHTML() {
   const me = MACHINE.name();
   return `<div class="pn"><h4>Machines</h4><div class="stk">This computer is registered as <b>${esc(me)}</b>.</div>
-  <div class="mac-list">${MACHINE.list()
+  <div class="stk">Tick what each computer sells. It then sells only there, and only people set up for those sale points can sign in on it. With nothing ticked it sells every sale point the person has.</div>
+  <div class="tw"><table class="t mac-t"><thead><tr><th>Machine</th><th>Sells at</th><th></th></tr></thead><tbody>${MACHINE.list()
     .map(
       (m, i) =>
-        `<span class="mac-chip ${m.n === me ? "me" : ""}">${esc(m.n)}${m.n === me ? " <small>This computer</small>" : `<button class="mini" data-a="psu_use" data-i="${i}">Use here</button><button class="mini" data-a="psu_mdel" data-i="${i}" aria-label="Delete ${esc(m.n)}">Delete</button>`}</span>`
+        `<tr class="${m.n === me ? "me" : ""}"><th scope="row">${esc(m.n)}${m.n === me ? " <small>This computer</small>" : ""}</th><td><div class="mac-sps">${psuPoints()
+          .map(
+            p =>
+              `<label><input type="checkbox" data-a="psu_msp" data-i="${i}" data-pt="${esc(p)}" ${(m.sp || []).includes(p) ? "checked" : ""}> ${esc(p)}</label>`
+          )
+          .join(
+            ""
+          )}</div></td><td class="mac-acts">${m.n === me ? "" : `<button class="mini" data-a="psu_use" data-i="${i}">Use here</button><button class="mini" data-a="psu_mdel" data-i="${i}" aria-label="Delete ${esc(m.n)}">Delete</button>`}</td></tr>`
     )
-    .join("")}</div>
+    .join("")}</tbody></table></div>
   <div class="fr" style="align-items:end"><label>Machine name<input id="psuM" maxlength="30" placeholder="e.g. Waiter5" autocomplete="off"></label><button class="chip on" style="flex:none" data-a="psu_madd">Add machine</button></div></div>`;
 }
 function printerSetupHTML() {
@@ -34656,9 +35708,19 @@ function psuAct(a, b) {
   }
   const m = M[+b.dataset.i];
   if (!m) return;
+  if (a === "psu_msp") {
+    const on = new Set(m.sp || []);
+    b.checked ? on.add(b.dataset.pt) : on.delete(b.dataset.pt);
+    m.sp = psuPoints().filter(p => on.has(p));
+    spRefreshPos();
+    const where = m.sp.length ? m.sp.join(", ") : "every sale point";
+    auditAdd("Settings", `${m.n} now sells at ${where}`);
+    return done(`${m.n} sells at ${where}.`);
+  }
   if (a === "psu_use") {
     MACHINE.use(m.n);
     psuD = null;
+    spRefreshPos();
     return done(`This computer is now ${m.n}.`);
   }
   if (a === "psu_mdel") {
@@ -34675,9 +35737,9 @@ const SET_TABS = [
   ["paymodes", "Payment modes"],
   ["voids", "Void reasons"],
   ["pos", "POS options"],
-  ["cats", "Categories"],
   ["tax", "Tax"],
   ["printers", "Printers"],
+  ["modules", "Modules"],
   ["backup", "Backup and restore"],
   ["network", "Network"]
 ];
@@ -34845,7 +35907,11 @@ const OPT_POS = [
   ["autoLogout", "Sign the waiter out after each order"],
   ["chefMsg", "Allow a kitchen message on orders"],
   ["tips", "Show the tip column when settling"],
-  ["boWaiterShift", "Back Office can start waiter shifts", "Waiters can always start their own."]
+  [
+    "boWaiterShift",
+    "Back Office can start waiter shifts",
+    "Their shift also opens by itself when they sign in."
+  ]
 ];
 const optsHTML = (title, note, L) =>
   `<div class="pn"><h4>${title}</h4><div class="stk">${note}</div><div class="set-opts">${L.map(
@@ -34882,6 +35948,7 @@ function generalAct(a, b) {
     return all();
   }
   if (a === "tab") {
+    mdlLock();
     setTab = b.dataset.k;
     return all();
   }
@@ -36725,10 +37792,12 @@ function payModesHTML() {
       locked
         ? '<span class="tag">Always on</span>'
         : `<button class="pv-sw ${on ? "on" : ""}" data-a="pv_pmtog" data-k="${esc(k)}" role="switch" aria-checked="${on}" aria-label="Show on the POS"><i></i></button>`,
-    built = PAY_BUILT.map(
-      ([k, n, s]) =>
-        `<tr><td><b>${esc(n)}</b><small class="pr-code">${esc(s)}</small></td><td><span class="tag">Built in</span></td><td class="n">${sw(k, payModeOn(k), k === "cash")}</td><td></td></tr>`
-    ).join(""),
+    built = PAY_BUILT.filter(([k]) => k !== "room" || fdOn())
+      .map(
+        ([k, n, s]) =>
+          `<tr><td><b>${esc(n)}</b><small class="pr-code">${esc(s)}</small></td><td><span class="tag">Built in</span></td><td class="n">${sw(k, payModeOn(k), k === "cash")}</td><td></td></tr>`
+      )
+      .join(""),
     mine = payMine()
       .map(c =>
         pvEdit && pvEdit.pm === c.k
@@ -37872,7 +38941,12 @@ function hrDayTime(e, day) {
           .filter(s => s.user === e.user && ymdOf(new Date(s.openedAt)) === day)
           .map(s => ({
             in: new Date(s.openedAt).toTimeString().slice(0, 5),
-            out: s.closedAt ? new Date(s.closedAt).toTimeString().slice(0, 5) : "",
+            // A shift the day closed for them ended when they last signed out.
+            out: s.closedAt
+              ? new Date(s.closedBy === "Day end" && s.lastOut ? s.lastOut : s.closedAt)
+                  .toTimeString()
+                  .slice(0, 5)
+              : "",
             src: "POS shift"
           }))
       : [],
@@ -38502,7 +39576,7 @@ function hrEmpModal() {
   <header class="itm-h"><div><h3>${E.id ? `Edit ${esc(E.name)}` : "New employee"}</h3><p>Only the name and basic pay are needed to start.</p></div><button class="itm-x" data-a="hr_empno" aria-label="Close">✕</button></header>
   <div class="itm-b">
   <section class="itm-s"><h4>Personal</h4><div class="itm-g">${f("Full name", "name", 'maxlength="60" autocomplete="off"')}${f("ID or passport no", "idNo", 'maxlength="20"')}${f("Phone", "phone", 'maxlength="20"')}${f("Email", "email", 'type="email" maxlength="80"')}${f("Next of kin", "kin", 'maxlength="80" placeholder="Name and phone"')}</div></section>
-  <section class="itm-s"><h4>Job</h4><div class="itm-g">${f("Job title", "job", 'maxlength="40" placeholder="e.g. Waiter"')}<label>Department<input data-he="dept" list="hrDepts" maxlength="30" value="${esc(E.dept)}"><datalist id="hrDepts">${[...new Set([...ALLD, ...STORES, "Front Office", "Housekeeping", "Administration"])].map(d => `<option value="${esc(d)}">`).join("")}</datalist></label><label>Employment<select data-he="type">${hrOpts(HR_TYPES, E.type)}</select></label>${f("Date started", "start", 'type="date"')}${f("Contract ends", "end", 'type="date"')}${f("Clock-in PIN", "pin", 'inputmode="numeric" maxlength="6" autocomplete="off" placeholder="If no POS sign-in"')}<label>POS sign-in<select data-he="user"><option value="">None</option>${users.map(u => `<option ${u === E.user ? "selected" : ""}>${esc(u)}</option>`).join("")}</select></label>${E.id ? `<label>Status<select data-he="status">${hrOpts(["Active", "Left"], E.status)}</select></label>` : ""}</div><div class="itm-hint">Link the POS sign-in so that shifts count as attendance and bills can be charged to this person.</div></section>
+  <section class="itm-s"><h4>Job</h4><div class="itm-g">${f("Job title", "job", 'maxlength="40" placeholder="e.g. Waiter"')}<label>Department<input data-he="dept" list="hrDepts" maxlength="30" value="${esc(E.dept)}"><datalist id="hrDepts">${[...new Set([...ALLD, ...STORES, "Front Office", "Housekeeping", "Administration"])].map(d => `<option value="${esc(d)}">`).join("")}</datalist></label><label>Employment<select data-he="type">${hrOpts(HR_TYPES, E.type)}</select></label>${f("Date started", "start", 'type="date"')}${f("Contract ends", "end", 'type="date"')}<label>POS sign-in<select data-he="user"><option value="">None</option>${users.map(u => `<option ${u === E.user ? "selected" : ""}>${esc(u)}</option>`).join("")}</select></label>${E.id ? `<label>Status<select data-he="status">${hrOpts(["Active", "Left"], E.status)}</select></label>` : ""}</div><div class="itm-hint">Link the POS sign-in so that shifts count as attendance and bills can be charged to this person.</div></section>
   <section class="itm-s"><h4>Monthly pay (KES)</h4><div class="itm-g">${money("Basic pay", "basic")}${money("House allowance", "house")}${money("Transport allowance", "transport")}${money("Other allowances", "otherAllow")}${money("Day rate (casual staff)", "dayRate")}${f("Service charge points", "svcPts", 'type="number" min="0" step="any" placeholder="1"')}${f("Annual leave days", "leaveYear", `type="number" min="0" step="any" placeholder="${hrR().annualLeave}"`)}</div><div class="hr-est" id="hrEst">${hrEstText(E)}</div></section>
   <section class="itm-s"><h4>How they are paid</h4><div class="itm-g"><label>Paid by<select data-he="via">${hrOpts(HR_VIA, E.via)}</select></label>${f("Bank", "bank", 'maxlength="40"')}${f("Branch", "branch", 'maxlength="40"')}${f("Account no", "acct", 'maxlength="30"')}${f("M-Pesa number", "mpesa", 'maxlength="15" placeholder="07…"')}</div></section>
   <section class="itm-s"><h4>Statutory numbers</h4><div class="itm-g">${f("KRA PIN", "kra", 'maxlength="11" style="text-transform:uppercase"')}${f("NSSF no", "nssfNo", 'maxlength="20"')}${f("SHA no", "shaNo", 'maxlength="20"')}</div></section>
@@ -39052,12 +40126,6 @@ function hrAct(a, b) {
     if (!E.name.trim()) return toast("Enter the employee's name.");
     if (E.type === "Casual" ? !(+E.dayRate > 0) : !(+E.basic >= 0) || E.basic === "")
       return toast(E.type === "Casual" ? "Enter the day rate." : "Enter the basic pay.");
-    if (
-      E.pin &&
-      (USERS.some(u => u.pin === E.pin && u.n !== E.user) ||
-        H.emps.some(x => x.id !== E.id && x.pin === E.pin))
-    )
-      return toast("That clock-in PIN is already in use.");
     if (E.idNo && H.emps.some(x => x.id !== E.id && x.idNo === E.idNo))
       return toast(`ID ${E.idNo} is already on another employee.`);
     if (E.end && E.start && E.end < E.start)
@@ -39080,6 +40148,10 @@ function hrAct(a, b) {
       day = ymdOf(new Date()),
       now = new Date().toTimeString().slice(0, 5),
       open = H.time.find(t => t.emp === e.id && !t.out);
+    if (!open && shiftRole(USERS.find(u => u.n === e.user)))
+      return toast(
+        `${e.name}'s hours come from their POS shift. Use Add a missed entry to correct them.`
+      );
     if (open) open.out = now;
     else H.time.push({ id: nid("T"), emp: e.id, date: day, in: now, out: "", by: boUser.n });
     bosave();
@@ -41115,6 +42187,7 @@ function lanApply(p) {
   const str = JSON.stringify(merged);
   localStorage.setItem(LS, str);
   boLoad(JSON.parse(str), true);
+  fdModuleApply();
   LAN.lastRaw = str;
   LAN.base = p.rev;
   lanSaveBase();
@@ -43534,7 +44607,11 @@ V.wait = () => {
     }).join("") || '<div class="empty">No POS staff yet.</div>'
   }</div>
  <div class="pn ws-form"><div class="ws-lh"><h4>${F.i < 0 ? "Create POS staff" : "Edit " + esc(F.n)}</h4><span class="ws-id">${esc(id)}</span></div>
- <div class="ws-g"><label>Role<select data-wsr>${POS_ROLES.map(r => `<option ${r === F.role ? "selected" : ""}>${r}</option>`).join("")}</select></label>${f("User name", "n", 'placeholder="First Last" autocomplete="off"')}${f("Pass code", "pin", 'inputmode="numeric" placeholder="4 to 6 digits" autocomplete="off"')}${f("Card no", "card", 'placeholder="Optional" autocomplete="off"')}${f("Sales commission (%)", "comm", 'inputmode="decimal" placeholder="Report rate"')}${f("Bill copies", "copies", 'inputmode="numeric"')}${always ? "" : f("Maximum pending bills", "maxPend", 'inputmode="numeric" title="0 means no limit"') + f("Maximum discount (%)", "maxDisc", 'inputmode="decimal" placeholder="No limit"')}</div>
+ <div class="ws-g"><label>Role<select data-wsr>${POS_ROLES.map(
+   r => `<option ${r === F.role ? "selected" : ""}>${r}</option>`
+ ).join(
+   ""
+ )}</select></label>${f("User name", "n", 'placeholder="First Last" autocomplete="off"')}${f("Pass code", "pin", 'inputmode="numeric" placeholder="4 to 6 digits" autocomplete="off"')}${f("Card no", "card", 'placeholder="Optional" autocomplete="off"')}${f("Sales commission (%)", "comm", 'inputmode="decimal" placeholder="Report rate"')}${f("Bill copies", "copies", 'inputmode="numeric"')}${always ? "" : f("Maximum pending bills", "maxPend", 'inputmode="numeric" title="0 means no limit"') + f("Maximum discount (%)", "maxDisc", 'inputmode="decimal" placeholder="No limit"')}</div>
  ${always ? "" : `<div class="ws-o"><label class="ws-c"><input type="checkbox" data-wsc="allSP" ${F.allSP ? "checked" : ""}> View bills from all sale points</label><label class="ws-c"><input type="checkbox" data-wsc="restrict" ${F.restrict ? "checked" : ""}> Restrict sale point access</label></div>`}
  ${
    !always && F.restrict
@@ -43550,7 +44627,14 @@ V.wait = () => {
    always
      ? `<div class="ws-always">${F.role}s can always do everything on the POS, so there are no rights to set.</div>`
      : `<div class="ws-lh ws-rh"><h4>What this ${who} may do</h4><span><button class="mini" data-a="ws_all">Tick all</button> <button class="mini" data-a="ws_none">Clear all</button></span></div>
- ${WAITER_RIGHTS.map(([g, R]) => `<div class="ws-h">${g}</div><div class="ws-grid">${R.map(([k, l, h]) => wsTile(k, l, h)).join("")}</div>`).join("")}
+ ${WAITER_RIGHTS.map(
+   ([g, R]) =>
+     `<div class="ws-h">${g}</div><div class="ws-grid">${R.filter(
+       ([k]) => k !== "postRoom" || fdOn()
+     )
+       .map(([k, l, h]) => wsTile(k, l, h))
+       .join("")}</div>`
+ ).join("")}
  <div class="ws-h">Not active yet <small>Saved with the person, but the POS doesn't use these until those features are built</small></div><div class="ws-grid">${WAITER_RIGHTS_LATER.map(([k, l]) => wsTile(k, l, "", 1)).join("")}</div>`
  }
  <label class="ws-foot">Bill footer<textarea data-ws="footer" rows="2" placeholder="Printed on this person's guest bills">${esc(F.footer)}</textarea></label>
@@ -43670,6 +44754,7 @@ const urCols = [
 const urYes = r => (roleHas(urRole, r.k) ? "YES" : "NO");
 const urCell = (r, c) => (c === "yes" ? urYes(r) : String(r[c]));
 const urShown = r =>
+  (fdOn() || r.m !== "FRONTOFFICE") &&
   urCols.every(([c]) => {
     const w = (urF[c] || "").trim().toLowerCase();
     return !w || urCell(r, c).toLowerCase().includes(w);
@@ -43677,18 +44762,23 @@ const urShown = r =>
 const roleCount = role => ADM.filter(a => (a.role || SUPER) === role).length;
 const roleGranted = role => BO_RIGHTS.filter(r => roleHas(role, r.k)).length;
 function urUsersHTML() {
-  return `<div class="pn"><h4>Create a back office user</h4><div class="ur-new"><label>Full name<input id="mn" autocomplete="off" placeholder="First Last"></label><label>Username<input id="mu" autocomplete="off" placeholder="At least 3 letters or digits"></label><label>Password<input id="mp" type="password" autocomplete="new-password" placeholder="At least 6 characters"></label><label>Role<select id="mr"><option value="">Choose a role</option>${BO_ROLES.map(r => `<option>${r}</option>`).join("")}<option>${SUPER}</option></select></label><button class="chip on" data-a="ur_add">Create user</button></div></div>
+  return `<div class="pn"><h4>Create a back office user</h4><div class="ur-new"><label>Full name<input id="mn" autocomplete="off" placeholder="First Last"></label><label>Username<input id="mu" autocomplete="off" placeholder="At least 3 letters or digits"></label><label>Password<input id="mp" type="password" autocomplete="new-password" placeholder="At least 6 characters"></label><label>Role<select id="mr"><option value="">Choose a role</option>${boRoles()
+    .map(r => `<option>${r}</option>`)
+    .join(
+      ""
+    )}<option>${SUPER}</option></select></label><button class="chip on" data-a="ur_add">Create user</button></div></div>
  <div class="pn tw"><h4>Back office users (${ADM.length})</h4><table class="t ur-t"><tr><th>Name</th><th>Username</th><th>Role</th><th>Status</th><th>New password</th><th></th></tr>${ADM.map(
    (a, i) => {
      const me = boUser && a.u === boUser.u;
-     return `<tr class="${a.off ? "off" : ""}"><td><span class="ws-a">${esc(a.n[0])}</span> <b>${esc(a.n)}</b>${me ? ' <small class="ur-me">You</small>' : ""}</td><td>${esc(a.u)}</td><td><select data-ura="${i}" ${me ? "disabled" : ""}>${[...BO_ROLES, SUPER].map(r => `<option ${(a.role || SUPER) === r ? "selected" : ""}>${r}</option>`).join("")}</select></td><td><button class="mini ur-st ${a.off ? "no" : "yes"}" data-a="ur_off" data-i="${i}" ${me ? "disabled" : ""}>${a.off ? "Disabled" : "Active"}</button></td><td><span class="ur-pw"><input type="password" id="np_${i}" autocomplete="new-password" placeholder="New password"><button class="mini" data-a="ur_pw" data-i="${i}">Change</button></span></td><td>${me ? "" : `<button class="mini" data-a="ur_del" data-i="${i}">Delete</button>`}</td></tr>`;
+     return `<tr class="${a.off ? "off" : ""}"><td><span class="ws-a">${esc(a.n[0])}</span> <b>${esc(a.n)}</b>${me ? ' <small class="ur-me">You</small>' : ""}</td><td>${esc(a.u)}</td><td><select data-ura="${i}" ${me ? "disabled" : ""}>${[...boRoles(), SUPER].map(r => `<option ${(a.role || SUPER) === r ? "selected" : ""}>${r}</option>`).join("")}</select></td><td><button class="mini ur-st ${a.off ? "no" : "yes"}" data-a="ur_off" data-i="${i}" ${me ? "disabled" : ""}>${a.off ? "Disabled" : "Active"}</button></td><td><span class="ur-pw"><input type="password" id="np_${i}" autocomplete="new-password" placeholder="New password"><button class="mini" data-a="ur_pw" data-i="${i}">Change</button></span></td><td>${me ? "" : `<button class="mini" data-a="ur_del" data-i="${i}">Delete</button>`}</td></tr>`;
    }
  ).join("")}</table></div>`;
 }
 function urRightsHTML() {
   const sup = urRole === SUPER,
     S = BO_RIGHTS.filter(urShown).length;
-  return `<div class="pn"><div class="ur-top"><label>User group<select data-urg>${[...BO_ROLES, SUPER].map(r => `<option ${r === urRole ? "selected" : ""}>${r}</option>`).join("")}</select></label><div class="ur-sum"><b id="urCount">${roleGranted(urRole)}</b> of ${BO_RIGHTS.length} rights granted · ${plural(roleCount(urRole), "user")}</div>${sup ? '<span class="ur-note">Super Admin always has every right.</span>' : `<span class="ur-acts"><button class="mini" data-a="ur_bulk" data-v="1">Grant all shown</button><button class="mini" data-a="ur_bulk" data-v="0">Revoke all shown</button><button class="mini" data-a="ur_reset">Reset to standard</button></span>`}</div>
+  return `<div class="pn"><div class="ur-top"><label>User group<select data-urg>${[...boRoles(), SUPER].map(r => `<option ${r === urRole ? "selected" : ""}>${r}</option>`).join("")}</select></label><div class="ur-sum"><b id="urCount">${roleGranted(urRole)}</b> of ${BO_RIGHTS.length} rights granted · ${plural(roleCount(urRole), "user")}</div>${sup ? '<span class="ur-note">Super Admin always has every right.</span>' : `<span class="ur-acts"><button class="mini" data-a="ur_bulk" data-v="1">Grant all shown</button><button class="mini" data-a="ur_bulk" data-v="0">Revoke all shown</button><button class="mini" data-a="ur_reset">${roleCustom().includes(urRole) ? "Clear all rights" : "Reset to standard"}</button>${roleCustom().includes(urRole) ? '<button class="mini" data-a="ur_rdel">Delete this role</button>' : ""}</span>`}</div>
+ <div class="ur-newrole"><label>Add a new role<input id="urNew" maxlength="30" autocomplete="off" placeholder="e.g. Night Auditor"></label><button class="chip on" data-a="ur_radd">Add role</button><span class="stk">A new role starts with no rights. Grant them below.</span></div>
  <div class="ur-wrap"><table class="ur-m"><thead><tr>${urCols.map(([c, l]) => `<th class="${c === "yes" ? "c" : ""}">${l}</th>`).join("")}</tr><tr class="ur-f">${urCols.map(([c, l]) => `<td><input data-urf="${c}" value="${esc(urF[c] || "")}" placeholder="Filter" aria-label="Filter ${l}"></td>`).join("")}</tr></thead><tbody>${BO_RIGHTS.map(
    r => {
      const y = roleHas(urRole, r.k);
@@ -43759,6 +44849,31 @@ async function urAct(a, b) {
     delete ROLE_OVER[urRole];
     bosave();
     toast(`${urRole} is back to the standard rights.`);
+    return all();
+  }
+  if (a === "ur_radd") {
+    const n = $("#urNew").value.trim().replace(/\s+/g, " ");
+    if (!/^[A-Za-z0-9 &._-]{2,30}$/.test(n))
+      return toast("Use 2 to 30 letters or numbers for the role name.");
+    if ([...boRoles(), SUPER].some(r => r.toLowerCase() === n.toLowerCase()))
+      return toast(`${n} is already a role.`);
+    roleCustom().push(n);
+    urRole = n;
+    auditAdd("Users", `Role ${n} added`);
+    bosave();
+    toast(`${n} added. Now grant its rights.`);
+    return all();
+  }
+  if (a === "ur_rdel") {
+    if (!roleCustom().includes(urRole)) return;
+    if (ADM.some(x => x.role === urRole))
+      return toast(`Move the users on ${urRole} to another role first.`);
+    roleCustom().splice(roleCustom().indexOf(urRole), 1);
+    delete ROLE_OVER[urRole];
+    auditAdd("Users", `Role ${urRole} deleted`);
+    urRole = BO_ROLES[0];
+    bosave();
+    toast("Role deleted.");
     return all();
   }
   if (a === "ur_add") {
@@ -43982,7 +45097,7 @@ function render() {
   $("#vSub").innerHTML =
     (["inv", "rec", "pur", "vendors", "acct", "hr"].includes(view)
       ? ""
-      : `<div class="hello"><div><h1>${TTL[view]}</h1><p>${view === "audit" ? "Who did what, when and from which computer. Entries can't be changed or removed." : view === "recrep" ? "What your kitchen used, made and has left, for the dates you choose." : view === "prod" ? "Everything on sale at your selling points. Add items, change prices and set their options here." : view === "tables" ? "Tables and takeaways for the POS. Any waiter can use any of them, and several waiters can share one." : view === "license" ? "Your trial or license, and entering a new key" : view === "wait" ? "Create waiters, cashiers and managers, and choose what each may do on the POS" : view === "sales" ? br + " · the current day, unless you search" : view === "settings" ? "Hotel details, bills and receipts, POS options, tax and printers" : view === "recrep" ? "How each item was used in production and in recipes, and what remains" : view === "rec" ? "Turn kitchen materials into what you sell, by production or by recipe" : view === "rooms" ? "Occupancy, guests and room sales · revenue for the " + PL[per] : view === "rep" ? "Run any report for a date range and sale point" : view === "outlets" ? "Bars, restaurants, kitchens and shops that get stock from a store and sell on the POS" : view === "pur" ? "Purchase orders, receiving goods and what you have bought" : view === "vendors" ? "The vendors you buy from. You choose them on purchase orders and when receiving goods" : "Who can sign in, and what each role may do"}</p></div>${
+      : `<div class="hello"><div><h1>${TTL[view]}</h1><p>${view === "audit" ? "Who did what, when and from which computer. Entries can't be changed or removed." : view === "recrep" ? "What your kitchen used, made and has left, for the dates you choose." : view === "prod" ? "Everything on sale at your selling points. Add items, change prices and set their options here." : view === "tables" ? "Tables and takeaways for the POS. Any waiter can use any of them, and several waiters can share one." : view === "license" ? "Your trial or license, and entering a new key" : view === "wait" ? "Create waiters, cashiers and managers, and choose what each may do on the POS" : view === "sales" ? br + " · the current day, unless you search" : view === "settings" ? "Hotel details, bills and receipts, POS options, tax and printers" : view === "recrep" ? "How each item was used in production and in recipes, and what remains" : view === "rec" ? "Turn kitchen materials into what you sell, by production or by recipe" : view === "rooms" ? "Occupancy, guests and room sales · revenue for the " + PL[per] : view === "rep" ? "Run any report for a date range and sale point" : view === "outlets" ? "Bars, restaurants, kitchens and shops that get stock from a store and sell on the POS" : view === "pur" ? "Purchase orders, receiving goods and what you have bought" : view === "cred" ? "Credit customers, what they owe, their statements and payments" : view === "vendors" ? "The vendors you buy from. You choose them on purchase orders and when receiving goods" : "Who can sign in, and what each role may do"}</p></div>${
           view === "rooms"
             ? `<div class="seg">${[
                 ["today", "Today"],
@@ -44001,6 +45116,7 @@ function render() {
 function go(n) {
   n = n.replace("&amp;", "&");
   if (!boPageOk(n)) return boDenied();
+  mdlLock();
   $("#ov").classList.remove("show");
   if (n === "Front Desk") {
     boUser = null;
@@ -44104,6 +45220,7 @@ $("#vSub").onclick = e => {
   if (a === "rep_xlsx") return repXlsx(b.dataset.k);
   if (a === "rep_xlsxpage") return pageXlsx(b);
   if (a.slice(0, 3) === "ws_") return wsAct(a, b);
+  if (a.slice(0, 3) === "cu_") return cuAct(a, b);
   if (a.slice(0, 3) === "tb_") return tbAct(a, b);
   if (a.slice(0, 4) === "psu_") return psuAct(a, b);
   if (a.slice(0, 4) === "mod_") return modAct(a, b);
@@ -44180,7 +45297,7 @@ $("#vSub").onclick = e => {
   if (a === "sstart") {
     const u = v("shU");
     if (!u) return toast("Choose who the shift is for.");
-    const r = shiftStart(u, parseFloat($("#shF").value), boUser.n);
+    const r = shiftStart(u, parseFloat($("#shF").value), boUser.n, false, true);
     toast(r || "Shift started for " + u + ".");
     return all();
   }
@@ -44261,23 +45378,6 @@ $("#vSub").onclick = e => {
     if (!(q > 0)) return toast("Enter a quantity.");
     stock[b.dataset.k] += q;
     toast("Stock received.");
-  } else if (a === "addc") {
-    const n = v("cn"),
-      l = num("cc");
-    if (!n || !(l >= 0)) return toast("Enter a name and limit.");
-    CU.push({ n, limit: l, owes: 0 });
-  } else if (a === "pay") {
-    const c = CU[b.dataset.i],
-      q = num("cp_" + b.dataset.i);
-    if (!(q > 0)) return toast("Enter an amount.");
-    c.owes = Math.max(0, c.owes - q);
-    (FD_SETTINGS.custPays = FD_SETTINGS.custPays || []).push({
-      at: new Date().toISOString(),
-      n: c.n,
-      amt: q,
-      by: boUser.n
-    });
-    toast("Payment recorded.");
   }
   bosave();
   all();
@@ -44463,7 +45563,7 @@ let ci = 0,
   cf = [];
 function cmd() {
   const q = $("#cq").value.toLowerCase();
-  cf = [...CMD.filter(c => c.n.toLowerCase().includes(q)), ...repCommands(q)];
+  cf = [...CMD.filter(c => boPageOk(c.n) && c.n.toLowerCase().includes(q)), ...repCommands(q)];
   ci = Math.min(ci, Math.max(0, cf.length - 1));
   $("#cl").innerHTML =
     cf
@@ -44625,11 +45725,11 @@ $("#th").onclick = () => {
 thApply();
 // ---- module switching and manager login ----
 function boShow() {
+  mdlLock();
   const ok = !!boUser;
   $("#boLogin").style.display = ok ? "none" : "grid";
   $("#app").style.display = ok ? "" : "none";
   if (ok) {
-    posKioskOff(); // signed in to Back Office: the POS rule no longer applies
     setUser(boUser.n);
     applyBoRights();
     all();
@@ -44652,12 +45752,15 @@ function boShow() {
   }
 }
 function boOpen() {
+  $("#fd").classList.remove("show"); // left behind the main menu; its sign-in still holds
+  $("#fl").classList.remove("show");
   $("#start").style.display = "none";
   $("#bo").classList.add("show");
   boShow();
 }
 function posOpen() {
-  posKioskOn();
+  fsEnter();
+  fdExit(false); // Front Desk stays behind the main menu; the POS must not open on top of it or as its user
   boUser = null;
   $("#bo").classList.remove("show");
   $("#start").style.display = "none";
@@ -44689,6 +45792,8 @@ const boTry = async () => {
   g.disabled = false;
   g.textContent = "Sign in";
   if (ok && a.off) return bad("This account is disabled. Ask your administrator.");
+  if (ok && !ALL_KEYS.some(k => !k.startsWith("fo.") && roleHas(a.role || SUPER, k)))
+    return bad("This account is for the Front Desk. Sign in there.");
   if (ok) {
     fails = 0;
     m.style.display = "none";
@@ -44714,6 +45819,70 @@ const boTry = async () => {
   }
 };
 $("#boGo").onclick = boTry;
+// ---- Front Desk sign-in: a user from Users & roles whose role has the right ----
+let flFails = 0,
+  flLock = 0;
+async function fdLoginTry() {
+  const m = $("#flMsg"),
+    g = $("#flGo"),
+    u = $("#flU").value.trim().toLowerCase(),
+    p = $("#flP").value,
+    bad = t => {
+      m.textContent = t;
+      m.style.display = "block";
+      const c = $("#fl .fl-card");
+      c.classList.remove("shake");
+      void c.offsetWidth;
+      c.classList.add("shake");
+    };
+  if (!u || !p) return bad("Enter your username and password.");
+  if (Date.now() < flLock) return bad("Too many attempts. Try again in 30 seconds.");
+  g.disabled = true;
+  const a = ADM.find(x => x.u === u),
+    ok = a && a.ph === (await H(u + "|" + p));
+  g.disabled = false;
+  if (!ok) {
+    if (++flFails >= 5) {
+      flLock = Date.now() + 3e4;
+      flFails = 0;
+    }
+    auditAdd("Failed sign-in", `Wrong password for username "${u}"`, {
+      who: u,
+      mod: "Front Desk"
+    });
+    $("#flP").value = "";
+    return bad("Wrong username or password.");
+  }
+  flFails = 0;
+  $("#flP").value = "";
+  const role = a.role || SUPER,
+    fd = {
+      desk: roleHas(role, "fo.desk"),
+      hk: roleHas(role, "fo.hk"),
+      set: roleHas(role, "fo.settings"),
+      day: roleHas(role, "shift.manage")
+    };
+  if (a.off) return bad("This account is disabled. Ask your administrator.");
+  if (!roleHas(role, "fo.open") || !(fd.desk || fd.hk || fd.set)) {
+    auditAdd("Failed sign-in", `${a.n}'s role has no Front Desk right`, {
+      who: a.n,
+      mod: "Front Desk"
+    });
+    return bad("Your role doesn't include the Front Desk. Ask your administrator.");
+  }
+  m.style.display = "none";
+  auditAdd("Sign in", "Signed in to the Front Desk", { who: a.n, mod: "Front Desk" });
+  fdEnter({ n: a.n, u: a.u, role, d: [], fd });
+}
+$("#flGo").onclick = fdLoginTry;
+$("#flU").onkeydown = e => {
+  if (e.key !== "Enter") return;
+  if ($("#flU").value.trim()) $("#flP").focus();
+  else fdLoginTry();
+};
+$("#flP").onkeydown = e => {
+  if (e.key === "Enter") fdLoginTry();
+};
 // Enter on the username moves to the password; Enter on the password signs in.
 $("#boU").onkeydown = e => {
   if (e.key !== "Enter") return;
@@ -44744,12 +45913,17 @@ $("#boBack").onclick = () => {
   $("#bo").classList.remove("show");
   $("#start").style.display = "grid";
 };
-$("#openPos").onclick = posOpen;
 $("#boMenu").onclick = () => {
   boUser = null;
   bosave();
   $("#bo").classList.remove("show");
   $("#start").style.display = "grid";
+};
+$("#boOut").onclick = () => {
+  auditAdd("Sign out", "Signed out of Back Office", { who: boUser.n, mod: "Back Office" });
+  boUser = null;
+  bosave();
+  boShow();
 };
 const stHi = () => {
   $("#stHi").textContent = (h =>
@@ -44778,6 +45952,8 @@ document.querySelectorAll(".bkm").forEach(
 );
 setInterval(bosave, 4000);
 addEventListener("pagehide", bosave);
+machineLabel();
+fdModuleApply();
 drawCats();
 drawCart();
 if (location.hash === "#backoffice") boOpen();

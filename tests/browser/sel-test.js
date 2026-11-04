@@ -17,7 +17,7 @@ const pick=async n=>{ if(bill(n)){bill(n).click(); await wait(20);} };
 const open=()=>orders.map(o=>o.label+"="+totals(o.lines,o).g).join(", "), closeB=()=>q("#mBopt").classList.remove("show");
 const login=async p=>{for (const k of p+"E") { q('#kp [data-k="'+k+'"]').click(); await wait(15); } await wait(450);};
 try{
-  click('[data-go="pos"]'); await wait(200); posKioskOff(); dayStart("t"); ["Boss Manager","Sue Super","Jane Waiter"].forEach(n=>shiftStart(n,0,"t"));
+  click('[data-go="pos"]'); await wait(200); dayStart("t"); ["Boss Manager","Sue Super","Jane Waiter"].forEach(n=>shiftStart(n,0,"t"));
   await login("1111"); q('#spTabs [data-t="Bar"]').click(); await wait(30);
   await add("Tusker",2); await send("T1"); await add("Soda"); await send("T2"); await add("Tusker"); await send("T3");
   const row=n=>qa("#selList [data-row]").find(r=>r.textContent.includes(n)), sel=()=>qa("#selList .sr.on").map(r=>r.querySelector("b").textContent).join(",");

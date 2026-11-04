@@ -15,9 +15,9 @@ const tile=n=>{const hit=()=>qa("#grid .it").find(b=>b.textContent.includes(n));
 const login=async p=>{for (const k of p+"E") { q('#kp [data-k="'+k+'"]').click(); await wait(15); } await wait(450);};
 const send=async l=>{click("#sendBtn"); await wait(20); if(q("#mSend").classList.contains("show")){q("#lbl").value=l; click("#sendGo");} await wait(600);};
 try{
-  click('[data-go="pos"]'); await wait(200); posKioskOff(); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
+  click('[data-go="pos"]'); await wait(200); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
   await login("1111");
-  const backPos=async p=>{click("#lock"); await wait(25);}; click("#lock"); await wait(25); posKioskOff(); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400); const nav=async n=>{qa("#nav .nv").find(x=>x.dataset.n===n).click(); await wait(80);};
+  const backPos=async p=>{click("#lock"); await wait(25);}; click("#lock"); await wait(25); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400); const nav=async n=>{qa("#nav .nv").find(x=>x.dataset.n===n).click(); await wait(80);};
   const set=(sel,v)=>{const e=q(sel); e.value=v; e.dispatchEvent(new Event("input",{bubbles:true})); e.dispatchEvent(new Event("change",{bubbles:true}));}, tst=()=>q("#toast").textContent, tick=(a,v)=>{const e=q('['+a+'="'+v+'"]'); e.checked=true; e.dispatchEvent(new Event("change",{bubbles:true}));}, row=n=>qa("#vSub table tr").find(r=>r.textContent.includes(n));
   await nav("Inventory");
   click('[data-a="inv_stnew"]'); await wait(40); log("1 NEW: "+q("#stEd h3").textContent+" | focus "+document.activeElement.id+" | kinds "+qa("[data-stk]").map(x=>x.dataset.stk).join()); click('[data-a="inv_stsave"]'); await wait(20); log("2 NO NAME: "+tst());

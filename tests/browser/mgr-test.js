@@ -26,7 +26,7 @@ try{
   await pick("Mia Boss"); await role("Waiter"); log("9 NOW WAITER: "+await sv()+" | role "+SV().U.find(u=>u.n==="Mia Boss").role);
   await pick("Boss"); log("10 EDITING "+q(".ws-form h4").textContent); await role("Waiter"); log("11 LAST MANAGER ROLE: "+await sv()); await role("Manager"); click('[data-a="ws_del"]'); await wait(20); log("12 LAST MANAGER DELETE: "+tst()); click('[data-a="ws_new"]'); await wait(15);
   await pick("Cara Cash"); click('[data-a="ws_del"]'); await wait(15); click('[data-a="ws_del"]'); await wait(30); log("13 DELETE: "+tst()+" | "+!SV().U.some(u=>u.n==="Cara Cash"));
-  click("#boMenu"); await wait(30); click('[data-go="pos"]'); await wait(80); posKioskOff(); dayStart("t"); shiftStart("Boss",0,"t"); await login("0000"); log("14 MANAGER POS: "+["sendBtn","settleBtn","billBtn"].filter(x=>getComputedStyle(q("#"+x)).display!=="none").join(","));`}
+  click("#boMenu"); await wait(30); click('[data-go="pos"]'); await wait(80); dayStart("t"); shiftStart("Boss",0,"t"); await login("0000"); log("14 MANAGER POS: "+["sendBtn","settleBtn","billBtn"].filter(x=>getComputedStyle(q("#"+x)).display!=="none").join(","));`}
 }catch(e){log("X "+e.message)}
 document.documentElement.setAttribute("data-test",__E.join(" @@ "));document.title="done";})();</script>`;
 const html = fs.readFileSync(file, "utf8").replace("<head>", "<head>" + head).replace(/<\/body>(?![\s\S]*<\/body>)/, tail + "</body>");

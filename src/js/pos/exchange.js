@@ -1,8 +1,6 @@
 // ---- swap items: one item for another of the same price, with a right and a manager's PIN ----
 const REAS = ["Customer changed mind", "Wrong item served", "Spoiled / wasted", "Out of stock"];
 let ex = {};
-// Swaps on a sale that hasn't been sent yet. They're stamped on its order, and recorded, when it's sent.
-let cartSwaps = [];
 let exFails = 0,
   exLock = 0;
 const swapText = x => `${x.q} x ${x.from} -> ${x.q} x ${x.to}`;
@@ -29,21 +27,20 @@ function swapLog(o, x) {
     back: !!x.back
   });
 }
-const exLines = () => (ex.o ? ex.o.lines : cart),
-  exDept = () => (ex.o ? (billPoints(ex.o.lines).length > 1 ? ALLP : ex.o.dept) : dept);
+const exLines = () => ex.o.lines,
+  exDept = () => (billPoints(ex.o.lines).length > 1 ? ALLP : ex.o.dept);
 function exOpen(o) {
   if (!can("swap")) return fsNote("You don't have the right to swap items.");
-  const L = o ? o.lines : cart;
-  if (!Object.keys(L).length) return fsNote("Nothing to swap yet.");
+  if (!Object.keys(o.lines).length) return fsNote("Nothing to swap yet.");
   ex = {
     o,
-    old: !o && selId && L[selId] ? selId : null,
+    old: null,
     qty: 1,
     nw: null,
     cat: "All",
     reason: REAS[0],
     // Cooked food can't go back on the shelf: kitchens and restaurants don't return swapped items to stock.
-    back: o ? !["Kitchen", "Restaurant"].includes((OUTLET_INFO[o.dept] || {}).type) : null
+    back: !["Kitchen", "Restaurant"].includes((OUTLET_INFO[o.dept] || {}).type)
   };
   exRender();
   $("#mEx").classList.add("show");
@@ -51,9 +48,7 @@ function exOpen(o) {
 function exRender() {
   const L = exLines(),
     d = exDept();
-  $("#exT").textContent = ex.o
-    ? "Swap items · " + ex.o.label + " · " + d
-    : "Swap items · current order";
+  $("#exT").textContent = "Swap items · " + ex.o.label + " · " + d;
   $("#exOld").innerHTML = Object.entries(L)
     .map(
       ([id, q]) =>
@@ -76,7 +71,7 @@ function exRender() {
   $("#exNew").innerHTML = same
     .filter(i => ex.cat === "All" || i.c === ex.cat)
     .map(i => {
-      const a = avail(i) - (ex.o ? 0 : inCart(i.id)),
+      const a = avail(i),
         low = a < ex.qty;
       return `<button class="exi ${ex.nw == i.id ? "on" : ""}" data-en="${i.id}" ${low ? "disabled" : ""}><b>${i.n}</b><span>${KES(i.p)}${low ? " · low stock" : ""}</span></button>`;
     })
@@ -86,7 +81,6 @@ function exRender() {
   $("#exReasons").innerHTML = REAS.map(
     r => `<button class="chip ${r === ex.reason ? "on" : ""}" data-er="${r}">${r}</button>`
   ).join("");
-  $("#exBackRow").style.display = ex.o ? "flex" : "none";
   $("#exBack").checked = !!ex.back;
   $("#exAuth").style.display = BILL_AUTH.includes(user.role) ? "none" : "";
   const ok = ex.old && ex.nw;
@@ -157,7 +151,7 @@ $("#exGo").onclick = () => {
     by,
     user: user.n
   };
-  if (ex.o) {
+  {
     const o = ex.o;
     if (ex.back) itemStockMove(oi, -q);
     if (avail(ni) < q) {
@@ -204,30 +198,21 @@ $("#exGo").onclick = () => {
         };
         return [{ station, printer, point: it.d, d, html: exchangeSlipHTML({ ...d, station }) }];
       });
-    showRc(
+    rcFill(
       tickets.map(x => x.html).join("") + '<div class="sl-scr" id="rcPrinted"></div>',
       null,
       "Close"
     );
-    printOrderTickets(tickets, swapTicketLines, "swap");
+    printOrderTickets(tickets, swapTicketLines, "swap").then(r => rcDone(r, "Swap sent."));
     if ($("#mSel").classList.contains("show")) selRender();
     drawCart();
-  } else {
-    if (avail(ni) - inCart(ni.id) < q) return fsNote("Not enough " + ni.n + " in stock.");
-    cart[ex.old] -= q;
-    if (cart[ex.old] <= 0) {
-      delete cart[ex.old];
-      if (selId == ex.old) selId = null;
-    }
-    cart[ex.nw] = (cart[ex.nw] || 0) + q;
-    cartSwaps.push(rec);
-    $("#mEx").classList.remove("show");
-    drawCart();
-    fsNote("Swapped " + q + "× " + oi.n + " for " + ni.n + ".");
   }
 };
 $("#exBtn").onclick = () => {
-  if (Object.keys(cart).length) return exOpen(null);
+  // Only what has gone to the kitchen or bar can be swapped. Before that, just change the order.
+  if (cur) return exOpen(cur);
+  if (Object.keys(cart).length)
+    return fsNote("Send the order first. Only a sent order can be swapped.");
   selOpen();
   fsNote("Tap Swap on a bill to swap its items.");
 };

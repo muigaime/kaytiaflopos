@@ -15,9 +15,9 @@ const tile=n=>{const hit=()=>qa("#grid .it").find(b=>b.textContent.includes(n));
 const login=async p=>{for (const k of p+"E") { q('#kp [data-k="'+k+'"]').click(); await wait(15); } await wait(450);};
 const send=async l=>{click("#sendBtn"); await wait(20); if(q("#mSend").classList.contains("show")){q("#lbl").value=l; click("#sendGo");} await wait(600);};
 try{
-  click('[data-go="pos"]'); await wait(200); posKioskOff(); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
+  click('[data-go="pos"]'); await wait(200); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
   await login("1111");
-  click("#lock"); await wait(25); posKioskOff(); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400); qa("#nav .nv").find(x=>x.dataset.n==="Inventory").click(); await wait(100);
+  click("#lock"); await wait(25); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400); qa("#nav .nv").find(x=>x.dataset.n==="Inventory").click(); await wait(100);
   const tab=async t=>{click('[data-a="inv_tab"][data-t="'+t+'"]'); await wait(60);}, set=(sel,v)=>{const e=q(sel); e.value=v; e.dispatchEvent(new Event("input",{bubbles:true})); e.dispatchEvent(new Event("change",{bubbles:true}));}, seen=s=>{const e=q(s); return !!e&&e.offsetParent!==null;};
   log("1 MENU: "+qa(".inv-rail .rhd,.inv-rail .ir").map(x=>(x.classList.contains("rhd")?"["+x.textContent+"]":x.querySelector("span").textContent)).join(" "));
   log("2 STORES: "+q(".inv-title h1").textContent+" | picker "+!!q(".sc2")); click('[data-a="inv_stnew"]'); await wait(40); log("3 NEW STORE: form "+!!q("#stEd")); q("#stName").value="Drinks Store"; click('[data-a="inv_stsave"]'); await wait(40); log("4 CREATED: "+q("#vSub table").textContent.includes("Drinks Store")+" | form hidden "+!q("#stEd")+" | "+q("#toast").textContent);

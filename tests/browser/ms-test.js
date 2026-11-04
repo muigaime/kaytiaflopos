@@ -15,9 +15,9 @@ const tile=n=>{const hit=()=>qa("#grid .it").find(b=>b.textContent.includes(n));
 const login=async p=>{for (const k of p+"E") { q('#kp [data-k="'+k+'"]').click(); await wait(15); } await wait(450);};
 const send=async l=>{click("#sendBtn"); await wait(20); if(q("#mSend").classList.contains("show")){q("#lbl").value=l; click("#sendGo");} await wait(600);};
 try{
-  click('[data-go="pos"]'); await wait(200); posKioskOff(); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
+  click('[data-go="pos"]'); await wait(200); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
   await login("1111");
-  const snd=async l=>{await send(l); await wait(350); click("#rcClose"); await wait(10);}, sc=()=>q("#shMgr").classList.contains("show"), head=()=>(q("#shMgr h2")||{}).textContent, B=a=>q('#shMgr [data-sa="'+a+'"]'), sa=async a=>{click('#shMgr [data-sa="'+a+'"]'); await wait(25);}, msgT=()=>(q("#shMgr .status:not(.ok)")||{}).textContent, relog=async p=>{q("#shMgr").classList.remove("show"); q("#mSel").classList.remove("show"); click("#lock"); await wait(25); posKioskOff(); await login(p); await wait(420);}, note=()=>(qa("#fsn").pop()||{}).textContent||"", tick=async no=>{q('[data-s="'+no+'"]').click(); await wait(15);}, sel=async()=>{click("#selBtn"); await wait(20);};
+  const snd=async l=>{await send(l); await wait(350); click("#rcClose"); await wait(10);}, sc=()=>q("#shMgr").classList.contains("show"), head=()=>(q("#shMgr h2")||{}).textContent, B=a=>q('#shMgr [data-sa="'+a+'"]'), sa=async a=>{click('#shMgr [data-sa="'+a+'"]'); await wait(25);}, msgT=()=>(q("#shMgr .status:not(.ok)")||{}).textContent, relog=async p=>{q("#shMgr").classList.remove("show"); q("#mSel").classList.remove("show"); click("#lock"); await wait(25); await login(p); await wait(420);}, note=()=>(qa("#fsn").pop()||{}).textContent||"", tick=async no=>{q('[data-s="'+no+'"]').click(); await wait(15);}, sel=async()=>{click("#selBtn"); await wait(20);};
   const J=()=>USERS.find(u=>u.n==="Jane Waiter"), S=()=>USERS.find(u=>u.n==="Solo Sam"); S().role="Cashier";
   shiftEnd(shiftOf(S().n),0,"t");
   await add("Tusker","Bar",2); await snd("T1"); await add("Fish","Restaurant"); await snd("T2"); await add("Tusker","Bar"); await snd("T3");
@@ -28,12 +28,12 @@ try{
   orders.find(o=>o.no===b).bd=ymdOf(new Date(Date.now()-3*864e5)); q("#selPushGo").click(); await wait(15); q("#selPushYes").click(); await wait(25);
   log("7 PUSHED: "+note()+" | "+orders.map(o=>o.no+":"+(o.handedTo||"-")).join()+" | waiter kept "+orders.find(o=>o.no===a).waiter+" | log "+BILLLOG.filter(x=>x.act==="Handover").length);
   log("8 SELECT NOW: "+qa("#selList [data-row]").map(r=>r.dataset.row).join()); click('#mSel [data-close]'); await wait(10);
-  click("#shiftBtn"); await wait(15); log("9 PENDING TILE: "+qa(".ms-t")[3].textContent); B("ms_end").click(); await wait(20); log("10 BILLS LEFT, ASKS: "+B("ms_end").textContent+" | shift "+!!shiftOf(J().n));
-  const pr=window.print; let printed=0; window.print=()=>printed++; orders.filter(o=>!o.handedTo).forEach(o=>o.handedTo=S().n); shDraw(); await wait(15); await sa("ms_end"); await wait(300); log("11 NO BILLS, ONE PRESS ENDS: shift "+!!shiftOf(J().n)+" | "+msgT()+" | printed "+printed+" | shPrint empty "+!q("#shPrint").textContent.includes("SHIFT"));
+  click("#shiftBtn"); await wait(15); log("9 PENDING TILE: "+qa(".ms-t")[3].textContent); log("10 NO END BUTTON: "+!B("ms_end")+" | shift "+!!shiftOf(J().n));
+  const pr=window.print; let printed=0; window.print=()=>printed++; orders.filter(o=>!o.handedTo).forEach(o=>o.handedTo=S().n); shDraw(); await wait(15); log("11 NOTHING PRINTS: "+printed);
   const sh=SHIFTS.filter(x=>x.user===J().n).pop(); log("12 RECORD: closed "+!!sh.closedAt+" | variance "+sh.variance);
   await relog("3333"); click('#shMgr [data-sa="exit"]'); await wait(10); await sel(); log("13 CASHIER: "+qa("#selList .sr-no small").map(x=>x.textContent).join(" ; ")+" | push button "+!!q("#selPushGo")); click('#mSel [data-close]'); await wait(10);
   click("#shiftBtn"); await wait(15); log("14 CASHIER KEEPS SHIFT MGMT: "+head()+" | cash box "+!!q("#shAct")); click('#shMgr [data-sa="exit"]'); await wait(10);
-  J().perm=Object.fromEntries(WAITER_RIGHTS.flatMap(([,L])=>L).map(([k])=>[k,k!=="sendPending"])); await relog("1111"); await sa("ms_start"); await add("Tusker","Bar"); await snd("T9"); await sel(); await tick(orders.at(-1).no); log("15 NO RIGHT: button "+!!q("#selPushGo")); click('#mSel [data-close]'); await wait(10); J().perm=undefined;
+  J().perm=Object.fromEntries(WAITER_RIGHTS.flatMap(([,L])=>L).map(([k])=>[k,k!=="sendPending"])); await relog("1111"); await add("Tusker","Bar"); await snd("T9"); await sel(); await tick(orders.at(-1).no); log("15 NO RIGHT: button "+!!q("#selPushGo")); click('#mSel [data-close]'); await wait(10); J().perm=undefined;
   bosave(); log("16 SAVED: "+JSON.parse(localStorage.getItem("kaytia_pos_bo_v1")).BL.filter(x=>x.act==="Handover").length);
 }catch(e){log("X "+e.message)}
 document.documentElement.setAttribute("data-test",__E.join(" @@ "));document.title="done";})();</script>`;

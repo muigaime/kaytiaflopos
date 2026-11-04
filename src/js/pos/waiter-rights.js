@@ -83,7 +83,11 @@ const CASHIER_POSTS = ["postRoom", "postPayroll"];
 const cashierHas = (role, k) => role === "Cashier" && CASHIER_POSTS.includes(k);
 const can = k => allowedAlways(user) || cashierHas(user.role, k) || !!user.perm[k];
 /** Only given when ticked in Waiter setup, even for staff from before that page. */
-const canDay = () => !!user && (BILL_AUTH.includes(user.role) || !!(user.perm && user.perm.newDay));
+const canDay = () =>
+  !!user &&
+  (BILL_AUTH.includes(user.role) ||
+    !!(user.perm && user.perm.newDay) ||
+    !!(user.fd && user.fd.day));
 /** Bill options: a waiter with this right acts alone; anyone else needs a PIN. */
 const actsAlone = k => !!user && (BILL_AUTH.includes(user.role) || !!(user.perm && user.perm[k]));
 const canAddTo = o => allowedAlways(user) || o.waiter === user.n || !!user.perm.addAll;

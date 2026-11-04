@@ -15,9 +15,9 @@ const tile=n=>{const hit=()=>qa("#grid .it").find(b=>b.textContent.includes(n));
 const login=async p=>{for (const k of p+"E") { q('#kp [data-k="'+k+'"]').click(); await wait(15); } await wait(450);};
 const send=async l=>{click("#sendBtn"); await wait(20); if(q("#mSend").classList.contains("show")){q("#lbl").value=l; click("#sendGo");} await wait(600);};
 try{
-  click('[data-go="pos"]'); await wait(200); posKioskOff(); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
+  click('[data-go="pos"]'); await wait(200); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
   await login("1111");
-  click("#lock"); await wait(25); posKioskOff(); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400);
+  click("#lock"); await wait(25); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400);
   qa("#nav .nv").find(x=>x.dataset.n==="Purchasing").click(); await wait(70); qa("#vSub button").find(b=>b.textContent.trim()==="Receive goods").click(); await wait(50);
   log("MODES: "+qa('[data-a="inv_rcmode"]').map(b=>b.dataset.m).join()); const m=qa('[data-a="inv_rcmode"]').find(b=>/lpo/i.test(b.dataset.m)); if(m){m.click(); await wait(40);} const pick=q('[data-iv="rc.lpoPick"]'); log("PICK: "+(pick?[...pick.options].map(o=>o.text).join("|"):"none")); if(pick){const o=[...pick.options].find(x=>x.value!==""); pick.value=o.value; pick.dispatchEvent(new Event("input",{bubbles:true})); pick.dispatchEvent(new Event("change",{bubbles:true})); await wait(60);}
   log("LINES: "+qa("#vSub table tr").filter(r=>/Thing/.test(r.textContent)).map(r=>[...r.cells].map(c=>c.textContent.trim()).filter(Boolean).join(" ")).join(" ;; "));

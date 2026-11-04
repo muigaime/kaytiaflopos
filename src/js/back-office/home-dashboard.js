@@ -53,11 +53,13 @@ function heroBar() {
             : `${ch >= 0 ? "▲" : "▼"} ${Math.abs(ch).toFixed(1)}% on the period before`,
           "heroFig"
         )) +
-    fig(
-      "Occupancy",
-      (ROOMS.length ? Math.round((occ / ROOMS.length) * 100) : 0) + "%",
-      `${occ} of ${ROOMS.length} rooms`
-    ) +
+    (fdOn()
+      ? fig(
+          "Occupancy",
+          (ROOMS.length ? Math.round((occ / ROOMS.length) * 100) : 0) + "%",
+          `${occ} of ${ROOMS.length} rooms`
+        )
+      : "") +
     fig(
       "Open bills",
       orders.length,
@@ -67,13 +69,6 @@ function heroBar() {
 }
 function mods() {
   const M = [
-    [
-      "Point of Sale",
-      "pos",
-      "#1d5c8a",
-      KES(sum(sel(0), s => s.g)) + " " + PL[per],
-      orders.length + " open orders"
-    ],
     ["Sales & Orders", "cart", "#2b7bb9", sel(0).length + " sales", br],
     [
       "Shifts & Day",
@@ -82,13 +77,20 @@ function mods() {
       curDay() ? "Day open" : "Day closed",
       openShifts().length + " open shifts"
     ],
-    [
-      "Front Desk",
-      "id",
-      "#2f9e75",
-      ROOMS.filter(r => roomStatus(r) === "occ").length + " of " + ROOMS.length + " rooms occupied",
-      "Bookings and guest bills"
-    ],
+    ...(fdOn()
+      ? [
+          [
+            "Front Desk",
+            "id",
+            "#2f9e75",
+            ROOMS.filter(r => roomStatus(r) === "occ").length +
+              " of " +
+              ROOMS.length +
+              " rooms occupied",
+            "Bookings and guest bills"
+          ]
+        ]
+      : []),
     ["Products List", "box", "#c8553d", ITEMS.length + " items", "Prices and tax"],
     ["Tables", "pos", "#3a8fb7", TBL.length + " on the list", "Tables and takeaways"],
     [
@@ -308,9 +310,9 @@ function insights() {
       orders.length + " open orders waiting to be charged",
       "Total " +
         KES(orders.reduce((a, o) => a + totals(o.lines).g, 0)) +
-        ". Open the POS to settle them.",
-      "Open POS",
-      "go:Point of Sale"
+        ". Settle them on the POS.",
+      "See orders",
+      "go:Sales & Orders"
     ]);
   $("#ins").innerHTML = L.length
     ? L.map(

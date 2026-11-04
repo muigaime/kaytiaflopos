@@ -29,9 +29,18 @@ function recPay(r, method, amt, ci) {
   sync();
   return "";
 }
+$("#fd").addEventListener("input", e => {
+  if (e.target.id !== "fdGq") return;
+  const q = e.target.value.trim().toLowerCase();
+  document.querySelectorAll("#fdGuests tr").forEach(tr => {
+    if (!tr.querySelector("th"))
+      tr.style.display = tr.textContent.toLowerCase().includes(q) ? "" : "none";
+  });
+});
 $("#fd").onclick = e => {
   const vb = e.target.closest("[data-v]");
   if (vb) {
+    if (!fdCan(fdPageRight(vb.dataset.v))) return;
     fdView = vb.dataset.v;
     fdNotice = null;
     fdPresetRoom = "";
@@ -43,12 +52,17 @@ $("#fd").onclick = e => {
   }
   const b = e.target.closest("[data-f]");
   if (!b) return;
+  // Each action belongs to a right, whatever is on the screen.
+  const act = b.dataset.f,
+    onHk = ["hkset", "hkprint", "hkf"].includes(act),
+    onSet = ["radd", "rdel", "rtnew", "rtedit", "rtcancel", "rtdel", "rtsave"].includes(act);
+  if (onSet ? !fdCan("set") : !fdCan("desk") && !(onHk && fdCan("hk"))) return;
   const f = b.dataset.f,
     id = b.dataset.id,
     no = b.dataset.no,
     g = i => $("#" + i).value.trim(),
     n = i => parseFloat($("#" + i).value),
-    T = todayYmd();
+    T = fdToday();
   let r = RESERVATIONS.find(x => x.id === id);
   if (f === "room") {
     fdSelectedRoom = no;
@@ -64,10 +78,21 @@ $("#fd").onclick = e => {
   } else if (f === "bookroom") {
     fdPresetRoom = no;
     fdView = "book";
+  } else if (f === "rflt") {
+    fdRoomF = b.dataset.k;
+  } else if (f === "hkf") {
+    fdHkF = b.dataset.k;
   } else if (f === "hkset") {
     const rm = roomByNo(no);
     if (stayOf(no)) fdNotify("The room is occupied.");
-    else rm.status = b.dataset.set;
+    else {
+      rm.status = b.dataset.set;
+      auditAdd("Room status", `Room ${no} set to ${ROOM_STATUS_LABELS[roomStatus(rm)]}`, {
+        who: user ? user.n : "Front Desk",
+        mod: "Front Desk"
+      });
+      sync();
+    }
   } else if (f === "ci") {
     const rm = roomByNo(r.room),
       x = roomStatus(rm);
@@ -623,11 +648,6 @@ $("#fd").onclick = e => {
       );
       fdNotify("Room " + no + " removed.", 1);
     }
-  } else if (f === "pday") {
-    const d = DAYS.filter(x => x.closedAt)
-      .slice()
-      .reverse()[+b.dataset.i];
-    printHTML(dayReport(d, user && user.n));
     return;
   }
   sync();
@@ -728,10 +748,6 @@ $("#fd").onchange = e => {
     fdSelectedRes = t.value;
     return fdDraw();
   }
-  if (t.dataset.rg !== undefined) {
-    fdDateRange[+t.dataset.rg] = t.value;
-    return fdDraw();
-  }
   if (t.dataset.rate) {
     const rm = roomByNo(t.dataset.rate),
       v = parseFloat(t.value);
@@ -740,4 +756,3 @@ $("#fd").onchange = e => {
     sync();
   }
 };
-$("#fdBack").onclick = () => fdExit(true);

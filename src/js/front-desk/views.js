@@ -1,21 +1,35 @@
 const FD_VIEWS = {
   grid() {
-    const c = roomStatusCounts();
-    return `<div class="fd-leg">${Object.keys(ROOM_STATUS_LABELS)
-      .map(k => `<span><i class="fs-${k}"></i>${ROOM_STATUS_LABELS[k]} <b>${c[k] || 0}</b></span>`)
-      .join("")}</div><div class="fd-grid">${ROOMS.map(r => {
-      const x = roomStatus(r),
-        st = stayOf(r.no),
-        rv = RESERVATIONS.find(
-          q =>
-            q.room === r.no && q.status === "reserved" && q.in <= todayYmd() && q.out > todayYmd()
-        );
-      return `<button class="fd-room fs-${x} ${fdSelectedRoom === r.no ? "sel" : ""}" data-f="room" data-no="${r.no}"><b>${r.no}</b><span>${r.type}</span><em>${st ? hx(st.guest) : rv ? "Due: " + hx(rv.guest) : ROOM_STATUS_LABELS[x]}</em><small>KES ${r.rate.toLocaleString()}</small></button>`;
-    }).join("")}</div>${roomPanel()}`;
+    const c = roomStatusCounts(),
+      T = fdToday(),
+      tile = (l, v, s, go) =>
+        `<${go ? `button data-v="${go}"` : "div"} class="fd-t"><span>${l}</span><b>${v}</b><small>${s}</small></${go ? "button" : "div"}>`,
+      arr = RESERVATIONS.filter(r => r.status === "reserved" && r.in <= T && !r.grp).length,
+      dep = RESERVATIONS.filter(r => r.status === "inhouse" && r.out <= T).length,
+      L = ROOMS.filter(r => !fdRoomF || roomStatus(r) === fdRoomF);
+    return `<div class="fd-kpi fd-tiles">${tile("Occupancy", ROOMS.length ? Math.round(((c.occ || 0) / ROOMS.length) * 100) + "%" : "0%", `${c.occ || 0} of ${ROOMS.length} rooms`)}${tile("Ready to sell", c.vac || 0, "Vacant and clean")}${tile("Arrivals", arr, "Due to check in", "checkin")}${tile("Departures", dep, "Due to leave", "guests")}${tile("To clean", c.dirty || 0, "Waiting for housekeeping", "hk")}</div>
+    <div class="fd-leg" role="group" aria-label="Show rooms by status"><button class="${fdRoomF ? "" : "on"}" data-f="rflt" data-k="">All <b>${ROOMS.length}</b></button>${Object.keys(
+      ROOM_STATUS_LABELS
+    )
+      .map(
+        k =>
+          `<button class="${fdRoomF === k ? "on" : ""}" data-f="rflt" data-k="${k}"><i class="fs-${k}"></i>${ROOM_STATUS_LABELS[k]} <b>${c[k] || 0}</b></button>`
+      )
+      .join("")}</div><div class="fd-grid">${
+      L.map(r => {
+        const x = roomStatus(r),
+          st = stayOf(r.no),
+          rv = RESERVATIONS.find(
+            q =>
+              q.room === r.no && q.status === "reserved" && q.in <= fdToday() && q.out > fdToday()
+          );
+        return `<button class="fd-room fs-${x} ${fdSelectedRoom === r.no ? "sel" : ""}" data-f="room" data-no="${r.no}"><b>${r.no}</b><span>${r.type}</span><em>${st ? hx(st.guest) : rv ? "Due: " + hx(rv.guest) : ROOM_STATUS_LABELS[x]}</em><small>KES ${r.rate.toLocaleString()}</small></button>`;
+      }).join("") || '<div class="stk">No rooms with this status.</div>'
+    }</div>${roomPanel()}`;
   },
   checkin() {
     ensureRoomTypes();
-    const arr = RESERVATIONS.filter(r => r.status === "reserved" && r.in <= todayYmd() && !r.grp);
+    const arr = RESERVATIONS.filter(r => r.status === "reserved" && r.in <= fdToday() && !r.grp);
     if (fdPresetRoom) {
       const r = roomByNo(fdPresetRoom);
       if (r) {
@@ -73,7 +87,7 @@ const FD_VIEWS = {
        `<option value="${k}" ${checkInForm.plan === k ? "selected" : ""}>${MEAL_PLANS[k]}${k === "RO" ? "" : " · +KES " + R2(mealPlanPrice(k)) + " pp"}</option>`
    )
    .join("")}</select></label></div>
- <div class="ci-sec">Payment</div><div class="fd-form"><label>When will the guest pay?<select data-cs="pm" data-rd="1"><option value="later" ${checkInForm.pm === "later" ? "selected" : ""}>Pay later (leave pending)</option><option value="dep" ${checkInForm.pm === "dep" ? "selected" : ""}>Make a partial payment now</option><option value="full" ${checkInForm.pm === "full" ? "selected" : ""}>Pay in full now</option></select></label>${checkInForm.pm === "later" ? "" : `${checkInForm.pm === "dep" ? cs("dep", "Partial payment (KES)", "number") : `<label>Amount (KES)<input readonly value="${R2(ttl)}"></label>`}<label>Method<select data-cs="m" data-rd="1"><option value="cash" ${checkInForm.m === "cash" ? "selected" : ""}>Cash</option><option value="mpesa" ${checkInForm.m === "mpesa" ? "selected" : ""}>M-Pesa</option><option value="account" ${checkInForm.m === "account" ? "selected" : ""}>Customer account</option></select></label>${checkInForm.m === "account" ? `<label>Customer account<select data-cs="ac">${CU.map((c, i) => `<option value="${i}" ${String(i) === String(checkInForm.ac) ? "selected" : ""}>${hx(c.n)}</option>`).join("")}</select></label>` : ""}`}</div>${checkInForm.pm === "later" ? '<div class="stk">The room charge stays pending on the guest folio. It can be paid any time, before or after check-out.</div>' : ""}
+ <div class="ci-sec">Payment</div><div class="fd-form"><label>When will the guest pay?<select data-cs="pm" data-rd="1"><option value="later" ${checkInForm.pm === "later" ? "selected" : ""}>Pay later (leave pending)</option><option value="dep" ${checkInForm.pm === "dep" ? "selected" : ""}>Make a partial payment now</option><option value="full" ${checkInForm.pm === "full" ? "selected" : ""}>Pay in full now</option></select></label>${checkInForm.pm === "later" ? "" : `${checkInForm.pm === "dep" ? cs("dep", "Partial payment (KES)", "number") : `<label>Amount (KES)<input readonly value="${R2(ttl)}"></label>`}<label>Method<select data-cs="m" data-rd="1"><option value="cash" ${checkInForm.m === "cash" ? "selected" : ""}>Cash</option><option value="mpesa" ${checkInForm.m === "mpesa" ? "selected" : ""}>M-Pesa</option><option value="account" ${checkInForm.m === "account" ? "selected" : ""}>Customer account</option></select></label>${checkInForm.m === "account" ? `<label>Customer account<select data-cs="ac">${CU.map((c, i) => (c.off ? "" : `<option value="${i}" ${String(i) === String(checkInForm.ac) ? "selected" : ""}>${hx(c.n)}</option>`)).join("")}</select></label>` : ""}`}</div>${checkInForm.pm === "later" ? '<div class="stk">The room charge stays pending on the guest folio. It can be paid any time, before or after check-out.</div>' : ""}
  ${warn ? `<div class="fd-note no">${warn}</div>` : ""}<div class="stk">Room KES ${R2(parseFloat(rate) || 0)}${mp > 0 ? " + " + MEAL_PLANS[checkInForm.plan] + " KES " + R2(mp) : ""} per night × ${nn} night(s) = <b>KES ${R2(ttl)}</b></div>
  <button class="chip on" data-f="walkgo">Check in guest</button></div>${roomTypeProfileHTML(t, vac)}</div>`;
   },
@@ -81,7 +95,7 @@ const FD_VIEWS = {
     const up = RESERVATIONS.filter(r => r.status === "reserved" && !r.grp).sort((a, b) =>
       a.in < b.in ? -1 : 1
     );
-    return `<div class="fd-card"><h4>Room booking (reservation)</h4><div class="fd-form">${inputHTML("b_g", "Guest name")}${inputHTML("b_p", "Phone")}${inputHTML("b_i", "ID / passport no.")}<select id="b_r">${roomOptionsHTML(ROOMS, fdPresetRoom)}</select><label>Check-in<input id="b_in" type="date" value="${todayYmd()}"></label><label>Check-out<input id="b_out" type="date" value="${addDays(todayYmd(), 1)}"></label><label>Adults<input id="b_a" type="number" min="1" value="1"></label><label>Children<input id="b_c" type="number" min="0" value="0"></label><label>Meal plan<select id="b_plan">${Object.keys(
+    return `<div class="fd-card"><h4>Room booking (reservation)</h4><div class="fd-form">${inputHTML("b_g", "Guest name")}${inputHTML("b_p", "Phone")}${inputHTML("b_i", "ID / passport no.")}<select id="b_r">${roomOptionsHTML(ROOMS, fdPresetRoom)}</select><label>Check-in<input id="b_in" type="date" value="${fdToday()}"></label><label>Check-out<input id="b_out" type="date" value="${addDays(fdToday(), 1)}"></label><label>Adults<input id="b_a" type="number" min="1" value="1"></label><label>Children<input id="b_c" type="number" min="0" value="0"></label><label>Meal plan<select id="b_plan">${Object.keys(
       MEAL_PLANS
     )
       .map(
@@ -151,66 +165,79 @@ const FD_VIEWS = {
     return `<div class="fd-card"><h4>Create new customer account</h4><div class="fd-form">${inputHTML("n_n", "Customer or company name")}<input id="n_l" type="number" placeholder="Credit limit (KES)"><button class="chip on" data-f="acnew">Create account</button></div></div>`;
   },
   hk() {
-    return `<div class="fd-card"><h4>Room housekeeping</h4><div class="shp"><button class="chip on" data-f="hkprint">Print A4 · all rooms</button><button class="mini" data-f="hkprint" data-only="1">Print A4 · rooms to clean</button></div>${tableHTML(
-      ["Room", "Type", "Status", ""],
-      ROOMS.map(r => {
+    const c = roomStatusCounts(),
+      btn = (r, set, l, main) =>
+        `<button class="${main ? "chip on" : "mini"}" data-f="hkset" data-no="${r.no}" data-set="${set}">${l}</button>`,
+      acts = (r, x) =>
+        x === "occ"
+          ? '<span class="stk">Guest in the room</span>'
+          : x === "dirty"
+            ? btn(r, "vac", "Mark clean", 1) + btn(r, "ooo", "Out of order")
+            : x === "ooo"
+              ? btn(r, "vac", "Back in service", 1) + btn(r, "dirty", "Mark dirty")
+              : btn(r, "dirty", "Mark dirty") + btn(r, "ooo", "Out of order"),
+      L = ROOMS.filter(r => !fdHkF || roomStatus(r) === fdHkF);
+    return `<div class="fd-card fd-hkbar"><div class="fd-leg" role="group" aria-label="Show rooms by status"><button class="${fdHkF ? "" : "on"}" data-f="hkf" data-k="">All <b>${ROOMS.length}</b></button>${Object.keys(
+      ROOM_STATUS_LABELS
+    )
+      .map(
+        k =>
+          `<button class="${fdHkF === k ? "on" : ""}" data-f="hkf" data-k="${k}"><i class="fs-${k}"></i>${ROOM_STATUS_LABELS[k]} <b>${c[k] || 0}</b></button>`
+      )
+      .join(
+        ""
+      )}</div><div class="shp"><button class="mini" data-f="hkprint" data-only="1">Print rooms to clean</button><button class="mini" data-f="hkprint">Print all rooms</button></div></div>
+    <div class="fd-hk">${
+      L.map(r => {
         const x = roomStatus(r);
+        return `<div class="fd-hkr hs-${x}"><div class="fd-hkt"><b>${r.no}</b><span>${hx(r.type)}</span><em class="fs-${x}">${ROOM_STATUS_LABELS[x]}</em></div><div class="fd-hka">${acts(r, x)}</div></div>`;
+      }).join("") || '<div class="stk">No rooms with this status.</div>'
+    }</div>`;
+  },
+  guests() {
+    const T = fdToday(),
+      ih = RESERVATIONS.filter(r => r.status === "inhouse"),
+      ar = RESERVATIONS.filter(r => r.status === "reserved" && r.in === T),
+      dp = ih.filter(r => r.out <= T),
+      all = RESERVATIONS.filter(r => r.status !== "cancelled")
+        .sort((a, b) => (a.in < b.in ? 1 : -1))
+        .slice(0, 300),
+      folio = r => `<button class="mini" data-f="folio" data-id="${r.id}">Folio</button>`;
+    return `<div class="fd-card"><h4>In the house<small>${ih.length}</small></h4>${tableHTML(
+      ["Guest", "Room", "Arrival", "Departure", "Charges", "Paid", "Balance", ""],
+      ih.map(r => {
+        const f = folioOf(r);
+        return [hx(r.guest), r.room, r.in, r.out, R2(f.total), R2(f.paid), R2(f.bal), folio(r)];
+      })
+    )}</div>
+    <div class="fd-two"><div class="fd-card"><h4>Arrivals today<small>${ar.length}</small></h4>${tableHTML(
+      ["Guest", "Room", "Departure", ""],
+      ar.map(r => [
+        hx(r.guest),
+        r.room,
+        r.out,
+        `<button class="mini" data-f="ci" data-id="${r.id}">Check in</button>`
+      ])
+    )}</div><div class="fd-card"><h4>Departures due<small>${dp.length}</small></h4>${tableHTML(
+      ["Guest", "Room", "Departure", "Balance", ""],
+      dp.map(r => [hx(r.guest), r.room, r.out, R2(folioOf(r).bal), folio(r)])
+    )}</div></div>
+    <div class="fd-card"><div class="fd-gh"><h4>All guests</h4><input id="fdGq" type="search" placeholder="Find a guest, room or ID number" autocomplete="off" aria-label="Find a guest"></div><div id="fdGuests">${tableHTML(
+      ["Guest", "ID no.", "Room", "Arrival", "Departure", "Status", "Balance", ""],
+      all.map(r => {
+        const l = (r.guests || [])[0] || {};
         return [
-          r.no,
-          r.type,
-          `<span class="tag" style="background:none;color:#fff;background:${{ vac: "#1f9d62", occ: "#2b7bb9", res: "#e08a1e", dirty: "#8a6d4b", ooo: "#c0392b" }[x]}">${ROOM_STATUS_LABELS[x]}</span>`,
-          x === "occ" || (x === "res" && 0)
-            ? ""
-            : x === "dirty"
-              ? `<button class="mini" data-f="hkset" data-no="${r.no}" data-set="vac">Mark clean</button>`
-              : x === "ooo"
-                ? `<button class="mini" data-f="hkset" data-no="${r.no}" data-set="vac">Back in service</button>`
-                : x === "occ"
-                  ? ""
-                  : `<button class="mini" data-f="hkset" data-no="${r.no}" data-set="dirty">Mark dirty</button> <button class="mini" data-f="hkset" data-no="${r.no}" data-set="ooo">Out of order</button>`
+          hx(r.guest),
+          hx(l.idn || r.idno || ""),
+          r.room,
+          r.in,
+          r.out,
+          r.status === "inhouse" ? "In house" : r.status === "out" ? "Checked out" : "Reserved",
+          R2(folioOf(r).bal),
+          `${folio(r)} <button class="mini" data-f="inv" data-id="${r.id}">Invoice</button>`
         ];
       })
-    )}</div>`;
-  },
-  occ() {
-    const c = roomStatusCounts(),
-      ih = RESERVATIONS.filter(r => r.status === "inhouse"),
-      ar = RESERVATIONS.filter(r => r.status === "reserved" && r.in === todayYmd()),
-      dp = ih.filter(r => r.out <= todayYmd());
-    return `<div class="fd-kpi">${[
-      ["Rooms", ROOMS.length],
-      ["Occupied", c.occ || 0],
-      ["Vacant", c.vac || 0],
-      ["Reserved today", c.res || 0],
-      ["Dirty", c.dirty || 0],
-      ["Out of order", c.ooo || 0],
-      ["Occupancy", ROOMS.length ? Math.round(((c.occ || 0) / ROOMS.length) * 100) + "%" : "0%"]
-    ]
-      .map(([a, b]) => `<div><span>${a}</span><b>${b}</b></div>`)
-      .join("")}</div>
- <div class="fd-card"><h4>In-house guests</h4>${tableHTML(
-   ["Guest", "Room", "Arrival", "Departure", "Charges", "Paid", "Balance", ""],
-   ih.map(r => {
-     const f = folioOf(r);
-     return [
-       hx(r.guest),
-       r.room,
-       r.in,
-       r.out,
-       R2(f.total),
-       R2(f.paid),
-       R2(f.bal),
-       `<button class="mini" data-f="folio" data-id="${r.id}">Folio</button>`
-     ];
-   })
- )}</div>
- <div class="fd-card"><h4>Arrivals today</h4>${tableHTML(
-   ["Guest", "Room", "Departure"],
-   ar.map(r => [hx(r.guest), r.room, r.out])
- )}<h4>Departures due today or overdue</h4>${tableHTML(
-   ["Guest", "Room", "Departure", "Balance"],
-   dp.map(r => [hx(r.guest), r.room, r.out, R2(folioOf(r).bal)])
- )}</div>`;
+    )}</div></div>`;
   },
   set() {
     return (
@@ -233,124 +260,6 @@ const FD_VIEWS = {
  )}</div>`
     );
   },
-  rsales() {
-    const m = revenueByDay(fdDateRange[0], fdDateRange[1]),
-      k = Object.keys(m).sort(),
-      S = x => sSum(k, d => m[d][x]);
-    return (
-      dateRangeBarHTML() +
-      `<div class="fd-card"><h4>Periodic sales report</h4>${tableHTML(["Date", "Room revenue", "Breakfast and meals", "Extras and charges", "Total"], k.map(d => [d, R2(m[d].room), R2(m[d].meal), R2(m[d].ex), R2(m[d].room + m[d].meal + m[d].ex)]).concat([["<b>Total</b>", "<b>" + R2(S("room")) + "</b>", "<b>" + R2(S("meal")) + "</b>", "<b>" + R2(S("ex")) + "</b>", "<b>" + R2(S("room") + S("meal") + S("ex")) + "</b>"]]))}<div class="stk">Room revenue is the room rate only. Breakfast and other meal plans are shown separately.</div></div>`
-    );
-  },
-  rpay() {
-    const m = {};
-    RESERVATIONS.forEach(r =>
-      r.pays.forEach(p => {
-        const d = toYmd(p.at);
-        if (d >= fdDateRange[0] && d <= fdDateRange[1]) {
-          (m[d] = m[d] || { cash: 0, mpesa: 0, account: 0 })[p.method] += p.amt;
-        }
-      })
-    );
-    const k = Object.keys(m).sort(),
-      S = x => sSum(k, d => m[d][x]);
-    return (
-      dateRangeBarHTML() +
-      `<div class="fd-card"><h4>Periodic payment report</h4>${tableHTML(["Date", "Cash", "M-Pesa", "Customer account", "Total"], k.map(d => [d, R2(m[d].cash), R2(m[d].mpesa), R2(m[d].account), R2(m[d].cash + m[d].mpesa + m[d].account)]).concat([["<b>Total</b>", "<b>" + R2(S("cash")) + "</b>", "<b>" + R2(S("mpesa")) + "</b>", "<b>" + R2(S("account")) + "</b>", "<b>" + R2(S("cash") + S("mpesa") + S("account")) + "</b>"]]))}</div>`
-    );
-  },
-  rrev() {
-    const o = {};
-    RESERVATIONS.filter(r => r.status === "inhouse" || r.status === "out").forEach(r => {
-      const t = (o[r.type] = o[r.type] || { n: 0, room: 0, meal: 0, ex: 0 }),
-        mv = (r.mrate || 0) * ((r.adults || 1) + ((r.children || 0) * FD_SETTINGS.child) / 100);
-      for (let i = 0; i < nightsBetween(r.in, r.out); i++) {
-        const d = addDays(r.in, i);
-        if (d >= fdDateRange[0] && d <= fdDateRange[1] && d <= todayYmd()) {
-          t.n++;
-          t.room += r.rate;
-          t.meal += mv;
-        }
-      }
-      r.charges.forEach(c => {
-        const d = toYmd(c.at);
-        if (d >= fdDateRange[0] && d <= fdDateRange[1]) t.ex += c.amt;
-      });
-    });
-    const k = Object.keys(o);
-    return (
-      dateRangeBarHTML() +
-      `<div class="fd-card"><h4>Periodic revenue report (by room type)</h4>${tableHTML(["Room type", "Nights sold", "Average room rate", "Room revenue", "Breakfast and meals", "Extras", "Total"], k.map(t => [t, o[t].n, R2(o[t].n ? o[t].room / o[t].n : 0), R2(o[t].room), R2(o[t].meal), R2(o[t].ex), R2(o[t].room + o[t].meal + o[t].ex)]).concat([["<b>Total</b>", "<b>" + sSum(k, t => o[t].n) + "</b>", "", "<b>" + R2(sSum(k, t => o[t].room)) + "</b>", "<b>" + R2(sSum(k, t => o[t].meal)) + "</b>", "<b>" + R2(sSum(k, t => o[t].ex)) + "</b>", "<b>" + R2(sSum(k, t => o[t].room + o[t].meal + o[t].ex)) + "</b>"]]))}<div class="stk">The average room rate excludes breakfast and meals.</div></div>`
-    );
-  },
-  rmeal() {
-    const M = mealRows(fdDateRange[0], fdDateRange[1]),
-      ks = Object.keys(M.day).sort(),
-      ps = Object.keys(M.plan);
-    return (
-      dateRangeBarHTML() +
-      `<div class="fd-card"><h4>Breakfast and meals report</h4>${tableHTML(["Date", "Rooms with meals", "Covers", "Meal revenue"], ks.map(d => [d, M.day[d].rooms, M.day[d].covers, R2(M.day[d].rev)]).concat([["<b>Total</b>", "<b>" + sSum(ks, d => M.day[d].rooms) + "</b>", "<b>" + sSum(ks, d => M.day[d].covers) + "</b>", "<b>" + R2(sSum(ks, d => M.day[d].rev)) + "</b>"]]))}<h4>By meal plan</h4>${tableHTML(
-        ["Meal plan", "Room-nights", "Covers", "Revenue"],
-        ps.map(p => [MEAL_PLANS[p], M.plan[p].rooms, M.plan[p].covers, R2(M.plan[p].rev)])
-      )}<div class="stk">A cover is one guest on a meal plan for one night. Children are charged ${FD_SETTINGS.child}% of the adult price.</div></div>`
-    );
-  },
-  rguests() {
-    const L = RESERVATIONS.filter(
-      r => r.status !== "cancelled" && r.in >= fdDateRange[0] && r.in <= fdDateRange[1]
-    ).sort((a, b) => (a.in < b.in ? 1 : -1));
-    return (
-      dateRangeBarHTML() +
-      `<div class="fd-card"><h4>Guests and invoices list</h4>${tableHTML(
-        [
-          "Guest",
-          "Nationality",
-          "ID no.",
-          "Room",
-          "Arrival",
-          "Departure",
-          "Status",
-          "Total",
-          "Paid",
-          "Balance",
-          ""
-        ],
-        L.map(r => {
-          const f = folioOf(r),
-            l = (r.guests || [])[0] || {};
-          return [
-            hx(r.guest),
-            hx(l.nat || ""),
-            hx(l.idn || r.idno || ""),
-            r.room,
-            r.in,
-            r.out,
-            r.status === "inhouse" ? "In house" : r.status === "out" ? "Checked out" : "Reserved",
-            R2(f.total),
-            R2(f.paid),
-            R2(f.bal),
-            `<button class="mini" data-f="folio" data-id="${r.id}">Folio</button> <button class="mini" data-f="inv" data-id="${r.id}">Invoice</button>`
-          ];
-        })
-      )}</div>`
-    );
-  },
-  rold() {
-    const L = DAYS.filter(d => d.closedAt)
-      .slice()
-      .reverse();
-    return `<div class="fd-card"><h4>Retrieve old summaries (closed days)</h4>${tableHTML(
-      ["Date", "Open", "Bills", "Sales", "Cash variance", ""],
-      L.map((d, i) => [
-        dm(d.openedAt),
-        hm(d.openedAt) + " to " + hm(d.closedAt),
-        d.bills,
-        R2(d.gross),
-        sg(d.variance || 0),
-        `<button class="mini" data-f="pday" data-i="${i}">Print summary</button>`
-      ])
-    )}</div>`;
-  },
   group() {
     ensureRoomTypes();
     const ok = groupFreeRooms();
@@ -367,7 +276,7 @@ const FD_VIEWS = {
       gf = (k, l, ty, x) =>
         `<label>${l}<input data-gb="${k}" ${ty ? `type="${ty}"` : ""} ${x || ""} value="${hx(groupForm[k])}"></label>`,
       acs = l =>
-        `<label>${l}<select data-gb="ac">${CU.map((c, i) => `<option value="${i}" ${String(i) === String(groupForm.ac) ? "selected" : ""}>${hx(c.n)}</option>`).join("")}</select></label>`,
+        `<label>${l}<select data-gb="ac">${CU.map((c, i) => (c.off ? "" : `<option value="${i}" ${String(i) === String(groupForm.ac) ? "selected" : ""}>${hx(c.n)}</option>`)).join("")}</select></label>`,
       list = GROUPS.slice()
         .reverse()
         .map(g => {
@@ -388,7 +297,7 @@ const FD_VIEWS = {
         });
     return `<div class="fd-card"><h4>Group booking</h4>
  <div class="ci-sec">Group and payer</div><div class="fd-form">${gf("name", "Group or event name")}<label>Who pays?<select data-gb="payer" data-rd="1"><option value="company" ${groupForm.payer === "company" ? "selected" : ""}>Company pays</option><option value="person" ${groupForm.payer === "person" ? "selected" : ""}>Person pays</option></select></label>${groupForm.payer === "person" ? gf("pname", "Paying person's name") : acs("Company account")}${gf("pphone", "Contact phone")}</div>
- <div class="ci-sec">Dates and group rate</div><div class="fd-form"><label>Check-in<input type="date" data-gb="in" data-rd="1" value="${groupForm.in}" min="${todayYmd()}"></label><label>Check-out<input type="date" data-gb="out" data-rd="1" value="${groupForm.out}" min="${addDays(groupForm.in, 1)}"></label>${gf("disc", "Group discount %", "number", 'min="0" max="50" data-rd="1"')}<label>Meal plan<select data-gb="plan" data-rd="1">${Object.keys(
+ <div class="ci-sec">Dates and group rate</div><div class="fd-form"><label>Check-in<input type="date" data-gb="in" data-rd="1" value="${groupForm.in}" min="${fdToday()}"></label><label>Check-out<input type="date" data-gb="out" data-rd="1" value="${groupForm.out}" min="${addDays(groupForm.in, 1)}"></label>${gf("disc", "Group discount %", "number", 'min="0" max="50" data-rd="1"')}<label>Meal plan<select data-gb="plan" data-rd="1">${Object.keys(
    MEAL_PLANS
  )
    .map(
@@ -400,7 +309,7 @@ const FD_VIEWS = {
  ${gbReg(rooms)}
  <div class="ci-sec">Payment</div><div class="fd-form"><label>When will the payer pay?<select data-gb="pm" data-rd="1"><option value="later" ${groupForm.pm === "later" ? "selected" : ""}>Pay later (leave pending)</option><option value="dep" ${groupForm.pm === "dep" ? "selected" : ""}>Pay a deposit now</option><option value="full" ${groupForm.pm === "full" ? "selected" : ""}>Pay in full now</option></select></label>${groupForm.pm === "later" ? "" : `${groupForm.pm === "dep" ? gf("dep", "Deposit (KES)", "number") : `<label>Amount (KES)<input readonly value="${R2(total)}"></label>`}<label>Method<select data-gb="m" data-rd="1"><option value="cash" ${groupForm.m === "cash" ? "selected" : ""}>Cash</option><option value="mpesa" ${groupForm.m === "mpesa" ? "selected" : ""}>M-Pesa</option><option value="account" ${groupForm.m === "account" ? "selected" : ""}>${groupForm.payer === "company" ? "Company account" : "Customer account"}</option></select></label>${groupForm.payer === "person" && groupForm.m === "account" ? acs("Customer account") : ""}`}</div>
  <div class="stk">${groupForm.sel.length} room(s) × ${nn} night(s)${disc ? " at " + disc + "% off" : ""} = <b>KES ${R2(total)}</b>. ${groupForm.pm === "later" ? "The full amount stays pending on the group folio." : ""}</div>
- <div class="shp"><button class="chip on" data-f="gbgo">Create group booking</button>${groupForm.in <= todayYmd() ? '<button class="mini" data-f="gbgo" data-now="1">Create and check in now</button>' : ""}</div></div>
+ <div class="shp"><button class="chip on" data-f="gbgo">Create group booking</button>${groupForm.in <= fdToday() ? '<button class="mini" data-f="gbgo" data-now="1">Create and check in now</button>' : ""}</div></div>
  <div class="fd-card"><h4>Group bookings</h4>${tableHTML(["Group", "Payer", "Rooms", "Dates", "Status", "Total", "Paid", "Balance", ""], list)}</div>`;
   },
   gfolio() {
@@ -443,7 +352,7 @@ const FD_VIEWS = {
    ])
  )}
  <div class="status ${B > 0.009 ? "bad" : "ok"}">Group balance due: KES ${R2(B)}</div>
- ${st !== "cancelled" && B > 0.009 ? `<div class="fd-form"><label>Amount (KES)<input id="g_a" type="number" value="${B}"></label><label>Method<select id="g_m"><option value="cash">Cash</option><option value="mpesa">M-Pesa</option><option value="account" ${g.payer === "company" ? "selected" : ""}>Customer account</option></select></label><label>Account<select id="g_c">${CU.map((c, i) => `<option value="${i}" ${i === g.ac ? "selected" : ""}>${hx(c.n)}</option>`).join("")}</select></label><button class="chip on" data-f="gpay">Receive group payment</button></div>` : ""}
+ ${st !== "cancelled" && B > 0.009 ? `<div class="fd-form"><label>Amount (KES)<input id="g_a" type="number" value="${B}"></label><label>Method<select id="g_m"><option value="cash">Cash</option><option value="mpesa">M-Pesa</option><option value="account" ${g.payer === "company" ? "selected" : ""}>Customer account</option></select></label><label>Account<select id="g_c">${CU.map((c, i) => (c.off ? "" : `<option value="${i}" ${i === g.ac ? "selected" : ""}>${hx(c.n)}</option>`)).join("")}</select></label><button class="chip on" data-f="gpay">Receive group payment</button></div>` : ""}
  <div class="shp">${st === "reserved" ? `<button class="chip on" data-f="gci" data-id="${g.id}">Check in group</button><button class="mini" data-f="gcancel" data-id="${g.id}">Cancel group</button>` : ""}${st === "in house" ? `<button class="chip on" data-f="gout" data-id="${g.id}">Check out group</button>${B > 0.009 ? `<button class="mini" data-f="gout" data-pend="1" data-id="${g.id}">Check out · leave KES ${R2(B)} pending</button>` : ""}` : ""}<button class="mini" data-f="ginv" data-id="${g.id}">Print group invoice</button><button class="mini" data-f="glist" data-id="${g.id}">Print guest list</button></div></div>${gReg(g)}`;
   },
   pending() {
@@ -495,7 +404,7 @@ const FD_VIEWS = {
            ]
          ]
        : [],
-     r.charges.map(c => [toYmd(c.at), hx(c.cat + ": " + c.desc), R2(c.amt)]),
+     r.charges.map(c => [bizDateOf(c.at), hx(c.cat + ": " + c.desc), R2(c.amt)]),
      [["", "<b>Total charges</b>", "<b>" + R2(f.total) + "</b>"]]
    )
  )}
@@ -503,12 +412,12 @@ const FD_VIEWS = {
    r.pays.length
      ? tableHTML(
          ["Date", "Payment", "Amount"],
-         r.pays.map(p => [toYmd(p.at), PAY_METHODS[p.method] || p.method, R2(p.amt)])
+         r.pays.map(p => [bizDateOf(p.at), PAY_METHODS[p.method] || p.method, R2(p.amt)])
        )
      : ""
  }
  <div class="status ${f.bal > 0 ? "bad" : "ok"}">Balance due: KES ${R2(f.bal)}</div>
- ${r.status === "inhouse" || r.status === "reserved" || (r.status === "out" && f.bal > 0.009) ? `<div class="fd-form"><label>Amount (KES)<input id="m_a" type="number" value="${f.bal > 0 ? f.bal : ""}"></label><label>Method<select id="m_m"><option value="cash">Cash</option><option value="mpesa">M-Pesa</option><option value="account">Customer account</option></select></label><label>Account<select id="m_c">${CU.map((c, i) => `<option value="${i}">${hx(c.n)}</option>`).join("")}</select></label><button class="chip on" data-f="paygo">Receive payment</button></div>` : ""}
+ ${r.status === "inhouse" || r.status === "reserved" || (r.status === "out" && f.bal > 0.009) ? `<div class="fd-form"><label>Amount (KES)<input id="m_a" type="number" value="${f.bal > 0 ? f.bal : ""}"></label><label>Method<select id="m_m"><option value="cash">Cash</option><option value="mpesa">M-Pesa</option><option value="account">Customer account</option></select></label><label>Account<select id="m_c">${CU.map((c, i) => (c.off ? "" : `<option value="${i}">${hx(c.n)}</option>`)).join("")}</select></label><button class="chip on" data-f="paygo">Receive payment</button></div>` : ""}
  <div class="shp">${r.status === "reserved" ? `<button class="chip on" data-f="ci" data-id="${r.id}">Check in</button><button class="mini" data-f="chg" data-id="${r.id}">Change dates</button>` : ""}${r.status === "inhouse" ? `<button class="chip on" data-f="out" data-id="${r.id}">Check out</button>${f.bal > 0.009 ? `<button class="mini" data-f="out" data-pend="1" data-id="${r.id}">Check out · leave KES ${R2(f.bal)} pending</button>` : ""}<button class="mini" data-f="chg" data-id="${r.id}">Change dates</button>` : ""}${r.grp ? `<button class="mini" data-f="gopen" data-id="${r.grp}">Group folio</button>` : ""}<button class="mini" data-f="inv" data-id="${r.id}">Print invoice</button></div></div>`;
   }
 };

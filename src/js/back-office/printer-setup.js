@@ -70,12 +70,20 @@ function psuCard(title, note, printers, P = psuPoints()) {
 function machinesHTML() {
   const me = MACHINE.name();
   return `<div class="pn"><h4>Machines</h4><div class="stk">This computer is registered as <b>${esc(me)}</b>.</div>
-  <div class="mac-list">${MACHINE.list()
+  <div class="stk">Tick what each computer sells. It then sells only there, and only people set up for those sale points can sign in on it. With nothing ticked it sells every sale point the person has.</div>
+  <div class="tw"><table class="t mac-t"><thead><tr><th>Machine</th><th>Sells at</th><th></th></tr></thead><tbody>${MACHINE.list()
     .map(
       (m, i) =>
-        `<span class="mac-chip ${m.n === me ? "me" : ""}">${esc(m.n)}${m.n === me ? " <small>This computer</small>" : `<button class="mini" data-a="psu_use" data-i="${i}">Use here</button><button class="mini" data-a="psu_mdel" data-i="${i}" aria-label="Delete ${esc(m.n)}">Delete</button>`}</span>`
+        `<tr class="${m.n === me ? "me" : ""}"><th scope="row">${esc(m.n)}${m.n === me ? " <small>This computer</small>" : ""}</th><td><div class="mac-sps">${psuPoints()
+          .map(
+            p =>
+              `<label><input type="checkbox" data-a="psu_msp" data-i="${i}" data-pt="${esc(p)}" ${(m.sp || []).includes(p) ? "checked" : ""}> ${esc(p)}</label>`
+          )
+          .join(
+            ""
+          )}</div></td><td class="mac-acts">${m.n === me ? "" : `<button class="mini" data-a="psu_use" data-i="${i}">Use here</button><button class="mini" data-a="psu_mdel" data-i="${i}" aria-label="Delete ${esc(m.n)}">Delete</button>`}</td></tr>`
     )
-    .join("")}</div>
+    .join("")}</tbody></table></div>
   <div class="fr" style="align-items:end"><label>Machine name<input id="psuM" maxlength="30" placeholder="e.g. Waiter5" autocomplete="off"></label><button class="chip on" style="flex:none" data-a="psu_madd">Add machine</button></div></div>`;
 }
 function printerSetupHTML() {
@@ -197,9 +205,19 @@ function psuAct(a, b) {
   }
   const m = M[+b.dataset.i];
   if (!m) return;
+  if (a === "psu_msp") {
+    const on = new Set(m.sp || []);
+    b.checked ? on.add(b.dataset.pt) : on.delete(b.dataset.pt);
+    m.sp = psuPoints().filter(p => on.has(p));
+    spRefreshPos();
+    const where = m.sp.length ? m.sp.join(", ") : "every sale point";
+    auditAdd("Settings", `${m.n} now sells at ${where}`);
+    return done(`${m.n} sells at ${where}.`);
+  }
   if (a === "psu_use") {
     MACHINE.use(m.n);
     psuD = null;
+    spRefreshPos();
     return done(`This computer is now ${m.n}.`);
   }
   if (a === "psu_mdel") {

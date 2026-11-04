@@ -69,6 +69,15 @@ function nextBizDate() {
     next = ymdOf(new Date(y, m - 1, n + 1));
   return next > today ? next : today;
 }
+/** The business date a moment belongs to: the day that was open then. Before any day, the clock's date. */
+function bizDateOf(at) {
+  const t = new Date(at).getTime(),
+    d = DAYS.find(
+      x =>
+        new Date(x.openedAt).getTime() <= t && (!x.closedAt || t <= new Date(x.closedAt).getTime())
+    );
+  return d ? dayDate(d) : ymdOf(new Date(at));
+}
 const dateGB = ymd => ymd.split("-").reverse().join("/");
 /** A moment shown on a business date: the date of the day, the clock's time. */
 function onBizDate(ymd, at = new Date()) {
@@ -80,6 +89,20 @@ const bizNow = () => onBizDate(bizDate());
 /** When a sale counts in reports. Sales from before business dates use their clock time. */
 const saleAt = s => (s.bd ? new Date(s.bd + "T12:00:00") : s.at);
 const saleShown = s => (s.bd ? onBizDate(s.bd, s.at) : s.at);
+/** Their shift for today, opened and closed. Nobody opens a second one at the till, unless Back Office has agreed to it. */
+const shiftDoneOf = n => {
+  const d = curDay(),
+    x = shiftAuthOf(n);
+  return d && !(x && x.status === "ok")
+    ? SHIFTS.filter(
+        s => s.day === d.id && s.user === n && s.closedAt && s.openedBy !== "Bill clearing"
+      ).pop()
+    : null;
+};
+/** A waiter's shift opens when they sign in and closes with the day. */
+const waiterShift = s => (USERS.find(u => u.n === s.user) || {}).role === "Waiter";
+/** Waiters and cashiers: opening and closing the shift is their clocking in and out. */
+const shiftRole = u => /waiter|cashier/i.test((u && u.role) || "");
 // ---- A waiter starts their own shift. With bills still pending, Back Office has to agree first.
 const shiftAuths = () => FD_SETTINGS.shiftAuth || (FD_SETTINGS.shiftAuth = []);
 const shiftAuthOf = n =>
@@ -171,12 +194,14 @@ function dayStart(by) {
   document.dispatchEvent(new Event("kf:newday"));
   return "";
 }
-function shiftStart(u, fl, by, clearing) {
+function shiftStart(u, fl, by, clearing, again) {
   if (!curDay()) return "Start the day first.";
   if (dayOver() && !clearing)
     return "The working day has ended. Clear the bills and end the day first.";
   if (!u) return "Choose a cashier.";
   if (shiftOf(u)) return u + " already has an open shift.";
+  if (!clearing && !again && shiftDoneOf(u))
+    return u + " has already done a shift today. A manager can open another in Back Office.";
   if (!(fl >= 0)) return "Enter the opening cash float (0 or more).";
   SHIFTS.push({
     id: "S" + (SHIFTS.length + 1),
@@ -193,6 +218,7 @@ function shiftStart(u, fl, by, clearing) {
 }
 function shiftEnd(sh, counted, by) {
   if (!sh) return "Shift not found.";
+  if (sh.closedAt) return "This shift is already closed.";
   if (!(counted >= 0)) return "Enter the actual cash counted in the till.";
   const c = shiftCalc(sh);
   Object.assign(sh, {
@@ -222,8 +248,9 @@ function dayEnd(by) {
   if (!d) return "No day is open.";
   const stop = dayEndStop();
   if (stop) return stop;
-  const os = openShifts();
+  const os = openShifts().filter(s => !waiterShift(s));
   if (os.length) return "End these shifts first: " + os.map(s => s.user).join(", ") + ".";
+  openShifts().forEach(s => shiftEnd(s, Math.max(0, shiftCalc(s).expected), "Day end"));
   const a = SALES.filter(s => s.at >= new Date(d.openedAt));
   Object.assign(d, {
     closedAt: new Date().toISOString(),
@@ -308,7 +335,7 @@ function shiftReport(sh, act, by) {
     ac = sh.closedAt ? sh.counted : act,
     vr = ac >= 0 ? ac - c.expected : null,
     pays = pOf(sh);
-  return `<div class="rd">${rhead("SHIFT SUMMARY")}<table>${rr("Shift no", sh.id)}${rr("Cashier", hx(sh.user))}${rr("Opened", dm(sh.openedAt) + " " + hm(sh.openedAt))}${rr("Closed", sh.closedAt ? dm(sh.closedAt) + " " + hm(sh.closedAt) : "Still open")}</table><hr><div class="sec">PAYMODES (KSH)</div><table>${rr("CASH", R2(c.cash))}${rr("M-PESA", R2(c.mpesa))}${rr("PDQ", R2(c.pdq || 0))}${rr("Complimentary", R2(c.comp || 0))}${rr("Room", R2(c.room || 0))}${rr("Tips", R2(c.tips || 0))}${rr("CREDIT", R2(c.credit))}${payExtraRows(c.sales, (n, v) => rr(hx(n), R2(v)))}${rr("TOTAL", R2(c.cash + c.mpesa + (c.pdq || 0) + (c.comp || 0) + (c.room || 0) + c.credit + payExtraSum(c.sales)), 1)}</table><hr><div class="sec">SALES</div><table>${rr("Bills", c.bills)}${rr("Gross sales", R2(c.gross))}${rr("Taxes", R2(c.tax))}${rr("Net sales", R2(c.gross - c.tax), 1)}</table><hr><div class="sec">CASH RECONCILIATION</div><table>${rr("Opening float", R2(sh.float))}${rr("+ Cash sales", R2(c.cash))}${rr("- Cash paid out", R2(c.paid))}${rr("Expected in till", R2(c.expected), 1)}${rr("Actual in till", ac >= 0 ? R2(ac) : "not counted")}${rr("Variance", vr === null ? "-" : sg(vr), 1)}</table><hr><div class="sec">CASH PAYOUTS / EXPENSES</div>${pays.length ? `<table>${pays.map(x => rr(hm(x.at) + " " + hx(x.cat) + ": " + hx(x.desc), R2(x.amt))).join("")}${rr("TOTAL PAID OUT", R2(c.paid), 1)}</table>` : "<div>None</div>"}<hr><div class="c">Printed by ${hx(by || sh.user)}</div></div>`;
+  return `<div class="rd">${rhead("SHIFT SUMMARY")}<table>${rr("Shift no", sh.id)}${rr("Cashier", hx(sh.user))}${rr("Opened", dm(sh.openedAt) + " " + hm(sh.openedAt))}${rr("Closed", sh.closedAt ? dm(sh.closedAt) + " " + hm(sh.closedAt) : "Still open")}</table><hr><div class="sec">PAYMODES (KSH)</div><table>${rr("CASH", R2(c.cash))}${rr("M-PESA", R2(c.mpesa))}${rr("PDQ", R2(c.pdq || 0))}${rr("Complimentary", R2(c.comp || 0))}${fdOn() || c.room ? rr("Room", R2(c.room || 0)) : ""}${rr("Tips", R2(c.tips || 0))}${rr("CREDIT", R2(c.credit))}${payExtraRows(c.sales, (n, v) => rr(hx(n), R2(v)))}${rr("TOTAL", R2(c.cash + c.mpesa + (c.pdq || 0) + (c.comp || 0) + (c.room || 0) + c.credit + payExtraSum(c.sales)), 1)}</table><hr><div class="sec">SALES</div><table>${rr("Bills", c.bills)}${rr("Gross sales", R2(c.gross))}${rr("Taxes", R2(c.tax))}${rr("Net sales", R2(c.gross - c.tax), 1)}</table><hr><div class="sec">CASH RECONCILIATION</div><table>${rr("Opening float", R2(sh.float))}${rr("+ Cash sales", R2(c.cash))}${rr("- Cash paid out", R2(c.paid))}${rr("Expected in till", R2(c.expected), 1)}${rr("Actual in till", ac >= 0 ? R2(ac) : "not counted")}${rr("Variance", vr === null ? "-" : sg(vr), 1)}</table><hr><div class="sec">CASH PAYOUTS / EXPENSES</div>${pays.length ? `<table>${pays.map(x => rr(hm(x.at) + " " + hx(x.cat) + ": " + hx(x.desc), R2(x.amt))).join("")}${rr("TOTAL PAID OUT", R2(c.paid), 1)}</table>` : "<div>None</div>"}<hr><div class="c">Printed by ${hx(by || sh.user)}</div></div>`;
 }
 /** Items sold in each department, added up, with what paid for them. Returns take their quantities back off. */
 function daySalesHTML(a) {
@@ -350,5 +377,5 @@ function dayReport(d, by) {
       s => s.at >= new Date(d.openedAt) && (!d.closedAt || s.at <= new Date(d.closedAt))
     ),
     paid = sSum(pays, p => p.amt);
-  return `<div class="rd">${rhead("END OF DAY SUMMARY")}<table>${rr("Day", d.id)}${rr("Business date", dateGB(dayDate(d)))}${rr("Opened", dm(d.openedAt) + " " + hm(d.openedAt) + " by " + hx(d.openedBy))}${rr("Closed", d.closedAt ? dm(d.closedAt) + " " + hm(d.closedAt) + " by " + hx(d.closedBy) : "Still open")}</table><hr><div class="sec">SALES</div><table>${rr("Bills", a.length)}${rr("Gross sales", R2(sSum(a, s => s.g)))}${rr("Taxes", R2(sSum(a, s => s.tax)))}${rr("Net sales", R2(sSum(a, s => s.g - s.tax)), 1)}</table><hr><div class="sec">PAYMODES (KSH)</div><table>${rr("CASH", R2(sPm(a, "cash")))}${rr("M-PESA", R2(sPm(a, "mpesa")))}${rr("PDQ", R2(sPm(a, "pdq")))}${rr("Complimentary", R2(sPm(a, "comp")))}${rr("Room", R2(sPm(a, "room")))}${rr("Tips", R2(sSum(a, s => Object.values(s.tips || {}).reduce((x, y) => x + y, 0))))}${rr("CREDIT", R2(sPm(a, "credit")))}${payExtraRows(a, (n, v) => rr(hx(n), R2(v)))}</table><hr><div class="sec">SALES BY DEPARTMENT</div><hr>${daySalesHTML(a)}<div class="sec">SHIFTS</div>${sh.length ? `<table>${sh.map(x => rr(hx(x.user) + " " + hm(x.openedAt) + "-" + (x.closedAt ? hm(x.closedAt) : "open"), x.closedAt ? "var " + sg(x.variance) : "open")).join("")}</table>` : "<div>None</div>"}<hr><div class="sec">CASH PAYOUTS / EXPENSES</div>${pays.length ? `<table>${pays.map(x => rr(hx(x.cat) + ": " + hx(x.desc) + " (" + hx(x.user) + ")", R2(x.amt))).join("")}${rr("TOTAL PAID OUT", R2(paid), 1)}</table>` : "<div>None</div>"}<hr><table>${rr("Total cash variance", sg(sSum(sh, x => x.variance || 0)), 1)}</table><hr><div class="c">Printed by ${hx(by || d.closedBy || d.openedBy)}</div></div>`;
+  return `<div class="rd">${rhead("END OF DAY SUMMARY")}<table>${rr("Day", d.id)}${rr("Business date", dateGB(dayDate(d)))}${rr("Opened", dm(d.openedAt) + " " + hm(d.openedAt) + " by " + hx(d.openedBy))}${rr("Closed", d.closedAt ? dm(d.closedAt) + " " + hm(d.closedAt) + " by " + hx(d.closedBy) : "Still open")}</table><hr><div class="sec">SALES</div><table>${rr("Bills", a.length)}${rr("Gross sales", R2(sSum(a, s => s.g)))}${rr("Taxes", R2(sSum(a, s => s.tax)))}${rr("Net sales", R2(sSum(a, s => s.g - s.tax)), 1)}</table><hr><div class="sec">PAYMODES (KSH)</div><table>${rr("CASH", R2(sPm(a, "cash")))}${rr("M-PESA", R2(sPm(a, "mpesa")))}${rr("PDQ", R2(sPm(a, "pdq")))}${rr("Complimentary", R2(sPm(a, "comp")))}${fdOn() || sPm(a, "room") ? rr("Room", R2(sPm(a, "room"))) : ""}${rr("Tips", R2(sSum(a, s => Object.values(s.tips || {}).reduce((x, y) => x + y, 0))))}${rr("CREDIT", R2(sPm(a, "credit")))}${payExtraRows(a, (n, v) => rr(hx(n), R2(v)))}</table><hr><div class="sec">SALES BY DEPARTMENT</div><hr>${daySalesHTML(a)}<div class="sec">SHIFTS</div>${sh.length ? `<table>${sh.map(x => rr(hx(x.user) + " " + hm(x.openedAt) + "-" + (x.closedAt ? hm(x.closedAt) : "open"), x.closedAt ? "var " + sg(x.variance) : "open")).join("")}</table>` : "<div>None</div>"}<hr><div class="sec">CASH PAYOUTS / EXPENSES</div>${pays.length ? `<table>${pays.map(x => rr(hx(x.cat) + ": " + hx(x.desc) + " (" + hx(x.user) + ")", R2(x.amt))).join("")}${rr("TOTAL PAID OUT", R2(paid), 1)}</table>` : "<div>None</div>"}<hr><table>${rr("Total cash variance", sg(sSum(sh, x => x.variance || 0)), 1)}</table><hr><div class="c">Printed by ${hx(by || d.closedBy || d.openedBy)}</div></div>`;
 }

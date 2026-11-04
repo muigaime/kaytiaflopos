@@ -7,6 +7,8 @@ const PAY_BUILT = [
   ["credit", "Post to account", "Charged to a customer's account."],
   ["room", "Post to room", "Charged to a guest's room."]
 ];
+/** A business without rooms switches the Front Desk off in Settings → Modules. Its data stays. */
+const fdOn = () => typeof FD_SETTINGS === "undefined" || !FD_SETTINGS.frontDeskOff;
 const payCfg = () => {
   if (typeof FD_SETTINGS === "undefined") return { off: {}, custom: [] };
   return FD_SETTINGS.payModes || (FD_SETTINGS.payModes = { off: {}, custom: [] });
@@ -20,7 +22,7 @@ const payCustoms = () =>
     ? [...payMine(), PAY_PAYROLL]
     : payMine();
 const payCustomsOn = () => payCustoms().filter(c => c.on !== false);
-const payModeOn = k => k === "cash" || !payCfg().off[k];
+const payModeOn = k => k === "cash" || ((k === "room" ? fdOn() : true) && !payCfg().off[k]);
 function payName(k) {
   const b = PAY_BUILT.find(x => x[0] === k),
     c = payCustoms().find(x => x.k === k);

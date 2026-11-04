@@ -363,12 +363,14 @@ function boptVoidSave() {
     },
     voidSlipHTML
   );
-  showRc(
+  rcFill(
     tickets.map(x => x.html).join("") + '<div class="sl-scr" id="rcPrinted"></div>',
     null,
     "Close"
   );
-  printOrderTickets(tickets, voidTicketLines, "void alert");
+  printOrderTickets(tickets, voidTicketLines, "void alert").then(r =>
+    rcDone(r, "Void alert sent.")
+  );
 }
 
 // ---------------------------------------------------------------- clicks

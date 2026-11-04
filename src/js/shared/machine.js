@@ -56,6 +56,11 @@ const MACHINE = (() => {
     if (name()) add(name());
     else draw();
   }
-  return { name, list, clean, problem, add, use, gate };
+  /** The sale points this computer is attached to. None means it isn't limited. */
+  function points() {
+    const m = list().find(x => x.n === name());
+    return m && m.sp ? m.sp.filter(posSells) : [];
+  }
+  return { name, list, clean, problem, add, use, gate, points };
 })();
 addEventListener("DOMContentLoaded", () => MACHINE.gate());

@@ -149,7 +149,7 @@ function docTarget(ctx) {
   }
 }
 function hkHTML(only, by) {
-  const T = todayYmd(),
+  const T = fdToday(),
     c = roomStatusCounts(),
     rows = ROOMS.slice()
       .sort((a, b) => a.no.localeCompare(b.no, undefined, { numeric: true }))

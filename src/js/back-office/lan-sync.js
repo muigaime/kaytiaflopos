@@ -80,6 +80,7 @@ function lanApply(p) {
   const str = JSON.stringify(merged);
   localStorage.setItem(LS, str);
   boLoad(JSON.parse(str), true);
+  fdModuleApply();
   LAN.lastRaw = str;
   LAN.base = p.rev;
   lanSaveBase();

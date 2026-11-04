@@ -139,7 +139,12 @@ function hrDayTime(e, day) {
           .filter(s => s.user === e.user && ymdOf(new Date(s.openedAt)) === day)
           .map(s => ({
             in: new Date(s.openedAt).toTimeString().slice(0, 5),
-            out: s.closedAt ? new Date(s.closedAt).toTimeString().slice(0, 5) : "",
+            // A shift the day closed for them ended when they last signed out.
+            out: s.closedAt
+              ? new Date(s.closedBy === "Day end" && s.lastOut ? s.lastOut : s.closedAt)
+                  .toTimeString()
+                  .slice(0, 5)
+              : "",
             src: "POS shift"
           }))
       : [],

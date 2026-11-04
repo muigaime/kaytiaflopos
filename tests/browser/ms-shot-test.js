@@ -15,9 +15,9 @@ const tile=n=>{const hit=()=>qa("#grid .it").find(b=>b.textContent.includes(n));
 const login=async p=>{for (const k of p+"E") { q('#kp [data-k="'+k+'"]').click(); await wait(15); } await wait(450);};
 const send=async l=>{click("#sendBtn"); await wait(20); if(q("#mSend").classList.contains("show")){q("#lbl").value=l; click("#sendGo");} await wait(600);};
 try{
-  click('[data-go="pos"]'); await wait(200); posKioskOff(); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
+  click('[data-go="pos"]'); await wait(200); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
   await login("1111");
-  const snd=async l=>{await send(l); await wait(350); click("#rcClose"); await wait(10);}, sc=()=>q("#shMgr").classList.contains("show"), head=()=>(q("#shMgr h2")||{}).textContent, B=a=>q('#shMgr [data-sa="'+a+'"]'), sa=async a=>{click('#shMgr [data-sa="'+a+'"]'); await wait(25);}, msgT=()=>(q("#shMgr .status:not(.ok)")||{}).textContent, relog=async p=>{q("#shMgr").classList.remove("show"); q("#mSel").classList.remove("show"); click("#lock"); await wait(25); posKioskOff(); await login(p); await wait(420);}, note=()=>(qa("#fsn").pop()||{}).textContent||"", tick=async no=>{q('[data-s="'+no+'"]').click(); await wait(15);}, sel=async()=>{click("#selBtn"); await wait(20);};
+  const snd=async l=>{await send(l); await wait(350); click("#rcClose"); await wait(10);}, sc=()=>q("#shMgr").classList.contains("show"), head=()=>(q("#shMgr h2")||{}).textContent, B=a=>q('#shMgr [data-sa="'+a+'"]'), sa=async a=>{click('#shMgr [data-sa="'+a+'"]'); await wait(25);}, msgT=()=>(q("#shMgr .status:not(.ok)")||{}).textContent, relog=async p=>{q("#shMgr").classList.remove("show"); q("#mSel").classList.remove("show"); click("#lock"); await wait(25); await login(p); await wait(420);}, note=()=>(qa("#fsn").pop()||{}).textContent||"", tick=async no=>{q('[data-s="'+no+'"]').click(); await wait(15);}, sel=async()=>{click("#selBtn"); await wait(20);};
   const J=()=>USERS.find(u=>u.n==="Jane Waiter"), S=()=>USERS.find(u=>u.n==="Solo Sam"); S().role="Cashier";
   shiftStart(S().n,0,"t")||0; await add("Tusker","Bar",2); await snd("T1"); await add("Fish","Restaurant"); await snd("T2"); await sel(); await tick(orders[0].no); q("#selPushGo").click(); await wait(20); log("ok");
 }catch(e){log("X "+e.message)}

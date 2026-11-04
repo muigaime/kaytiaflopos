@@ -15,7 +15,7 @@ const tile=n=>{const hit=()=>qa("#grid .it").find(b=>b.textContent.includes(n));
 const login=async p=>{for (const k of p+"E") { q('#kp [data-k="'+k+'"]').click(); await wait(15); } await wait(450);};
 const send=async l=>{click("#sendBtn"); await wait(20); if(q("#mSend").classList.contains("show")){q("#lbl").value=l; click("#sendGo");} await wait(600);};
 try{
-  click('[data-go="pos"]'); await wait(200); posKioskOff(); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
+  click('[data-go="pos"]'); await wait(200); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
   await login("1111");
   const pin=async()=>{if(q("#bopPin")){q("#bopPin").value="0000"; click('[data-bg="auth"]'); await wait(20);}}, opt=async a=>{click("#billBtn"); await wait(10); click('[data-bo="'+a+'"]'); await wait(15);}, save=async()=>{click('[data-bg="save"]'); await wait(25);}, closeRc=async()=>{await wait(500); click("#rcClose"); await wait(10);}, pick=async n=>{const b=qa("#bopBody .bop-b").find(x=>x.textContent.includes(n)); if(b){b.click(); await wait(15);}};
   click("#billBtn"); await wait(20); log("1 DIAL: "+qa(".bw-i").map(b=>b.dataset.bo+":"+b.textContent).join(" / ")+" | title "+q(".bw-t").textContent);
@@ -29,7 +29,7 @@ try{
   await opt("merge"); await pin(); q('[data-trs="'+orders.find(o=>o.label==="T9").no+'"]').click(); await wait(10); q('[data-trt="'+orders.find(o=>o.label==="T8").no+'"]').click(); await wait(10); click("[data-trw]"); await wait(10); await save();
   await opt("void"); await pin(); await pick("T1B"); click("#bopVAll"); await wait(10); q('.bv-r[data-vw="Item spoilt"]').click(); await save(); await closeRc();
   log("3 LOG: "+BILLLOG.map(x=>x.act).join(",")+" | bills "+orders.map(o=>o.label+" "+totals(o.lines,o).g).join(";"));
-  posKioskOff(); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400);
+  q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400);
   log("4 HOME CARD: "+(document.body.textContent.match(/\\d+ reports/)||["not on this page"])[0]);
   q('#nav .nv[data-n="Reports"]').click(); await wait(30); log("5 LIST: "+qa("[data-r]").map(b=>b.textContent).join(" / "));
   const rep=async k=>{q('[data-r="'+k+'"]').click(); await wait(30); const tb=q("#vSub table.t"); return q(".rp-head h3").textContent+" | "+q(".rp-cap").textContent+" || "+[...tb.rows].map(r=>[...r.cells].map(c=>c.textContent).join(",")).join("\\n   ");};

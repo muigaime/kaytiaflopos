@@ -15,15 +15,15 @@ const tile=n=>{const hit=()=>qa("#grid .it").find(b=>b.textContent.includes(n));
 const login=async p=>{for (const k of p+"E") { q('#kp [data-k="'+k+'"]').click(); await wait(15); } await wait(450);};
 const send=async l=>{click("#sendBtn"); await wait(20); if(q("#mSend").classList.contains("show")){q("#lbl").value=l; click("#sendGo");} await wait(600);};
 try{
-  click('[data-go="pos"]'); await wait(200); posKioskOff(); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
+  click('[data-go="pos"]'); await wait(200); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
   await login("1111");
-  const relog=async p=>{click("#lock"); await wait(25); posKioskOff(); await login(p);}, pay=async o=>{openPay(o); await wait(20); q("#pAmt").value="9000"; click("#pOk"); await wait(35); click("#rcClose"); await wait(10);};
+  const relog=async p=>{click("#lock"); await wait(25); await login(p);}, pay=async o=>{openPay(o); await wait(20); q("#pAmt").value="9000"; click("#pOk"); await wait(35); click("#rcClose"); await wait(10);};
   window.__P=[]; window.open=()=>({document:{write(h){window.__P.push(h);},close(){}},focus(){},print(){}});
   await add("Tusker","Bar",2); await add("Fish","Restaurant"); await send("T1"); await wait(500); click("#rcClose"); await wait(10); orders[0].guest="Mary W"; orders[0].room="101";
   await add("Fish","Restaurant"); await send("T2"); await wait(500); click("#rcClose"); await wait(10);
   await relog("0000"); await pay([orders[0]]); await pay([orders[0]]);
   await relog("3333"); await add("Tusker"); await pay(null);
-  posKioskOff(); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400);
+  q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400);
   q('#nav .nv[data-n="Reports"]').click(); await wait(30); q('[data-r="bills"]').click(); await wait(30);
   const rows=()=>qa("#vSub [data-bill]").filter(r=>!r.hidden).map(r=>[...r.cells].map(c=>c.textContent).join(",")).join("\\n   "), tot=()=>q(".bl-tot").innerText.replace(/\\s+/g," "), dbl=n=>q('[data-bill="'+n+'"]').dispatchEvent(new MouseEvent("dblclick",{bubbles:true})), hdr=()=>qa(".bl-t th").map(x=>x.textContent).join("/");
   log("1 GRID: "+hdr()+"\\n   "+rows()+"\\n   "+tot()+" | hint "+q(".bl-hint").textContent);

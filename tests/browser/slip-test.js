@@ -22,16 +22,16 @@ try{
   click("#printBtn"); await wait(30);
   log("1 BILL: "+rc());
   log("2 HTML SAFE: "+q("#rc").innerHTML.includes("&lt;Grilled&gt;")+" | scr hidden");
-  if(SHOT==="bill") {posKioskOff(); return done();}
+  if(SHOT==="bill") {return done();}
   click("#rcPrint"); await wait(10); log("3 PRINT: called "+__prints+" | html class during print ["+__cls+"] | "+__pg); dispatchEvent(new Event("afterprint")); log("3b AFTER: class ["+document.documentElement.className+"] style ["+q("#pgStyle").textContent+"]"); await closeRc();
   await add("Tusker Lager",2);
   await send("T9"); log("4 ORDER slips "+slips()+" | titles "+qa("#rc .sl-ot").map(x=>x.textContent).join(" + ")+" | hotel name on it "+rc().includes("The Tide")+" | price on it "+/100\\.00|KES/.test(rc())+" | "+rc());
-  if(SHOT==="order"||SHOT==="pdforder") {posKioskOff(); if(SHOT==="pdforder")pr(); return done();}
+  if(SHOT==="order"||SHOT==="pdforder") {if(SHOT==="pdforder")pr(); return done();}
   await closeRc(); log("5 FIELDS CLEARED: "+["fTable","fGuest","fCov","fRoom"].map(i=>"["+q("#"+i).value+"]").join(""));
   click("#settleBtn"); await wait(30); click('#ordList [data-oa="bill"]'); await wait(30); log("6 ORDER BILL: "+rc()); log("6b Charge button "+(q("#rcCharge").style.display!=="none")); await closeRc();
   const o=orders[0]; openPay([o]); await wait(25); q("#pAmt").value="2000"; click("#pOk"); await wait(40);
   log("7 RECEIPT: "+rc()); log("7b no stock note "+!/Stock used/.test(rc())+" | no old name "+!/MWANGAZA/i.test(q("#rc").innerHTML)+" | close "+q("#rcClose").textContent);
-  if(SHOT==="receipt"||SHOT==="pdf") {posKioskOff(); if(SHOT==="pdf")pr(); return done();}
+  if(SHOT==="receipt"||SHOT==="pdf") {if(SHOT==="pdf")pr(); return done();}
   await closeRc();
   await add("Tusker Lager"); openPay(null); await wait(25); q("#pAmt").value="500"; click("#pOk"); await wait(40); log("8 DIRECT RECEIPT: "+rc()); log("8b Stock used hidden "+!/Stock used/.test(rc())); await closeRc();
   q('#spTabs [data-t="Pool Bar"]').click(); await wait(50); await add("Cheese Platter"); await send("Pool 1"); log("9 BAR OUTLET: "+qa("#rc .sl-ot").map(x=>x.textContent).join(" + ")); await closeRc();

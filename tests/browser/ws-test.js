@@ -15,11 +15,10 @@ const tile=n=>{const hit=()=>qa("#grid .it").find(b=>b.textContent.includes(n));
 const login=async p=>{for (const k of p+"E") { q('#kp [data-k="'+k+'"]').click(); await wait(15); } await wait(450);};
 const send=async l=>{click("#sendBtn"); await wait(20); if(q("#mSend").classList.contains("show")){q("#lbl").value=l; click("#sendGo");} await wait(600);};
 try{
-  click('[data-go="pos"]'); await wait(200); posKioskOff(); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
+  click('[data-go="pos"]'); await wait(200); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
   await login("1111");
-  const relog=async p=>{click("#lock"); await wait(25); posKioskOff(); await login(p);}, note=()=>(qa("#fsn").pop()||{}).textContent||"", snd=async l=>{await send(l); await wait(400); if(q("#mRc").classList.contains("show")) click("#rcClose"); await wait(10);}, vis=s=>{const e=q(s); return !!e&&getComputedStyle(e).display!=="none";}, btns=()=>["sendBtn","printBtn","settleBtn","ordBtn","selBtn","billBtn","chSP"].filter(x=>vis("#"+x)).join(",");
-  click("#lock"); await wait(25); posKioskOff();
-  q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400);
+  const relog=async p=>{click("#lock"); await wait(25); await login(p);}, note=()=>(qa("#fsn").pop()||{}).textContent||"", snd=async l=>{await send(l); await wait(400); if(q("#mRc").classList.contains("show")) click("#rcClose"); await wait(10);}, vis=s=>{const e=q(s); return !!e&&getComputedStyle(e).display!=="none";}, btns=()=>["sendBtn","printBtn","settleBtn","ordBtn","selBtn","billBtn","chSP"].filter(x=>vis("#"+x)).join(",");
+  click("#lock"); await wait(25);   q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400);
   const goP=async()=>{qa("#nav .nv").find(x=>x.dataset.n==="Waiter setup").click(); await wait(30);}; await goP();
   log("1 PAGE: "+q("#vSub h1").textContent+" | waiters "+qa(".ws-w").map(x=>x.innerText.replace(/\\s+/g," ")).join(" ; ")+" | rights "+qa("[data-wsp]").length+" | later "+qa(".ws-p.later").length);
   const inp=(k,v)=>{const e=q('[data-ws="'+k+'"]'); e.value=v; e.dispatchEvent(new Event("input",{bubbles:true}));}, tick=async(k,on)=>{const e=q('[data-wsp="'+k+'"]'); if(e.checked!==on){e.click(); e.dispatchEvent(new Event("change",{bubbles:true}));} await wait(5);}, sv=async()=>{click('[data-a="ws_save"]'); await wait(25); return q("#toast").textContent;};
@@ -32,7 +31,7 @@ try{
   q('.ws-w[data-i="'+USERS.indexOf(R)+'"]').click(); await wait(25); log("11 EDIT: "+q(".ws-form h4").textContent+" | id "+q(".ws-id").textContent+" | disc "+q('[data-wsp="disc"]').checked+" void "+q('[data-wsp="void"]').checked+" | points "+qa("[data-wsd]:checked").length);
   click('[data-a="ws_new"]'); await wait(15);
   shiftStart("Rose Kim",0,"t"); q("#bo").classList.remove("show"); click('[data-go="pos"]'); await wait(50);
-  posKioskOff(); await login("5555");
+  await login("5555");
   log("12 ROSE TILES tabs "+qa("#spTabs button").map(b=>b.textContent).join("/")+" | buttons "+btns()+" | credit "+vis('#pAcct'));
   await add("Tusker","Bar"); log("13 NO STOCK COUNT: tile "+q("#grid .it").innerText.replace(/\\s+/g," ")); await snd("R1"); await add("Fish","Restaurant"); await snd("R2"); await add("Fish","Restaurant"); await send("R3"); await wait(30); log("14 PENDING LIMIT: "+note()+" | bills "+orders.length); cart={}; drawCart();
   click("#billBtn"); await wait(10); click('[data-bo="disc"]'); await wait(15); log("15 DISCOUNT NO PIN: "+!q("#bopPin")); qa("#bopBody .bop-b").find(b=>b.textContent.includes("R1")).click(); await wait(15); q("#bopVal").value="20"; q("#bopWhy").value="x"; click('[data-bg="save"]'); await wait(15); log("16 OVER LIMIT: "+q("#bopMsg").textContent); q("#bopVal").value="10"; click('[data-bg="save"]'); await wait(20); log("17 WITHIN: "+note()+" | "+BILLLOG.at(-1).by);

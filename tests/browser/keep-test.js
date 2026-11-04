@@ -9,7 +9,7 @@ const tail = `<script>(async()=>{const log=m=>sessionStorage.log=(sessionStorage
 const click=s=>{const el=q(s);if(!el)throw new Error("missing "+s);el.click();};
 const tile=n=>{const hit=()=>qa("#grid .it").find(b=>b.textContent.includes(n)); if(hit()) return hit(); for(const c of qa("#cats .cat").map(x=>x.dataset.c)){q('#cats [data-c="'+c+'"]').click(); if(hit()) return hit();}}, add=async(n,t=1)=>{for(let i=0;i<t;i++){tile(n).click(); await wait(6);}};
 const send=async l=>{click("#sendBtn"); await wait(20); if(q("#mSend").classList.contains("show")){q("#lbl").value=l; click("#sendGo"); await wait(30);} click("#rcClose"); await wait(15);};
-const inn=async()=>{click('[data-go="pos"]'); await wait(200); posKioskOff(); for (const k of "1111E") { q('#kp [data-k="'+k+'"]').click(); await wait(15); } await wait(500);};
+const inn=async()=>{click('[data-go="pos"]'); await wait(200); for (const k of "1111E") { q('#kp [data-k="'+k+'"]').click(); await wait(15); } await wait(500);};
 const rows=()=>qa("#selList [data-row]").map(r=>r.querySelector("b").textContent+":"+r.querySelector(".n").textContent).join(", ");
 const st=()=>"Bar a "+STK.Bar.a+" b "+STK.Bar.b;
 const ph=+(sessionStorage.ph||1);

@@ -8,6 +8,14 @@ FIRST TIME
   Windows may say "Windows protected your PC", because the program isn't digitally
   signed yet. Press More info, then Run anyway.
 
+UPDATING
+  Double-click KaytiaFlow_Update.exe on each computer. It closes Kaytia Flow, replaces the
+  program in C:\KaytiaFlow and starts it again. Then refresh the browser page.
+  Your sales, stock, staff and settings are not touched, but take a backup first under
+  Settings > Backup and restore.
+  The old version is kept as C:\KaytiaFlow\KaytiaFlow.previous.exe.
+  Update the Main first, then the tills, when nobody is in the middle of a sale.
+
 CONNECTING COMPUTERS
   On the computer that will stay on (the Main):
     1. Run KaytiaFlow.exe and choose "The Main computer".

@@ -15,12 +15,12 @@ const tile=n=>{const hit=()=>qa("#grid .it").find(b=>b.textContent.includes(n));
 const login=async p=>{for (const k of p+"E") { q('#kp [data-k="'+k+'"]').click(); await wait(15); } await wait(450);};
 const send=async l=>{click("#sendBtn"); await wait(20); if(q("#mSend").classList.contains("show")){q("#lbl").value=l; click("#sendGo");} await wait(600);};
 try{
-  click('[data-go="pos"]'); await wait(200); posKioskOff(); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
+  click('[data-go="pos"]'); await wait(200); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
   await login("1111");
   const jobs=[]; const realFetch=window.fetch; window.fetch=async(u,o)=>{ u=String(u); if(u.includes("/api/print/installed")) return {ok:true,json:async()=>({printers:["TEST"]})}; if(u.includes("/api/print/ticket")){ jobs.push(JSON.parse(o.body)); return {ok:true,json:async()=>({})}; } return realFetch(u,o); };
   const tst=()=>q("#toast").textContent, tab=async k=>{click('[data-a="hs_tab"][data-k="'+k+'"]'); await wait(40);};
-  const toBO=async()=>{click("#lock"); await wait(25); posKioskOff(); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400); qa("#nav .nv").find(x=>x.dataset.n==="Settings").click(); await wait(60);};
-  const toPOS=async p=>{click("#boMenu"); await wait(30); click('[data-go="pos"]'); await wait(80); posKioskOff(); await login(p); click('#spTabs [data-t="Bar"]'); await wait(10);};
+  const toBO=async()=>{click("#lock"); await wait(25); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400); qa("#nav .nv").find(x=>x.dataset.n==="Settings").click(); await wait(60);};
+  const toPOS=async p=>{click("#boMenu"); await wait(30); click('[data-go="pos"]'); await wait(80); await login(p); click('#spTabs [data-t="Bar"]'); await wait(10);};
   const logoFile=async(type="image/png")=>{const c=document.createElement("canvas"); c.width=800; c.height=400; const x=c.getContext("2d"); x.fillStyle="#fff"; x.fillRect(0,0,800,400); x.fillStyle="#000"; x.fillRect(200,100,400,200); const b=await new Promise(r=>c.toBlob(r,type)); return new File([b],"logo.png",{type});};
   const upload=async(k,f)=>{const i=q('[data-setc="logo"][data-k="'+k+'"]'); const dt=new DataTransfer(); dt.items.add(f); i.files=dt.files; i.dispatchEvent(new Event("change",{bubbles:true})); await wait(250);};
   const addPay=async(pt,m,v,a)=>{for(const [k,val] of [["pt",pt],["m",m],["v",v],["a",a]]){const e=q('[data-iv="gp.'+k+'"]'); e.value=val; e.dispatchEvent(new Event("input",{bubbles:true}));} click('[data-a="hs_payadd"]'); await wait(30);};

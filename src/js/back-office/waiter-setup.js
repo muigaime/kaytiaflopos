@@ -69,7 +69,11 @@ V.wait = () => {
     }).join("") || '<div class="empty">No POS staff yet.</div>'
   }</div>
  <div class="pn ws-form"><div class="ws-lh"><h4>${F.i < 0 ? "Create POS staff" : "Edit " + esc(F.n)}</h4><span class="ws-id">${esc(id)}</span></div>
- <div class="ws-g"><label>Role<select data-wsr>${POS_ROLES.map(r => `<option ${r === F.role ? "selected" : ""}>${r}</option>`).join("")}</select></label>${f("User name", "n", 'placeholder="First Last" autocomplete="off"')}${f("Pass code", "pin", 'inputmode="numeric" placeholder="4 to 6 digits" autocomplete="off"')}${f("Card no", "card", 'placeholder="Optional" autocomplete="off"')}${f("Sales commission (%)", "comm", 'inputmode="decimal" placeholder="Report rate"')}${f("Bill copies", "copies", 'inputmode="numeric"')}${always ? "" : f("Maximum pending bills", "maxPend", 'inputmode="numeric" title="0 means no limit"') + f("Maximum discount (%)", "maxDisc", 'inputmode="decimal" placeholder="No limit"')}</div>
+ <div class="ws-g"><label>Role<select data-wsr>${POS_ROLES.map(
+   r => `<option ${r === F.role ? "selected" : ""}>${r}</option>`
+ ).join(
+   ""
+ )}</select></label>${f("User name", "n", 'placeholder="First Last" autocomplete="off"')}${f("Pass code", "pin", 'inputmode="numeric" placeholder="4 to 6 digits" autocomplete="off"')}${f("Card no", "card", 'placeholder="Optional" autocomplete="off"')}${f("Sales commission (%)", "comm", 'inputmode="decimal" placeholder="Report rate"')}${f("Bill copies", "copies", 'inputmode="numeric"')}${always ? "" : f("Maximum pending bills", "maxPend", 'inputmode="numeric" title="0 means no limit"') + f("Maximum discount (%)", "maxDisc", 'inputmode="decimal" placeholder="No limit"')}</div>
  ${always ? "" : `<div class="ws-o"><label class="ws-c"><input type="checkbox" data-wsc="allSP" ${F.allSP ? "checked" : ""}> View bills from all sale points</label><label class="ws-c"><input type="checkbox" data-wsc="restrict" ${F.restrict ? "checked" : ""}> Restrict sale point access</label></div>`}
  ${
    !always && F.restrict
@@ -85,7 +89,14 @@ V.wait = () => {
    always
      ? `<div class="ws-always">${F.role}s can always do everything on the POS, so there are no rights to set.</div>`
      : `<div class="ws-lh ws-rh"><h4>What this ${who} may do</h4><span><button class="mini" data-a="ws_all">Tick all</button> <button class="mini" data-a="ws_none">Clear all</button></span></div>
- ${WAITER_RIGHTS.map(([g, R]) => `<div class="ws-h">${g}</div><div class="ws-grid">${R.map(([k, l, h]) => wsTile(k, l, h)).join("")}</div>`).join("")}
+ ${WAITER_RIGHTS.map(
+   ([g, R]) =>
+     `<div class="ws-h">${g}</div><div class="ws-grid">${R.filter(
+       ([k]) => k !== "postRoom" || fdOn()
+     )
+       .map(([k, l, h]) => wsTile(k, l, h))
+       .join("")}</div>`
+ ).join("")}
  <div class="ws-h">Not active yet <small>Saved with the person, but the POS doesn't use these until those features are built</small></div><div class="ws-grid">${WAITER_RIGHTS_LATER.map(([k, l]) => wsTile(k, l, "", 1)).join("")}</div>`
  }
  <label class="ws-foot">Bill footer<textarea data-ws="footer" rows="2" placeholder="Printed on this person's guest bills">${esc(F.footer)}</textarea></label>
