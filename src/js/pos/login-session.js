@@ -238,6 +238,39 @@ window.addEventListener(
   },
   true
 );
+// ---- Nobody at the till: sign out after 30 seconds ----
+const POS_IDLE_MS = 30000;
+let posLastActive = Date.now();
+["pointerdown", "pointermove", "keydown", "touchstart", "wheel", "input", "click"].forEach(ev =>
+  document.addEventListener(ev, () => (posLastActive = Date.now()), {
+    capture: true,
+    passive: true
+  })
+);
+/** Work that signing out would lose: an unsent order, a payment, or a cashier counting the till. */
+function posIdleBusy() {
+  return (
+    Object.keys(cart).length > 0 ||
+    $("#mPay").classList.contains("show") ||
+    ($("#shMgr").classList.contains("show") && user.role !== "Waiter")
+  );
+}
+function posIdleCheck() {
+  if (Date.now() - posLastActive < POS_IDLE_MS) return;
+  if (!user || $("#login").style.display !== "none") return;
+  if ($("#bo").classList.contains("show") || $("#fd").classList.contains("show")) return;
+  if ($("#fl").classList.contains("show") || posIdleBusy()) return;
+  auditAdd("Sign out", "Signed out of the POS after 30 seconds with no activity", {
+    who: user.n,
+    mod: "POS"
+  });
+  document.querySelectorAll(".modal.show").forEach(m => m.classList.remove("show"));
+  $("#shMgr").classList.remove("show");
+  logoutAfterRc = false;
+  $("#lock").click();
+  pmsg("Signed out after 30 seconds with no activity. Enter your PIN.");
+}
+setInterval(posIdleCheck, 1000);
 drawDepts();
 drawCats();
 drawCart();

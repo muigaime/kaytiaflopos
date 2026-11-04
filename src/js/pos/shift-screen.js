@@ -129,6 +129,8 @@ function shiftHeld() {
 /** The clock has moved on but the day hasn't been ended. */
 function bizLateNote() {
   if (!dayOver()) return "";
+  if (user && user.role === "Waiter")
+    return '<div class="status bad">The day has not been ended. Confirm from the office.</div>';
   const n = pendingAll().length;
   return `<div class="status bad">The system day ended at ${dayEndText(curDay())}.${n ? ` Clear ${n === 1 ? "the pending bill, or post it" : `the ${n} pending bills, or post them`} to an account or a room.` : ""} Then end the day. The date changes as soon as the day ends.</div>`;
 }

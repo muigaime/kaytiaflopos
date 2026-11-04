@@ -22140,6 +22140,39 @@ window.addEventListener(
   },
   true
 );
+// ---- Nobody at the till: sign out after 30 seconds ----
+const POS_IDLE_MS = 30000;
+let posLastActive = Date.now();
+["pointerdown", "pointermove", "keydown", "touchstart", "wheel", "input", "click"].forEach(ev =>
+  document.addEventListener(ev, () => (posLastActive = Date.now()), {
+    capture: true,
+    passive: true
+  })
+);
+/** Work that signing out would lose: an unsent order, a payment, or a cashier counting the till. */
+function posIdleBusy() {
+  return (
+    Object.keys(cart).length > 0 ||
+    $("#mPay").classList.contains("show") ||
+    ($("#shMgr").classList.contains("show") && user.role !== "Waiter")
+  );
+}
+function posIdleCheck() {
+  if (Date.now() - posLastActive < POS_IDLE_MS) return;
+  if (!user || $("#login").style.display !== "none") return;
+  if ($("#bo").classList.contains("show") || $("#fd").classList.contains("show")) return;
+  if ($("#fl").classList.contains("show") || posIdleBusy()) return;
+  auditAdd("Sign out", "Signed out of the POS after 30 seconds with no activity", {
+    who: user.n,
+    mod: "POS"
+  });
+  document.querySelectorAll(".modal.show").forEach(m => m.classList.remove("show"));
+  $("#shMgr").classList.remove("show");
+  logoutAfterRc = false;
+  $("#lock").click();
+  pmsg("Signed out after 30 seconds with no activity. Enter your PIN.");
+}
+setInterval(posIdleCheck, 1000);
 drawDepts();
 drawCats();
 drawCart();
@@ -22702,6 +22735,8 @@ function shiftHeld() {
 /** The clock has moved on but the day hasn't been ended. */
 function bizLateNote() {
   if (!dayOver()) return "";
+  if (user && user.role === "Waiter")
+    return '<div class="status bad">The day has not been ended. Confirm from the office.</div>';
   const n = pendingAll().length;
   return `<div class="status bad">The system day ended at ${dayEndText(curDay())}.${n ? ` Clear ${n === 1 ? "the pending bill, or post it" : `the ${n} pending bills, or post them`} to an account or a room.` : ""} Then end the day. The date changes as soon as the day ends.</div>`;
 }
@@ -23073,12 +23108,13 @@ function msDraw(msg) {
   let main;
   if (!d)
     main = `<div class="shc"><div class="status bad">The day has not been started.</div>${canDay() ? `<div class="stk">The new business date will be <b>${dateGB(nextBizDate())}</b>.</div><button class="chip on" data-sa="dstart">Start new day</button>` : `<div class="stk">Back Office or a cashier has to start the new day. You can start your shift after that.</div>`}</div>`;
+  else if (!sh && dayOver()) main = "";
   else if (!sh && shiftHeld()) main = shiftHeldHTML();
   else if (!sh)
     main = `<div class="shc"><div class="status">${wcShifts(n).some(s => s.cleared) ? "You've been cleared for today. A manager can open another shift in Back Office." : "You can sell again once the new day starts."}</div></div>`;
   else main = "";
   $("#shMgr").innerHTML =
-    `<div class="shm"><div class="shm-top"><h2>My bills</h2><button class="mini" data-sa="exit">Exit</button></div>${msg ? `<div class="status">${msg}</div>` : ""}${bizLateNote()}${main}${!sh && d && shiftHeld() ? "" : msPendingHTML(n)}
+    `<div class="shm"><div class="shm-top"><h2>My bills</h2><button class="mini" data-sa="exit">Exit</button></div>${msg ? `<div class="status">${msg}</div>` : ""}${bizLateNote()}${main}${!sh && d && !dayOver() && shiftHeld() ? "" : msPendingHTML(n)}
   <div class="ms-tiles">${tile("Pending bills", P.length, "KES " + R2(pend))}${tile("Sales today", "KES " + R2(msSum(today)))}${tile("Bills today", msBills(today))}${tile("Last 7 days", "KES " + R2(msSum(week)))}</div>
   <div class="shc">${msChart(n)}</div></div>`;
 }

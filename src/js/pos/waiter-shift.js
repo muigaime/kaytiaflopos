@@ -174,12 +174,13 @@ function msDraw(msg) {
   let main;
   if (!d)
     main = `<div class="shc"><div class="status bad">The day has not been started.</div>${canDay() ? `<div class="stk">The new business date will be <b>${dateGB(nextBizDate())}</b>.</div><button class="chip on" data-sa="dstart">Start new day</button>` : `<div class="stk">Back Office or a cashier has to start the new day. You can start your shift after that.</div>`}</div>`;
+  else if (!sh && dayOver()) main = "";
   else if (!sh && shiftHeld()) main = shiftHeldHTML();
   else if (!sh)
     main = `<div class="shc"><div class="status">${wcShifts(n).some(s => s.cleared) ? "You've been cleared for today. A manager can open another shift in Back Office." : "You can sell again once the new day starts."}</div></div>`;
   else main = "";
   $("#shMgr").innerHTML =
-    `<div class="shm"><div class="shm-top"><h2>My bills</h2><button class="mini" data-sa="exit">Exit</button></div>${msg ? `<div class="status">${msg}</div>` : ""}${bizLateNote()}${main}${!sh && d && shiftHeld() ? "" : msPendingHTML(n)}
+    `<div class="shm"><div class="shm-top"><h2>My bills</h2><button class="mini" data-sa="exit">Exit</button></div>${msg ? `<div class="status">${msg}</div>` : ""}${bizLateNote()}${main}${!sh && d && !dayOver() && shiftHeld() ? "" : msPendingHTML(n)}
   <div class="ms-tiles">${tile("Pending bills", P.length, "KES " + R2(pend))}${tile("Sales today", "KES " + R2(msSum(today)))}${tile("Bills today", msBills(today))}${tile("Last 7 days", "KES " + R2(msSum(week)))}</div>
   <div class="shc">${msChart(n)}</div></div>`;
 }
