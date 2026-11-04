@@ -145,7 +145,8 @@ function bosave() {
 window.bosave = bosave;
 /** Puts saved data into memory: at start-up, and again when another computer's changes arrive. */
 function boLoad(s, again) {
-  if (again) {
+  // After Clear all data the save is the whole truth: the built-in demo lists stay out.
+  if (again || (s.FS || {}).noSeeds) {
     SALES.length = 0;
     FREE_BILLS.length = 0;
     [OUTLET_INFO, ING, RO, INGC, INGU, ROLE_OVER].forEach(o =>
@@ -155,6 +156,7 @@ function boLoad(s, again) {
       if (!(k in (s.FS || {}))) delete FD_SETTINGS[k];
     });
   }
+  if ((s.FS || {}).noSeeds) Object.keys(STK).forEach(k => delete STK[k]);
   SALES.push(...s.S.map(x => ({ ...x, at: new Date(x.at) })));
   ITEMS.length = 0;
   ITEMS.push(...s.I.filter(i => i.d !== "Supermarket"));

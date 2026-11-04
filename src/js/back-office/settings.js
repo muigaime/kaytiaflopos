@@ -76,17 +76,15 @@ let mdlOpen = false,
   mdlFails = 0,
   mdlLocked = 0;
 const mdlLock = () => (mdlOpen = false);
-async function mdlUnlock() {
-  const el = $("#modPw");
-  if (!el) return;
-  if (Date.now() < mdlLocked) return toast("Too many tries. Wait 30 seconds.");
-  const typed = el.value;
-  el.value = "";
+/** The one password for protected settings. Says why when it's refused; wrong tries count across every place. */
+async function mdlPassOk(typed) {
+  if (Date.now() < mdlLocked) {
+    toast("Too many tries. Wait 30 seconds.");
+    return false;
+  }
   if (typed && MOD_PASS.includes(await H("module|" + typed))) {
     mdlFails = 0;
-    mdlOpen = true;
-    auditAdd("Settings", "Modules page opened");
-    return all();
+    return true;
   }
   if (++mdlFails >= 5) {
     mdlLocked = Date.now() + 3e4;
@@ -94,6 +92,18 @@ async function mdlUnlock() {
   }
   auditAdd("Failed sign-in", "Wrong modules password", { pri: "high" });
   toast("That is not the modules password.");
+  return false;
+}
+async function mdlUnlock() {
+  const el = $("#modPw");
+  if (!el) return;
+  const typed = el.value;
+  el.value = "";
+  if (await mdlPassOk(typed)) {
+    mdlOpen = true;
+    auditAdd("Settings", "Modules page opened");
+    return all();
+  }
   el.focus();
 }
 $("#vSub").addEventListener("keydown", e => {

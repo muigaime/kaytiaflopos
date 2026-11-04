@@ -4523,3 +4523,33 @@ tr[data-grp].on td {
   border-radius: 8px;
   background: var(--tint, #f6efde);
 }
+/* Settings: Clear all data */
+#bo .bk-danger {
+  border-color: #b3392b;
+  border-top: 3px solid #b3392b;
+}
+#bo .bk-two {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+  margin: 12px 0;
+}
+#bo .bk-two b,
+#bo .bk-two span {
+  display: block;
+  font-size: 13px;
+}
+#bo .bk-two b {
+  margin-bottom: 2px;
+}
+#bo .bk-red {
+  flex: none;
+  border-color: #b3392b;
+  background: #b3392b;
+  color: #fff;
+}
+#bo .bk-redl {
+  flex: none;
+  border-color: #b3392b;
+  color: #b3392b;
+}

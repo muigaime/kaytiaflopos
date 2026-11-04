@@ -3,9 +3,11 @@
 const BK_KIND = "kaytia-flow-backup",
   BK_VERSION = 1,
   BK_LAST = "kaytia_last_backup",
-  BK_DONE = "kaytia_restored";
+  BK_DONE = "kaytia_restored",
+  BK_CLEARED = "kaytia_cleared";
 let bkPick = null, // the file chosen to restore: { name, file, sum } or { name, err }
-  bkBusy = false;
+  bkBusy = false,
+  bkClearing = false; // the Clear all data form is open
 const bkToBase64 = blob =>
   new Promise((ok, no) => {
     const r = new FileReader();
@@ -100,6 +102,130 @@ function bkRead(text, name) {
     return { name, err: "This backup is missing data and can't be restored." };
   return { name, file: f, data: d };
 }
+// ---- Clear all data: for starting clean, such as going live after training ----
+// The settings that say how this business is set up stay. Everything that happened, and everyone in it, goes.
+const BK_KEEP_SETTINGS = [
+  "name",
+  "biz",
+  "logos",
+  "printers",
+  "printRules",
+  "printRoutes",
+  "printUrl",
+  "printKey",
+  "machines",
+  "opts",
+  "tax",
+  "dayTime",
+  "frontDeskOff",
+  "customRoles",
+  "payModes",
+  "voidReasons",
+  "currencies",
+  "meals",
+  "child",
+  "billPay",
+  "storeInfo"
+];
+function bkEmptyData() {
+  const cur = JSON.parse(localStorage.getItem(LS) || "{}"),
+    FS = {};
+  BK_KEEP_SETTINGS.forEach(k => {
+    if (k in FD_SETTINGS) FS[k] = FD_SETTINGS[k];
+  });
+  FS.noSeeds = true; // the demo data stays out from now on
+  FS.auditTrail = [
+    {
+      at: Date.now(),
+      nature: "Clear data",
+      text: `All data cleared by ${boUser.n}`,
+      who: boUser.n,
+      mod: "Settings",
+      pc: MACHINE.name(),
+      ref: "",
+      pri: "Important"
+    }
+  ];
+  return {
+    S: [],
+    I: [],
+    MV: [],
+    RQ: [],
+    CT: [],
+    GN: [],
+    LP: [],
+    VN: [],
+    VP: [],
+    BL: [],
+    OR: [],
+    RN: 1,
+    FB: [],
+    IS: [],
+    PD: [],
+    G: {},
+    R: {},
+    X: {},
+    IU: {},
+    D: [],
+    H: [],
+    P: [],
+    RM: [],
+    RV: [],
+    RT: [],
+    GR: [],
+    U: [],
+    C: [],
+    K: Object.fromEntries(LOCS.map(l => [l, {}])),
+    TB: cur.TB,
+    ST: cur.ST,
+    OL: cur.OL,
+    OI: cur.OI,
+    SS: Date.now(),
+    A: cur.A,
+    LI: cur.LI,
+    BR: cur.BR,
+    FS
+  };
+}
+function bkClearHTML() {
+  const open = bkClearing;
+  return `<div class="pn bk-danger"><h4>Clear all data</h4><div class="stk">For starting clean, such as going live after training. <b>This can't be undone</b> without a backup, so a copy of what's here downloads first.</div>
+  <div class="bk-two"><div><b>Cleared</b><span>Sales and bills, shifts and days, the menu, stock and recipes, purchases, vendors, customers, rooms and guests, POS staff, accounts, HR and payroll, and the audit log.</span></div><div><b>Kept</b><span>Back office users and role rights, the license, hotel details and logos, printers and machines, tax and payment settings, stores, selling points and tables.</span></div></div>
+  ${LAN.on ? '<div class="status bad">This computer is connected, so it clears every connected computer too.</div>' : ""}
+  ${
+    open
+      ? `<div class="pv-form"><label>Modules password<input id="bkClrPw" type="password" autocomplete="new-password"></label><label>Type CLEAR to confirm<input id="bkClrWord" autocomplete="off" spellcheck="false"></label><button class="chip bk-red" data-a="bk_cleargo" ${bkBusy ? "disabled" : ""}>Clear everything</button><button class="mini" data-a="bk_clearno">Cancel</button></div>`
+      : '<div class="pv-form"><button class="mini bk-redl" data-a="bk_clearask">Clear all data</button></div>'
+  }</div>`;
+}
+async function bkClear() {
+  const word = $("#bkClrWord").value.trim(),
+    typed = $("#bkClrPw").value;
+  if (word !== "CLEAR") return toast("Type CLEAR in capitals to confirm.");
+  if (!(await mdlPassOk(typed))) {
+    $("#bkClrPw").value = "";
+    return;
+  }
+  bkBusy = true;
+  all();
+  try {
+    bkDownload(await bkMake(), `Before_clearing_${bkFileName()}`);
+    const empty = JSON.stringify(bkEmptyData());
+    // From here on nothing in memory may be saved over the cleared data.
+    boFrozen = true;
+    localStorage.setItem(LS, empty);
+    if (LAN.on) localStorage.setItem(LAN_FORCE, "1");
+    await hrFiles.clear();
+    localStorage.removeItem("kaytia_rep_recent");
+    localStorage.setItem(BK_CLEARED, String(Date.now()));
+    location.reload();
+  } catch (e) {
+    boFrozen = false;
+    bkBusy = false;
+    toast("Clearing failed, so this computer's data was left as it was.");
+    all();
+  }
+}
 function backupHTML() {
   const last = localStorage.getItem(BK_LAST),
     days = last ? Math.floor((Date.now() - new Date(last).getTime()) / 864e5) : null,
@@ -124,10 +250,15 @@ function backupHTML() {
   <div class="pv-form">${mgrs ? '<label>Manager PIN<input id="bkPin" type="password" inputmode="numeric" autocomplete="off"></label>' : ""}<button class="chip on" data-a="bk_restore" ${bkBusy ? "disabled" : ""}>Replace and restore</button><button class="mini" data-a="bk_cancel">Cancel</button></div>`
         : ""
   }
-  <div class="stk">Staying with this computer: its machine name, license, theme and remembered sign-in. Set up its printers under Printers after restoring, because printer choices belong to each machine.</div></div>`;
+  <div class="stk">Staying with this computer: its machine name, license, theme and remembered sign-in. Set up its printers under Printers after restoring, because printer choices belong to each machine.</div></div>${bkClearHTML()}`;
 }
 async function bkAct(a) {
   if (!boCan("set.manage")) return boDenied();
+  if (a === "bk_clearask" || a === "bk_clearno") {
+    bkClearing = a === "bk_clearask";
+    return all();
+  }
+  if (a === "bk_cleargo") return bkClear();
   if (a === "bk_cancel") {
     bkPick = null;
     return all();
@@ -203,11 +334,12 @@ document.addEventListener("change", e => {
 });
 // Another open tab mustn't save its old data over a restore.
 addEventListener("storage", e => {
-  if (e.key === BK_DONE && e.newValue) {
+  if ((e.key === BK_DONE || e.key === BK_CLEARED) && e.newValue) {
     boFrozen = true;
     location.reload();
   }
 });
+localStorage.removeItem(BK_CLEARED);
 // The first start after a restore: put it on the record.
 (() => {
   const note = localStorage.getItem(BK_DONE);

@@ -47,6 +47,7 @@ function fdBrand() {
   });
 }
 function fdSeed() {
+  if (FD_SETTINGS.noSeeds) return; // cleared on purpose: the hotel adds its own rooms
   [
     [101, 0],
     [102, 0],
