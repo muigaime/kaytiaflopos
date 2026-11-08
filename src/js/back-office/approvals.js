@@ -3,7 +3,7 @@
 // Requisition:  "Awaiting approval" → approving it moves the stock. Whatever the store is short of stays open.
 // Issue:        anyone with the approve right issues straight away. Anyone else raises a note (ISSUES),
 //               and the stock moves when a manager approves that. One approval per movement, never two.
-// A manager approves by typing their PIN (Waiter setup). Each decision keeps who, when and why.
+// Who may approve is set in Users & roles (the inv.approve right). Each decision keeps who, when and why.
 const AWAIT = "Awaiting approval";
 let apM = null; // approval popup: { kind: "lpo" | "req" | "iss", id, act: "approve" | "reject" }
 
@@ -26,7 +26,7 @@ const apPending = () =>
 const apCount = () => apPending().length;
 /** Approve / Reject buttons for a document waiting for approval. */
 const apButtons = (kind, d) =>
-  d.status === AWAIT
+  d.status === AWAIT && boCan("inv.approve")
     ? `<button class="chip on" data-a="ap_open" data-k="${kind}" data-id="${esc(d.id)}" data-act="approve">Approve</button><button class="mini" data-a="ap_open" data-k="${kind}" data-id="${esc(d.id)}" data-act="reject">Reject</button>`
     : "";
 /** "Approved by Peter Mwangi · 31 Oct 10:20" / "Rejected by … : reason". */
@@ -168,20 +168,15 @@ const apTitle = (kind, d) =>
 function apModalIfOpen() {
   const d = apM && apFind(apM.kind, apM.id);
   if (!d || d.status !== AWAIT) return "";
-  const rej = apM.act === "reject",
-    mgrs = USERS.filter(u => u.role === "Manager");
+  const rej = apM.act === "reject";
   return `<div class="modal show" id="apModal" style="z-index:75"><div class="box" style="max-width:720px">
   <div class="fr" style="align-items:center;justify-content:space-between"><h3>${rej ? "Reject" : "Approve"} ${AP_KIND[apM.kind].toLowerCase()}</h3><button class="mini" data-a="ap_close" aria-label="Close">✕</button></div>
   <div class="stk"><b>${apTitle(apM.kind, d)}</b> · raised by ${esc(d.by)} · ${dt2(d.at)}${d.note ? " · " + esc(d.note) : ""}</div>
   <div class="tw"><table class="t">${apDocLines(apM.kind, d)}</table></div>
   ${rej ? `<label>Reason<input id="apWhy" placeholder="Why is it rejected?"></label>` : ""}
-  ${
-    mgrs.length
-      ? `<label>Manager PIN<input id="apPin" type="password" inputmode="numeric" autocomplete="off" placeholder="${mgrs.length} manager(s) can ${rej ? "reject" : "approve"}"></label>`
-      : '<div class="stk" style="color:var(--bad)">No manager can approve yet. Give a staff member the Manager role under Waiter setup.</div>'
-  }
+  <div class="stk">${rej ? "Rejecting" : "Approving"} as <b>${esc(boUser.n)}</b>.</div>
   <div class="stk">${apM.kind === "ret" && !rej ? "Approving takes the stock out now and reduces what's owed to the supplier." : apM.kind === "iss" && !rej ? "Approving moves the stock now." : apM.kind === "lpo" && !rej ? "Once approved the order can be received." : apM.kind === "req" && !rej ? "Once approved the store can issue it." : ""}</div>
-  <div class="fr" style="justify-content:flex-end"><button class="mini" data-a="ap_close">Cancel</button><button class="chip on" data-a="ap_ok" ${mgrs.length ? "" : "disabled"}>${rej ? "Reject" : "Approve"}</button></div>
+  <div class="fr" style="justify-content:flex-end"><button class="mini" data-a="ap_close">Cancel</button><button class="chip on" data-a="ap_ok">${rej ? "Reject" : "Approve"}</button></div>
  </div></div>`;
 }
 
@@ -336,15 +331,13 @@ function apAct(a, b) {
   }
   if (a === "ok") {
     const doc = apM && apFind(apM.kind, apM.id),
-      pin = ($("#apPin") || {}).value || "",
       why = (($("#apWhy") || {}).value || "").trim(),
-      mgr = USERS.find(u => u.role === "Manager" && u.pin === pin);
+      mgr = { n: boUser.n }; // the right is checked before any button action runs (ACT_RIGHTS)
     if (!doc || doc.status !== AWAIT) {
       apM = null;
       return all();
     }
     if (apM.act === "reject" && !why) return toast("Enter the reason for rejecting.");
-    if (!mgr) return toast("That is not a manager's PIN.");
     const kind = apM.kind;
     let extra = "";
     if (apM.act === "reject") apReject(kind, doc, mgr.n, why);

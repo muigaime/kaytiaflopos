@@ -7,6 +7,7 @@ const SET_TABS = [
   ["pos", "POS options"],
   ["tax", "Tax"],
   ["printers", "Printers"],
+  ["email", "Email reports"],
   ["modules", "Modules"],
   ["backup", "Backup and restore"],
   ["network", "Network"]

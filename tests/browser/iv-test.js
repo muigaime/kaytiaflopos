@@ -19,13 +19,14 @@ try{
   await login("1111");
   click("#lock"); await wait(25); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400); qa("#nav .nv").find(x=>x.dataset.n==="Inventory").click(); await wait(100);
   const tab=async t=>{click('[data-a="inv_tab"][data-t="'+t+'"]'); await wait(60);}, set=(sel,v)=>{const e=q(sel); e.value=v; e.dispatchEvent(new Event("input",{bubbles:true})); e.dispatchEvent(new Event("change",{bubbles:true}));}, seen=s=>{const e=q(s); return !!e&&e.offsetParent!==null;};
-  log("1 MENU: "+qa(".inv-rail .rhd,.inv-rail .ir").map(x=>(x.classList.contains("rhd")?"["+x.textContent+"]":x.querySelector("span").textContent)).join(" "));
+  await tab("stores");
+  log("1 MENU: "+qa(".inv-rail .rhd,.ph-subs button").map(x=>(x.classList.contains("rhd")?"["+x.textContent+"]":x.querySelector("span").textContent)).join(" "));
   log("2 STORES: "+q(".inv-title h1").textContent+" | picker "+!!q(".sc2")); click('[data-a="inv_stnew"]'); await wait(40); log("3 NEW STORE: form "+!!q("#stEd")); q("#stName").value="Drinks Store"; click('[data-a="inv_stsave"]'); await wait(40); log("4 CREATED: "+q("#vSub table").textContent.includes("Drinks Store")+" | form hidden "+!q("#stEd")+" | "+q("#toast").textContent);
-  for (const t of ["master","items","cats","req","issue","damage","appr","riss","rdmg","position","variance","streps"]) { await tab(t); log("5 "+t+": "+q(".inv-title h1").textContent+" | picker "+!!q(".sc2")+" | on "+q(".inv-rail .ir.on span").textContent); }
+  for (const t of ["master","items","cats","req","issue","damage","appr","riss","rdmg","position","variance","streps"]) { await tab(t); log("5 "+t+": "+q(".inv-title h1").textContent+" | picker "+!!q(".sc2")+" | on "+q(".ph-subs:not([hidden]) button.on span").textContent); }
   await tab("master"); const chips=qa(".sc2"); log("6 STORE PICK: "+chips.map(c=>c.textContent).join(" / ")); chips.find(c=>c.textContent.includes("Drinks")).click(); await wait(60); log("7 PICKED: "+q(".sc2.on span").textContent+" | "+q(".inv-title h1").textContent); qa(".sc2").find(c=>c.textContent.includes("Main")).click(); await wait(60);
   await tab("items"); log("8 ITEM SETUP: send hidden "+!q("#sdPanel")+" | new item "+!!qa("#vSub button").find(b=>b.textContent.includes("New item"))); click('[data-a="inv_sdtog"]'); await wait(40); log("9 OPEN: "+!!q("#sdPanel")); click('#sdPanel [data-a="inv_sdtog"]'); await wait(40); log("10 CLOSED: "+!q("#sdPanel"));
   q('[data-a="inv_itpick"][data-k="a"]').click(); await wait(60); log("11 ROW SEND: panel "+!!q("#sdPanel")+" | item "+q('[data-iv="sd.k"]').value); qa("#vSub button").find(b=>b.textContent.includes("New item")).click(); await wait(50); log("12 NEW ITEM POPUP: "+q("#itModal h3").textContent); click('[data-a="inv_itcancel"]'); await wait(40);
-  click('[data-a="inv_tab"][data-t="exit"]'); await wait(50); log("13 EXIT: "+(q("#vHome").style.display!=="none"));
+  click('#nav .nv[data-n="Home"]'); await wait(50); log("13 EXIT: "+(q("#vHome").style.display!=="none"));
 }catch(e){log("X "+e.message)}
 document.documentElement.setAttribute("data-test",__E.join(" @@ "));document.title="done";})();</script>`;
 const html = fs.readFileSync(file, "utf8").replace("<head>", "<head>" + head).replace(/<\/body>(?![\s\S]*<\/body>)/, tail + "</body>");

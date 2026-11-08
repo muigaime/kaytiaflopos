@@ -11,7 +11,7 @@ import path from "node:path";
 import sea from "node:sea";
 import zlib from "node:zlib";
 import express, { type NextFunction, type Request, type Response } from "express";
-import { mailRouter } from "../server/src/modules/mail/mail.routes.ts";
+import { mailRouter, setMailAccountFile } from "../server/src/modules/mail/mail.routes.ts";
 import { printRouter } from "../server/src/modules/printing/print.routes.ts";
 import { CONNECT_PAGE } from "./connect-page.ts";
 import { merge } from "./merge.js";
@@ -141,6 +141,48 @@ async function installIfNeeded(): Promise<boolean> {
     env: process.env
   }).unref();
   return true;
+}
+
+// ---------------------------------------------------------------- the app window
+const BROWSERS: Record<string, string[]> = {
+  chrome: ["Google\\Chrome\\Application\\chrome.exe"],
+  edge: ["Microsoft\\Edge\\Application\\msedge.exe"]
+};
+function browserPath(kind: string) {
+  const roots = [
+    process.env.ProgramFiles,
+    process.env["ProgramFiles(x86)"],
+    process.env.LOCALAPPDATA
+  ];
+  for (const rel of BROWSERS[kind])
+    for (const root of roots) {
+      const full = root ? path.join(root, rel) : "";
+      if (full && fs.existsSync(full)) return full;
+    }
+  return "";
+}
+/** Opens Kaytia Flow in a window of its own, with no tabs or address bar. The person's usual browser goes first, so their saved work is there. */
+function openApp(url: string) {
+  if (process.env.KAYTIA_NO_BROWSER) return;
+  execFile(
+    "reg",
+    [
+      "query",
+      "HKCU\\Software\\Microsoft\\Windows\\Shell\\Associations\\UrlAssociations\\http\\UserChoice",
+      "/v",
+      "ProgId"
+    ],
+    { timeout: 5000 },
+    (_err, out) => {
+      const order = /msedge/i.test(out ?? "") ? ["edge", "chrome"] : ["chrome", "edge"],
+        exe = order.map(browserPath).find(Boolean);
+      if (!exe) return void exec(`start "" "${url}"`);
+      spawn(exe, [`--app=${url}`, "--start-maximized"], {
+        detached: true,
+        stdio: "ignore"
+      }).unref();
+    }
+  );
 }
 
 // ---------------------------------------------------------------- settings
@@ -321,6 +363,7 @@ async function main() {
   if (!process.env.KAYTIA_NO_INSTALL && (await installIfNeeded()))
     return void setTimeout(() => process.exit(0), 3000);
   const hasEnv = loadEnv();
+  setMailAccountFile(path.join(HOME, "kaytia.env"));
   const cfg = loadConfig();
   if (!process.env.KAYTIA_NO_INSTALL) await makeShortcut(EXE).catch(() => {});
 
@@ -480,11 +523,9 @@ async function main() {
       saveConfig(cfg);
       res.json({ ok: true, main: j.name, idx: j.idx });
     } catch {
-      res
-        .status(400)
-        .json({
-          error: `Couldn't reach ${host}. Check the address, that Kaytia Flow is running there, and that its firewall allows it.`
-        });
+      res.status(400).json({
+        error: `Couldn't reach ${host}. Check the address, that Kaytia Flow is running there, and that its firewall allows it.`
+      });
     }
   });
   app.use("/lan", lan);
@@ -507,7 +548,7 @@ async function main() {
   console.log("Kaytia Flow\n");
   if (!(await listen(app as unknown as http.RequestListener, PORT, "0.0.0.0"))) {
     console.log(`Port ${PORT} is already in use, so Kaytia Flow may already be open.`);
-    if (!process.env.KAYTIA_NO_BROWSER) exec(`start "" "${url}"`);
+    openApp(url);
     return void setTimeout(() => process.exit(0), 4000);
   }
   await listen(app as unknown as http.RequestListener, PORT, "::1");
@@ -535,7 +576,7 @@ async function main() {
   );
   console.log(hasEnv ? "Mail settings loaded." : "Email isn't set up yet (see README.txt).");
   console.log("\nKeep this window open while you work. Close it to stop Kaytia Flow.");
-  if (!process.env.KAYTIA_NO_BROWSER) exec(`start "" "${cfg.chosen ? url : `${url}/connect`}"`);
+  openApp(cfg.chosen ? url : `${url}/connect`);
 }
 main().catch(e => {
   console.error("Kaytia Flow could not start:", e);

@@ -29,7 +29,7 @@ try{
   await nav("Settings"); log("7 SETTINGS: samples "+qa("#vSub .slip").length+" | setPrev "+!!q("#setPrev")+" | "+qa("#vSub .pn h4").map(h=>h.textContent).join(" / "));
   const f=q('[data-iv="hs.name"]'); f.value="Test Hotel"; f.dispatchEvent(new Event("input",{bubbles:true})); await wait(15); log("8 TYPING IN SETTINGS OK");
   await nav("Selling points"); click('[data-a="sp_newopen"]'); await wait(30); log("9 SELLING POINTS PAGE: market "+q("#vSub").textContent.includes("Supermarket")+" | shop type "+qa("#vSub option").some(o=>o.textContent==="Shop"));
-  await nav("Reports"); await wait(30); log("10 REPORTS OPEN: "+!!q("#vSub .pn"));
+  await nav("Reports"); click('[data-a="rep_open"]'); await wait(40); await wait(30); log("10 REPORTS OPEN: "+!!q("#vSub .pn"));
   bosave(); const s=G(); log("11 SAVED: points "+s.OL.join()+" | items "+s.I.filter(i=>i.d==="Supermarket").length+" | group "+((s.IU||{}).sugar||{}).group+" | past "+s.S.filter(x=>x.dept==="Supermarket").length);
 }catch(e){log("X "+e.message)}
 document.documentElement.setAttribute("data-test",__E.join(" @@ "));document.title="done";})();</script>`;

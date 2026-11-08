@@ -2,8 +2,10 @@
 // A statement shows what the business owes a vendor: goods received (GRNs) are credits, payments are
 // debits, balance = opening + credits − debits. Vendor setup itself lives in receive.js (shared with
 // the quick-add popup on purchase orders and the GRN).
-let vnT = "list";
+let vnT = "home",
+  vnKeep = false; // on the way to one screen, so Vendors shouldn't reopen on the overview
 const VN_TABS = [
+  ["home", "Overview", "home"],
   ["list", "Vendor list", "users"],
   ["stmt", "Statement", "book"],
   ["pay", "Payments made", "wal"]
@@ -218,7 +220,7 @@ function vsPrint(v, from, to) {
   const w = window.open("", "_blank");
   if (!w) return toast("Allow pop-ups to print the statement.");
   w.document.write(
-    `<!DOCTYPE html><html><head><title>${vsNo(v, to)}</title><style>body{margin:24px}${VS_CSS}.vs-doc{padding:0}@page{size:A4;margin:12mm}</style></head><body>${vsDocHTML(v, from, to)}<\/body><\/html>` // "<\/" so tools scanning the page for </body> don't stop here
+    `<!DOCTYPE html><html><head><title>${vsNo(v, to)}</title><style>body{margin:24px}${VS_CSS}.vs-doc{padding:0}@page{size:A4;margin:12mm}${a4Screen(false)}</style></head><body>${vsDocHTML(v, from, to)}<\/body><\/html>` // "<\/" so tools scanning the page for </body> don't stop here
   );
   w.document.close();
   w.focus();
@@ -235,10 +237,96 @@ const VN_PAGES = {
   ],
   pay: ["Vendor payments", "Record a payment to a vendor, and see what's already been paid."]
 };
+/** The overview: figures, the things people come here to do, then every part of Vendors. */
+function vnHomeHTML() {
+  const today = todayYmd(),
+    money = VENDORS.map(v => ({
+      v,
+      bal: vendorBalance(v),
+      S: vendorStatement(v, "0000-01-01", today)
+    })),
+    owed = sum(money, x => Math.max(0, x.bal)),
+    owing = money.filter(x => x.bal > 0.009).length,
+    late = sum(money, x => x.S.overdue),
+    lateN = money.filter(x => x.S.overdue > 0.009).length,
+    paid = VPAYS.filter(p => ymdOf(new Date(p.at)).slice(0, 7) === today.slice(0, 7)),
+    ok = t => boTabOk("vn", t),
+    tile = (ic, l, v, s, a, warn) =>
+      `<button class="ph-t ${warn ? "ph-warn" : ""}" ${a}><span class="ph-i">${I(ic)}</span><span class="ph-l">${l}</span><b>${v}</b><small>${s}</small></button>`,
+    quick = (ic, l, a) =>
+      `<button class="ph-q" ${a}><span class="ph-i">${I(ic)}</span>${l}</button>`,
+    card = (ic, t, s, meta, a) =>
+      `<button class="ph-c" ${a}><span class="ph-i">${I(ic)}</span><span class="ph-b"><b>${t}</b><span>${s}</span>${meta ? `<em>${meta}</em>` : ""}</span><span class="ph-ch">${I("chev")}</span></button>`,
+    tab = t => `data-a="vs_tab" data-t="${t}"`,
+    many = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`,
+    tiles = [
+      ok("list") && tile("users", "Suppliers", VENDORS.length, "On your list", tab("list")),
+      ok("stmt") &&
+        tile(
+          "wal",
+          "Owed to suppliers",
+          "KES " + m2(owed),
+          many(owing, "supplier") + " to pay",
+          tab("stmt")
+        ),
+      ok("stmt") &&
+        tile(
+          "alert",
+          "Past their terms",
+          "KES " + m2(late),
+          lateN ? many(lateN, "supplier") + " overdue" : "Nothing overdue",
+          tab("stmt"),
+          lateN > 0
+        ),
+      ok("pay") &&
+        tile(
+          "book",
+          "Paid this month",
+          "KES " + m2(sum(paid, p => p.amt)),
+          many(paid.length, "payment"),
+          tab("pay")
+        )
+    ].filter(Boolean),
+    quicks = [
+      ok("list") && quick("plus", "New supplier", 'data-a="vs_new"'),
+      ok("pay") && quick("wal", "Record payment", 'data-a="vs_paynow"'),
+      ok("stmt") && quick("book", "View statement", tab("stmt")),
+      boTabOk("pur", "lpo") &&
+        quick("truck", "New order", `data-a="pur_go" data-l="${esc(STKT.loc)}" data-t="lpo"`)
+    ].filter(Boolean),
+    cards = [
+      ok("list") &&
+        card(
+          "users",
+          "Supplier list",
+          "Your suppliers, contacts and payment terms",
+          VENDORS.length ? many(VENDORS.length, "supplier") : "",
+          tab("list")
+        ),
+      ok("stmt") &&
+        card(
+          "book",
+          "Statements",
+          "What was bought from a supplier and what was paid",
+          owing ? `KES ${m2(owed)} owed` : "",
+          tab("stmt")
+        ),
+      ok("pay") &&
+        card(
+          "wal",
+          "Payments made",
+          "Record a payment and see what's already been paid",
+          paid.length ? `${many(paid.length, "payment")} this month` : "",
+          tab("pay")
+        )
+    ].filter(Boolean);
+  return `<div class="ph"><div class="ph-h"><h1>Suppliers</h1><p>Your suppliers, what you owe them and what you've paid.</p></div><div class="ph-ts">${tiles.join("")}</div><div class="ph-qs">${quicks.join("")}</div><div class="ph-cs">${cards.join("")}</div></div>`;
+}
 function vendorsView() {
-  if (!boTabOk("vn", vnT)) vnT = "list";
+  if (!VN_TABS.some(([t]) => t === vnT) || !boTabOk("vn", vnT)) vnT = "home";
   invF.vn.open = false; // the vendor form is on the page itself
   if (!VENDORS.some(v => v.id === invF.vs.vendor)) invF.vs.vendor = VENDORS[0] ? VENDORS[0].id : "";
+  if (vnT === "home") return vnHomeHTML();
   const body =
     vnT === "list"
       ? `${
@@ -252,14 +340,16 @@ function vendorsView() {
           ? vsStatementHTML()
           : vsPaymentsHTML();
   const [title, what] = VN_PAGES[vnT];
-  return `<div class="inv invx"><nav class="inv-rail">${VN_TABS.filter(([t]) => boTabOk("vn", t))
+  return `<div class="inv invx inv-solo"><div class="inv-main"><nav class="ph-tabs" aria-label="Vendors">${VN_TABS.filter(
+    ([t]) => boTabOk("vn", t)
+  )
     .map(
       ([t, l, ic]) =>
-        `<button class="ir ${t === vnT ? "on" : ""}" data-a="vs_tab" data-t="${t}">${I(ic)}<span>${l}</span></button>`
+        `<button class="${t === vnT ? "on" : ""}" data-a="vs_tab" data-t="${t}" ${t === vnT ? 'aria-current="page"' : ""}>${I(ic)}<span>${l}</span></button>`
     )
     .join(
       ""
-    )}</nav><div class="inv-main"><div class="inv-title"><h1>${title}</h1><p>${what}</p></div>${body}</div></div>`;
+    )}</nav><div class="inv-title"><h1>${title}</h1><p>${what}</p></div>${body}</div></div>`;
 }
 
 const vsVendorSelect = () =>
@@ -380,10 +470,18 @@ function vsAct(a, b) {
     vnT = d.t;
     return all();
   }
+  if (a === "new") {
+    vnT = "list";
+    vnPageNew = true;
+    all();
+    const n = $("#vnName");
+    return n && n.focus();
+  }
   if (a === "open") {
     // "Statement" on a row of the vendor list (also from the vendor popup in Purchasing)
     F.vendor = d.id;
     vnT = "stmt";
+    vnKeep = true;
     return go("Vendors");
   }
   if (a === "rng") {

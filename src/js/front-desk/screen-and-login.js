@@ -85,6 +85,10 @@ function fdEnter(u) {
 }
 function fdExit(menu) {
   if (fdUser) {
+    auditAdd("Sign out", "Left the Front Office and was signed out", {
+      who: fdUser.n,
+      mod: "Front Desk"
+    });
     user = posUser;
     posUser = null;
     fdUser = null;

@@ -27,19 +27,19 @@ try{
   bosave(); const S=JSON.parse(localStorage.getItem("kaytia_pos_bo_v1")).S; log("8 SALES: "+S.map(s=>s.no+" "+s.dept+" "+JSON.stringify(s.mx)+(s.comp?" comp "+JSON.stringify(s.comp):"")).join(" ; "));
   const shc=shiftOf("Jane Waiter"); log("9 SHIFT CASH EXPECTED: "+shiftCalc(shc).expected+" pdq "+shiftCalc(shc).pdq+" comp "+shiftCalc(shc).comp);
   q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400);
-  qa("#nav .nv").find(x=>x.dataset.n==="Reports").click(); await wait(30); q('[data-r="ps"]').click(); await wait(30);
+  qa("#nav .nv").find(x=>x.dataset.n==="Reports").click(); await wait(30); click('[data-a="rep_open"]'); await wait(40); q('[data-r="ps"]').click(); await wait(30);
   ${outPng ? '' : `
-  log("10 META: "+q(".rp-meta").innerText.replace(/\\s+/g," ")+" | picker "+!!q("[data-rpsel]"));
+  log("10 META: "+q(".rp-meta").innerText.replace(/\\s+/g," "));
   log("11 TABLE:\\n   "+tbl(q("#vSub table.t")));
   log("12 BELOW:\\n   "+qa(".rp-below > div").map(d=>d.querySelector("h4").textContent+":\\n   "+(d.querySelector("table")?tbl(d.querySelector("table")):d.textContent)).join("\\n   "));
   q('[data-a="rep_print"]').click(); await wait(10); const A=window.__P.at(-1); log("13 A4 PRINT: address box "+A.includes("Postal address")+" | breakdown "+A.includes("Payment breakdown")+" M-Pesa "+A.includes("M-Pesa")+" Complimentary "+A.includes("Complimentary")+" | landscape "+A.includes("landscape"));
   const r8=q('[data-rsz="80"]'); r8.click(); r8.dispatchEvent(new Event("change",{bubbles:true})); q('[data-a="rep_print"]').click(); await wait(10); const T=window.__P.at(-1); log("14 80MM: "+(T.match(/class="b"/g)||[]).length+" blocks | has breakdown "+T.includes("Payment breakdown")+" | Tax A "+T.includes("Tax A")); const r4=q('[data-rsz="a4"]'); r4.click(); r4.dispatchEvent(new Event("change",{bubbles:true}));
   const rd0=q('[data-f="rd"]'); rd0.value="Bar"; rd0.dispatchEvent(new Event("change",{bubbles:true})); await wait(30); log("15 BAR ONLY: "+q(".rp-meta").innerText.replace(/\\s+/g," ").slice(-20)+" | "+[...q("#vSub table.t").rows].slice(1).map(r=>r.cells[1].textContent+"="+r.cells[8].textContent).join(";")); const rd1=q('[data-f="rd"]'); rd1.value="All"; rd1.dispatchEvent(new Event("change",{bubbles:true})); await wait(30);
-  const ps=q("[data-rpsel]"); ps.value="cmp"; ps.dispatchEvent(new Event("change",{bubbles:true})); await wait(30); log("16 COMP REPORT: "+q(".rp-head h3").textContent+"\\n   "+tbl(q("#vSub table.t")));
+  q('[data-r="cmp"]').click(); await wait(30); log("16 COMP REPORT: "+q(".rp-head h3").textContent+"\\n   "+tbl(q("#vSub table.t")));
   q('[data-r="ip"]').click(); await wait(30); log("17 PAYMODE REPORT: "+tbl(q("#vSub table.t")));
   q('[data-r="bills"]').click(); await wait(30); const pf=q('[data-bf="pay"]'); log("18 BILLS PAYMODES: "+[...pf.options].map(o=>o.textContent).join("/")); pf.value="comp"; pf.dispatchEvent(new Event("change",{bubbles:true})); await wait(30); log("19 COMP BILLS: "+qa("#vSub [data-bill]").filter(r=>!r.hidden).length); const pf2=q('[data-bf="pay"]'); pf2.value="All"; pf2.dispatchEvent(new Event("change",{bubbles:true})); await wait(20);
   qa("#nav .nv").find(x=>x.dataset.n==="Sales & Orders").click(); await wait(30); q('.so-r summary').click(); const rb=qa('[data-a="ret"]'); log("20 RETURN BUTTONS "+rb.length); const compNo=SALES.find(s=>s.comp&&s.dept==="Pool").no; const rtb=qa('[data-a="ret"]').find(b=>b.dataset.no===compNo); rtb.click(); await wait(20); q("#bopPin").value="0000"; click('[data-bg="auth"]'); await wait(25); click("#bopVAll"); await wait(10); q('.bv-r[data-vw="Goods returned"]').click(); click('[data-bg="save"]'); await wait(40); log("21 RETURN OF COMP: "+q("#rc").innerText.replace(/\\s+/g," ").match(/REFUNDED BY.*?Reason/)[0]); click("#rcClose"); await wait(10);
-  qa("#nav .nv").find(x=>x.dataset.n==="Reports").click(); await wait(30); q('[data-r="cmp"]').click(); await wait(30); log("22 COMP REPORT AFTER: "+[...q("#vSub table.t").rows].slice(1).map(r=>r.cells[1].textContent+" "+r.cells[9].textContent).join(";"));`}
+  qa("#nav .nv").find(x=>x.dataset.n==="Reports").click(); await wait(30); click('[data-a="rep_open"]'); await wait(40); q('[data-r="cmp"]').click(); await wait(30); log("22 COMP REPORT AFTER: "+[...q("#vSub table.t").rows].slice(1).map(r=>r.cells[1].textContent+" "+r.cells[9].textContent).join(";"));`}
 }catch(e){log("X "+e.message)}
 document.documentElement.setAttribute("data-test",__E.join(" @@ "));document.title="done";})();</script>`;
 const html = fs.readFileSync(file, "utf8").replace("<head>", "<head>" + head).replace(/<\/body>(?![\s\S]*<\/body>)/, tail + "</body>");

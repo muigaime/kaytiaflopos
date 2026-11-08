@@ -1,8 +1,10 @@
 // ---- Purchasing: purchase orders (LPO), receiving goods (GRN) and the purchases report ----
 // Everything about buying lives here; Inventory controls the stock once it is in a store.
 // Vendors, statements and payments have their own page (People → Vendors, vendors.js).
-let purT = "lpo";
+let purT = "home",
+  purKeep = false; // on the way to one screen, so Purchasing shouldn't reopen on the overview
 const PUR_TABS = [
+  ["home", "Overview", "home"],
   ["lpo", "Purchase orders", "truck"],
   ["receive", "Receive goods", "dl"],
   ["ret", "Returns to supplier", "swap"],
@@ -25,10 +27,116 @@ const PUR_PAGES = {
   ],
   rpur: ["Purchases report", "Everything received, for the dates you choose."]
 };
+const purGrnDay = g => String(g.date || (g.at ? ymdOf(new Date(g.at)) : ""));
+/** The overview: figures, the four things people come here to do, then every part of Purchasing. */
+function purHomeHTML(popups) {
+  const ok = t => boTabOk("pur", t),
+    vn = boCan("vn.view"),
+    today = todayYmd(),
+    open = LPOS.filter(p => p.status === "Open" || p.status === "Partly received"),
+    late = open.filter(p => p.due && p.due < today).length,
+    month = GRNS.filter(g => purGrnDay(g).slice(0, 7) === today.slice(0, 7)),
+    owed = sum(VENDORS, v => Math.max(0, vendorBalance(v))),
+    owing = VENDORS.filter(v => vendorBalance(v) > 0.009).length,
+    plural2 = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`,
+    tile = (ic, l, v, s, go) =>
+      `<${go ? `button ${go}` : "div"} class="ph-t"><span class="ph-i">${I(ic)}</span><span class="ph-l">${l}</span><b>${v}</b><small>${s}</small></${go ? "button" : "div"}>`,
+    quick = (ic, l, a) =>
+      `<button class="ph-q" ${a}><span class="ph-i">${I(ic)}</span>${l}</button>`,
+    card = (ic, t, s, meta, a) =>
+      `<button class="ph-c" ${a}><span class="ph-i">${I(ic)}</span><span class="ph-b"><b>${t}</b><span>${s}</span>${meta ? `<em>${meta}</em>` : ""}</span><span class="ph-ch">${I("chev")}</span></button>`,
+    tab = t => `data-a="pur_tab" data-t="${t}"`,
+    vend = t => `data-a="pur_vend" data-t="${t}"`,
+    tiles = [
+      ok("lpo") &&
+        tile(
+          "truck",
+          "Open orders",
+          open.length,
+          late ? `${late} past due` : "Waiting for delivery",
+          tab("lpo")
+        ),
+      ok("receive") &&
+        tile(
+          "dl",
+          "Received this month",
+          month.length,
+          plural2(month.length, "delivery").replace("deliverys", "deliveries"),
+          tab("receive")
+        ),
+      vn &&
+        tile(
+          "wal",
+          "Owed to suppliers",
+          "KES " + m2(owed),
+          plural2(owing, "supplier") + " to pay",
+          vend("pay")
+        ),
+      vn && tile("users", "Suppliers", VENDORS.length, "On your list", vend("list"))
+    ].filter(Boolean),
+    quicks = [
+      ok("lpo") && quick("plus", "New order", tab("lpo")),
+      ok("receive") && quick("dl", "Receive stock", tab("receive")),
+      vn && quick("users", "New supplier", 'data-a="inv_vnopen"'),
+      vn && quick("wal", "Pay supplier", vend("pay"))
+    ].filter(Boolean),
+    cards = [
+      ok("lpo") &&
+        card(
+          "truck",
+          "Purchase orders",
+          "Raise and track orders to your suppliers",
+          open.length ? `${open.length} open` : "",
+          tab("lpo")
+        ),
+      ok("receive") &&
+        card(
+          "dl",
+          "Goods received (GRN)",
+          "Record what came in, with or without an order",
+          "",
+          tab("receive")
+        ),
+      ok("ret") &&
+        card(
+          "swap",
+          "Returns to supplier",
+          "Send goods back and print the return note",
+          "",
+          tab("ret")
+        ),
+      ok("rpur") &&
+        card(
+          "chart",
+          "Purchases report",
+          "Everything received, for the dates you choose",
+          "",
+          tab("rpur")
+        ),
+      vn &&
+        card(
+          "users",
+          "Suppliers",
+          "Your supplier list, contacts and payment terms",
+          "",
+          vend("list")
+        ),
+      vn &&
+        card(
+          "book",
+          "Statements and payments",
+          "What each supplier is owed, and what you've paid",
+          owing ? `KES ${m2(owed)} owed` : "",
+          vend("stmt")
+        )
+    ].filter(Boolean);
+  return `<div class="ph"><div class="ph-h"><h1>Purchases</h1><p>Orders, deliveries, returns and suppliers, all in one place.</p></div><div class="ph-ts">${tiles.join("")}</div><div class="ph-qs">${quicks.join("")}</div><div class="ph-cs">${cards.join("")}</div>${popups}</div>`;
+}
 function purchasingView() {
   if (!isStore(STKT.loc)) STKT.loc = STORES[0];
   if (!PUR_TABS.some(([t]) => t === purT) || !boTabOk("pur", purT))
     purT = PUR_TABS.map(([t]) => t).find(t => boTabOk("pur", t));
+  if (purT === "home") return purHomeHTML(vendorPopupIfOpen());
   const openN = LPOS.filter(p => p.status === "Open" || p.status === "Partly received").length,
     body =
       purT === "ret"
@@ -40,14 +148,16 @@ function purchasingView() {
             : storeBar("Purchase orders for") + lpoHTML(),
     popups = itemPopupIfOpen() + vendorPopupIfOpen() + apModalIfOpen();
   const [title, what] = PUR_PAGES[purT];
-  return `<div class="inv invx"><nav class="inv-rail">${PUR_TABS.filter(([t]) => boTabOk("pur", t))
+  return `<div class="inv invx inv-solo"><div class="inv-main"><nav class="ph-tabs" aria-label="Purchasing">${PUR_TABS.filter(
+    ([t]) => boTabOk("pur", t)
+  )
     .map(
       ([t, l, ic]) =>
-        `<button class="ir ${t === purT ? "on" : ""}" data-a="pur_tab" data-t="${t}">${I(ic)}<span>${l}</span>${t === "lpo" && openN ? `<b>${openN}</b>` : ""}</button>`
+        `<button class="${t === purT ? "on" : ""}" data-a="pur_tab" data-t="${t}" ${t === purT ? 'aria-current="page"' : ""}>${I(ic)}<span>${l}</span>${t === "lpo" && openN ? `<b>${openN}</b>` : ""}</button>`
     )
     .join(
       ""
-    )}</nav><div class="inv-main"><div class="inv-title"><h1>${title}</h1><p>${what}</p></div>${body}${popups}</div></div>`;
+    )}</nav><div class="inv-title"><h1>${title}</h1><p>${what}</p></div>${body}${popups}</div></div>`;
 }
 
 /** Compact store chooser (Purchasing doesn't need Inventory's stock cards). */
@@ -60,6 +170,11 @@ function purAct(a, b) {
     purT = d.t;
     invF.vn.open = false;
     return all();
+  }
+  if (a === "vend") {
+    vnT = d.t;
+    vnKeep = true;
+    return go("Vendors");
   }
   if (a === "rclpo") {
     // "Open in GRN" on a purchase order: receive it on the Goods Received Note
@@ -75,6 +190,7 @@ function purAct(a, b) {
     R.mode = "sp";
     R.sp = d.o;
     purT = "receive";
+    purKeep = true;
     return go("Purchasing");
   }
   if (a === "go") {
@@ -87,6 +203,7 @@ function purAct(a, b) {
       if (R.mode === "lpo") Object.assign(R, { lines: [], lpo: null, lpoPick: "", sup: "" });
       R.mode = "direct";
     }
+    purKeep = true;
     return go("Purchasing");
   }
 }

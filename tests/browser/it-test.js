@@ -28,7 +28,7 @@ try{
   log("4 OLD ITEM IS VAT: "+row("Tusker").cells[col].textContent);
   row("Item None").querySelector('[data-a="inv_itedit"]').click(); await wait(50); log("5 EDIT SHOWS: "+q('[data-iv="it.tax"]').value); iv("it.tax","B"); await A("inv_itsave"); log("6 CHANGED: "+row("Item None").cells[col].textContent); row("Item None").querySelector('[data-a="inv_itedit"]').click(); await wait(50); iv("it.tax","A"); await A("inv_itsave");
   bosave(); const s=JSON.parse(localStorage.getItem("kaytia_pos_bo_v1")); log("7 SAVED: "+Object.values(s.IU).filter(u=>/^Item /.test(u.name)).map(u=>u.name+":"+u.tax).join());
-  await nav("Purchasing"); const rb=qa("#vSub button").find(b=>b.textContent.trim()==="Receive goods"); rb.click(); await wait(50); const typed=async n=>{const e=q("#rcName"); e.value=n; iv("rc.eName",n); await wait(40); return q('[data-iv="rc.eTax"]').value;};
+  await nav("Purchasing"); const rb=q('[data-a="pur_tab"][data-t="receive"]'); rb.click(); await wait(50); const typed=async n=>{const e=q("#rcName"); e.value=n; iv("rc.eName",n); await wait(40); return q('[data-iv="rc.eTax"]').value;};
   log("8 RECEIVE RATE: vat "+await typed("Item Vat")+" | none "+await typed("Item None")+" | both "+await typed("Item Both"));
   const r0=await typed("Item None"); iv("rc.eQty","2"); iv("rc.ePrice","100"); const add=qa("#vSub button").find(b=>/^Add/i.test(b.textContent.trim())); add&&add.click(); await wait(50); log("9 ADDED LINE: "+(q(".grn-t,#vSub table")?qa("#vSub table tr").filter(r=>r.textContent.includes("Item None")).map(r=>r.textContent.replace(/\s+/g," ").slice(0,90)).join():"")+" | "+(tst()));
   await nav("Selling points"); log("10 PAGE: "+q("#vSub h1").textContent);

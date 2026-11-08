@@ -242,6 +242,7 @@ function itemSpDone(k, sp, F, units, price, msg) {
     R.eQty = want ? String(units / itemInfo(k).perBuy) : "";
     if (want && R.eUnits !== "buy") R.eQty = String(units);
     purT = "receive";
+    purKeep = true;
     toast(msg + ` Receive it into ${F.store} now.`);
     return go("Purchasing");
   }
@@ -322,6 +323,7 @@ function spDetail(o) {
         .join(", "),
     subs = [
       ...(mat ? [] : [["prod", `Products (${prods.length})`]]),
+      ...(mat ? [] : [["cats", "Categories"]]),
       ["stock", "Request stock"],
       ["move", "Transfer stock"],
       ["count", "Stock take"],
@@ -354,6 +356,7 @@ function spDetail(o) {
                 .join("")}</table>`
             : '<div class="empty">No products yet. Add one above and it appears on this POS at once.</div>'
         }</div>`,
+      cats: () => spCatsPanel(o),
       stock: () => spRequestPanel(o, keys) + spRequisitions(o),
       move: () => spTransferPanel(o),
       count: () => spCountPanel(o, keys, held),
@@ -368,6 +371,71 @@ function spDetail(o) {
   return `<div id="spDetail"><button class="sp-back" data-a="sp_close">← All selling points</button>
   <div class="pn sp-hero"><div><h3>${esc(o)}</h3><p>${esc(info.type)} · gets stock from ${esc(info.store)}</p></div><div class="sp-kpis">${mat ? "" : kpi("Products", prods.length)}${kpi("Items in stock", spInStock(o))}${mat ? "" : kpi("Sales today (KES)", m2(spToday(o))) + kpi("Staff", spStaff(o))}</div></div>
   ${spTabs(subs, spSub, "sp_sub")}${mat && spSub === "stock" ? '<div class="stk sp-note">A materials store holds ingredients for the kitchen. Nothing is sold here; use them under Recipes &amp; Production.</div>' : ""}${panels[spSub]()}</div>`;
+}
+
+// ---- categories at one selling point: hide them from its POS, or move them to another ----
+const spCatList = o =>
+  [...new Set(ITEMS.filter(i => i.d === o).map(i => i.c))].sort((a, b) => a.localeCompare(b));
+function spCatsPanel(o) {
+  const L = spCatList(o),
+    to = ALLD.filter(x => posSells(x) && x !== o),
+    edit = boCan("sp.manage");
+  return `<div class="pn tw"><div class="sp-head"><div><h4>Categories at ${esc(o)}</h4><p>Hide a category to take it off this POS without deleting anything, or move it and its products to another selling point.</p></div></div>${
+    L.length
+      ? `<table class="t sp-cats"><thead><tr><th>Category</th><th class="n">Products</th><th>On this POS</th><th>Move to</th></tr></thead><tbody>${L.map(
+          c => {
+            const off = catOffAt(o, c),
+              n = ITEMS.filter(i => i.d === o && i.c === c).length;
+            return `<tr class="${off ? "off" : ""}"><td><b>${esc(c)}</b></td><td class="n">${n}</td><td><label class="sp-show"><input type="checkbox" data-a="sp_catoff" data-c="${esc(c)}" ${off ? "" : "checked"} ${edit ? "" : "disabled"}><span>${off ? "Hidden" : "Showing"}</span></label></td><td>${
+              to.length && edit
+                ? `<span class="sp-mv"><select aria-label="Move ${esc(c)} to">${opts(to, to[0])}</select><button class="mini" data-a="sp_catmove" data-c="${esc(c)}">Move</button></span>`
+                : "-"
+            }</td></tr>`;
+          }
+        ).join("")}</tbody></table>`
+      : '<div class="empty">No products here yet, so there are no categories.</div>'
+  }</div>`;
+}
+function spCatToggle(o, c) {
+  const off = FD_SETTINGS.catOff || (FD_SETTINGS.catOff = {}),
+    L = off[o] || (off[o] = []),
+    at = L.indexOf(c);
+  if (at < 0) L.push(c);
+  else L.splice(at, 1);
+  auditAdd("Selling point", `${c} ${at < 0 ? "hidden from" : "shown again on"} the ${o} POS`);
+  spRefreshPos();
+  bosave();
+  toast(at < 0 ? `${c} is hidden at ${o}.` : `${c} shows at ${o} again.`);
+  all();
+}
+/** Why this category can't move, or "". */
+function spCatMoveBlock(c, o, to) {
+  const L = ITEMS.filter(i => i.d === o && i.c === c),
+    billed = L.find(i => prOnBill(i.id)),
+    twin = L.find(i => ITEMS.some(x => x.d === to && x.n.toLowerCase() === i.n.toLowerCase()));
+  if (billed) return `${billed.n} is on an open bill. Settle it first.`;
+  if (twin) return `${to} already sells ${twin.n}. Rename or delete one of them first.`;
+  return "";
+}
+function spCatMove(c, o, to) {
+  const L = ITEMS.filter(i => i.d === o && i.c === c),
+    off = FD_SETTINGS.catOff || {};
+  L.forEach(i => {
+    i.d = to;
+    if (i.from === to) delete i.from;
+  });
+  [o, to].forEach(p => {
+    if (off[p]) off[p] = off[p].filter(x => x !== c);
+  });
+  const empty = L.filter(i => Object.keys(i.r || {}).length && avail(i) <= 0).length;
+  auditAdd("Selling point", `${c} moved from ${o} to ${to} (${L.length} products)`);
+  spRefreshPos();
+  bosave();
+  toast(
+    `${c} moved to ${to}.` +
+      (empty ? ` ${empty} of its products need stock issued to ${to} before they can sell.` : "")
+  );
+  all();
 }
 
 // ---- requesting stock (requisition): the selling point asks; the store issues it in Inventory ----
@@ -595,6 +663,15 @@ function spAct(a, b) {
     toast(name + " created. It is on the POS now; add its products here.");
     all();
     return $("#spPage").scrollIntoView();
+  }
+  if (a === "catoff") return spCatToggle(spSel, d.c);
+  if (a === "catmove") {
+    const to = b.previousElementSibling.value,
+      why = spCatMoveBlock(d.c, spSel, to);
+    if (why) return toast(why);
+    const o = spSel,
+      c = d.c;
+    return tapConfirm(b, () => spCatMove(c, o, to), `Move ${c} to ${to}?`);
   }
   if (a === "open") {
     spSel = d.o;
@@ -858,6 +935,10 @@ function speModal() {
   const keys = itemsByName(),
     S = F.way === "store" ? keys : [],
     pairs = speProdPairs(),
+    makeIt =
+      !Object.keys(i.r).length && boCan("rec.view") && boCan("rec.prod")
+        ? `<button class="mini" data-a="rec_dirp" data-id="${i.id}">Make ${esc(i.n)} under Production</button>`
+        : "",
     ways = [
       ["store", "Store stock", "Issued from a store to here"],
       ["prod", "Production", "Deducts from production balances"],
@@ -895,8 +976,8 @@ function speModal() {
       ? `<div class="itm-g itm-gn">
      <label>Finished item<select data-iv="spe.pk">${pairs.map(p => `<option value="${esc(p.k + "|" + p.loc)}" ${p.k + "|" + p.loc === F.pk ? "selected" : ""}>${esc(itemInfo(p.k).name)} · ${esc(p.loc)} · ${qtyAt(p.loc, p.k)}</option>`).join("")}</select></label>
      <label>One sale uses<input data-iv="spe.per" type="number" min="0" step="any" value="${esc(F.per)}"></label>
-    </div>`
-      : '<div class="itm-hint">No production yet. Run one under Recipes &amp; Production first.</div>';
+    </div>${makeIt ? `<div class="itm-hint">Not made yet? ${makeIt}</div>` : ""}`
+      : `<div class="itm-hint">No production yet. ${makeIt || "Run one under Recipes &amp; Production first."}</div>`;
   else
     source = `<div class="itm-g itm-gn">
      <label>Copy ingredients from<select data-iv="spe.copy"><option value="">Keep these ingredients</option>${recipeList()

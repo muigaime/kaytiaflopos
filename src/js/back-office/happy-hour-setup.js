@@ -131,7 +131,7 @@ function hhSave() {
 }
 function hhAct(a, b) {
   if (a === "hh_rep") {
-    rp = "hh";
+    repPick("hh");
     return go("Reports");
   }
   if (!catRight()) return boDenied();

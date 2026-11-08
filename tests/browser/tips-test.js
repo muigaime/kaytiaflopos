@@ -24,7 +24,7 @@ try{
   const t1=orders.find(o=>o.label==="T3"); openPay([t1]); await wait(20); set("#pAmt","200"); click("#pOk"); await wait(35); click("#rcClose"); await wait(10);
   SALES.forEach((s,i)=>{const d=new Date(s.at); d.setHours([8,8,13,22,13,13][i]||9,15,0,0); s.at=d;}); log("0 SALES: "+SALES.map(s=>s.no+" "+s.dept+" "+s.at.getHours()+":15 tips "+JSON.stringify(s.tips||{})).join(" ; "));
   q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400);
-  qa("#nav .nv").find(x=>x.dataset.n==="Reports").click(); await wait(30); log("1 LIST: "+qa("[data-r]").slice(0,4).map(b=>b.textContent).join(" / "));
+  qa("#nav .nv").find(x=>x.dataset.n==="Reports").click(); await wait(30); click('[data-a="rep_open"]'); await wait(40); log("1 LIST: "+qa("[data-r]").slice(0,4).map(b=>b.textContent).join(" / "));
   q('[data-r="tips"]').click(); await wait(30);
   ${outPng ? '' : `
   log("2 TIPS: "+q(".rp-cap").textContent+"\\n   "+tbl(q("#vSub .pn:last-child > .tw table.t, #vSub .pn:last-child table.t")));

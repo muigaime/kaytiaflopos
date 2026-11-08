@@ -1,33 +1,73 @@
 // ---- Accounting: the working screens. Everything posts through one journal, so reports always agree. ----
-const AC_TABS = [
-  ["h", "Overview"],
-  ["home", "Insights", "chart"],
-  ["h", "Ledgers"],
-  ["coa", "Chart of accounts", "book"],
-  ["jv", "Journal entries", "plus"],
-  ["gl", "Ledger transactions", "book"],
-  ["h", "Money"],
-  ["exp", "Expenses and income", "wal"],
-  ["bank", "Bank accounts", "wal"],
-  ["btx", "Bank transactions", "truck"],
-  ["rec", "Bank reconciliation", "shield"],
-  ["h", "Assets"],
-  ["fa", "Fixed assets", "box"],
-  ["h", "Financial reports"],
-  ...Object.entries(AC_REPORTS).map(([k, [n]]) => ["r_" + k, n, "chart"]),
-  ["h", "Setup"],
-  ["set", "Revenue and tax", "shield"],
-  ["imp", "Import", "dl"]
+// [screen, name on the menu, icon, the question it answers]
+const AC_GROUPS = [
+  {
+    name: "Day to day",
+    tabs: [
+      ["exp", "Money in and out", "wal", "Record money in or out"],
+      ["bank", "Bank accounts", "wal", "Your bank accounts"],
+      ["btx", "Bank transactions", "truck", "Deposits, withdrawals and transfers"],
+      ["rec", "Match the bank statement", "shield", "Does the bank agree with us?"]
+    ]
+  },
+  {
+    name: "How we're doing",
+    tabs: [
+      ["r_pl", "Profit and loss", "chart", "Did we make money?"],
+      ["r_cf", "Cash flow", "wal", "Where did our cash go?"],
+      ["r_ex", "Where the money went", "chart", "What are we spending on?"],
+      ["r_bs", "Balance sheet", "book", "What do we own and owe?"],
+      ["r_ad", "Who owes us", "users", "Who owes us money?"],
+      ["r_ac", "Who we owe", "users", "Who do we owe?"],
+      ["r_vat", "VAT and tax", "shield", "How much tax is due?"]
+    ]
+  },
+  {
+    name: "For your accountant",
+    tabs: [
+      ["coa", "Chart of accounts", "book", "Chart of accounts"],
+      ["jv", "Journal entries", "plus", "Journal entries"],
+      ["gl", "Ledger transactions", "book", "Ledger transactions"],
+      ["r_tb", "Trial balance", "chart", "Trial balance"],
+      ["r_jl", "Journal listing", "book", "Journal listing"],
+      ["fa", "Fixed assets", "box", "Fixed assets"],
+      ["set", "Revenue and tax setup", "gear", "Revenue and tax setup"],
+      ["imp", "Import", "dl", "Import from a spreadsheet"]
+    ]
+  }
 ];
+// One line on each screen, for anyone who has never kept a set of books.
+const AC_PLAIN = {
+  exp: "Use this whenever money leaves or comes in outside the POS, such as paying for repairs or receiving a rent deposit.",
+  bank: "Add each account the business uses. Everything else in banking builds on this list.",
+  btx: "Use this when money moves in the bank: you pay in cash, take cash out, move it between accounts, or the bank charges a fee.",
+  rec: "Tick each line that's also on your bank statement. When the difference reaches zero, your books agree with the bank.",
+  r_pl: "Income minus costs. A positive number at the bottom means the business made money in those dates.",
+  r_cf: "Profit and cash aren't the same thing. This shows the cash that really came in and went out.",
+  r_ex: "Your spending, biggest first. A good place to look for savings.",
+  r_bs: "A snapshot on one day: what the business owns, what it owes, and what's left for the owners.",
+  r_ad: "Customers and guests who still owe you, sorted by how long they've owed it. The oldest are the ones to chase.",
+  r_ac: "Suppliers you still have to pay, sorted by how long the bill has been open.",
+  r_vat:
+    "Tax you charged on sales, less tax you paid on purchases. The difference is what's due to KRA.",
+  coa: "The list of headings all your money is sorted under. Your accountant usually looks after this.",
+  jv: "A way to correct or add to the books by hand. Each entry must balance, so only use this if you know what it should be.",
+  gl: "Every movement on a single heading, line by line, for checking where a figure came from.",
+  r_tb: "A check that the books balance. The two totals should always match.",
+  r_jl: "Every entry in the books for the dates chosen.",
+  fa: "Things you'll own for years, like fridges or vehicles. Their value is reduced a little over time.",
+  set: "Tells the system where sales, payments and tax are filed in the books. Set once, then rarely touched.",
+  imp: "Bring in opening balances and accounts from a spreadsheet when you first start."
+};
 const AC_PAGES = {
   home: ["Insights", "How the business is doing, at a glance."],
   coa: ["Chart of accounts", "Every account in the books, with its balance today."],
   jv: ["Journal entries", "Post a transaction by hand. Entries can be reversed, never deleted."],
   gl: ["Ledger transactions", "Every movement on one account, with its running balance."],
-  exp: ["Expenses and income", "Record money going out, and income that isn't a POS sale."],
+  exp: ["Money in and out", "Record money going out, and income that isn't a POS sale."],
   bank: ["Bank accounts", "The accounts the business banks with."],
   btx: ["Bank transactions", "Deposits, withdrawals, payments, transfers and bank charges."],
-  rec: ["Bank reconciliation", "Tick what's on the statement until the difference is zero."],
+  rec: ["Match the bank statement", "Tick what's on the statement until the difference is zero."],
   fa: [
     "Fixed assets",
     "What the business owns for the long term, and what it's worth after depreciation."
@@ -143,7 +183,27 @@ function acHome() {
       acS().assets.some(a => !a.disposed) &&
         !acS().depTo && ["Depreciation hasn't been run on your fixed assets yet.", "fa"]
     ].filter(Boolean);
-  return `<div class="sp-kpis ac-kpis">${acKpi("Income this month", acKes(inc))}${acKpi("Gross margin", inc ? `${(((inc - cos) / inc) * 100).toFixed(1)}%` : "–")}${acKpi("Net profit this month", acKes(profit), profit < 0 ? "crit" : "")}${acKpi("Cash and bank", acKes(cash))}${acKpi("Owed to you", acKes(debt))}${acKpi("You owe vendors", acKes(owe))}</div>
+  const out2 = cos + exp,
+    say =
+      !inc && !out2
+        ? "Nothing has been recorded this month yet. Sales and expenses appear here on their own."
+        : profit >= 0
+          ? `So far this month ${acKes(inc)} has come in and ${acKes(out2)} has gone out, leaving ${acKes(profit)}.`
+          : `So far this month ${acKes(inc)} has come in and ${acKes(out2)} has gone out. That's ${acKes(-profit)} more out than in.`,
+    tab = t => `data-a="ac_tab" data-t="${t}"`,
+    tile = (ic, l, v, s, t, warn) =>
+      `<button class="ph-t ${warn ? "ph-warn" : ""}" ${tab(t)}><span class="ph-i">${I(ic)}</span><span class="ph-l">${l}</span><b>${v}</b><small>${s}</small></button>`,
+    quick = (ic, l, a) =>
+      `<button class="ph-q" ${a}><span class="ph-i">${I(ic)}</span>${l}</button>`,
+    card = x =>
+      `<button class="ph-c" ${tab(x[0])}><span class="ph-i">${I(x[2])}</span><span class="ph-b"><b>${x[3]}</b><span>${AC_PLAIN[x[0]]}</span></span><span class="ph-ch">${I("chev")}</span></button>`;
+  return `<div class="ph ac-home"><div class="ph-h"><h1>Accounting</h1><p>How the business is doing, in plain words.</p></div>
+  <div class="ac-say ${profit < 0 ? "low" : ""}"><span>This month</span><b>${say}</b></div>
+  <div class="ph-ts">${tile("cash", "Money in", acKes(inc), "Income this month", "r_pl")}${tile("cart", "Money out", acKes(out2), "Costs and expenses this month", "r_ex")}${tile("chart", "Left over", acKes(profit), profit < 0 ? "More went out than came in" : inc ? `${(((inc - cos) / inc) * 100).toFixed(0)}% kept after cost of goods` : "Profit this month", "r_pl", profit < 0)}${tile("wal", "Cash and bank", acKes(cash), "What you hold today", "bank")}${tile("users", "People owe you", acKes(debt), "Customers and guests", "r_ad")}${tile("truck", "You owe suppliers", acKes(owe), "Bills still to pay", "r_ac")}</div>
+  <div class="ph-qs">${quick("plus", "Record an expense", 'data-a="ac_quick" data-t="exp" data-x="out"')}${quick("cash", "Record other income", 'data-a="ac_quick" data-t="exp" data-x="in"')}${quick("wal", "Bank a deposit or withdrawal", tab("btx"))}${quick("chart", "Did we make money?", tab("r_pl"))}</div>
+  ${notes.length ? `<div class="pn ac-look"><h4>Worth a look</h4><div class="ac-notes">${notes.map(([x, go2]) => `<button class="ac-note" data-a="ac_tab" data-t="${go2}"><span>${esc(x)}</span><b aria-hidden="true">→</b></button>`).join("")}</div></div>` : ""}
+  ${AC_GROUPS.map(g => `<section class="ph-sec"><h2>${g.name}</h2><div class="ph-cs">${g.tabs.map(card).join("")}</div></section>`).join("")}
+  <section class="ph-sec"><h2>The last six months</h2>
   <div class="ac-two"><div class="pn"><div class="inv-head"><h4>Income against costs · last 6 months</h4><span class="ac-legend"><span><i class="s1"></i>Income</span><span><i class="s2"></i>Costs and expenses</span></span></div>
   <div class="ac-chart" role="img" aria-label="Income against costs for the last 6 months. The figures are in the table below.">${M.map(m => `<div class="ac-col"><div class="ac-bars">${bar(m.rev, "s1", `${m.long}: income ${acKes(m.rev)}`)}${bar(m.cst, "s2", `${m.long}: costs ${acKes(m.cst)}`)}</div><span>${m.l}</span></div>`).join("")}</div>
   <details class="ac-data"><summary>See the figures</summary>${acTable(
@@ -151,7 +211,7 @@ function acHome() {
     M.map(m => [m.long, acMoneyStr(m.rev), acMoneyStr(m.cst), acMoneyStr(m.rev - m.cst)])
   )}</details></div>
   <div class="pn"><h4>Biggest costs this month</h4>${E.length ? `<div class="trk-places">${E.map(e => `<div class="trk-place ac-hb" data-tip="${esc(e.a.name)}: ${acKes(e.v)}"><span>${esc(e.a.name)}</span><div class="trk-bar"><i style="width:${Math.max(3, (e.v / eTop) * 100)}%"></i></div><b>${acMoneyStr(e.v)}</b></div>`).join("")}</div>` : '<div class="empty">No costs recorded this month.</div>'}</div></div>
-  ${notes.length ? `<div class="pn"><h4>Worth a look</h4><div class="ac-notes">${notes.map(([x, go2]) => `<button class="ac-note" data-a="ac_tab" data-t="${go2}"><span>${esc(x)}</span><b aria-hidden="true">→</b></button>`).join("")}</div></div>` : ""}`;
+  </section></div>`;
 }
 // ---------------------------------------------------------------- chart of accounts
 function acCoaHTML() {
@@ -609,14 +669,6 @@ function acImport(text) {
   return `<b>${done} imported.</b>${errs.length ? `<br>${errs.length} skipped:<br>${errs.map(esc).join("<br>")}` : ""}`;
 }
 // ---------------------------------------------------------------- page
-function acRail() {
-  const L = AC_TABS;
-  return L.map(([t, l, ic]) =>
-    t === "h"
-      ? `<div class="rhd">${l}</div>`
-      : `<button class="ir ${t === acT ? "on" : ""}" data-a="ac_tab" data-t="${t}">${I(ic)}<span>${l}</span></button>`
-  ).join("");
-}
 function acctView() {
   acS();
   acFresh();
@@ -639,7 +691,8 @@ function acctView() {
           set: acSetHTML,
           imp: acImpHTML
         }[acT]();
-  return `<div class="inv invx acx"><nav class="inv-rail">${acRail()}</nav><div class="inv-main"><div class="inv-title"><h1>${title}</h1><p>${what}</p></div>${body}</div></div>`;
+  if (acT === "home") return `<div class="acx">${body}</div>`;
+  return `<div class="inv invx inv-solo acx"><div class="inv-main">${phMenu(AC_GROUPS, acT, "ac_tab", "Accounting")}<div class="inv-title"><h1>${title}</h1><p>${what}</p></div>${AC_PLAIN[acT] ? `<div class="ac-plain"><b>In plain words</b><span>${AC_PLAIN[acT]}</span></div>` : ""}${body}</div></div>`;
 }
 V.acct = acctView;
 const acV = id => {
@@ -663,6 +716,11 @@ function acAct(a, b) {
     };
   if (a === "ac_tab") {
     acT = d.t;
+    return all();
+  }
+  if (a === "ac_quick") {
+    acT = d.t;
+    acF.exp = d.x;
     return all();
   }
   if (a === "ac_range") {

@@ -13,7 +13,7 @@ const PR_WAYS = [
   [
     "sell",
     "Selling item only",
-    "Goes straight on the POS with no stock kept, such as corkage or a service."
+    "Goes straight on the POS with no stock kept, such as corkage or a service. You can add a recipe or production later."
   ]
 ];
 const prPoints = () => ALLD.filter(posSells);
@@ -23,13 +23,21 @@ const prOnBill = id => {
   const on = L => Object.keys(L || {}).some(k => k.split("~")[0] === String(id));
   return orders.some(o => on(o.lines)) || on(cart);
 };
+/** Buttons that give an item with no stock a recipe or production. */
+function prGetStock(i) {
+  if (!prNoStock(i) || !boCan("rec.view")) return "";
+  const btn = (a, right, l) =>
+      boCan(right) ? `<button class="mini" data-a="${a}" data-id="${i.id}">${l}</button>` : "",
+    L = btn("rec_dirr", "rec.recipes", "Add recipe") + btn("rec_dirp", "rec.prod", "Production");
+  return L ? `<span class="pr-gets">${L}</span>` : "";
+}
 function prCanSell(i) {
   if (prNoStock(i)) return '<span class="tag">No stock kept</span>';
   const n = avail(i);
   return `<span class="tag ${n > 0 ? "ok" : "bad"}">${n > 0 ? qn(n) : "Out of stock"}</span>`;
 }
 function prRow(i) {
-  return `<tr${findAttr("prod", i.n, i.c, i.d, i.id)}><td><b>${esc(i.n)}</b><small class="pr-code">Code ${i.id}</small></td><td>${esc(i.d)}</td><td><span class="pr-cat" style="--h:${hue(i.c)}">${esc(i.c)}</span></td><td>${TAX[i.t] > 0 ? `${qn(TAX[i.t])}%` : "None"}</td><td><input type="number" class="pr-price" value="${i.p}" data-pr="${i.id}" aria-label="Price of ${esc(i.n)}"></td><td class="n">${prCanSell(i)}</td><td>${modCell(i)}</td><td>${accCell(i)}</td><td>${cvCell(i)}</td><td class="n"><span class="sp-acts"><button class="mini" data-a="prl_edit" data-id="${i.id}">Edit</button><button class="mini cat-del" data-a="prl_del" data-id="${i.id}">Delete</button></span></td></tr>`;
+  return `<tr${findAttr("prod", i.n, i.c, i.d, i.id)}><td><b>${esc(i.n)}</b><small class="pr-code">Code ${i.id}</small></td><td>${esc(i.d)}</td><td><span class="pr-cat" style="--h:${hue(i.c)}">${esc(i.c)}</span></td><td>${TAX[i.t] > 0 ? `${qn(TAX[i.t])}%` : "None"}</td><td><input type="number" class="pr-price" value="${i.p}" data-pr="${i.id}" aria-label="Price of ${esc(i.n)}"></td><td class="n">${prCanSell(i)}${prGetStock(i)}</td><td>${modCell(i)}</td><td>${accCell(i)}</td><td>${cvCell(i)}</td><td class="n"><span class="sp-acts"><button class="mini" data-a="prl_edit" data-id="${i.id}">Edit</button><button class="mini cat-del" data-a="prl_del" data-id="${i.id}">Delete</button></span></td></tr>`;
 }
 function productsHTML() {
   const P = prPoints();
@@ -120,12 +128,15 @@ function prSave() {
 }
 function prEditModal() {
   if (!prEdit) return "";
-  const F = prEdit;
+  const F = prEdit,
+    gets = prGetStock(ITEMS.find(x => x.id === F.id));
   return `<div class="modal show" id="prEd" style="z-index:63"><div class="box itm">
   <header class="itm-h"><div><h3>Edit ${esc(F.was)}</h3><p>Sold at ${esc(F.d)} · no stock kept</p></div><button class="itm-x" data-a="prl_eclose" aria-label="Close">✕</button></header>
   <div class="itm-b"><section class="itm-s"><div class="itm-g itm-g3"><label>Name on the POS<input id="preN" maxlength="60" value="${esc(F.n)}"></label><label>Category<input id="preC" list="prodCatL" value="${esc(F.c)}"></label><label>Selling price (KES)<input id="preP" type="number" min="0" step="any" value="${esc(F.p)}"></label><label>Tax<select id="preT">${taxChoices()
     .map(([v, l]) => `<option value="${v}" ${v === F.t ? "selected" : ""}>${l}</option>`)
-    .join("")}</select></label></div></section></div>
+    .join(
+      ""
+    )}</select></label></div></section>${gets ? `<section class="itm-s"><h4>Stock</h4><div class="itm-hint">No stock is deducted when this sells. Give it a recipe to deduct ingredients, or make it under production to deduct finished items.</div>${gets}</section>` : ""}</div>
   <footer class="itm-f"><button class="mini" data-a="prl_eclose">Cancel</button><button class="chip on" data-a="prl_esave">Save changes</button></footer></div></div>`;
 }
 function prEditOpen(id) {

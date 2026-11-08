@@ -51,17 +51,107 @@ function cuStatementHTML(c) {
   ${S.rows.map(r => `<tr><td>${dateGB(ymdOf(r.at))}</td><td>${esc(r.what)}</td><td>${esc(r.ref)}</td><td class="n">${r.dr ? m2(r.dr) : ""}</td><td class="n">${r.cr ? m2(r.cr) : ""}</td><td class="n">${m2(r.bal)}</td></tr>`).join("")}
   </tbody><tfoot><tr><td colspan="5">Balance due</td><td class="n">KES ${m2(c.owes)}</td></tr></tfoot></table></div>`;
 }
+const CU_LIMITS = [
+  [0, "Cash only"],
+  [10000, "10,000"],
+  [25000, "25,000"],
+  [50000, "50,000"],
+  [100000, "100,000"],
+  [250000, "250,000"]
+];
+const CU_DAYS = [7, 14, 30, 60];
+/** What the limit typed so far means, in words. */
+function cuLimitNote(raw, c) {
+  const n = parseFloat(raw);
+  if (raw === "" || !(n >= 0))
+    return "Set how much this customer may owe. Charges above it are refused at the POS and the Front Desk.";
+  const owes = c ? c.owes || 0 : 0;
+  if (n === 0)
+    return owes > 0
+      ? `No new credit allowed. They still owe KES ${m2(owes)}.`
+      : "Cash only: nothing can be charged to this account.";
+  return owes > n
+    ? `They owe KES ${m2(owes)}, which is KES ${m2(owes - n)} over this limit. New charges will be refused.`
+    : `Can owe up to KES ${m2(n)}.${owes > 0 ? ` Owes KES ${m2(owes)} now, KES ${m2(n - owes)} still available.` : " Charges above it are refused at the POS and the Front Desk."}`;
+}
 function cuFormHTML() {
-  const c = cuS.ed.i < 0 ? {} : CU[cuS.ed.i],
+  const me = cuS.ed.i < 0 ? null : CU[cuS.ed.i],
+    c = me || {},
     f = (l, k, attrs = "", wide = "") =>
-      `<label class="${wide}">${l}<input id="cu_${k}" value="${esc(c[k] === undefined ? "" : c[k])}" ${attrs}></label>`;
-  return `<div class="modal show" id="cuEd" style="z-index:66"><div class="box itm cu-box"><header class="cu-h"><div><h3>${cuS.ed.i < 0 ? "New customer" : "Edit " + esc(c.n)}</h3><p>Credit customers can be charged from the POS and the Front Desk.</p></div><button class="mini" data-a="cu_edno">Close</button></header>
-  <section><h4>Customer</h4><div class="cu-g">${f("Customer or company name", "n", 'maxlength="80" autocomplete="off"', "cu-w")}<label>Type<select id="cu_type">${CU_TYPES.map(t => `<option ${t === (c.type || "Company") ? "selected" : ""}>${t}</option>`).join("")}</select></label>${f("Account code", "code", 'maxlength="20" placeholder="Your own reference"')}${f("KRA PIN", "kra", 'maxlength="11" style="text-transform:uppercase" placeholder="A000000000B"')}${f("ID or registration no", "idNo", 'maxlength="30"')}</div></section>
-  <section><h4>Contact</h4><div class="cu-g">${f("Contact person", "contact", 'maxlength="60"')}${f("Job title", "job", 'maxlength="40"')}${f("Phone", "phone", 'type="tel" maxlength="20" placeholder="07XX XXX XXX"')}${f("Other phone", "phone2", 'type="tel" maxlength="20"')}${f("Email", "email", 'type="email" maxlength="80"', "cu-w")}</div></section>
-  <section><h4>Address</h4><div class="cu-g">${f("Physical address", "addr", 'maxlength="120"', "cu-w")}${f("Town", "town", 'maxlength="40"')}${f("P.O. Box", "box", 'maxlength="30"')}</div></section>
-  <section><h4>Credit terms</h4><div class="cu-g">${f("Credit limit (KES)", "limit", 'type="number" min="0" step="any"')}${f("Days to pay", "terms", 'type="number" min="0" step="1" placeholder="e.g. 30"')}<label class="cu-c cu-w"><input id="cu_off" type="checkbox" ${c.off ? "checked" : ""}> On hold: can't be charged until this is cleared</label></div></section>
-  <section><h4>Notes</h4><label class="cu-n">Anything staff should know<textarea id="cu_notes" rows="2" maxlength="300">${esc(c.notes || "")}</textarea></label></section>
-  <footer class="cu-f"><button class="mini" data-a="cu_edno">Cancel</button><button class="chip on" data-a="cu_save">Save customer</button></footer></div></div>`;
+      `<label class="${wide}"><span>${l}</span><input id="cu_${k}" value="${esc(c[k] === undefined ? "" : c[k])}" ${attrs}></label>`,
+    sec = (ic, t, body) =>
+      `<section class="cuf-s"><h4><span class="ph-i">${I(ic)}</span>${t}</h4><div class="cuf-g">${body}</div></section>`,
+    limit = c.limit === undefined ? "" : String(c.limit),
+    terms = c.terms === undefined ? "" : String(c.terms);
+  return `<div class="modal show" id="cuEd" style="z-index:66"><div class="box itm cuf">
+  <header class="itm-h cuf-h"><span class="cuf-av" id="cuAv" aria-hidden="true">${esc((c.n || "+")[0].toUpperCase())}</span><div><h3>${me ? "Edit " + esc(c.n) : "New customer"}</h3><p>Customers with credit can be charged from the POS and the Front Desk.</p></div><button class="itm-x" data-a="cu_edno" aria-label="Close">✕</button></header>
+  <div class="itm-b cuf-b"><div class="cuf-main">
+   ${sec(
+     "users",
+     "Customer details",
+     f(
+       "Customer or company name <em>Required</em>",
+       "n",
+       'maxlength="80" autocomplete="off"',
+       "cuf-w"
+     ) +
+       `<label><span>Type</span><select id="cu_type">${CU_TYPES.map(t => `<option ${t === (c.type || "Company") ? "selected" : ""}>${t}</option>`).join("")}</select></label>` +
+       f("Account code", "code", 'maxlength="20" placeholder="Your own reference"') +
+       f(
+         "KRA PIN",
+         "kra",
+         'maxlength="11" style="text-transform:uppercase" placeholder="A000000000B"'
+       ) +
+       f("ID or registration no", "idNo", 'maxlength="30"')
+   )}
+   ${sec(
+     "phone",
+     "Contact",
+     f("Contact person", "contact", 'maxlength="60"') +
+       f("Job title", "job", 'maxlength="40"') +
+       f("Phone", "phone", 'type="tel" maxlength="20" placeholder="07XX XXX XXX"') +
+       f("Other phone", "phone2", 'type="tel" maxlength="20"') +
+       f("Email", "email", 'type="email" maxlength="80"', "cuf-w")
+   )}
+   ${sec(
+     "home",
+     "Address",
+     f("Physical address", "addr", 'maxlength="120"', "cuf-w") +
+       f("Town", "town", 'maxlength="40"') +
+       f("P.O. Box", "box", 'maxlength="30"')
+   )}
+   ${sec(
+     "book",
+     "Notes",
+     `<label class="cuf-w"><span>Anything staff should know</span><textarea id="cu_notes" rows="2" maxlength="300">${esc(c.notes || "")}</textarea></label>`
+   )}
+  </div>
+  <div class="cuf-credit">
+   <h4><span class="ph-i">${I("cash")}</span>Credit account</h4>
+   <label class="cuf-lim"><span>Credit limit <em>Required</em></span><span class="cuf-amt"><i>KES</i><input id="cu_limit" type="number" min="0" step="any" inputmode="decimal" value="${esc(limit)}" placeholder="0"></span></label>
+   <div class="cuf-chips" role="group" aria-label="Common credit limits">${CU_LIMITS.map(([v, l]) => `<button type="button" class="${limit === String(v) ? "on" : ""}" data-a="cu_lim" data-v="${v}">${l}</button>`).join("")}</div>
+   <p class="cuf-note" id="cuLimNote">${cuLimitNote(limit, me)}</p>
+   <label class="cuf-days"><span>Days to pay</span><input id="cu_terms" type="number" min="0" step="1" value="${esc(terms)}" placeholder="e.g. 30"></label>
+   <div class="cuf-chips cuf-chips4" role="group" aria-label="Common payment terms">${CU_DAYS.map(v => `<button type="button" class="${terms === String(v) ? "on" : ""}" data-a="cu_days" data-v="${v}">${v} days</button>`).join("")}</div>
+   <label class="cuf-hold"><input id="cu_off" type="checkbox" ${c.off ? "checked" : ""}><span><b>On hold</b><small>Can't be charged until this is cleared</small></span></label>
+  </div></div>
+  <footer class="itm-f"><button class="mini" data-a="cu_edno">Cancel</button><button class="chip on" data-a="cu_save">Save customer</button></footer></div></div>`;
+}
+/** Keep the note and the quick buttons in step with what is typed. */
+function cuFormSync() {
+  const lim = $("#cu_limit"),
+    days = $("#cu_terms"),
+    mark = (a, v) =>
+      document
+        .querySelectorAll(`#cuEd [data-a="${a}"]`)
+        .forEach(b => b.classList.toggle("on", b.dataset.v === v));
+  if (!lim) return;
+  mark("cu_lim", lim.value.trim());
+  mark("cu_days", days.value.trim());
+  $("#cuLimNote").textContent = cuLimitNote(
+    lim.value.trim(),
+    cuS.ed && cuS.ed.i >= 0 ? CU[cuS.ed.i] : null
+  );
 }
 function cuPayHTML() {
   const c = CU[cuS.pay];
@@ -99,7 +189,7 @@ function customersHTML() {
 function cuSave() {
   const v = k => $("#cu_" + k).value.trim(),
     n = v("n"),
-    limit = parseFloat(v("limit") || 0),
+    limit = parseFloat(v("limit")),
     terms = v("terms") === "" ? "" : parseInt(v("terms"), 10),
     kra = v("kra").toUpperCase(),
     email = v("email"),
@@ -107,12 +197,15 @@ function cuSave() {
   if (!n) return toast("Enter the customer's name.");
   if (CU.some(c => c !== me && c.n.toLowerCase() === n.toLowerCase()))
     return toast(`${n} is already a customer.`);
-  if (!(limit >= 0)) return toast("Enter a credit limit of 0 or more.");
   if (terms !== "" && !(terms >= 0)) return toast("Enter the days to pay as a number.");
   if (kra && !/^[A-Z][0-9]{9}[A-Z]$/.test(kra))
     return toast("A KRA PIN has a letter, nine digits and a letter.");
   if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))
     return toast("That email address doesn't look right.");
+  if (!(limit >= 0)) {
+    $("#cu_limit").focus();
+    return toast("Enter a credit limit. Use 0 for a cash-only customer.");
+  }
   const rec = {
     n,
     limit,
@@ -161,6 +254,11 @@ function cuPayGo() {
 }
 function cuAct(a, b) {
   const i = +b.dataset.i;
+  // Quick buttons fill the box: redrawing would lose what has been typed.
+  if (a === "cu_lim" || a === "cu_days") {
+    $(a === "cu_lim" ? "#cu_limit" : "#cu_terms").value = b.dataset.v;
+    return cuFormSync();
+  }
   if (a === "cu_f") cuS.f = b.dataset.k;
   else if (a === "cu_new" || a === "cu_edit") {
     if (!boCan("cust.manage")) return boDenied();
@@ -182,6 +280,9 @@ function cuAct(a, b) {
   all();
 }
 $("#vSub").addEventListener("input", e => {
+  if (e.target.id === "cu_n")
+    $("#cuAv").textContent = (e.target.value.trim()[0] || "+").toUpperCase();
+  if (e.target.id === "cu_limit" || e.target.id === "cu_terms") cuFormSync();
   if (e.target.id !== "cuQ") return;
   const q = e.target.value.trim().toLowerCase();
   document.querySelectorAll("#vSub [data-cu-row]").forEach(tr => {

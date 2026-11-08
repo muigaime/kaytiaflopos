@@ -5,7 +5,6 @@
    the guest check stays ivory in both. */
 .pos,
 #login,
-#bye,
 #shMgr,
 body > .modal {
   --bg: #f3eee4;
@@ -38,7 +37,6 @@ body > .modal {
 }
 :root[data-theme="dark"] .pos,
 :root[data-theme="dark"] #login,
-:root[data-theme="dark"] #bye,
 :root[data-theme="dark"] #shMgr,
 :root[data-theme="dark"] body > .modal {
   --bg: #120e0a;
@@ -60,7 +58,6 @@ body > .modal {
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .pos,
   :root:not([data-theme="light"]) #login,
-  :root:not([data-theme="light"]) #bye,
   :root:not([data-theme="light"]) #shMgr,
   :root:not([data-theme="light"]) body > .modal {
     --bg: #120e0a;

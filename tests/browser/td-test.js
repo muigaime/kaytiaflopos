@@ -23,9 +23,9 @@ try{
   click("#lock"); await wait(25); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400);
   const nav=async n=>{qa("#nav .nv").find(x=>x.dataset.n===n).click(); await wait(70);}, dts=()=>qa('#vSub input[type=date]').slice(0,2).map(x=>x.value).join(" to "), line=()=>{const e=qa("#vSub .pn div").find(x=>/bills ·/.test(x.textContent)); return e?e.textContent.replace(/\s+/g," ").slice(0,70):"none";};
   log("1 HOME BUTTON: "+q("#per button.on").textContent+" | "+q("#tc").textContent+" | labels "+qa("#tc ~ * text, svg text").map(x=>x.textContent).filter(x=>/:/.test(x)).join(","));
-  await nav("Reports"); log("2 REPORT OPENS TODAY: "+(dts()===today+" to "+today)+" | "+line());
+  await nav("Reports"); click('[data-a="rep_open"]'); await wait(40); log("2 REPORT OPENS TODAY: "+(dts()===today+" to "+today)+" | "+line());
   click('[data-q="6"]'); await wait(40); log("3 LAST 7: "+line()); const f=q('#vSub input[data-f="rf"]'); f.value=old(25); f.dispatchEvent(new Event("change",{bubbles:true})); await wait(40); log("4 GO BACK BY HAND: "+line());
-  await nav("Sales & Orders"); await nav("Reports"); log("5 BACK TO TODAY ON RETURN: "+(dts()===today+" to "+today)+" | "+line());
+  await nav("Sales & Orders"); await nav("Reports"); click('[data-a="rep_open"]'); await wait(40); log("5 BACK TO TODAY ON RETURN: "+(dts()===today+" to "+today)+" | "+line());
 }catch(e){log("X "+e.message)}
 document.documentElement.setAttribute("data-test",__E.join(" @@ "));document.title="done";})();</script>`;
 const html = fs.readFileSync(file, "utf8").replace("<head>", "<head>" + head).replace(/<\/body>(?![\s\S]*<\/body>)/, tail + "</body>");

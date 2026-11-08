@@ -33,7 +33,7 @@ const WAITER_RIGHTS = [
       ["comp", "Give Complimentary", "Without a manager's PIN"],
       ["postRoom", "Post to Room", "Charge a bill to a guest's room"],
       ["postPayroll", "Post to Payroll", "Charge a bill to a staff member's pay"],
-      ["swap", "Swap Items", "Same price only, and a manager's PIN is still needed"]
+      ["swap", "Swap Items", "Same price only, without a manager's PIN"]
     ]
   ],
   [
@@ -64,19 +64,18 @@ const WAITER_RIGHTS_LATER = [
   ["switchCur", "Switch Currency"],
   ["billMode", "Switch Billing Mode"]
 ];
-const WAITER_DEFAULTS = [
-  "create",
+const WAITER_DEFAULTS = ["create", "addPrinted", "printGuest", "interim", "send", "orderStatus"];
+/** A cashier takes payment, so a new one starts with more. */
+const CASHIER_DEFAULTS = [
+  ...WAITER_DEFAULTS,
   "clear",
-  "addPrinted",
-  "printGuest",
-  "interim",
   "functions",
-  "send",
-  "orderStatus",
   "stock",
   "switchSP",
   "sendPending"
 ];
+const newStaffRights = role =>
+  Object.fromEntries((role === "Cashier" ? CASHIER_DEFAULTS : WAITER_DEFAULTS).map(k => [k, true]));
 const allowedAlways = u => !u || !u.perm || BILL_AUTH.includes(u.role);
 // Part of a cashier's job, so these aren't left to a tick in Waiter setup.
 const CASHIER_POSTS = ["postRoom", "postPayroll"];

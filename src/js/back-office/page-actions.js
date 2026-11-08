@@ -35,9 +35,8 @@ $("#vSub").onclick = e => {
   const a = b.dataset.a,
     v = id => $("#" + id).value.trim(),
     num = id => parseFloat($("#" + id).value);
-  if (a === "rep_full") {
-    if (REP[rp][1](rs())[5] && REP[rp][1](rs())[5].wide) rpWideList = !rpWideList;
-    else rpFull = !rpFull;
+  if (a === "rep_home" || a === "rep_open") {
+    rpHome = a === "rep_home";
     return all();
   }
   if (a === "rep_print") return repPrint(b.dataset.k);
@@ -146,6 +145,7 @@ $("#vSub").onclick = e => {
     recAct(a.slice(4), b);
     return;
   }
+  if (a.slice(0, 3) === "rm_") return repMailAct(a, b);
   if (a.slice(0, 3) === "hs_") {
     settingsAct(a.slice(3), b);
     return;
@@ -265,10 +265,6 @@ $("#vSub").onchange = e => {
   if (s.tbn !== undefined) return tbRename(t);
   if (s.psx) return psuChange(t);
   if (s.setc) return settingsChange(t);
-  if (s.rpsel !== undefined) {
-    repPick(t.value);
-    return all();
-  }
   if (s.urg !== undefined) {
     urRole = t.value;
     return all();
@@ -276,6 +272,7 @@ $("#vSub").onchange = e => {
   if (s.ura !== undefined) return urRoleChange(+s.ura, t.value);
   if (s.wsr !== undefined) {
     wsF.role = t.value;
+    if (wsF.i < 0) wsF.perm = newStaffRights(t.value);
     return all();
   }
   if (s.wsp) return void (wsF.perm[s.wsp] = t.checked);

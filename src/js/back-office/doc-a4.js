@@ -402,7 +402,7 @@ function docWindow(title, css, html) {
   const w = window.open("", "_blank");
   if (!w) return toast("Allow pop-ups to print.");
   w.document.write(
-    `<!DOCTYPE html><html><head><title>${esc(title)}</title><style>${css}</style></head><body>${html}<\/body><\/html>`
+    `<!DOCTYPE html><html><head><title>${esc(title)}</title><style>${css}${/size:\s*A4/.test(css) ? a4Screen(/landscape/.test(css)) : ""}</style></head><body>${html}<\/body><\/html>`
   );
   w.document.close();
   const go = () => {
@@ -596,24 +596,22 @@ function docMailPanel(m) {
 }
 /** Sends one PDF through the server. Says what went wrong, or nothing. */
 async function docMailPost(to, subject, text, file, s) {
+  const made = await docPdfSpec(s);
+  return mailServerPost({ to, subject, text, filename: file + ".pdf", pdf: btoa(PDF.sheet(made)) });
+}
+/** Ask the server to send an email. Null when it went; otherwise what went wrong. */
+async function mailServerPost(payload) {
   const ctl = new AbortController(),
     t = setTimeout(() => ctl.abort(), 30000);
   let res = null;
   try {
-    const made = await docPdfSpec(s);
     res = await fetch(printServer() + "/api/mail/send", {
       method: "POST",
       headers: {
         "content-type": "application/json",
         ...(FD_SETTINGS.printKey ? { "x-print-key": FD_SETTINGS.printKey } : {})
       },
-      body: JSON.stringify({
-        to,
-        subject,
-        text,
-        filename: file + ".pdf",
-        pdf: btoa(PDF.sheet(made))
-      }),
+      body: JSON.stringify(payload),
       signal: ctl.signal
     });
   } catch (e) {

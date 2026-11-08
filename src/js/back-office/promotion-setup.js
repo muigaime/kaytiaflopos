@@ -99,7 +99,7 @@ function pmSave() {
 }
 function pmAct(a, b) {
   if (a === "pm_rep") {
-    rp = "promo";
+    repPick("promo");
     return go("Reports");
   }
   if (!catRight()) return boDenied();

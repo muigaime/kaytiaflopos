@@ -275,6 +275,7 @@ function dayEnd(by) {
     )
   });
   sync();
+  document.dispatchEvent(new CustomEvent("kf:dayend", { detail: d }));
   return "";
 }
 function addPayout(sh, cat, desc, amt, by) {
@@ -304,6 +305,9 @@ function delPayout(id) {
   PAYOUTS.splice(i, 1);
   sync();
 }
+/** For a print window: on screen it's a sheet of A4 on a grey desk. The printer only ever sees the page's own rules. */
+const a4Screen = landscape =>
+  `@media screen{html{background:#5f6368;min-height:100%}body{box-sizing:border-box;width:${landscape ? "297mm" : "210mm"};min-height:${landscape ? "210mm" : "297mm"};max-width:calc(100% - 32px);margin:20px auto!important;padding:12mm!important;background:#fff;box-shadow:0 3px 14px rgba(0,0,0,.45)}}`;
 function printHTML(html, th, pg) {
   const p = $("#shPrint");
   p.innerHTML = html;

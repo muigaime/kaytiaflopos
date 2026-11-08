@@ -61,7 +61,13 @@ function exRender() {
     : '<span class="stk">Tap the item you want to replace.</span>';
   // Only items at the same price, so a swap never changes the bill.
   const same = ex.old
-    ? ITEMS.filter(i => inPoint(i, d) && i.p === get(ex.old).p && String(i.id) !== String(ex.old))
+    ? ITEMS.filter(
+        i =>
+          inPoint(i, d) &&
+          !catOffAt(i.d, i.c) &&
+          i.p === get(ex.old).p &&
+          String(i.id) !== String(ex.old)
+      )
     : [];
   if (ex.cat !== "All" && !same.some(i => i.c === ex.cat)) ex.cat = "All";
   const cats = ["All", ...new Set(same.map(i => i.c))];
@@ -82,7 +88,7 @@ function exRender() {
     r => `<button class="chip ${r === ex.reason ? "on" : ""}" data-er="${r}">${r}</button>`
   ).join("");
   $("#exBack").checked = !!ex.back;
-  $("#exAuth").style.display = BILL_AUTH.includes(user.role) ? "none" : "";
+  $("#exAuth").style.display = actsAlone("swap") ? "none" : "";
   const ok = ex.old && ex.nw;
   let sum = "Pick the item to replace, then the new item.";
   if (ok) {
@@ -122,9 +128,9 @@ $("#exGo").onclick = () => {
     oi = get(ex.old),
     ni = get(ex.nw);
   if (oi.p !== ni.p) return fsNote("Only items of the same price can be swapped.");
-  // A Manager or Super Cashier authorizes it. Having the right doesn't replace this.
+  // The swap right is enough. Only staff from before Waiter setup, with no rights list, still need a PIN.
   let by = user.n;
-  if (!BILL_AUTH.includes(user.role)) {
+  if (!actsAlone("swap")) {
     const m = $("#exMsg");
     if (Date.now() < exLock) return (m.textContent = "Too many tries. Wait 30 seconds.");
     const a = USERS.find(x => BILL_AUTH.includes(x.role) && x.pin === $("#exPin").value);

@@ -29,7 +29,7 @@ try{
   log("7 TYPING KEPT: "+q('[data-ws="n"]').value+" | "+q('[data-ws="footer"]').value); log("8 CREATE: "+await sv()); const R=USERS.find(u=>u.n==="Rose Kim"); log("9 SAVED: "+JSON.stringify({wid:R.wid,role:R.role,d:R.d,copies:R.copies,maxPend:R.maxPend,maxDisc:R.maxDisc,comm:R.comm,card:R.card,footer:R.footer})+" | on list "+qa(".ws-w").length+" | form blank "+(q('[data-ws="n"]').value===""));
   bosave(); log("10 PERSISTED: "+!!JSON.parse(localStorage.getItem("kaytia_pos_bo_v1")).U.find(u=>u.n==="Rose Kim"&&u.perm&&u.wid));
   q('.ws-w[data-i="'+USERS.indexOf(R)+'"]').click(); await wait(25); log("11 EDIT: "+q(".ws-form h4").textContent+" | id "+q(".ws-id").textContent+" | disc "+q('[data-wsp="disc"]').checked+" void "+q('[data-wsp="void"]').checked+" | points "+qa("[data-wsd]:checked").length);
-  click('[data-a="ws_new"]'); await wait(15);
+  click('[data-a="ws_new"]'); await wait(15); ["clear","functions","stock","switchSP","sendPending"].forEach(k=>R.perm[k]=true); bosave();
   shiftStart("Rose Kim",0,"t"); q("#bo").classList.remove("show"); click('[data-go="pos"]'); await wait(50);
   await login("5555");
   log("12 ROSE TILES tabs "+qa("#spTabs button").map(b=>b.textContent).join("/")+" | buttons "+btns()+" | credit "+vis('#pAcct'));

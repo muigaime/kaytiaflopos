@@ -9,8 +9,7 @@ const z = (n, w = 2) => String(n).padStart(w, "0"),
   PMH = ["#Cash", "#M-Pesa", "#PDQ", "#Complimentary", "#Credit", "#Room"],
   pm = (s, k) => (s.mx || {})[k] || 0;
 let rp = "dr",
-  rpFull = false,
-  rpWideList = false,
+  rpHome = true, // the Reports overview, until a report is chosen
   rpQ = "",
   rd = "All",
   rcm = 2,
@@ -1540,6 +1539,7 @@ function repRecent() {
 /** Opens a report and remembers it for the Recent list on this computer. */
 function repPick(k) {
   rp = k;
+  rpHome = false;
   try {
     localStorage.setItem(
       RECENT_KEY,
@@ -1555,29 +1555,36 @@ const repGroups = has => {
     .map(([g, L]) => [g, L.filter(k => has.includes(k))])
     .filter(([, L]) => L.length);
 };
-const repOptions = picker =>
-  repGroups(picker.map(([k]) => k))
-    .map(
-      ([g, L]) =>
-        `<optgroup label="${g}">${L.map(k => `<option value="${k}" ${k === rp ? "selected" : ""}>${REP[k][0]}</option>`).join("")}</optgroup>`
-    )
-    .join("");
-function repMenuHTML(picker) {
+const REP_ICONS = {
+  Sales: "chart",
+  Items: "box",
+  Staff: "users",
+  Control: "shield",
+  Other: "book"
+};
+/** The overview: today's figures, the reports people open most, then every report by group. */
+function repHomeHTML(picker) {
   const has = picker.map(([k]) => k),
-    item = (k, on) =>
-      `<button class="rp-item ${on && k === rp ? "on" : ""}" data-r="${k}" title="${esc(REP_WHAT[k] || "")}" ${repHit(k, rpQ) ? "" : "hidden"}><span>${REP[k][0].replace(/ Report$/, "")}</span><small>${REP_WHAT[k] || ""}</small></button>`,
-    recent = repRecent().filter(k => has.includes(k));
-  return `<nav class="pn rp-menu ${rpQ.trim() ? "searching" : ""}"><input id="rpFind" type="search" value="${esc(rpQ)}" placeholder="Search, e.g. M-Pesa or waiter" aria-label="Find a report by name or by what you need" autocomplete="off">
-  ${recent.length ? `<div class="rp-group rp-recent"><div class="rp-gh">Recent</div>${recent.map(k => item(k, false)).join("")}</div>` : ""}${repGroups(
-    has
-  )
-    .map(
-      ([g, L]) =>
-        `<div class="rp-group" ${L.some(k => repHit(k, rpQ)) ? "" : "hidden"}><div class="rp-gh">${g}</div>${L.map(k => item(k, true)).join("")}</div>`
-    )
-    .join(
-      ""
-    )}<div class="stk rp-none" ${has.some(k => repHit(k, rpQ)) ? "hidden" : ""}>Nothing matches. Try another word, or clear the search.</div></nav>`;
+    start = d0(),
+    today = SALES.filter(s => saleAt(s) >= start && saleAt(s) < start + D),
+    total = G(today),
+    bills = billCount(today),
+    open = orders.reduce((a, o) => a + totals(o.lines, o).g, 0),
+    tile = (ic, l, v, s, k) =>
+      `<${k && has.includes(k) ? `button data-r="${k}"` : "div"} class="ph-t"><span class="ph-i">${I(ic)}</span><span class="ph-l">${l}</span><b>${v}</b><small>${s}</small></${k && has.includes(k) ? "button" : "div"}>`,
+    quick = (ic, l, k) =>
+      has.includes(k)
+        ? `<button class="ph-q" data-r="${k}"><span class="ph-i">${I(ic)}</span>${l}</button>`
+        : "",
+    card = (k, ic) =>
+      `<button class="ph-c rp-item" data-r="${k}" ${repHit(k, rpQ) ? "" : "hidden"}><span class="ph-i">${I(ic)}</span><span class="ph-b"><b>${REP[k][0].replace(/ Report$/, "")}</b><span>${REP_WHAT[k] || ""}</span></span><span class="ph-ch">${I("chev")}</span></button>`,
+    groups = repGroups(has);
+  return `<div class="ph rp-hub ${rpQ.trim() ? "searching" : ""}"><div class="ph-h"><h1>Reports</h1><p>Sales, items, staff and controls, for any dates you choose.</p></div>
+  ${boCan("rep.sales") ? `<div class="ph-ts">${tile("cash", "Sales today", KES(total), "Settled so far", "dr")}${tile("book", "Bills today", bills, bills === 1 ? "1 bill settled" : bills + " bills settled", "bills")}${tile("chart", "Average bill", KES(bills ? total / bills : 0), "Today", "ps")}${tile("cart", "Open bills", KES(open), plural(orders.length, "bill") + " not yet settled", "bills")}</div>` : ""}
+  <div class="ph-qs">${quick("chart", "Daily takings", "dr")}${quick("book", "Every bill", "bills")}${quick("users", "Staff sales", "ss")}<button class="ph-q" data-a="rep_open"><span class="ph-i">${I("swap")}</span>Last report: ${REP[rp][0].replace(/ Report$/, "")}</button></div>
+  <label class="ph-find"><input id="rpFind" type="search" value="${esc(rpQ)}" placeholder="Find a report, e.g. M-Pesa or waiter" aria-label="Find a report by name or what it shows" autocomplete="off"></label>
+  ${groups.map(([g, L]) => `<section class="ph-sec rp-group" ${L.some(k => repHit(k, rpQ)) ? "" : "hidden"}><h2 class="rp-gh">${g}</h2><div class="ph-cs">${L.map(k => card(k, REP_ICONS[g] || "book")).join("")}</div></section>`).join("")}
+  <div class="stk rp-none" ${has.some(k => repHit(k, rpQ)) ? "hidden" : ""}>Nothing matches. Try another word, or clear the search.</div></div>`;
 }
 // The list filters as you type, without redrawing, so the cursor stays in the box.
 function repFilter(box) {
@@ -1605,12 +1612,12 @@ const repVisible = box => [
 document.addEventListener("input", e => {
   if (e.target.id !== "rpFind") return;
   rpQ = e.target.value;
-  repFilter(e.target.closest(".rp-menu"));
+  repFilter(e.target.closest(".rp-hub"));
 });
 // Up and down move through what's listed, and Enter opens it.
 document.addEventListener("keydown", e => {
   if (e.target.id !== "rpFind") return;
-  const box = e.target.closest(".rp-menu"),
+  const box = e.target.closest(".rp-hub"),
     L = repVisible(box),
     at = L.findIndex(b => b.classList.contains("kb"));
   if (e.key === "Escape") {
@@ -1649,11 +1656,12 @@ const V = {
   rep() {
     if (!boCan(repRight(rp, REP[rp][0])))
       rp = Object.keys(REP).find(k => boCan(repRight(k, REP[k][0])));
+    if (rpHome)
+      return repHomeHTML(Object.entries(REP).filter(([k, y]) => boCan(repRight(k, y[0]))));
     const [title, fn] = REP[rp],
       L = rs(),
       [c, r, f, note, head, x] = fn(L),
       picker = Object.entries(REP).filter(([k, y]) => boCan(repRight(k, y[0]))),
-      wide = x && x.wide ? !rpWideList : rpFull,
       bills = L.length,
       total = G(L),
       kpi = (l, v) => `<div class="sp-kpi"><span>${l}</span><b>${v}</b></div>`,
@@ -1663,8 +1671,17 @@ const V = {
         ["29", "Last 30 days"]
       ],
       onQuick = q => rt === ymd(d0()) && rf === ymd(d0() - q * D);
-    return `<div class="rp-page ${wide ? "wide" : ""}">${wide ? "" : repMenuHTML(picker)}
- <div class="pn rp-main"><div class="rp-head"><div><h3>${title}</h3><p>${REP_WHAT[rp] || ""}</p></div><span class="rp-head-btns">${wide ? `<label class="rp-jump">Report<select data-rpsel>${repOptions(picker)}</select></label>` : ""}<button class="mini" data-a="rep_full">${wide ? "Show report list" : "Full width"}</button></span></div>
+    const has = picker.map(([k]) => k);
+    return `${phMenu(
+      repGroups(has).map(([g, K]) => ({
+        name: g,
+        tabs: K.map(k => [k, REP[k][0].replace(/ Report$/, ""), REP_ICONS[g] || "book"])
+      })),
+      rp,
+      t => (t === "home" ? 'data-a="rep_home"' : `data-r="${t}"`),
+      "Reports"
+    )}<div class="rp-page wide">
+ <div class="pn rp-main"><div class="rp-head"><div><h3>${title}</h3><p>${REP_WHAT[rp] || ""}</p></div></div>
  ${repExtraTop(x)}<div class="rp-filters"><label>From<input type="date" data-f="rf" value="${rf}"></label><label>To<input type="date" data-f="rt" value="${rt}"></label><label>Sale point<select data-f="rd">${["All", ...ALLD].map(d => `<option value="${esc(d)}" ${d === rd ? "selected" : ""}>${d === "All" ? "All sale points" : esc(d)}</option>`).join("")}</select></label>${rp === "ts" ? `<label>From time<input type="time" data-f="tf" value="${rtf}"></label><label>To time<input type="time" data-f="tt" value="${rtt}"></label>` : ""}${rp === "com" ? `<label>Commission rate (%)<input type="number" step="any" data-f="rc" value="${rcm}" placeholder="Rate %"></label>` : ""}${x && x.tools ? x.tools : ""}</div>
  <div class="rp-bar"><span class="pr-pills">${quick.map(([q, l]) => `<button class="pr-pill ${onQuick(+q) ? "on" : ""}" data-q="${q}">${l}</button>`).join("")}</span><span class="rp-tools">${printTools("rep")}</span></div>
  ${head ? `<div class="rp-cap">${head}</div>` : `<div class="sp-kpis rp-kpis">${kpi("Bills", bills)}${kpi("Total sales", KES(total))}${kpi("Average bill", KES(bills ? total / bills : 0))}</div><div class="rp-cap">${repDates()} · ${rd === "All" ? "all sale points" : esc(rd)}</div>`}${rp === "bills" ? billsGrid(c, r, note) : x && x.colour ? `<div class="rp-colour">${tb(c, r, f, note)}</div>` : head ? tb(c, r, f, note) : tb(c, r, f)}${repExtraBelow(x)}${note && !head ? `<div class="stk">${note}</div>` : ""}</div></div>`;

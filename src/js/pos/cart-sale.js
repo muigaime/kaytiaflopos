@@ -114,7 +114,8 @@ const get = id => {
 // A waiter ticked for several sale points works in them side by side (dept = ALLP): the tabs on top
 // choose whose menu shows, and the order keeps building across them.
 let spTab = "";
-const onMenu = i => i.sell !== "acc" && (dept === ALLP ? i.d === spTab : i.d === dept);
+const onMenu = i =>
+  i.sell !== "acc" && !catOffAt(i.d, i.c) && (dept === ALLP ? i.d === spTab : i.d === dept);
 const shownPoint = () => (dept === ALLP ? spTab : dept);
 function drawTabs() {
   if (dept === ALLP && !DEPTS.includes(spTab)) spTab = DEPTS[0];
@@ -625,7 +626,10 @@ $("#selChgAll").onclick = () => {
 function findList() {
   const q = $("#fq").value.toLowerCase();
   $("#fr").innerHTML =
-    ITEMS.filter(i => i.sell !== "acc" && inPoint(i, dept) && i.n.toLowerCase().includes(q))
+    ITEMS.filter(
+      i =>
+        i.sell !== "acc" && !catOffAt(i.d, i.c) && inPoint(i, dept) && i.n.toLowerCase().includes(q)
+    )
       .map(
         i =>
           `<button class="mini" style="width:100%;text-align:left;margin-bottom:6px;padding:10px" data-i="${i.id}">${i.n} · ${i.p.toFixed(2)}</button>`
@@ -654,6 +658,7 @@ function findEnter() {
   const f = ITEMS.filter(
     i =>
       i.sell !== "acc" &&
+      !catOffAt(i.d, i.c) &&
       inPoint(i, dept) &&
       i.n.toLowerCase().includes($("#fq").value.trim().toLowerCase())
   );

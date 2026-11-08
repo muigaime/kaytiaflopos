@@ -246,7 +246,7 @@ const ST_CSS = `.st-doc{position:relative;background:#fff;color:#241b12;border-r
 .st-doc .st-grp{border-collapse:collapse;margin-top:14px;min-width:60%}
 .st-doc .st-grp th{padding:6px 8px;font-size:10.5px;text-align:left;color:#fff;background:#241b12}
 .st-doc .st-grp td{padding:5px 8px;border-bottom:1px solid #e8e0d0}
-.st-doc .st-t tbody .st-tot td,.st-doc .st-grp .st-tot td,.st-doc .st-t tfoot td{font-weight:700;color:#fff;background:#241b12;border:0}
+.st-doc .st-t tbody tr.st-tot td,.st-doc .st-t tbody tr.st-tot:nth-child(even) td,.st-doc .st-grp .st-tot td,.st-doc .st-t tfoot td{font-weight:700;color:#fff;background:#241b12;border:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .st-doc .st-sig{display:grid;grid-template-columns:repeat(3,1fr);gap:36px;margin-top:46px;break-inside:avoid}
 .st-doc .st-sig div{border-top:1px solid #241b12;padding-top:5px;font-size:11px}
 .st-doc .st-foot{margin-top:16px;padding-top:6px;border-top:1px solid #d9cdb8;font-size:10px;color:#6b6358;display:flex;justify-content:space-between;gap:16px}
@@ -273,7 +273,7 @@ function stPrint(title, html, page = "A4 landscape") {
   const w = window.open("", "_blank");
   if (!w) return toast("Allow pop-ups to print.");
   w.document.write(
-    `<!DOCTYPE html><html><head><title>${esc(title)}</title><style>body{margin:0}${ST_CSS}.st-doc{padding:0}@page{size:${page};margin:10mm}</style></head><body>${stDress(html)}<\/body><\/html>` // "<\/" so tools scanning the page for </body> don't stop here
+    `<!DOCTYPE html><html><head><title>${esc(title)}</title><style>body{margin:0}${ST_CSS}.st-doc{padding:0}@page{size:${page};margin:10mm}${a4Screen(/landscape/.test(page))}</style></head><body>${stDress(html)}<\/body><\/html>` // "<\/" so tools scanning the page for </body> don't stop here
   );
   w.document.close();
   w.focus();

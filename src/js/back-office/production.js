@@ -5,7 +5,7 @@
 //              materials becomes the cost of the batch; the items go to a selling point's stock.
 //  Recipe:     a product whose ingredients leave the materials store each time it is sold,
 //              e.g. 0.25 kg flour + 0.1 L oil per portion (ITEMS entry with r + from, see itemLoc).
-let recT = "overview";
+let recT = "home";
 const REC_TABS = [
   ["h", "Kitchen"],
   ["overview", "Kitchen materials", "box"],
@@ -14,7 +14,8 @@ const REC_TABS = [
   ["h", "Reports"],
   ["pbal", "Production balances", "chart"],
   ["allp", "All products", "box"],
-  ["log", "Production log", "chart"]
+  ["log", "Production log", "chart"],
+  ["report", "Recipe & Production Report", "chart"]
 ];
 const prBlank = () => ({
   from: "",
@@ -106,33 +107,73 @@ const REC_PAGES = {
   allp: [
     "All products in selling points",
     "Opening, added, sold and what remains of everything on sale."
+  ],
+  report: [
+    "Recipe & Production Report",
+    "What each kitchen material was used for and what remains, for the dates you choose."
   ]
 };
 let recNewOn = false;
-function recRail() {
-  const L = REC_TABS.filter(([t]) => t === "h" || boTabOk("rec", t));
-  return L.filter(([t], i) => t !== "h" || (L[i + 1] && L[i + 1][0] !== "h"))
-    .map(([t, l, ic]) =>
-      t === "h"
-        ? `<div class="rhd">${l}</div>`
-        : `<button class="ir ${t === recT ? "on" : ""}" data-a="rec_tab" data-t="${t}">${I(ic)}<span>${l}</span></button>`
+const recGroups = () => {
+  const G = [];
+  REC_TABS.forEach(x => {
+    if (x[0] === "h") G.push({ name: x[1], tabs: [] });
+    else if (boTabOk("rec", x[0])) G[G.length - 1].tabs.push(x);
+  });
+  return G.filter(g => g.tabs.length);
+};
+/** The overview: figures, the things people come here to do, then every screen by group. */
+function recHomeHTML() {
+  const M = materialStores(),
+    today = todayYmd(),
+    runs = PRODS.filter(x => ymdOf(new Date(x.at)).slice(0, 7) === today.slice(0, 7)),
+    recipes = recipeList().length,
+    value = sum(M, storeValue),
+    toAccept = ISSUES.filter(x => M.includes(x.to) && x.status === AWAIT).length,
+    ok = t => boTabOk("rec", t),
+    many = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`,
+    tab = t => `data-a="rec_tab" data-t="${t}"`,
+    tile = (ic, l, v, s, t, warn) =>
+      `<${ok(t) ? `button ${tab(t)}` : "div"} class="ph-t ${warn ? "ph-warn" : ""}"><span class="ph-i">${I(ic)}</span><span class="ph-l">${l}</span><b>${v}</b><small>${s}</small></${ok(t) ? "button" : "div"}>`,
+    quick = (ic, l, t, a) =>
+      ok(t)
+        ? `<button class="ph-q" ${a || tab(t)}><span class="ph-i">${I(ic)}</span>${l}</button>`
+        : "",
+    card = x => {
+      const meta =
+        x[0] === "recipes" && recipes
+          ? many(recipes, "recipe")
+          : x[0] === "prod" && runs.length
+            ? `${many(runs.length, "run")} this month`
+            : x[0] === "overview" && toAccept
+              ? `${toAccept} waiting`
+              : "";
+      return `<button class="ph-c" ${tab(x[0])}><span class="ph-i">${I(x[2])}</span><span class="ph-b"><b>${x[1]}</b><span>${REC_PAGES[x[0]][1]}</span>${meta ? `<em>${meta}</em>` : ""}</span><span class="ph-ch">${I("chev")}</span></button>`;
+    };
+  return `<div class="ph"><div class="ph-h"><h1>Recipes &amp; Production</h1><p>Kitchen materials, what you make from them, and what it all costs.</p></div><div class="ph-ts">${tile("box", "Kitchen materials", "KES " + m2(value), `Held in ${many(M.length, "materials store")}`, "overview")}${tile("book", "Recipes", recipes, "Taking ingredients off stock", "recipes")}${tile("chef", "Production this month", runs.length, many(runs.length, "run"), "prod")}${tile("alert", "Waiting to accept", toAccept, toAccept ? "Issued to the kitchen" : "Nothing waiting", "overview", toAccept > 0)}</div><div class="ph-qs">${quick("chef", "Run production", "prod")}${quick("plus", "New recipe", "recipes", 'data-a="rec_rnew"')}${quick("box", "Kitchen materials", "overview")}${quick("chart", "View report", "report")}</div>${recGroups()
+    .map(
+      g =>
+        `<section class="ph-sec"><h2>${g.name}</h2><div class="ph-cs">${g.tabs.map(card).join("")}</div></section>`
     )
-    .join("");
+    .join("")}${apModalIfOpen()}</div>`;
 }
 function recipesView() {
-  if (!boTabOk("rec", recT)) recT = "overview";
+  if (recT !== "home" && !boTabOk("rec", recT)) recT = "home";
+  if (recT === "home") return recHomeHTML();
   const body =
-    recT === "pbal" || recT === "allp"
-      ? recBalHTML(recT)
-      : recT === "prod"
-        ? prodHTML()
-        : recT === "recipes"
-          ? recipesHTML()
-          : recT === "log"
-            ? prodLogHTML()
-            : recOverviewHTML();
+    recT === "report"
+      ? recRepHTML()
+      : recT === "pbal" || recT === "allp"
+        ? recBalHTML(recT)
+        : recT === "prod"
+          ? prodHTML()
+          : recT === "recipes"
+            ? recipesHTML()
+            : recT === "log"
+              ? prodLogHTML()
+              : recOverviewHTML();
   const [title, what] = REC_PAGES[recT] || REC_PAGES.overview;
-  return `<div class="inv invx"><nav class="inv-rail">${recRail()}</nav><div class="inv-main"><div class="inv-title"><h1>${title}</h1><p>${what}</p></div>${body}${apModalIfOpen()}</div></div>`;
+  return `<div class="inv invx inv-solo"><div class="inv-main">${phMenu(recGroups(), recT, "rec_tab", "Recipes and production")}<div class="inv-title"><h1>${title}</h1><p>${what}</p></div>${body}${apModalIfOpen()}</div></div>`;
 }
 V.rec = recipesView;
 
@@ -204,6 +245,48 @@ function recOverviewHTML() {
 }
 
 // ---------------------------------------------------------------- production
+/** The product sold at this point under this name with no stock behind it, if any. */
+const prodDirect = (name, to) =>
+  ITEMS.find(
+    i =>
+      i.d === to &&
+      i.n.toLowerCase() === String(name).trim().toLowerCase() &&
+      !Object.keys(i.r || {}).length
+  );
+/** Products that keep no stock, each with the way to give it some. */
+function recDirectPanel() {
+  const L = ITEMS.filter(i => i.sell !== "acc" && !Object.keys(i.r || {}).length).sort((a, b) =>
+    a.n.localeCompare(b.n)
+  );
+  if (!L.length) return "";
+  return `<div class="pn tw"><div class="inv-head"><h4>Sold with no stock kept (${L.length})</h4></div><div class="stk">These were added directly, so a sale deducts nothing. Add a recipe or make them under production and each sale will.</div><table class="t"><tr><th>Product</th><th>Sold at</th><th class="n">Price</th><th></th></tr>${L.map(i => `<tr><td>${esc(i.n)}</td><td>${esc(i.d)}</td><td class="n">${m2(i.p)}</td><td class="n">${prGetStock(i)}</td></tr>`).join("")}</table></div>`;
+}
+/** Open the recipe or production form for a product that keeps no stock. */
+function recFromDirect(way, id) {
+  const i = ITEMS.find(x => x.id === id);
+  if (!i) return;
+  if (prOnBill(id)) return toast(i.n + " is on an open bill. Settle it first.");
+  invF.spe = null;
+  prEdit = null;
+  if (way === "dirr") {
+    invF.rcp = {
+      ...rcpBlank(),
+      edit: id,
+      name: i.n,
+      sp: i.d,
+      cat: i.c,
+      price: String(i.p),
+      tax: i.t
+    };
+    recT = "recipes";
+    toast(`Add the ingredients for ${i.n}, then press Save recipe.`);
+  } else {
+    invF.pr = { ...prBlank(), to: i.d, outName: i.n, cat: i.c, tax: i.t };
+    recT = "prod";
+    toast(`Add the materials for ${i.n}, then press Run production.`);
+  }
+  return go("Recipes & Production");
+}
 function prodHTML() {
   const M = materialStores(),
     F = invF.pr,
@@ -215,7 +298,8 @@ function prodHTML() {
     cost = F.lines.reduce((a, x) => a + x.q * cst(x.k), 0),
     yq = parseFloat(F.outQty),
     outK = rcExact(F.outName),
-    prod = outK ? sdProduct(outK, F.to) : null;
+    direct = prodDirect(F.outName, F.to),
+    prod = direct || (outK ? sdProduct(outK, F.to) : null);
   return `<div class="pn"><h4>Convert materials into finished items</h4>
   <div class="stk">Example: 1 kg of flour makes 10 ugali. The materials leave ${esc(F.from)} and the finished items go to the selling point's stock.</div>
   <div class="fr"><label>Materials from<select data-iv="pr.from">${opts(M, F.from)}</select></label><label>Note<input data-iv="pr.note" value="${esc(F.note)}" placeholder="Optional, e.g. lunch batch"></label></div>
@@ -241,9 +325,10 @@ function prodHTML() {
    <label>Tax<select data-iv="pr.tax">${taxChoices()
      .map(([v, l]) => `<option value="${v}" ${v === F.tax ? "selected" : ""}>${l}</option>`)
      .join("")}</select></label></div>
+  ${direct ? `<div class="stk">${esc(direct.n)} sells at ${esc(F.to)} with no stock kept. This production links them, so each sale deducts one finished item.</div>` : ""}
   <div class="stk" id="prInfo">${yq > 0 && cost > 0 ? `Cost per item: KES ${m2(cost / yq)}` : ""}</div>
   <div class="fr"><button class="chip on" data-a="rec_run">Run production</button><button class="mini" data-a="rec_clear" data-f="pr">Clear</button></div></div>
-  ${itemDatalists()}`;
+  ${recDirectPanel()}${itemDatalists()}`;
 }
 /** Live cost per item while typing the quantity made. */
 function prSync(p, f) {
@@ -276,9 +361,13 @@ function prodRun() {
   if (!(qty > 0)) return toast("Enter how many it makes.");
   if (!posSells(F.to)) return toast("Choose the selling point it goes to.");
   if (price !== null && !(price > 0)) return toast("The selling price must be more than 0.");
+  const direct = prodDirect(name, F.to);
+  if (direct && prOnBill(direct.id))
+    return toast(direct.n + " is on an open bill. Settle it first.");
   let k = rcExact(name);
   if (k && F.lines.some(x => x.k === k)) return toast(name + " cannot be made from itself.");
-  const named = !k && ITEMS.some(i => i.d === F.to && i.n.toLowerCase() === name.toLowerCase());
+  const named =
+    !k && !direct && ITEMS.some(i => i.d === F.to && i.n.toLowerCase() === name.toLowerCase());
   if (named && price !== null) return toast(F.to + " already sells a product called " + name + ".");
   if (!k) {
     const uom = F.outUom.trim() || "pcs";
@@ -320,7 +409,12 @@ function prodRun() {
     lines
   });
   let msg = `${id}: ${qn(qty)} ${itemInfo(k).uom} of ${itemInfo(k).name} made, KES ${m2(qty ? cost / qty : 0)} each.`;
-  if (price !== null) {
+  if (direct) {
+    direct.r = { [k]: 1 };
+    if (price !== null) direct.p = price;
+    spRefreshPos();
+    msg += ` ${direct.n} at ${F.to} now sells from this stock.`;
+  } else if (price !== null) {
     const prod = sdProduct(k, F.to);
     if (prod) prod.p = price;
     else
@@ -382,7 +476,7 @@ function recipesHTML() {
     !recipeList().length;
   return `${
     showForm
-      ? `<div class="pn"><h4>${F.edit ? "Edit recipe" : "New recipe"}</h4>
+      ? `<div class="pn"><h4>${F.edit ? (F.lines.length ? "Edit recipe" : "Add a recipe for " + esc(F.name)) : "New recipe"}</h4>
   <div class="stk">One portion. Choose ingredients from the store; decimals such as 0.5, 0.25, 0.1 or 0.3 are fine. Each sale deducts them from what was issued to ${esc(F.from)}.</div>
   <div class="fr"><label>Product name<input id="rcpName" data-iv="rcp.name" value="${esc(F.name)}" placeholder="e.g. Beef stew"></label>
    <label>Sold at<select data-iv="rcp.sp">${opts(S, F.sp)}</select></label>
@@ -412,7 +506,7 @@ function recipesHTML() {
           })
           .join("")}</table>`
       : '<div class="empty">No recipes yet.</div>'
-  }</div>`;
+  }</div>${recDirectPanel()}`;
 }
 /** How much of an item the stores hold, all together. */
 const storeQty = k => STORES.reduce((a, l) => a + have(l, k), 0);
@@ -453,8 +547,16 @@ function recipeSave() {
   if (!isMaterials(F.from)) return toast("Choose where the ingredients come from.");
   if (!(price > 0)) return toast("Enter the selling price.");
   if (!F.lines.length) return toast("Add at least one ingredient.");
-  if (ITEMS.some(i => i.id !== F.edit && i.d === F.sp && i.n.toLowerCase() === name.toLowerCase()))
+  // Typing the name of a product that keeps no stock gives that product the recipe.
+  const twin = ITEMS.find(
+    i => i.id !== F.edit && i.d === F.sp && i.n.toLowerCase() === name.toLowerCase()
+  );
+  if (twin && (F.edit || Object.keys(twin.r || {}).length))
     return toast(F.sp + " already sells a product called " + name + ".");
+  if (twin) F.edit = twin.id;
+  const before = ITEMS.find(i => i.id === F.edit);
+  if (before && !Object.keys(before.r || {}).length && prOnBill(before.id))
+    return toast(before.n + " is on an open bill. Settle it first.");
   const r = Object.fromEntries(F.lines.map(x => [x.k, x.q])),
     data = {
       n: name,
@@ -890,24 +992,21 @@ function recRepTables(D, print) {
   }</tbody></table>`;
   return wrap(main) + wrap(prod) + wrap(rec);
 }
-function recRepView() {
+function recRepHTML() {
   const F = invF.recr,
     bad = F.from > F.to,
     D = bad ? null : recRepData(),
     sum2 = f => D.items.reduce((a, r) => a + f(r), 0),
     kst = (l, v) => `<div class="kst"><span>${l}</span><b>${v}</b></div>`;
-  return `<div class="inv invx inv-solo"><div class="inv-main">
-  <div class="pn"><div class="fr" style="align-items:end"><label>From<input type="date" data-iv="recr.from" value="${esc(F.from)}"></label><label>To<input type="date" data-iv="recr.to" value="${esc(F.to)}"></label><div class="seg2"><button data-a="rec_rrange" data-rng="today">Today</button><button data-a="rec_rrange" data-rng="month">This month</button></div><button class="mini xl-btn" style="flex:none" data-a="rep_xlsxpage" data-title="Recipe and production report" data-like="rec_rprint">Export to Excel</button><button class="chip on" style="flex:none" data-a="rec_rprint" ${bad ? "disabled" : ""}>Print</button></div></div>
+  return `  <div class="pn"><div class="fr" style="align-items:end"><label>From<input type="date" data-iv="recr.from" value="${esc(F.from)}"></label><label>To<input type="date" data-iv="recr.to" value="${esc(F.to)}"></label><div class="seg2"><button data-a="rec_rrange" data-rng="today">Today</button><button data-a="rec_rrange" data-rng="month">This month</button></div><button class="mini xl-btn" style="flex:none" data-a="rep_xlsxpage" data-title="Recipe and production report" data-like="rec_rprint">Export to Excel</button><button class="chip on" style="flex:none" data-a="rec_rprint" ${bad ? "disabled" : ""}>Print</button></div></div>
   ${
     bad
       ? '<div class="pn"><div class="empty">The From date is after the To date.</div></div>'
       : `<div class="kstg">${kst("Cost used in production", "KES " + m2(sum2(r => r.prodCost)))}${kst("Cost used by recipes", "KES " + m2(sum2(r => r.recCost)))}${kst("Value left", "KES " + m2(sum2(r => r.value)))}${kst("Production runs", D.runs.length)}</div>
   ${recRepTables(D)}
   <div class="stk">Opening + issued in − used in production − used by recipes ± other = remaining. Other is damages, stock takes and transfers out. Recipes sold uses each recipe's ingredients today, and counts settled sales only.</div>`
-  }
- </div>${apModalIfOpen()}</div>`;
+  }`;
 }
-V.recrep = recRepView;
 function recRepDoc() {
   const F = invF.recr,
     D = recRepData(),
@@ -982,7 +1081,9 @@ function recAct(a, b) {
     recT = "prod";
     return all();
   }
+  if (a === "dirr" || a === "dirp") return recFromDirect(a, +d.id);
   if (a === "rsave") return recipeSave();
+  if (a === "rnew") recT = "recipes";
   if (a === "rnew" || a === "rno") {
     recNewOn = a === "rnew";
     if (a === "rno") invF.rcp = { ...rcpBlank(), sp: invF.rcp.sp, from: invF.rcp.from };

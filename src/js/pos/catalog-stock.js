@@ -79,6 +79,9 @@ const curLoc = () => (STK[dept] ? dept : "Bar");
 /** The view that shows every sale point a waiter is ticked for, all at once. */
 const ALLP = "All sale points";
 /** Is item i on the menu of view d? */
+/** Categories can be hidden at one selling point from its Categories tab. */
+const catOffAt = (d, c) =>
+  typeof FD_SETTINGS !== "undefined" && ((FD_SETTINGS.catOff || {})[d] || []).includes(c); // the menu is first drawn before settings load
 const inPoint = (i, d) => (d === ALLP ? DEPTS.includes(i.d) : i.d === d);
 /** Where a product's ingredients are deducted: its materials store (recipes), else where it is sold. */
 const itemLoc = it => (it.from && STK[it.from] ? it.from : STK[it.d] ? it.d : curLoc());

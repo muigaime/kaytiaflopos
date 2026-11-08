@@ -148,31 +148,22 @@ function fsLabel() {
 );
 $("#fsb").onclick = fsToggle;
 $("#fsl").onclick = fsToggle;
-function exitApp() {
+/** EXIT on the sign-in screen: back to the main page. */
+function posExit() {
   fsLeave();
+  fdPending = false;
   cart = {};
   user = null;
   pin = "";
   pdraw();
-  try {
-    window.close();
-  } catch (e) {}
-  try {
-    window.top.close();
-  } catch (e) {}
-  setTimeout(() => $("#bye").classList.add("show"), 250);
-}
-$("#again").onclick = () => {
-  fsEnter();
-  $("#bye").classList.remove("show");
-  $("#login").style.display = "grid";
   drawCart();
-};
+  $("#start").style.display = "grid";
+}
 $(".bt").onclick = e => {
   const b = e.target.closest("[data-k]");
   if (!b) return;
   if (b.dataset.k === "C") pkey("C");
-  else if (b.dataset.k === "X") exitApp();
+  else if (b.dataset.k === "X") posExit();
 };
 document.addEventListener("keydown", e => {
   if (

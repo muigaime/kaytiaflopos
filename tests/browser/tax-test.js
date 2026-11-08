@@ -30,9 +30,9 @@ try{
   const tile=n=>{const hit=()=>qa("#grid .it").find(b=>b.querySelector(".nm").textContent===n); return hit();}; click('#spTabs [data-t="Bar"]'); await wait(15);
   ITEMS.slice(-3).forEach(i=>{i.r={a:1}; }); drawGrid(); await wait(10); log("8 LABEL ON CHECK: "+q("#vatL").textContent);
   for(const n of ["Both","OnlyC","Free"]){ tile(n).click(); await wait(8);} log("9 TOTALS: net "+q("#tNet").textContent+" | tax "+q("#tTax").textContent+" | gross "+q("#tGross").textContent); await snd("NEW"); const r1=await pay([orders[0]]); log("10 RECEIPT: "+r1.match(/Net [\\d,.]+ \\w+ [\\d,.]+/)[0]);
-  click("#lock"); await wait(25); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400); await nav("Reports"); q('[data-r="ps"]').click(); await wait(30);
+  click("#lock"); await wait(25); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400); await nav("Reports"); click('[data-a="rep_open"]'); await wait(40); q('[data-r="ps"]').click(); await wait(30);
   log("11 REPORT:\\n   "+tbl(q("#vSub table.t"))); log("12 SUMMARY:\\n   "+tbl(q(".rp-below table")));
-  await nav("Settings"); click('[data-a="hs_tab"][data-k="tax"]'); await wait(30); inp("hs.taxB","10"); click('[data-a="hs_tax"]'); await wait(25); await nav("Reports"); log("13 RATE CHANGED, OLD REPORT SAME: "+[...q("#vSub table.t").rows].slice(1).map(r=>r.cells[1].textContent+" B "+r.cells[9].textContent+" C "+r.cells[10].textContent).join(" ; "));
+  await nav("Settings"); click('[data-a="hs_tab"][data-k="tax"]'); await wait(30); inp("hs.taxB","10"); click('[data-a="hs_tax"]'); await wait(25); await nav("Reports"); click('[data-a="rep_open"]'); await wait(40); log("13 RATE CHANGED, OLD REPORT SAME: "+[...q("#vSub table.t").rows].slice(1).map(r=>r.cells[1].textContent+" B "+r.cells[9].textContent+" C "+r.cells[10].textContent).join(" ; "));
   bosave(); const S=JSON.parse(localStorage.getItem("kaytia_pos_bo_v1")); log("14 SAVED: "+JSON.stringify(S.FS.tax)+" | sale rates "+S.S.map(s=>JSON.stringify(s.rates)).join(" "));`}
 }catch(e){log("X "+e.message)}
 document.documentElement.setAttribute("data-test",__E.join(" @@ "));document.title="done";})();</script>`;

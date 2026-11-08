@@ -27,7 +27,7 @@ function boShow() {
   }
 }
 function boOpen() {
-  $("#fd").classList.remove("show"); // left behind the main menu; its sign-in still holds
+  $("#fd").classList.remove("show");
   $("#fl").classList.remove("show");
   $("#start").style.display = "none";
   $("#bo").classList.add("show");
@@ -35,7 +35,7 @@ function boOpen() {
 }
 function posOpen() {
   fsEnter();
-  fdExit(false); // Front Desk stays behind the main menu; the POS must not open on top of it or as its user
+  fdExit(false); // the POS must not open on top of the Front Desk or as its user
   boUser = null;
   $("#bo").classList.remove("show");
   $("#start").style.display = "none";
@@ -189,6 +189,10 @@ $("#boBack").onclick = () => {
   $("#start").style.display = "grid";
 };
 $("#boMenu").onclick = () => {
+  auditAdd("Sign out", "Left the Back Office and was signed out", {
+    who: boUser.n,
+    mod: "Back Office"
+  });
   boUser = null;
   bosave();
   $("#bo").classList.remove("show");
@@ -218,7 +222,8 @@ $("#start").onclick = e => {
   if (g) g.dataset.go === "bo" ? boOpen() : g.dataset.go === "fd" ? fdOpen() : posOpen();
 };
 $("#home").onclick = boOpen;
-document.querySelectorAll(".bkm").forEach(
+$("#fdBack").onclick = () => fdExit(true); // leaving the Front Office signs out
+document.querySelectorAll(".bkm:not(#fdBack)").forEach(
   b =>
     (b.onclick = () => {
       fdPending = false;

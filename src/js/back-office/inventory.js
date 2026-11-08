@@ -1,6 +1,6 @@
 // ---- inventory: stores, item setup, receive, purchase orders, requisitions, issue, damage, stock master ----
 // Stores (STORES) hold purchased stock. Selling points (ALLD) get stock from a store by requisition or issue.
-let invT = "stores",
+let invT = "home",
   invSdOpen = false,
   invPoNew = false;
 const invF = {
@@ -56,8 +56,9 @@ const fq = n =>
     const d = new Date(t);
     return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short" }) + " " + hm(d);
   };
-const optK = s0 =>
+const optK = (s0, place) =>
     pickKeys()
+      .filter(k => !place || storeHolds(place, k))
       .map(k => `<option value="${k}" ${k === s0 ? "selected" : ""}>${esc(ING[k])}</option>`)
       .join(""),
   optL = (s0, ex) =>
@@ -277,6 +278,7 @@ const RAIL = [
   ["riss", "Issues", "cart"],
   ["rdmg", "Damage report", "alert"],
   ["position", "Stock position", "chart"],
+  ["spstock", "Selling point stock", "box"],
   ["variance", "Stock take variance", "chart"],
   ["streps", "Stock take reports", "book"],
   "-",
@@ -308,11 +310,15 @@ const INV_PAGES = {
   riss: ["Issues report", "Everything issued from the stores, for the dates you choose."],
   rdmg: ["Damage report", "Everything written off, for the dates you choose."],
   position: ["Stock position", "How much of each item you hold and what it's worth."],
+  spstock: [
+    "Selling point stock",
+    "What each selling point is holding right now, and what it's worth at cost."
+  ],
   variance: ["Stock take variance", "The differences between the system and what was counted."],
   streps: ["Stock take reports", "Stock takes already posted."]
 };
 // The chosen store only matters on these screens.
-const INV_NO_STORE = ["stores", "items", "cats", "track"];
+const INV_NO_STORE = ["stores", "items", "cats", "track", "spstock"];
 const tabAllowed = t => {
   const x = RAIL.find(r => r !== "-" && r[0] === t);
   return boTabOk("inv", t) && (!x || x[3] !== "store" || isStore(STKT.loc));
@@ -323,24 +329,97 @@ const isOpenReq = r =>
 /** Requisitions that concern the selected place: sent TO it (store) or made BY it (selling point). */
 const reqsHere = () =>
   REQS.filter(r => (isStore(STKT.loc) ? (r.store || STORES[0]) === STKT.loc : r.dept === STKT.loc));
-const rail = () => {
-  const pend = reqsHere().filter(isOpenReq).length;
-  const L = RAIL.filter(x => x === "-" || x[0] === "h" || tabAllowed(x[0]));
-  return L.filter((x, i) => x[0] !== "h" || (L[i + 1] && L[i + 1][0] !== "h" && L[i + 1] !== "-"))
-    .map(x =>
-      x === "-"
-        ? '<i class="rsep"></i>'
-        : x[0] === "h"
-          ? `<div class="rhd">${x[1]}</div>`
-          : `<button class="ir ${x[0] === invT ? "on" : ""}" data-a="inv_tab" data-t="${x[0]}">${I(x[2])}<span>${x[1]}</span>${x[0] === "req" && pend ? `<b>${pend}</b>` : ""}${x[0] === "appr" && apCount() ? `<b>${apCount()}</b>` : ""}</button>`
-    )
-    .join("");
+/** RAIL as groups, each with only the screens this person can open. */
+const invGroups = () => {
+  const G = [];
+  RAIL.forEach(x => {
+    if (x === "-" || x[0] === "exit") return;
+    if (x[0] === "h") G.push({ name: x[1], tabs: [] });
+    else if (tabAllowed(x[0])) G[G.length - 1].tabs.push(x);
+  });
+  return G.filter(g => g.tabs.length);
 };
+const invBadge = t => {
+  const n = t === "req" ? reqsHere().filter(isOpenReq).length : t === "appr" ? apCount() : 0;
+  return n ? `<b>${n}</b>` : "";
+};
+/** Across the top: the groups, then the screens of the group you're in. G is [{ name, tabs: [[t, label, icon]] }]. */
+function phMenu(G, cur, act, label, badge = () => "") {
+  const attrs = typeof act === "function" ? act : t => `data-a="${act}" data-t="${t}"`,
+    btn = (t, ic, l, on, extra = "") =>
+      `<button class="${on ? "on" : ""}" ${attrs(t)} ${on ? 'aria-current="page"' : ""}>${I(ic)}<span>${l}</span>${extra}</button>`;
+  return `<nav class="ph-tabs" aria-label="${label}">${btn("home", "home", "Overview", false)}${G.map(
+    g =>
+      btn(
+        g.tabs[0][0],
+        g.tabs[0][2],
+        g.name,
+        g.tabs.some(x => x[0] === cur)
+      )
+  ).join("")}</nav>${G.map(
+    g =>
+      `<nav class="ph-subs" aria-label="${g.name}" ${g.tabs.some(x => x[0] === cur) ? "" : "hidden"}>${g.tabs.map(x => btn(x[0], x[2], x[1], x[0] === cur, badge(x[0]))).join("")}</nav>`
+  ).join("")}`;
+}
+const invMenu = () => phMenu(invGroups(), invT, "inv_tab", "Inventory", invBadge);
+/** The overview: figures, the things people come here to do, then every screen by group. */
+function invHomeHTML(popups) {
+  const items = Object.keys(ING).filter(k => STORES.some(l => have(l, k) > 0)).length,
+    low = lowCount(),
+    openReq = REQS.filter(isOpenReq).length,
+    wait = apCount(),
+    ok = tabAllowed,
+    many = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`,
+    tab = t => `data-a="inv_tab" data-t="${t}"`,
+    tile = (ic, l, v, s, t, warn) =>
+      `<${t && ok(t) ? `button ${tab(t)}` : "div"} class="ph-t ${warn ? "ph-warn" : ""}"><span class="ph-i">${I(ic)}</span><span class="ph-l">${l}</span><b>${v}</b><small>${s}</small></${t && ok(t) ? "button" : "div"}>`,
+    quick = (ic, l, t) =>
+      ok(t) ? `<button class="ph-q" ${tab(t)}><span class="ph-i">${I(ic)}</span>${l}</button>` : "",
+    card = x => {
+      const meta =
+        x[0] === "req" && openReq
+          ? `${openReq} open`
+          : x[0] === "appr" && wait
+            ? `${wait} waiting`
+            : x[0] === "master" && low
+              ? `${many(low, "line")} low`
+              : "";
+      return `<button class="ph-c" ${tab(x[0])}><span class="ph-i">${I(x[2])}</span><span class="ph-b"><b>${x[1]}</b><span>${INV_PAGES[x[0]][1]}</span>${meta ? `<em>${meta}</em>` : ""}</span><span class="ph-ch">${I("chev")}</span></button>`;
+    },
+    tiles = [
+      tile("box", "Items in stock", items, `Across ${many(STORES.length, "store")}`, "master"),
+      ok("position")
+        ? tile("wal", "Stock value", "KES " + m2(sum(STORES, storeValue)), "At cost", "position")
+        : "",
+      tile(
+        "alert",
+        "Low stock",
+        low,
+        low ? "Below the reorder level" : "All above reorder level",
+        "master",
+        low > 0
+      ),
+      tile(
+        "shield",
+        "Waiting for you",
+        openReq + wait,
+        `${many(openReq, "requisition")} · ${many(wait, "approval")}`,
+        wait ? "appr" : "req",
+        openReq + wait > 0
+      )
+    ].join("");
+  return `<div class="ph"><div class="ph-h"><h1>Inventory</h1><p>Your stores, stock levels and every movement in one place.</p></div><div class="ph-ts">${tiles}</div><div class="ph-qs">${quick("plus", "New item", "items")}${quick("box", "Count stock", "master")}${quick("cart", "Issue stock", "issue")}${quick("book", "Requisition", "req")}</div>${invGroups()
+    .map(
+      g =>
+        `<section class="ph-sec"><h2>${g.name}</h2><div class="ph-cs">${g.tabs.map(card).join("")}</div></section>`
+    )
+    .join("")}${popups}</div>`;
+}
 /** Store picker. Inventory is for stores only; selling points are managed under "Selling points". */
 const strip = () => {
   const ks = pickKeys(),
     chip = l =>
-      `<button class="sc2 ${l === STKT.loc && !(STKT.all && invT === "master") ? "on" : ""}" data-a="inv_loc" data-l="${esc(l)}"><span>${esc(l)}</span><small>${ks.filter(k => have(l, k) > 0).length} of ${ks.length} items in stock</small></button>`;
+      `<button class="sc2 ${l === STKT.loc && !(STKT.all && invT === "master") ? "on" : ""}" data-a="inv_loc" data-l="${esc(l)}"><span>${esc(l)}</span><small>${ks.filter(k => storeHolds(l, k) && have(l, k) > 0).length} of ${ks.filter(k => storeHolds(l, k)).length} items in stock</small></button>`;
   const allOn = invT === "master";
   return `<div class="stgw"><div class="stgh">Store</div><div class="stg">${allOn ? `<button class="sc2 ${STKT.all ? "on" : ""}" data-a="inv_locall"><span>${MASTER_ALL}</span><small>${STORES.length === 1 ? "1 store" : `${STORES.length} stores together`}</small></button>` : ""}${STORES.map(chip).join("")}</div></div>`;
 };
@@ -363,9 +442,12 @@ const qtyBoth = (k, units) => {
 const unitHint = (k, place) => (k && place ? `${place} has ${qtyBoth(k, have(place, k))}` : "");
 function lineEd(f, cost) {
   const L = invF[f].lines;
-  const k0 = invF[f].pick && ING[invF[f].pick] !== undefined ? invF[f].pick : pickKeys()[0];
-  return `<div class="fr" style="align-items:end"><label>Item<select id="l_k_${f}" data-unitfor="${f}">${optK(k0)}</select></label><label>Quantity<input id="l_q_${f}" type="number" min="0" step="any" placeholder="Qty"></label><label>Units${unitSel("l_u_" + f, k0)}</label>${cost ? `<label>Unit cost (KES)<input id="l_c_${f}" type="number" step="any" placeholder="Optional"></label>` : ""}<button class="mini" data-a="inv_ladd" data-f="${f}">Add line</button></div><div class="stk" id="l_h_${f}">${unitHint(k0, STKT.loc)}</div>${L.length ? `<div class="tw"><table class="t"><tr><th>Item</th><th class="n">Qty</th>${cost ? '<th class="n">Unit cost</th>' : ""}<th></th></tr>${L.map((x, i) => `<tr><td>${esc(iN(x.k))}</td><td class="n">${qtyBoth(x.k, x.q)}</td>${cost ? `<td class="n">${x.c ? m2(x.c) : "-"}</td>` : ""}<td><button class="mini" data-a="inv_ldel" data-f="${f}" data-i="${i}">✕</button></td></tr>`).join("")}</table></div>` : ""}`;
+  const place = f === "is" ? invF.is.from : "",
+    allowed = pickKeys().filter(k => !place || storeHolds(place, k)),
+    k0 = allowed.includes(invF[f].pick) ? invF[f].pick : allowed[0];
+  return `<div class="fr" style="align-items:end"><label>Item<select id="l_k_${f}" data-unitfor="${f}">${optK(k0, place)}</select></label><label>Quantity<input id="l_q_${f}" type="number" min="0" step="any" placeholder="Qty"></label><label>Units${unitSel("l_u_" + f, k0)}</label>${cost ? `<label>Unit cost (KES)<input id="l_c_${f}" type="number" step="any" placeholder="Optional"></label>` : ""}<button class="mini" data-a="inv_ladd" data-f="${f}">Add line</button></div><div class="stk" id="l_h_${f}">${unitHint(k0, STKT.loc)}</div>${L.length ? `<div class="tw"><table class="t"><tr><th>Item</th><th class="n">Qty</th>${cost ? '<th class="n">Unit cost</th>' : ""}<th></th></tr>${L.map((x, i) => `<tr><td>${esc(iN(x.k))}</td><td class="n">${qtyBoth(x.k, x.q)}</td>${cost ? `<td class="n">${x.c ? m2(x.c) : "-"}</td>` : ""}<td><button class="mini" data-a="inv_ldel" data-f="${f}" data-i="${i}">✕</button></td></tr>`).join("")}</table></div>` : ""}`;
 }
+let msOffList = 0;
 function mRows() {
   const loc = STKT.loc,
     // Stores hold stock items only; finished products exist only at selling points.
@@ -373,8 +455,8 @@ function mRows() {
     t0 = new Date(STKT.since).getTime(),
     agg = {},
     // The categories ticked on the store decide what it lists. Anything it really holds always shows too.
-    kinds = isStore(loc) ? storeKinds(loc).map(x => x.toLowerCase()) : [],
-    inKind = k => kinds.includes(String(itemInfo(k).group || "").toLowerCase());
+    kinds = isStore(loc) ? storeKinds(loc) : [],
+    inKind = k => storeHolds(loc, k);
   MOV.filter(m => m.loc === loc && m.at >= t0).forEach(m => {
     const a = (agg[m.k] = agg[m.k] || { add: 0, inn: 0, sold: 0, dmg: 0, out: 0, prod: 0 });
     // Added: received, plus stock adjustments (either way). Damages: written off as damaged only.
@@ -425,7 +507,9 @@ function mRows() {
           return mk(i.id, i.n, cst(k) * v, i.c, i.p, k, v);
         });
   const moved = r => Math.abs(r.sys) > 1e-9 || r.add || r.inn || r.sold || r.dmg || r.out || r.prod;
-  if (kinds.length) R = R.filter(r => inKind(r.k) || moved(r));
+  // Only what's ticked on the store. Stock held outside that is counted so it can be pointed out, not lost.
+  msOffList = kinds.length ? R.filter(r => !inKind(r.k) && Math.abs(r.sys) > 1e-9).length : 0;
+  if (kinds.length && STKT.offAt !== loc) R = R.filter(r => inKind(r.k));
   if (!STKT.zero)
     R = R.filter(
       r =>
@@ -602,7 +686,7 @@ function masterHTML() {
    st,
    "inv_mst"
  )}</div><span class="stm-sw"><label class="sw"><input type="checkbox" data-m="zero" ${STKT.zero ? "checked" : ""}><span>Zero balances</span></label><label class="sw"><input type="checkbox" data-m="issued" ${STKT.issued ? "checked" : ""}><span>Issued only</span></label><label class="sw"><input type="checkbox" data-a="inv_mdetail" ${D ? "checked" : ""}><span>All movements</span></label>${msFold}</span></div>
- <div class="stk stm-note">Stock take for ${placeLabel(loc)} · Shift ${esc(sh)}.${isStore(loc) && storeKinds(loc).length ? ` Lists ${storeKinds(loc).map(esc).join(", ")}, and anything else it holds.` : ""} Type a count, then press Enter for the next item.</div>
+ <div class="stk stm-note">Stock take for ${placeLabel(loc)} · Shift ${esc(sh)}.${isStore(loc) && storeKinds(loc).length ? ` Lists ${storeKinds(loc).map(esc).join(", ")} only.` : ""} Type a count, then press Enter for the next item.</div>${msOffList ? `<div class="status warn stm-off">${plural(msOffList, "item")} outside ${esc(loc)}'s categories still ${msOffList === 1 ? "has" : "have"} stock here. <button class="mini" data-a="inv_moff">${STKT.offAt === loc ? "Hide them" : "Show them"}</button></div>` : ""}
  <div class="tw tall"><table class="t stm-t ${(FINDQ.master || "").trim() ? "stm-find" : ""} ${D ? "stm-wide" : ""}"><thead><tr><th>Item</th><th class="n">Cost</th>${D ? '<th class="n">Sale price</th>' : ""}<th class="n">Opening</th>${D ? '<th class="n">Added</th><th class="n">Production</th><th class="n">Stock in</th><th class="n">Sold</th>' : '<th class="n">In</th><th class="n">Sold</th>'}<th class="n">Damages</th><th class="n">${D ? "Stock out" : "Issued out"}</th><th class="n">System</th><th class="stm-count">Physical</th><th class="n">Variance</th><th>Reason</th></tr></thead>${
    V.length
      ? msBands(V, cols, r => {
@@ -712,7 +796,10 @@ function dmgHTML() {
   const F = invF.dm,
     L = recent(["DAMAGE"], 15).filter(m => m.loc === STKT.loc);
   F.loc = STKT.loc;
-  return `<div class="pn"><h4>Record damaged or wasted stock in ${placeLabel(F.loc)}</h4><div class="fr"><label>Item<select data-iv="dm.k">${optK(F.k)}</select></label><label>Quantity<input data-iv="dm.q" type="number" step="any" value="${esc(F.q)}"></label><label>Reason<select data-iv="dm.why">${["Damaged", "Expired", "Spilled", "Spoiled", "Theft or loss", "Other"].map(x => `<option ${F.why === x ? "selected" : ""}>${x}</option>`).join("")}</select></label><button class="chip on" data-a="inv_dmpost">Record damage</button></div></div>
+  // A store lists only its own items, so a choice left over from another store can't stand.
+  if (!pickKeys().some(k => k === F.k && storeHolds(F.loc, k)))
+    F.k = pickKeys().find(k => storeHolds(F.loc, k)) || "";
+  return `<div class="pn"><h4>Record damaged or wasted stock in ${placeLabel(F.loc)}</h4><div class="fr"><label>Item<select data-iv="dm.k">${optK(F.k, F.loc)}</select></label><label>Quantity<input data-iv="dm.q" type="number" step="any" value="${esc(F.q)}"></label><label>Reason<select data-iv="dm.why">${["Damaged", "Expired", "Spilled", "Spoiled", "Theft or loss", "Other"].map(x => `<option ${F.why === x ? "selected" : ""}>${x}</option>`).join("")}</select></label><button class="chip on" data-a="inv_dmpost">Record damage</button></div></div>
  <div class="pn tw"><h4>Recent damages</h4>${tb(
    ["Date", "Location", "Item", "#Quantity", "Reason", "By"],
    L.map(m => [dt2(m.at), m.loc, iN(m.k), fq(-m.q), m.note, m.by]),
@@ -729,6 +816,83 @@ function posHTML() {
     return [iN(k), ...LOCS.map(l => fq(have(l, k))), fq(t), m2(cst(k)), m2(v)];
   });
   return `<div class="pn tw"><div class="fr" style="align-items:center;justify-content:space-between"><h4 style="margin:0">Stock position report</h4><span class="fr" style="flex:none;margin:0"><button class="mini xl-btn" style="flex:none" data-a="rep_xlsxpage" data-title="Stock position report" data-like="st_posprint">Export to Excel</button><button class="chip on" style="flex:none" data-a="st_posprint">Print</button></span></div>${tb(["Item", ...LOCS.map(l => "#" + l), "#Total", "#Unit cost", "#Value"], rows, ["Total stock value", ...LOCS.map(() => ""), "", "", m2(val)])}</div>`;
+}
+// ---- what each selling point is holding ----
+invF.sps = { pt: "All", zero: false };
+function spStockRows() {
+  const F = invF.sps,
+    P = salePoints();
+  if (F.pt !== "All" && !P.includes(F.pt)) F.pt = "All";
+  return (F.pt === "All" ? P : [F.pt])
+    .flatMap(p =>
+      pickKeys()
+        .filter(k => F.zero || Math.abs(have(p, k)) > 1e-9)
+        .map(k => {
+          const u = itemInfo(k),
+            q = have(p, k);
+          return {
+            p,
+            k,
+            code: u.code || "-",
+            name: iN(k),
+            grp: u.group || "Other",
+            q,
+            cost: cst(k),
+            value: Math.max(0, q) * cst(k),
+            level: msLevel(k, q)
+          };
+        })
+    )
+    .sort((a, b) => a.p.localeCompare(b.p) || a.name.localeCompare(b.name));
+}
+function spStockTable() {
+  const R = spStockRows();
+  return {
+    title: "Selling point stock",
+    head: `${invF.sps.pt === "All" ? "All selling points" : invF.sps.pt} · as at ${slashDate(todayYmd())} ${hm(new Date())}`,
+    c: [
+      "Selling point",
+      "Code",
+      "Item",
+      "Category",
+      "#Quantity",
+      "#Cost",
+      "#Value (KES)",
+      "Status"
+    ],
+    r: R.map(r => [
+      r.p,
+      r.code,
+      r.name,
+      r.grp,
+      qn(r.q),
+      m2(r.cost),
+      m2(r.value),
+      r.level === "out" ? "Out" : r.level === "low" ? "Low" : "In stock"
+    ]),
+    f: ["Total", "", "", "", "", "", m2(R.reduce((a, r) => a + r.value, 0)), ""]
+  };
+}
+function spStockHTML() {
+  const F = invF.sps,
+    P = salePoints(),
+    R = spStockRows(),
+    low = R.filter(r => r.level !== "in").length,
+    pill = (v, l) =>
+      `<button class="pr-pill ${F.pt === v ? "on" : ""}" data-a="inv_spspt" data-v="${esc(v)}">${esc(l)}</button>`,
+    tools = boCan("rep.print")
+      ? '<span class="inv-btns"><button class="mini xl-btn" data-a="inv_spsxl">Export to Excel</button><button class="chip on" style="flex:none" data-a="inv_spsprint">Print</button></span>'
+      : "";
+  return `<div class="stm-tiles">${msTile("Selling points", F.pt === "All" ? P.length : 1)}${msTile("Items held", new Set(R.filter(r => r.q > 0).map(r => r.k)).size)}${msTile("Value at cost", "KES " + m2(R.reduce((a, r) => a + r.value, 0)))}${msTile("Low or out", low, "", low ? "warn" : "")}</div>
+  <div class="pn" data-findscope><div class="inv-head"><span class="pr-pills">${pill("All", "All")}${P.map(p => pill(p, p)).join("")}</span>${tools}</div>
+  <div class="stm-bar">${findBox("sps", "Search item, code or category")}<label class="sw"><input type="checkbox" data-a="inv_spszero" ${F.zero ? "checked" : ""}><span>Zero balances</span></label></div>
+  <div class="tw tall"><table class="t"><thead><tr><th>Selling point</th><th>Code</th><th>Item</th><th>Category</th><th class="n">Quantity</th><th class="n">Cost</th><th class="n">Value (KES)</th><th></th></tr></thead><tbody>${
+    R.map(
+      r =>
+        `<tr${findAttr("sps", r.code, r.name, r.grp, r.p)}><td>${esc(r.p)}</td><td>${esc(r.code)}</td><td><b>${esc(r.name)}</b></td><td>${esc(r.grp)}</td><td class="n">${qn(r.q)}</td><td class="n">${m2(r.cost)}</td><td class="n">${m2(r.value)}</td><td>${msTag(r.level)}</td></tr>`
+    ).join("") ||
+    '<tr><td colspan="8" class="stm-empty">No stock at these selling points. Tick Zero balances to list every item.</td></tr>'
+  }</tbody></table></div></div>`;
 }
 // ---- stores ----
 const storeValue = l => Object.keys(ING).reduce((a, k) => a + Math.max(0, have(l, k)) * cst(k), 0);
@@ -1021,6 +1185,7 @@ function invView() {
     issue: issHTML,
     damage: dmgHTML,
     position: posHTML,
+    spstock: spStockHTML,
     riss: () => invReportHTML("iss"),
     rdmg: () => invReportHTML("dmg"),
     variance: varHTML, // stock-take-report.js
@@ -1029,7 +1194,7 @@ function invView() {
     appr: apView // approvals.js
   };
   if (!isStore(STKT.loc)) STKT.loc = STORES[0]; // Inventory works on stores only
-  if (!tabAllowed(invT) || !B[invT])
+  if (invT !== "home" && (!tabAllowed(invT) || !B[invT]))
     invT = tabAllowed("master")
       ? "master"
       : RAIL.filter(x => x !== "-" && B[x[0]] && tabAllowed(x[0]))[0][0]; // e.g. LPO / purchases now live in Purchasing
@@ -1042,8 +1207,9 @@ function invView() {
     apModalIfOpen() +
     storeModal() +
     storeDeleteModal();
+  if (invT === "home") return invHomeHTML(popups);
   const [title, what] = INV_PAGES[invT] || ["Inventory", ""];
-  return `<div class="inv invx"><nav class="inv-rail">${rail()}</nav><div class="inv-main"><div class="inv-title"><h1>${title}</h1><p>${what}</p></div>${INV_NO_STORE.includes(invT) ? "" : strip()}${(B[invT] || masterHTML)()}${popups}</div></div>`;
+  return `<div class="inv invx inv-solo"><div class="inv-main">${invMenu()}<div class="inv-title"><h1>${title}</h1><p>${what}</p></div>${INV_NO_STORE.includes(invT) ? "" : strip()}${(B[invT] || masterHTML)()}${popups}</div></div>`;
 }
 V.inv = invView;
 function updMaster() {
@@ -1656,6 +1822,34 @@ function invAct(a, b) {
   if (a === "stall" || a === "stnone") {
     document.querySelectorAll("#stEd [data-stk]").forEach(x => (x.checked = a === "stall"));
     return;
+  }
+  if (a === "spspt") {
+    invF.sps.pt = d.v;
+    return all();
+  }
+  if (a === "spszero") {
+    invF.sps.zero = b.checked;
+    return all();
+  }
+  if (a === "spsprint" || a === "spsxl") {
+    if (!boCan("rep.print")) return boDenied();
+    const T = spStockTable();
+    if (!T.r.length) return toast("There is nothing to print here.");
+    if (a === "spsprint") return tablePrint(T.title, T.head, T.c, T.r, T.f);
+    return XLSX.download(
+      {
+        company: FD_SETTINGS.name,
+        title: T.title,
+        head: T.head,
+        by: xlsxBy(),
+        sections: [{ t: T.title, c: T.c, r: T.r, f: T.f }]
+      },
+      `${T.title}_${todayYmd()}`
+    );
+  }
+  if (a === "moff") {
+    STKT.offAt = STKT.offAt === STKT.loc ? "" : STKT.loc;
+    return all();
   }
   if (a === "loc") {
     STKT.all = false;

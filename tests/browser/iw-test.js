@@ -18,7 +18,7 @@ try{
   click('[data-go="pos"]'); await wait(200); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
   await login("1111");
   const snd=async l=>{await send(l); await wait(350); click("#rcClose"); await wait(10);}; await add("Tusker","Bar",2); await add("Fish","Restaurant"); await snd("T1"); click("#ordBtn"); await wait(10); q('#ordList [data-oa="pay"]').click(); await wait(25); const e=q('[data-pa="cash"]'); e.value="5000"; e.dispatchEvent(new Event("input",{bubbles:true})); await wait(15); click("#pOk"); await wait(250); click("#rcClose"); await wait(10);
-  click("#lock"); await wait(25); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400); qa("#nav .nv").find(x=>x.dataset.n==="Reports").click(); await wait(70); q('[data-r="iw"]').click(); await wait(40); const T=q("#vSub table.t"); [...T.rows].forEach(r=>log([...r.cells].map(c=>c.textContent).join(" | ")));
+  click("#lock"); await wait(25); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400); qa("#nav .nv").find(x=>x.dataset.n==="Reports").click(); await wait(70); click('[data-a="rep_open"]'); await wait(40); q('[data-r="iw"]').click(); await wait(40); const T=q("#vSub table.t"); [...T.rows].forEach(r=>log([...r.cells].map(c=>c.textContent).join(" | ")));
 }catch(e){log("X "+e.message)}
 document.documentElement.setAttribute("data-test",__E.join(" @@ "));document.title="done";})();</script>`;
 const html = fs.readFileSync(file, "utf8").replace("<head>", "<head>" + head).replace(/<\/body>(?![\s\S]*<\/body>)/, tail + "</body>");

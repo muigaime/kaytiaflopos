@@ -24,12 +24,12 @@ try{
   await add("Tusker","Bar"); await snd("Long Terrace Table Name With Many Words For Wrapping And More Words");
   click("#lock"); await wait(25); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400);
   const nav=async n=>{qa("#nav .nv").find(x=>x.dataset.n===n).click(); await wait(70);}, tst=()=>q("#toast").textContent;
-  await nav("Reports"); log("1 BUTTON: "+!!q('[data-a="rep_xlsx"]')+" | beside print "+!!q('[data-a="rep_print"]'));
+  await nav("Reports"); click('[data-a="rep_open"]'); await wait(40); log("1 BUTTON: "+!!q('[data-a="rep_xlsx"]')+" | beside print "+!!q('[data-a="rep_print"]'));
   const opts=qa("[data-r]").map(b=>[b.dataset.r,b.textContent.trim()]); log("2 REPORTS: "+opts.length); const pick=async v=>{const b=q('[data-r="'+v+'"]'); if(b) b.click(); else {const s=q("[data-rpsel]"); s.value=v; s.dispatchEvent(new Event("change",{bubbles:true}));} await wait(40);}; let okAll=0, emptyAll=[]; for(const [v,n] of opts){ await pick(v); const before=files.length; click('[data-a="rep_xlsx"]'); await wait(25); if(files.length>before) okAll++; else emptyAll.push(n+": "+tst()); } log("3 ALL REPORTS: exported "+okAll+" of "+opts.length+" | empty: "+emptyAll.join(" ; "));
   const names=clicks.slice(); log("4 FILE NAMES: "+names.slice(0,3).join(" | "));
   for(let i=0;i<files.length;i++) log("XLSX|R"+i+"|"+names[i]+"|"+await b64(files[i]));
-  const base=files.length; const page=async(n,label)=>{await nav(n); const b=q('[data-a="rep_xlsxpage"]'); log("P "+label+": button "+!!b); if(b){const c=files.length; b.click(); await wait(25); log("P "+label+": "+tst()); if(files.length>c) log("XLSX|P"+label+"|"+clicks.at(-1)+"|"+await b64(files.at(-1)));}};
-  await page("Recipe & Production Report","recipe");
+  const base=files.length; const page=async(n,label,pre)=>{await nav(n); if(pre) await pre(); const b=q('[data-a="rep_xlsxpage"]'); log("P "+label+": button "+!!b); if(b){const c=files.length; b.click(); await wait(25); log("P "+label+": "+tst()); if(files.length>c) log("XLSX|P"+label+"|"+clicks.at(-1)+"|"+await b64(files.at(-1)));}};
+  await page("Recipes & Production","recipe",async()=>{click('[data-a="rec_tab"][data-t="report"]'); await wait(50);});
   const invTab=async n=>{await nav("Inventory"); const b=qa("#vSub button,#vSub [data-a]").find(x=>x.textContent.trim()===n); if(!b){log("P "+n+": no tab"); return false;} b.click(); await wait(60); return true;};
   const xl=async(label,sel)=>{const b=q(sel); log("P "+label+": button "+!!b); if(!b) return; const c=files.length; b.click(); await wait(30); log("P "+label+": "+tst()); if(files.length>c) log("XLSX|P-"+label.replace(/W/g,"")+"|"+clicks.at(-1)+"|"+await b64(files.at(-1)));};
   for(const n of ["Stock position","Stock take variance","Stock take reports"]){ if(await invTab(n)) await xl(n,'[data-a="rep_xlsxpage"]'); }

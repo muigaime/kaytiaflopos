@@ -18,7 +18,7 @@ try{
   click('[data-go="pos"]'); await wait(200); dayStart("t"); ["Jane Waiter","Solo Sam","Boss"].forEach(n=>shiftStart(n,0,"t"));
   await login("1111");
   click("#lock"); await wait(25); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400); const G=()=>{window.bosave(); return JSON.parse(localStorage.getItem("kaytia_pos_bo_v1")).GN||[];}, nav=async n=>{qa("#nav .nv").find(x=>x.dataset.n===n).click(); await wait(100);}, tab=async t=>{click('[data-a="pur_tab"][data-t="'+t+'"]'); await wait(60);}, set=(s,v)=>{const e=q(s); e.value=v; e.dispatchEvent(new Event("input",{bubbles:true})); e.dispatchEvent(new Event("change",{bubbles:true}));}, tst=()=>q("#toast").textContent;
-  await nav("Vendors"); set('[data-iv="vn.name"]',"Kenya Breweries"); click('[data-a="inv_vnsave"]'); await wait(40);
+  await nav("Vendors"); click('[data-a="vs_tab"][data-t="list"]'); await wait(40); set('[data-iv="vn.name"]',"Kenya Breweries"); click('[data-a="inv_vnsave"]'); await wait(40);
   await nav("Purchasing"); await tab("receive"); const addLine=async(name,qty,price)=>{ set('[data-iv="rc.eName"]',name); await wait(30); const pk=qa("#vSub button").find(b=>b.dataset.a==="inv_rcfind"); set('[data-iv="rc.eQty"]',String(qty)); set('[data-iv="rc.ePrice"]',String(price)); await wait(15); click('[data-a="inv_rcadd"]'); await wait(40); };
   
   const invTab=async t=>{ click('[data-a="inv_tab"][data-t="'+t+'"]'); await wait(50); };

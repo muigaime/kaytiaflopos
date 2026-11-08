@@ -616,40 +616,6 @@ aside {
   z-index: 80;
   font-size: 13px;
 }
-#bye {
-  position: fixed;
-  inset: 0;
-  z-index: 60;
-  background: var(--bg);
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  text-align: center;
-  padding: 20px;
-}
-#bye.show {
-  display: flex;
-}
-#bye .pl {
-  background: #fff;
-  padding: 16px;
-  border-radius: 16px;
-  width: min(80%, 360px);
-}
-#bye img {
-  display: block;
-  width: 100%;
-}
-#bye button {
-  border: 0;
-  border-radius: 10px;
-  background: var(--brand);
-  color: var(--brand-ink);
-  font-weight: 700;
-  padding: 12px 22px;
-}
 .sh {
   animation: sh 0.3s;
 }
@@ -7706,7 +7672,6 @@ body.mgr #home {
    the guest check stays ivory in both. */
 .pos,
 #login,
-#bye,
 #shMgr,
 body > .modal {
   --bg: #f3eee4;
@@ -7739,7 +7704,6 @@ body > .modal {
 }
 :root[data-theme="dark"] .pos,
 :root[data-theme="dark"] #login,
-:root[data-theme="dark"] #bye,
 :root[data-theme="dark"] #shMgr,
 :root[data-theme="dark"] body > .modal {
   --bg: #120e0a;
@@ -7761,7 +7725,6 @@ body > .modal {
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .pos,
   :root:not([data-theme="light"]) #login,
-  :root:not([data-theme="light"]) #bye,
   :root:not([data-theme="light"]) #shMgr,
   :root:not([data-theme="light"]) body > .modal {
     --bg: #120e0a;
@@ -15790,6 +15753,813 @@ tr[data-grp].on td {
   border-color: #b3392b;
   color: #b3392b;
 }
+/* ==================== Purchasing: overview ==================== */
+#bo .ph {
+  display: grid;
+  gap: 16px;
+  padding: 4px 2px 20px;
+}
+#bo .ph-h h1 {
+  margin: 0;
+  font-size: 30px;
+  line-height: 1.15;
+}
+#bo .ph-h p {
+  margin: 4px 0 0;
+  color: var(--mute);
+  font-size: 14px;
+}
+#bo .ph-ts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+#bo .ph-t {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 8px 12px;
+  overflow: hidden;
+  padding: 18px 20px 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: linear-gradient(160deg, var(--tint), var(--card) 70%);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+}
+#bo .ph-t::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(90deg, var(--acc), transparent);
+}
+#bo button.ph-t {
+  cursor: pointer;
+  transition:
+    box-shadow 0.18s,
+    transform 0.18s;
+}
+#bo button.ph-t:hover {
+  box-shadow: var(--sh);
+  transform: translateY(-1px);
+}
+#bo .ph-l {
+  color: var(--mute);
+  font-size: 13.5px;
+}
+#bo .ph-t b {
+  grid-column: 1 / -1;
+  font-size: 28px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+}
+#bo .ph-t small {
+  grid-column: 1 / -1;
+  margin-top: -6px;
+  color: var(--mute);
+  font-size: 12.5px;
+}
+#bo .ph-i {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--tint);
+  color: var(--brand);
+}
+#bo .ph-i svg {
+  width: 19px;
+  height: 19px;
+}
+#bo .ph-qs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px;
+}
+#bo .ph-q {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 7px 12px;
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+}
+#bo .ph-q .ph-i {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+}
+#bo .ph-q:hover {
+  border: 1px dashed var(--acc);
+  background: var(--card);
+}
+#bo .ph-cs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+#bo .ph-c {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 104px;
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 0.16s,
+    border-color 0.16s,
+    box-shadow 0.16s;
+}
+#bo .ph-c .ph-i {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--tint);
+}
+#bo .ph-c:hover {
+  border-color: var(--acc);
+  background: var(--card);
+  box-shadow: var(--sh);
+}
+#bo .ph-b {
+  display: grid;
+  flex: 1;
+  gap: 3px;
+  min-width: 0;
+}
+#bo .ph-b b {
+  font-size: 16px;
+  font-weight: 600;
+}
+#bo .ph-b > span {
+  color: var(--mute);
+  font-size: 13.5px;
+  line-height: 1.35;
+}
+#bo .ph-b em {
+  justify-self: start;
+  margin-top: 3px;
+  padding: 1px 8px;
+  border-radius: 99px;
+  background: var(--tint);
+  color: var(--brand);
+  font-size: 11.5px;
+  font-style: normal;
+  font-weight: 600;
+}
+#bo .ph-ch {
+  flex: none;
+  color: var(--mute);
+  transition: transform 0.16s;
+}
+#bo .ph-ch svg {
+  width: 16px;
+  height: 16px;
+}
+#bo .ph-c:hover .ph-ch {
+  transform: translateX(3px);
+}
+#bo .ph button:focus-visible {
+  outline: 2px solid var(--acc);
+  outline-offset: 2px;
+}
+@media (max-width: 1120px) {
+  #bo .ph-cs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 680px) {
+  #bo .ph-cs {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #bo .ph-t,
+  #bo .ph-q,
+  #bo .ph-c,
+  #bo .ph-ch {
+    transition: none;
+  }
+  #bo button.ph-t:hover {
+    transform: none;
+  }
+}
+/* Purchasing: the screens inside it, with the menu across the top */
+#bo .ph-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+}
+#bo .ph-tabs button {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+#bo .ph-tabs button svg {
+  width: 17px;
+  height: 17px;
+}
+#bo .ph-tabs button:hover {
+  background: var(--chip);
+}
+#bo .ph-tabs button.on {
+  background: var(--tint);
+  box-shadow: inset 0 -2px 0 var(--acc);
+  font-weight: 600;
+}
+#bo .ph-tabs b {
+  padding: 0 7px;
+  border-radius: 99px;
+  background: var(--acc);
+  color: var(--amber-ink, #1c1408);
+  font-size: 12px;
+}
+#bo .ph-tabs button:focus-visible {
+  outline: 2px solid var(--acc);
+  outline-offset: 1px;
+}
+#bo .ph-warn b,
+#bo .ph-warn .ph-i {
+  color: var(--bad);
+}
+/* Inventory: the screens of the chosen group, under the main menu */
+#bo .ph-subs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: -6px 0 14px;
+  padding: 4px 6px;
+}
+#bo .ph-subs[hidden] {
+  display: none;
+}
+#bo .ph-subs button {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 99px;
+  background: transparent;
+  color: var(--mute);
+  font: inherit;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+#bo .ph-subs button svg {
+  width: 15px;
+  height: 15px;
+}
+#bo .ph-subs button:hover {
+  color: var(--ink);
+}
+#bo .ph-subs button.on {
+  border-color: var(--acc);
+  background: var(--card);
+  color: var(--ink);
+  font-weight: 600;
+}
+#bo .ph-subs b {
+  padding: 0 7px;
+  border-radius: 99px;
+  background: var(--acc);
+  color: var(--amber-ink, #1c1408);
+  font-size: 11.5px;
+}
+#bo .ph-subs button:focus-visible {
+  outline: 2px solid var(--acc);
+  outline-offset: 1px;
+}
+#bo .ph-sec {
+  display: grid;
+  gap: 10px;
+}
+#bo .ph-sec h2 {
+  margin: 4px 0 0;
+  color: var(--mute);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+/* Accounting: in plain words */
+#bo .ac-say {
+  display: grid;
+  gap: 4px;
+  padding: 18px 22px;
+  border-radius: 14px;
+  background: linear-gradient(120deg, #1d1710, #33261a);
+  color: #f6efe0;
+}
+#bo .ac-say span {
+  color: #c9a24a;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+#bo .ac-say b {
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.35;
+}
+#bo .ac-home .ph-ts {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+#bo .ac-look .ac-notes {
+  margin-top: 6px;
+}
+#bo .ac-plain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  margin: 0 0 14px;
+  padding: 11px 16px;
+  border-left: 3px solid var(--acc);
+  border-radius: 0 10px 10px 0;
+  background: var(--tint);
+  font-size: 14px;
+  line-height: 1.45;
+}
+#bo .ac-plain b {
+  flex: none;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+#bo .ac-plain span {
+  flex: 1 1 320px;
+}
+@media (max-width: 1120px) {
+  #bo .ac-home .ph-ts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 680px) {
+  #bo .ac-home .ph-ts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+/* Reports: the overview */
+#bo .ph-find input {
+  width: 100%;
+  min-height: 46px;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+}
+#bo .ph-find input:focus {
+  border-color: var(--acc);
+  outline: 0;
+}
+#bo .rp-hub .ph-c[hidden],
+#bo .rp-hub .ph-sec[hidden] {
+  display: none;
+}
+#bo .rp-hub .ph-c.kb {
+  border-color: var(--acc);
+  box-shadow: var(--sh);
+}
+/* Products that keep no stock: the way to give them some */
+#bo .pr-gets {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-top: 5px;
+}
+#bo .itm-s .pr-gets {
+  justify-content: flex-start;
+  margin-top: 8px;
+}
+/* Customer form */
+#bo .box.itm.cuf {
+  width: min(1000px, 96vw);
+  max-width: min(1000px, 96vw);
+  max-height: 92vh;
+  text-align: left;
+}
+#bo .cuf-h {
+  align-items: center;
+  gap: 14px;
+}
+#bo .cuf-h > div {
+  flex: 1;
+  min-width: 0;
+}
+#bo .cuf-av {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: var(--acc);
+  color: var(--amber-ink);
+  font-size: 21px;
+  font-weight: 800;
+}
+#bo .cuf-b {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  align-items: start;
+  gap: 20px;
+  padding: 18px 22px;
+}
+#bo .cuf-main {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+#bo .cuf-s,
+#bo .cuf-credit {
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--card);
+}
+#bo .cuf-credit {
+  position: sticky;
+  top: 0;
+  display: grid;
+  gap: 10px;
+  border-color: color-mix(in srgb, var(--acc) 45%, var(--line));
+  background: color-mix(in srgb, var(--acc) 7%, var(--card));
+}
+#bo .cuf-s h4,
+#bo .cuf-credit h4 {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 12px;
+  color: var(--ink);
+  font-size: 14.5px;
+  font-weight: 700;
+}
+#bo .cuf-credit h4 {
+  margin-bottom: 2px;
+}
+#bo .cuf-g {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 14px;
+}
+#bo .cuf-w {
+  grid-column: 1 / -1;
+}
+#bo .cuf label {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+}
+#bo .cuf label > span:first-child {
+  color: var(--mute);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+#bo .cuf em {
+  margin-left: 5px;
+  color: var(--warn);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 700;
+}
+#bo .cuf input:not([type="checkbox"]),
+#bo .cuf select,
+#bo .cuf textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+}
+#bo .cuf textarea {
+  resize: vertical;
+}
+#bo .cuf input:focus,
+#bo .cuf select:focus,
+#bo .cuf textarea:focus {
+  border-color: var(--acc);
+  outline: 2px solid color-mix(in srgb, var(--acc) 25%, transparent);
+}
+#bo .cuf-amt {
+  position: relative;
+  display: block;
+}
+#bo .cuf-amt i {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  color: var(--mute);
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 700;
+  transform: translateY(-50%);
+}
+#bo .cuf .cuf-amt input {
+  min-height: 58px;
+  padding-left: 54px;
+  font-size: 25px;
+  font-weight: 800;
+}
+#bo .cuf-chips {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+#bo .cuf-chips4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+#bo .cuf-chips button {
+  min-height: 34px;
+  padding: 0 4px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+#bo .cuf-chips button:hover {
+  border-color: var(--acc);
+}
+#bo .cuf-chips button.on {
+  border-color: var(--acc);
+  background: var(--acc);
+  color: var(--amber-ink);
+}
+#bo .cuf-note {
+  min-height: 34px;
+  margin: 0;
+  color: var(--mute);
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+#bo .cuf label.cuf-hold {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  cursor: pointer;
+}
+#bo .cuf-hold input {
+  flex: none;
+  width: 18px;
+  height: 18px;
+}
+#bo .cuf label.cuf-hold > span:first-child,
+#bo .cuf-hold span {
+  display: grid;
+  color: var(--ink);
+}
+#bo .cuf-hold small {
+  color: var(--mute);
+  font-size: 12px;
+  font-weight: 400;
+}
+@media (max-width: 820px) {
+  #bo .cuf-b {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  #bo .cuf-credit {
+    position: static;
+  }
+}
+/* Selling point: categories */
+#bo .sp-cats tr.off b {
+  color: var(--mute);
+}
+#bo .sp-show {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  cursor: pointer;
+}
+#bo .sp-show input {
+  flex: none;
+  width: 18px;
+  height: 18px;
+}
+#bo .sp-mv {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+#bo .sp-mv select {
+  width: auto;
+  min-width: 150px;
+}
+/* Settings: email reports */
+#bo .rm-auto,
+#bo .rm-list label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  cursor: pointer;
+}
+#bo .rm-auto {
+  margin: 12px 0;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+#bo .rm-auto input,
+#bo .rm-list input {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+}
+#bo .rm-auto span,
+#bo .rm-list span {
+  display: grid;
+  gap: 1px;
+}
+#bo .rm-auto small,
+#bo .rm-list small {
+  color: var(--mute);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.35;
+}
+#bo .rm-h {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 8px;
+}
+#bo .rm-h h4 {
+  margin: 0;
+}
+#bo .rm-g h5 {
+  margin: 14px 0 8px;
+  color: var(--mute);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+#bo .rm-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px 18px;
+}
+#bo .rm-go {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+#bo .rm-go #rmLast {
+  flex: 1 1 280px;
+  align-self: center;
+}
+#bo .rm-go label {
+  flex: none;
+  margin: 0;
+}
+#bo .rm-go button {
+  flex: none;
+}
+/* Email reports: account and people */
+#bo .rm + .rm {
+  margin-top: 14px;
+}
+#bo .rm-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px 14px;
+  margin-top: 10px;
+}
+#bo .rm-grid label[hidden] {
+  display: none;
+}
+#bo .rm-grid label,
+#bo .rm-add label {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  font-weight: 600;
+}
+#bo .rm-acts {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+#bo .rm-acts button {
+  flex: none;
+}
+#bo .rm-add {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) auto;
+  align-items: end;
+  gap: 10px;
+  margin-top: 12px;
+}
+#bo .rm-people {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 8px;
+  margin: 10px 0 0;
+}
+#bo .rm-p {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+#bo .rm-p button {
+  flex: none;
+}
+#bo .rm-av {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  background: var(--acc);
+  color: var(--amber-ink);
+  font-weight: 800;
+}
+#bo .rm-who {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+#bo .rm-who b,
+#bo .rm-who small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#bo .rm-who small {
+  color: var(--mute);
+}
+@media (max-width: 900px) {
+  #bo .rm-grid,
+  #bo .rm-add {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
 </style>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -15881,14 +16651,6 @@ tr[data-grp].on td {
         </div>
         <div class="bt"><button data-k="C">CLEAR</button><button data-k="X">EXIT</button></div>
       </div>
-    </div>
-    <!-- ==================== POS: "application closed" screen ==================== -->
-    <div id="bye">
-      <h2 style="margin: 0">Application closed</h2>
-      <p style="margin: 0; color: var(--mute)">
-        Your session has ended. You can now close this tab.
-      </p>
-      <button id="again">Open POS again</button>
     </div>
     <!-- ==================== POS: till (category rail, item grid, bill) ==================== -->
     <div class="pos">
@@ -17758,6 +18520,7 @@ function dayEnd(by) {
     )
   });
   sync();
+  document.dispatchEvent(new CustomEvent("kf:dayend", { detail: d }));
   return "";
 }
 function addPayout(sh, cat, desc, amt, by) {
@@ -17787,6 +18550,9 @@ function delPayout(id) {
   PAYOUTS.splice(i, 1);
   sync();
 }
+/** For a print window: on screen it's a sheet of A4 on a grey desk. The printer only ever sees the page's own rules. */
+const a4Screen = landscape =>
+  `@media screen{html{background:#5f6368;min-height:100%}body{box-sizing:border-box;width:${landscape ? "297mm" : "210mm"};min-height:${landscape ? "210mm" : "297mm"};max-width:calc(100% - 32px);margin:20px auto!important;padding:12mm!important;background:#fff;box-shadow:0 3px 14px rgba(0,0,0,.45)}}`;
 function printHTML(html, th, pg) {
   const p = $("#shPrint");
   p.innerHTML = html;
@@ -17943,6 +18709,9 @@ const curLoc = () => (STK[dept] ? dept : "Bar");
 /** The view that shows every sale point a waiter is ticked for, all at once. */
 const ALLP = "All sale points";
 /** Is item i on the menu of view d? */
+/** Categories can be hidden at one selling point from its Categories tab. */
+const catOffAt = (d, c) =>
+  typeof FD_SETTINGS !== "undefined" && ((FD_SETTINGS.catOff || {})[d] || []).includes(c); // the menu is first drawn before settings load
 const inPoint = (i, d) => (d === ALLP ? DEPTS.includes(i.d) : i.d === d);
 /** Where a product's ingredients are deducted: its materials store (recipes), else where it is sold. */
 const itemLoc = it => (it.from && STK[it.from] ? it.from : STK[it.d] ? it.d : curLoc());
@@ -18308,7 +19077,8 @@ const get = id => {
 // A waiter ticked for several sale points works in them side by side (dept = ALLP): the tabs on top
 // choose whose menu shows, and the order keeps building across them.
 let spTab = "";
-const onMenu = i => i.sell !== "acc" && (dept === ALLP ? i.d === spTab : i.d === dept);
+const onMenu = i =>
+  i.sell !== "acc" && !catOffAt(i.d, i.c) && (dept === ALLP ? i.d === spTab : i.d === dept);
 const shownPoint = () => (dept === ALLP ? spTab : dept);
 function drawTabs() {
   if (dept === ALLP && !DEPTS.includes(spTab)) spTab = DEPTS[0];
@@ -18819,7 +19589,10 @@ $("#selChgAll").onclick = () => {
 function findList() {
   const q = $("#fq").value.toLowerCase();
   $("#fr").innerHTML =
-    ITEMS.filter(i => i.sell !== "acc" && inPoint(i, dept) && i.n.toLowerCase().includes(q))
+    ITEMS.filter(
+      i =>
+        i.sell !== "acc" && !catOffAt(i.d, i.c) && inPoint(i, dept) && i.n.toLowerCase().includes(q)
+    )
       .map(
         i =>
           `<button class="mini" style="width:100%;text-align:left;margin-bottom:6px;padding:10px" data-i="${i.id}">${i.n} · ${i.p.toFixed(2)}</button>`
@@ -18848,6 +19621,7 @@ function findEnter() {
   const f = ITEMS.filter(
     i =>
       i.sell !== "acc" &&
+      !catOffAt(i.d, i.c) &&
       inPoint(i, dept) &&
       i.n.toLowerCase().includes($("#fq").value.trim().toLowerCase())
   );
@@ -20096,7 +20870,13 @@ function exRender() {
     : '<span class="stk">Tap the item you want to replace.</span>';
   // Only items at the same price, so a swap never changes the bill.
   const same = ex.old
-    ? ITEMS.filter(i => inPoint(i, d) && i.p === get(ex.old).p && String(i.id) !== String(ex.old))
+    ? ITEMS.filter(
+        i =>
+          inPoint(i, d) &&
+          !catOffAt(i.d, i.c) &&
+          i.p === get(ex.old).p &&
+          String(i.id) !== String(ex.old)
+      )
     : [];
   if (ex.cat !== "All" && !same.some(i => i.c === ex.cat)) ex.cat = "All";
   const cats = ["All", ...new Set(same.map(i => i.c))];
@@ -20117,7 +20897,7 @@ function exRender() {
     r => `<button class="chip ${r === ex.reason ? "on" : ""}" data-er="${r}">${r}</button>`
   ).join("");
   $("#exBack").checked = !!ex.back;
-  $("#exAuth").style.display = BILL_AUTH.includes(user.role) ? "none" : "";
+  $("#exAuth").style.display = actsAlone("swap") ? "none" : "";
   const ok = ex.old && ex.nw;
   let sum = "Pick the item to replace, then the new item.";
   if (ok) {
@@ -20157,9 +20937,9 @@ $("#exGo").onclick = () => {
     oi = get(ex.old),
     ni = get(ex.nw);
   if (oi.p !== ni.p) return fsNote("Only items of the same price can be swapped.");
-  // A Manager or Super Cashier authorizes it. Having the right doesn't replace this.
+  // The swap right is enough. Only staff from before Waiter setup, with no rights list, still need a PIN.
   let by = user.n;
-  if (!BILL_AUTH.includes(user.role)) {
+  if (!actsAlone("swap")) {
     const m = $("#exMsg");
     if (Date.now() < exLock) return (m.textContent = "Too many tries. Wait 30 seconds.");
     const a = USERS.find(x => BILL_AUTH.includes(x.role) && x.pin === $("#exPin").value);
@@ -21846,7 +22626,7 @@ const WAITER_RIGHTS = [
       ["comp", "Give Complimentary", "Without a manager's PIN"],
       ["postRoom", "Post to Room", "Charge a bill to a guest's room"],
       ["postPayroll", "Post to Payroll", "Charge a bill to a staff member's pay"],
-      ["swap", "Swap Items", "Same price only, and a manager's PIN is still needed"]
+      ["swap", "Swap Items", "Same price only, without a manager's PIN"]
     ]
   ],
   [
@@ -21877,19 +22657,18 @@ const WAITER_RIGHTS_LATER = [
   ["switchCur", "Switch Currency"],
   ["billMode", "Switch Billing Mode"]
 ];
-const WAITER_DEFAULTS = [
-  "create",
+const WAITER_DEFAULTS = ["create", "addPrinted", "printGuest", "interim", "send", "orderStatus"];
+/** A cashier takes payment, so a new one starts with more. */
+const CASHIER_DEFAULTS = [
+  ...WAITER_DEFAULTS,
   "clear",
-  "addPrinted",
-  "printGuest",
-  "interim",
   "functions",
-  "send",
-  "orderStatus",
   "stock",
   "switchSP",
   "sendPending"
 ];
+const newStaffRights = role =>
+  Object.fromEntries((role === "Cashier" ? CASHIER_DEFAULTS : WAITER_DEFAULTS).map(k => [k, true]));
 const allowedAlways = u => !u || !u.perm || BILL_AUTH.includes(u.role);
 // Part of a cashier's job, so these aren't left to a tick in Waiter setup.
 const CASHIER_POSTS = ["postRoom", "postPayroll"];
@@ -22080,31 +22859,22 @@ function fsLabel() {
 );
 $("#fsb").onclick = fsToggle;
 $("#fsl").onclick = fsToggle;
-function exitApp() {
+/** EXIT on the sign-in screen: back to the main page. */
+function posExit() {
   fsLeave();
+  fdPending = false;
   cart = {};
   user = null;
   pin = "";
   pdraw();
-  try {
-    window.close();
-  } catch (e) {}
-  try {
-    window.top.close();
-  } catch (e) {}
-  setTimeout(() => $("#bye").classList.add("show"), 250);
-}
-$("#again").onclick = () => {
-  fsEnter();
-  $("#bye").classList.remove("show");
-  $("#login").style.display = "grid";
   drawCart();
-};
+  $("#start").style.display = "grid";
+}
 $(".bt").onclick = e => {
   const b = e.target.closest("[data-k]");
   if (!b) return;
   if (b.dataset.k === "C") pkey("C");
-  else if (b.dataset.k === "X") exitApp();
+  else if (b.dataset.k === "X") posExit();
 };
 document.addEventListener("keydown", e => {
   if (
@@ -24586,6 +25356,10 @@ function fdEnter(u) {
 }
 function fdExit(menu) {
   if (fdUser) {
+    auditAdd("Sign out", "Left the Front Office and was signed out", {
+      who: fdUser.n,
+      mod: "Front Desk"
+    });
     user = posUser;
     posUser = null;
     fdUser = null;
@@ -25743,7 +26517,7 @@ const BO_RIGHTS = [
   ["inv.stores", "View and create stores.", "INVENTORY", "STORES"],
   [
     "inv.approve",
-    "Open approvals for purchase orders, requisitions and issues.",
+    "Approve or reject purchase orders, requisitions and issues.",
     "INVENTORY",
     "APPROVALS"
   ],
@@ -25967,8 +26741,7 @@ const PAGE_RIGHTS = {
   ],
   "Selling points": ["sp.view"],
   Tables: ["tables.manage"],
-  "Recipes & Production": ["rec.view"],
-  "Recipe & Production Report": ["rec.report"],
+  "Recipes & Production": ["rec.view", "rec.report"],
   Accounting: ["fin.menu"],
   "Expenses & Income": ["fin.menu"],
   "M-Pesa & eTIMS": ["fin.menu"],
@@ -26001,6 +26774,7 @@ const TAB_RIGHTS = {
     riss: "inv.reports",
     rdmg: "inv.reports",
     position: "inv.reports",
+    spstock: "inv.reports",
     variance: "inv.reports",
     track: "inv.reports",
     streps: "inv.reports"
@@ -26008,6 +26782,7 @@ const TAB_RIGHTS = {
   pur: { lpo: "pur.lpo", receive: "pur.receive", ret: "pur.receive", rpur: "pur.report" },
   rec: {
     overview: "rec.view",
+    report: "rec.report",
     pbal: "rec.view",
     allp: "rec.view",
     log: "rec.view",
@@ -26046,6 +26821,7 @@ const ACT_RIGHTS = {
   inv_rqrej: "inv.issue",
   inv_isspost: "inv.issue",
   inv_dmpost: "inv.damage",
+  ap_open: "inv.approve",
   ap_ok: "inv.approve",
   ap_issue: "inv.issue",
   vs_pay: "vn.pay",
@@ -26061,7 +26837,17 @@ const ACT_RIGHTS = {
   sp_rqmake: "sp.move",
   rec_issue: "rec.issue",
   rec_run: "rec.prod",
+  rm_save: "set.manage",
+  rm_add: "set.manage",
+  rm_del: "set.manage",
+  rm_acsave: "set.manage",
+  rm_actest: "set.manage",
+  rm_send: "set.manage",
+  sp_catoff: "sp.manage",
+  sp_catmove: "sp.manage",
   rec_rsave: "rec.recipes",
+  rec_dirr: "rec.recipes",
+  rec_dirp: "rec.prod",
   rec_rdel: "rec.recipes"
 };
 const boDenied = () => toast("Your role doesn't include this. Ask your administrator.");
@@ -26169,8 +26955,7 @@ const NAV = [
       ["Inventory", "box"],
       ["Selling points", "pos"],
       ["Tables", "pos"],
-      ["Recipes &amp; Production", "chef"],
-      ["Recipe &amp; Production Report", "chart"]
+      ["Recipes &amp; Production", "chef"]
     ]
   ],
   [
@@ -26653,8 +27438,7 @@ const z = (n, w = 2) => String(n).padStart(w, "0"),
   PMH = ["#Cash", "#M-Pesa", "#PDQ", "#Complimentary", "#Credit", "#Room"],
   pm = (s, k) => (s.mx || {})[k] || 0;
 let rp = "dr",
-  rpFull = false,
-  rpWideList = false,
+  rpHome = true, // the Reports overview, until a report is chosen
   rpQ = "",
   rd = "All",
   rcm = 2,
@@ -28184,6 +28968,7 @@ function repRecent() {
 /** Opens a report and remembers it for the Recent list on this computer. */
 function repPick(k) {
   rp = k;
+  rpHome = false;
   try {
     localStorage.setItem(
       RECENT_KEY,
@@ -28199,29 +28984,36 @@ const repGroups = has => {
     .map(([g, L]) => [g, L.filter(k => has.includes(k))])
     .filter(([, L]) => L.length);
 };
-const repOptions = picker =>
-  repGroups(picker.map(([k]) => k))
-    .map(
-      ([g, L]) =>
-        `<optgroup label="${g}">${L.map(k => `<option value="${k}" ${k === rp ? "selected" : ""}>${REP[k][0]}</option>`).join("")}</optgroup>`
-    )
-    .join("");
-function repMenuHTML(picker) {
+const REP_ICONS = {
+  Sales: "chart",
+  Items: "box",
+  Staff: "users",
+  Control: "shield",
+  Other: "book"
+};
+/** The overview: today's figures, the reports people open most, then every report by group. */
+function repHomeHTML(picker) {
   const has = picker.map(([k]) => k),
-    item = (k, on) =>
-      `<button class="rp-item ${on && k === rp ? "on" : ""}" data-r="${k}" title="${esc(REP_WHAT[k] || "")}" ${repHit(k, rpQ) ? "" : "hidden"}><span>${REP[k][0].replace(/ Report$/, "")}</span><small>${REP_WHAT[k] || ""}</small></button>`,
-    recent = repRecent().filter(k => has.includes(k));
-  return `<nav class="pn rp-menu ${rpQ.trim() ? "searching" : ""}"><input id="rpFind" type="search" value="${esc(rpQ)}" placeholder="Search, e.g. M-Pesa or waiter" aria-label="Find a report by name or by what you need" autocomplete="off">
-  ${recent.length ? `<div class="rp-group rp-recent"><div class="rp-gh">Recent</div>${recent.map(k => item(k, false)).join("")}</div>` : ""}${repGroups(
-    has
-  )
-    .map(
-      ([g, L]) =>
-        `<div class="rp-group" ${L.some(k => repHit(k, rpQ)) ? "" : "hidden"}><div class="rp-gh">${g}</div>${L.map(k => item(k, true)).join("")}</div>`
-    )
-    .join(
-      ""
-    )}<div class="stk rp-none" ${has.some(k => repHit(k, rpQ)) ? "hidden" : ""}>Nothing matches. Try another word, or clear the search.</div></nav>`;
+    start = d0(),
+    today = SALES.filter(s => saleAt(s) >= start && saleAt(s) < start + D),
+    total = G(today),
+    bills = billCount(today),
+    open = orders.reduce((a, o) => a + totals(o.lines, o).g, 0),
+    tile = (ic, l, v, s, k) =>
+      `<${k && has.includes(k) ? `button data-r="${k}"` : "div"} class="ph-t"><span class="ph-i">${I(ic)}</span><span class="ph-l">${l}</span><b>${v}</b><small>${s}</small></${k && has.includes(k) ? "button" : "div"}>`,
+    quick = (ic, l, k) =>
+      has.includes(k)
+        ? `<button class="ph-q" data-r="${k}"><span class="ph-i">${I(ic)}</span>${l}</button>`
+        : "",
+    card = (k, ic) =>
+      `<button class="ph-c rp-item" data-r="${k}" ${repHit(k, rpQ) ? "" : "hidden"}><span class="ph-i">${I(ic)}</span><span class="ph-b"><b>${REP[k][0].replace(/ Report$/, "")}</b><span>${REP_WHAT[k] || ""}</span></span><span class="ph-ch">${I("chev")}</span></button>`,
+    groups = repGroups(has);
+  return `<div class="ph rp-hub ${rpQ.trim() ? "searching" : ""}"><div class="ph-h"><h1>Reports</h1><p>Sales, items, staff and controls, for any dates you choose.</p></div>
+  ${boCan("rep.sales") ? `<div class="ph-ts">${tile("cash", "Sales today", KES(total), "Settled so far", "dr")}${tile("book", "Bills today", bills, bills === 1 ? "1 bill settled" : bills + " bills settled", "bills")}${tile("chart", "Average bill", KES(bills ? total / bills : 0), "Today", "ps")}${tile("cart", "Open bills", KES(open), plural(orders.length, "bill") + " not yet settled", "bills")}</div>` : ""}
+  <div class="ph-qs">${quick("chart", "Daily takings", "dr")}${quick("book", "Every bill", "bills")}${quick("users", "Staff sales", "ss")}<button class="ph-q" data-a="rep_open"><span class="ph-i">${I("swap")}</span>Last report: ${REP[rp][0].replace(/ Report$/, "")}</button></div>
+  <label class="ph-find"><input id="rpFind" type="search" value="${esc(rpQ)}" placeholder="Find a report, e.g. M-Pesa or waiter" aria-label="Find a report by name or what it shows" autocomplete="off"></label>
+  ${groups.map(([g, L]) => `<section class="ph-sec rp-group" ${L.some(k => repHit(k, rpQ)) ? "" : "hidden"}><h2 class="rp-gh">${g}</h2><div class="ph-cs">${L.map(k => card(k, REP_ICONS[g] || "book")).join("")}</div></section>`).join("")}
+  <div class="stk rp-none" ${has.some(k => repHit(k, rpQ)) ? "hidden" : ""}>Nothing matches. Try another word, or clear the search.</div></div>`;
 }
 // The list filters as you type, without redrawing, so the cursor stays in the box.
 function repFilter(box) {
@@ -28249,12 +29041,12 @@ const repVisible = box => [
 document.addEventListener("input", e => {
   if (e.target.id !== "rpFind") return;
   rpQ = e.target.value;
-  repFilter(e.target.closest(".rp-menu"));
+  repFilter(e.target.closest(".rp-hub"));
 });
 // Up and down move through what's listed, and Enter opens it.
 document.addEventListener("keydown", e => {
   if (e.target.id !== "rpFind") return;
-  const box = e.target.closest(".rp-menu"),
+  const box = e.target.closest(".rp-hub"),
     L = repVisible(box),
     at = L.findIndex(b => b.classList.contains("kb"));
   if (e.key === "Escape") {
@@ -28293,11 +29085,12 @@ const V = {
   rep() {
     if (!boCan(repRight(rp, REP[rp][0])))
       rp = Object.keys(REP).find(k => boCan(repRight(k, REP[k][0])));
+    if (rpHome)
+      return repHomeHTML(Object.entries(REP).filter(([k, y]) => boCan(repRight(k, y[0]))));
     const [title, fn] = REP[rp],
       L = rs(),
       [c, r, f, note, head, x] = fn(L),
       picker = Object.entries(REP).filter(([k, y]) => boCan(repRight(k, y[0]))),
-      wide = x && x.wide ? !rpWideList : rpFull,
       bills = L.length,
       total = G(L),
       kpi = (l, v) => `<div class="sp-kpi"><span>${l}</span><b>${v}</b></div>`,
@@ -28307,8 +29100,17 @@ const V = {
         ["29", "Last 30 days"]
       ],
       onQuick = q => rt === ymd(d0()) && rf === ymd(d0() - q * D);
-    return `<div class="rp-page ${wide ? "wide" : ""}">${wide ? "" : repMenuHTML(picker)}
- <div class="pn rp-main"><div class="rp-head"><div><h3>${title}</h3><p>${REP_WHAT[rp] || ""}</p></div><span class="rp-head-btns">${wide ? `<label class="rp-jump">Report<select data-rpsel>${repOptions(picker)}</select></label>` : ""}<button class="mini" data-a="rep_full">${wide ? "Show report list" : "Full width"}</button></span></div>
+    const has = picker.map(([k]) => k);
+    return `${phMenu(
+      repGroups(has).map(([g, K]) => ({
+        name: g,
+        tabs: K.map(k => [k, REP[k][0].replace(/ Report$/, ""), REP_ICONS[g] || "book"])
+      })),
+      rp,
+      t => (t === "home" ? 'data-a="rep_home"' : `data-r="${t}"`),
+      "Reports"
+    )}<div class="rp-page wide">
+ <div class="pn rp-main"><div class="rp-head"><div><h3>${title}</h3><p>${REP_WHAT[rp] || ""}</p></div></div>
  ${repExtraTop(x)}<div class="rp-filters"><label>From<input type="date" data-f="rf" value="${rf}"></label><label>To<input type="date" data-f="rt" value="${rt}"></label><label>Sale point<select data-f="rd">${["All", ...ALLD].map(d => `<option value="${esc(d)}" ${d === rd ? "selected" : ""}>${d === "All" ? "All sale points" : esc(d)}</option>`).join("")}</select></label>${rp === "ts" ? `<label>From time<input type="time" data-f="tf" value="${rtf}"></label><label>To time<input type="time" data-f="tt" value="${rtt}"></label>` : ""}${rp === "com" ? `<label>Commission rate (%)<input type="number" step="any" data-f="rc" value="${rcm}" placeholder="Rate %"></label>` : ""}${x && x.tools ? x.tools : ""}</div>
  <div class="rp-bar"><span class="pr-pills">${quick.map(([q, l]) => `<button class="pr-pill ${onQuick(+q) ? "on" : ""}" data-q="${q}">${l}</button>`).join("")}</span><span class="rp-tools">${printTools("rep")}</span></div>
  ${head ? `<div class="rp-cap">${head}</div>` : `<div class="sp-kpis rp-kpis">${kpi("Bills", bills)}${kpi("Total sales", KES(total))}${kpi("Average bill", KES(bills ? total / bills : 0))}</div><div class="rp-cap">${repDates()} · ${rd === "All" ? "all sale points" : esc(rd)}</div>`}${rp === "bills" ? billsGrid(c, r, note) : x && x.colour ? `<div class="rp-colour">${tb(c, r, f, note)}</div>` : head ? tb(c, r, f, note) : tb(c, r, f)}${repExtraBelow(x)}${note && !head ? `<div class="stk">${note}</div>` : ""}</div></div>`;
@@ -28747,6 +29549,385 @@ const V0 = {
   }
 };
 Object.assign(V, V0);
+// ---- Emailing reports: who gets them, which ones, and when ----
+// Reports are worked out here from the same figures as the Reports page. The server only delivers them.
+function repMailSet() {
+  const S =
+    FD_SETTINGS.repMail ||
+    (FD_SETTINGS.repMail = { auto: false, people: [], reps: ["dr"], last: null });
+  // Addresses saved before people had names.
+  if (!S.people) {
+    S.people = String(S.to || "")
+      .split(/[\s,;]+/)
+      .filter(Boolean)
+      .map(e => ({ n: "", e }));
+    delete S.to;
+  }
+  return S;
+}
+const repMailWho = list =>
+  list
+    .map(e => {
+      const p = repMailSet().people.find(x => x.e === e);
+      return p && p.n ? p.n : e;
+    })
+    .join(", ");
+const RM_CELL = "padding:6px 9px;border-bottom:1px solid #e2d9c8;font:13px Arial,sans-serif;";
+function repMailTable(c, r, f) {
+  const align = i => ((c[i] || "")[0] === "#" ? "text-align:right;" : "text-align:left;"),
+    row = (y, extra) =>
+      `<tr>${y.map((v, i) => `<td style="${RM_CELL}${align(i)}${extra}">${esc(v === null || v === undefined ? "" : v)}</td>`).join("")}</tr>`;
+  return `<table cellspacing="0" cellpadding="0" style="border-collapse:collapse;width:100%;margin:0 0 6px"><thead><tr>${c.map((h, i) => `<th style="${RM_CELL}${align(i)}background:#241b12;color:#f6efe0;">${esc(h.replace("#", ""))}</th>`).join("")}</tr></thead><tbody>${r.map(y => row(y, "")).join("")}${f ? row(f, "font-weight:bold;background:#f3eee4;") : ""}</tbody></table>`;
+}
+/** The chosen reports for one business date, as the body of an email. */
+function repMailBuild(date, keys) {
+  // Report dates and filters belong to whoever is on the Reports page, so they go back afterwards.
+  const keep = { rf, rt, rd, rtw, bill: { ...billF } },
+    parts = [],
+    failed = [];
+  rf = rt = date;
+  rd = "All";
+  rtw = "All";
+  Object.assign(billF, { status: "Combined", cashier: "All", pay: "All", col: {} });
+  try {
+    keys
+      .filter(k => REP[k])
+      .forEach(k => {
+        const title = REP[k][0];
+        try {
+          const L = rs(),
+            [c, r, f, note, head, x] = REP[k][1](L);
+          parts.push(
+            `<h2 style="margin:26px 0 2px;font:bold 18px Arial,sans-serif;color:#241b12">${esc(title)}</h2><p style="margin:0 0 10px;font:13px Arial,sans-serif;color:#75695a">${esc(head || `${L.length} bills · ${KES(G(L))}`)}</p>${
+              r.length
+                ? repMailTable(c, r, f)
+                : `<p style="font:13px Arial,sans-serif;color:#75695a">${esc(note || "Nothing for this date.")}</p>`
+            }${((x && x.below) || [])
+              .map(
+                b =>
+                  `<h3 style="margin:14px 0 6px;font:bold 14px Arial,sans-serif">${esc(b.t)}</h3>${repMailTable(b.c, b.r, b.f)}`
+              )
+              .join("")}`
+          );
+        } catch (e) {
+          failed.push(title);
+        }
+      });
+  } finally {
+    rf = keep.rf;
+    rt = keep.rt;
+    rd = keep.rd;
+    rtw = keep.rtw;
+    Object.assign(billF, keep.bill);
+  }
+  return {
+    failed,
+    html: `<div style="max-width:900px;margin:0 auto;color:#241b12"><h1 style="margin:0;font:bold 22px Arial,sans-serif">${esc(FD_SETTINGS.name)}</h1><p style="margin:2px 0 0;font:14px Arial,sans-serif;color:#75695a">Reports for ${esc(dateGB(date))}</p>${parts.join("")}${failed.length ? `<p style="margin-top:20px;font:13px Arial,sans-serif;color:#a4342a">Could not be prepared: ${esc(failed.join(", "))}</p>` : ""}<p style="margin-top:26px;font:12px Arial,sans-serif;color:#75695a">Sent by Kaytia Flow.</p></div>`
+  };
+}
+let repMailBusy = false;
+/** Send to everyone on the list. A retry skips those who already have this date's email. */
+async function repMailSend(date, retry) {
+  const S = repMailSet(),
+    done = retry && S.last && S.last.day === date ? S.last.done || [] : [],
+    to = S.people.map(p => p.e).filter(x => !done.includes(x));
+  if (repMailBusy) return "Reports are already being sent.";
+  if (!S.people.length || !S.reps.length) return "Add a person and tick at least one report.";
+  if (!to.length) return "";
+  repMailBusy = true;
+  const { html } = repMailBuild(date, S.reps),
+    subject = `${FD_SETTINGS.name}: reports for ${dateGB(date)}`,
+    text = `Reports for ${dateGB(date)}. Open this email in a program that shows HTML to read them.`,
+    sent = [...done];
+  let bad = null;
+  for (const x of to) {
+    bad = await mailServerPost({ to: x, subject, text, html });
+    if (bad) break;
+    sent.push(x);
+  }
+  repMailBusy = false;
+  S.last = {
+    day: date,
+    at: new Date().toISOString(),
+    ok: !bad,
+    msg: bad ? bad.msg : "",
+    done: sent
+  };
+  auditAdd(
+    "Email reports",
+    bad
+      ? `Reports for ${date} not sent: ${bad.msg}`
+      : `Reports for ${date} emailed to ${sent.join(", ")}`,
+    { who: "System", mod: "Back Office" }
+  );
+  bosave();
+  if (setTab === "email" && $("#rmLast")) $("#rmLast").innerHTML = repMailLast();
+  return bad ? bad.msg : "";
+}
+function repMailLast() {
+  const L = repMailSet().last;
+  if (!L) return "Nothing has been sent yet.";
+  return L.ok
+    ? `<span class="tag ok">Sent</span> Reports for ${esc(dateGB(L.day))} went to ${esc(repMailWho(L.done))} on ${dt2(L.at)}.`
+    : `<span class="tag bad">Not sent</span> Reports for ${esc(dateGB(L.day))}: ${esc(L.msg)} ${repMailSet().auto ? "It tries again every 10 minutes while this computer is on." : ""}`;
+}
+function repMailPeople() {
+  const L = repMailSet().people;
+  return L.length
+    ? L.map(
+        (p, i) =>
+          `<div class="rm-p"><span class="rm-av" aria-hidden="true">${esc((p.n || p.e)[0].toUpperCase())}</span><span class="rm-who"><b>${esc(p.n || p.e)}</b>${p.n ? `<small>${esc(p.e)}</small>` : ""}</span><button class="mini cat-del" data-a="rm_del" data-i="${i}" aria-label="Remove ${esc(p.n || p.e)}">Remove</button></div>`
+      ).join("")
+    : '<div class="empty">Nobody yet. Add the first person above.</div>';
+}
+// ---------------------------------------------------------------- the email account
+const RM_PROV = {
+  gmail: [
+    "Gmail",
+    "smtp.gmail.com",
+    465,
+    "Gmail needs an app password, not your normal one. Create it in your Google Account under Security, 2-Step Verification, App passwords."
+  ],
+  outlook: [
+    "Outlook or Microsoft 365",
+    "smtp.office365.com",
+    587,
+    "If the password is refused, SMTP may need turning on for this mailbox in Microsoft 365."
+  ],
+  yahoo: [
+    "Yahoo",
+    "smtp.mail.yahoo.com",
+    465,
+    "Yahoo needs an app password. Create it under Account Security."
+  ],
+  other: [
+    "Another mail server",
+    "",
+    587,
+    "Your email provider can tell you its SMTP server and port."
+  ]
+};
+const rmAcc = {
+  loaded: false,
+  err: "",
+  prov: "gmail",
+  host: "",
+  port: 587,
+  user: "",
+  hasPass: false,
+  set: false
+};
+const rmProvOf = host =>
+  Object.keys(RM_PROV).find(k => k !== "other" && RM_PROV[k][1] === host) || "other";
+function rmFetch(sub, body) {
+  const ctl = new AbortController(),
+    t = setTimeout(() => ctl.abort(), 15000);
+  return fetch(printServer() + "/api/mail/account" + sub, {
+    method: body ? "POST" : "GET",
+    headers: body ? { "content-type": "application/json" } : {},
+    body: body ? JSON.stringify(body) : undefined,
+    signal: ctl.signal
+  }).finally(() => clearTimeout(t));
+}
+function rmAccDraw() {
+  const box = $("#rmAcct");
+  if (box) box.innerHTML = repMailAcctHTML();
+}
+async function rmAccLoad() {
+  rmAcc.loaded = false;
+  rmAcc.err = "";
+  rmAccDraw();
+  try {
+    const r = await rmFetch("");
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) rmAcc.err = (j.error && j.error.message) || "The email account could not be read.";
+    else
+      Object.assign(rmAcc, {
+        host: j.host,
+        port: j.port,
+        user: j.user,
+        hasPass: j.hasPass,
+        set: !!(j.host && j.from),
+        prov: j.host ? rmProvOf(j.host) : rmAcc.prov
+      });
+  } catch (e) {
+    rmAcc.err = "The server could not be reached.";
+  }
+  rmAcc.loaded = true;
+  rmAccDraw();
+}
+function repMailAcctHTML() {
+  if (!rmAcc.loaded) return '<div class="stk">Checking the email account...</div>';
+  if (rmAcc.err)
+    return `<div class="rm-h"><h4>Email account</h4></div><div class="stk">${esc(rmAcc.err)}</div><div class="rm-acts"><button class="mini" data-a="rm_acreload">Try again</button></div>`;
+  const P = RM_PROV[rmAcc.prov],
+    other = rmAcc.prov === "other";
+  return `<div class="rm-h"><h4>Email account</h4><span class="tag ${rmAcc.set ? "ok" : "warn"}">${rmAcc.set ? "Set up" : "Not set up"}</span></div>
+  <div class="stk">Reports are sent from this account. The password stays on this computer and is never shown again.</div>
+  <div class="rm-grid"><label>Email service<select id="rmProv">${Object.entries(RM_PROV)
+    .map(
+      ([k, v]) => `<option value="${k}" ${k === rmAcc.prov ? "selected" : ""}>${esc(v[0])}</option>`
+    )
+    .join("")}</select></label>
+  <label>Email address<input id="rmUser" type="email" autocomplete="off" value="${esc(rmAcc.user)}" placeholder="reports@hotel.co.ke"></label>
+  <label>Password<input id="rmPass" type="password" autocomplete="new-password" placeholder="${rmAcc.hasPass ? "Saved. Leave blank to keep it" : ""}"></label>
+  <label class="rm-oth" ${other ? "" : "hidden"}>Mail server<input id="rmHost" autocomplete="off" value="${esc(other ? rmAcc.host : "")}" placeholder="mail.hotel.co.ke"></label>
+  <label class="rm-oth" ${other ? "" : "hidden"}>Port<input id="rmPort" type="number" min="1" max="65535" value="${esc(rmAcc.port)}"></label></div>
+  <div class="itm-hint" id="rmHint">${esc(P[3])}</div>
+  <div class="rm-acts"><button class="chip on" data-a="rm_acsave">Save account</button><button class="mini" data-a="rm_actest" ${rmAcc.set ? "" : "disabled"}>Send a test email</button></div>`;
+}
+async function rmAccSave(b) {
+  const prov = $("#rmProv").value,
+    P = RM_PROV[prov],
+    user = $("#rmUser").value.trim(),
+    pass = (prov === "gmail" ? $("#rmPass").value.replace(/\s/g, "") : $("#rmPass").value).trim(),
+    host = prov === "other" ? $("#rmHost").value.trim() : P[1],
+    port = prov === "other" ? parseInt($("#rmPort").value, 10) : P[2];
+  if (!docMailOk(user)) return toast("Enter the email address reports are sent from.");
+  if (!pass && !rmAcc.hasPass) return toast("Enter the password for this email account.");
+  if (!/^[a-zA-Z0-9.-]+$/.test(host))
+    return toast("Enter the mail server, such as mail.hotel.co.ke.");
+  if (!(port >= 1 && port <= 65535)) return toast("Enter the mail server's port, such as 587.");
+  const name = String(FD_SETTINGS.name || "Kaytia Flow").replace(/["<>\r\n]/g, "");
+  b.disabled = true;
+  let msg = "";
+  try {
+    const r = await rmFetch("", {
+      host,
+      port,
+      user,
+      from: `"${name}" <${user}>`,
+      ...(pass ? { pass } : {})
+    });
+    if (!r.ok) {
+      const j = await r.json().catch(() => ({}));
+      msg = (j.error && j.error.message) || "The email account was not saved.";
+    }
+  } catch (e) {
+    msg = "The server could not be reached, so nothing was saved.";
+  }
+  b.disabled = false;
+  if (msg) return toast(msg);
+  Object.assign(rmAcc, { prov, host, port, user, hasPass: true, set: true });
+  auditAdd("Email reports", `Email account set to ${user}`);
+  rmAccDraw();
+  toast("Email account saved. Send a test email to check it.");
+}
+async function rmAccTest(b) {
+  b.disabled = true;
+  toast("Sending a test email...");
+  const bad = await mailServerPost({
+    to: rmAcc.user,
+    subject: `${FD_SETTINGS.name}: test email`,
+    text: "Kaytia Flow can send email from this account.",
+    html: '<p style="font:15px Arial,sans-serif">Kaytia Flow can send email from this account.</p>'
+  });
+  b.disabled = false;
+  toast(bad ? bad.msg : `Test email sent to ${rmAcc.user}. Check that inbox.`);
+}
+$("#vSub").addEventListener("change", e => {
+  if (e.target.id !== "rmProv") return;
+  const k = e.target.value,
+    P = RM_PROV[k];
+  rmAcc.prov = k;
+  document.querySelectorAll(".rm-oth").forEach(x => (x.hidden = k !== "other"));
+  $("#rmPort").value = P[2];
+  $("#rmHint").textContent = P[3];
+});
+$("#vSub").addEventListener("keydown", e => {
+  if (e.key !== "Enter" || !["rmN", "rmE"].includes(e.target.id)) return;
+  e.preventDefault();
+  repMailAdd();
+});
+function repMailAdd() {
+  const S = repMailSet(),
+    n = $("#rmN").value.trim().replace(/\s+/g, " "),
+    em = $("#rmE").value.trim();
+  if (!n) {
+    $("#rmN").focus();
+    return toast("Enter the person's name.");
+  }
+  if (!docMailOk(em)) {
+    $("#rmE").focus();
+    return toast(`${em || "That"} doesn't look like an email address.`);
+  }
+  if (S.people.some(p => p.e.toLowerCase() === em.toLowerCase()))
+    return toast(`${em} is already on the list.`);
+  S.people.push({ n, e: em });
+  auditAdd("Email reports", `${n} (${em}) added to email reports`);
+  bosave();
+  $("#rmPeople").innerHTML = repMailPeople();
+  $("#rmN").value = $("#rmE").value = "";
+  $("#rmN").focus();
+  toast(`${n} added.`);
+}
+function repMailHTML() {
+  const S = repMailSet(),
+    G0 = repGroups(Object.keys(REP));
+  if (!rmAcc.loaded) setTimeout(rmAccLoad);
+  return `<div class="pn rm" id="rmAcct">${repMailAcctHTML()}</div><div class="pn rm"><h4>Email reports</h4><div class="stk">Choose who receives reports and which ones. They arrive as one email covering the whole business day.</div>
+  <div class="rm-add"><label>Name<input id="rmN" maxlength="60" autocomplete="off" placeholder="e.g. Amina Ali"></label><label>Email<input id="rmE" type="email" maxlength="120" autocomplete="off" placeholder="amina@hotel.co.ke"></label><button class="chip on" data-a="rm_add">Add</button></div>
+  <div class="rm-people" id="rmPeople">${repMailPeople()}</div>
+  <label class="rm-auto"><input id="rmAuto" type="checkbox" ${S.auto ? "checked" : ""}><span><b>Send automatically when the day is ended</b><small>Goes out from the computer that ends the day.</small></span></label>
+  <div class="rm-h"><h4>Reports to send</h4><span><button class="mini" data-a="rm_all">Tick all</button> <button class="mini" data-a="rm_none">Clear</button></span></div>
+  ${G0.map(([g, K]) => `<div class="rm-g"><h5>${esc(g)}</h5><div class="rm-list">${K.map(k => `<label><input type="checkbox" data-rmk="${k}" ${S.reps.includes(k) ? "checked" : ""}><span><b>${esc(REP[k][0].replace(/ Report$/, ""))}</b><small>${esc(REP_WHAT[k] || "")}</small></span></label>`).join("")}</div></div>`).join("")}
+  <div class="rm-go"><span class="stk" id="rmLast">${repMailLast()}</span><label>Date<input id="rmDay" type="date" value="${esc(bizDate())}"></label><button class="mini" data-a="rm_send">Send now</button><button class="chip on" data-a="rm_save">Save</button></div></div>`;
+}
+/** Read the page into the settings. False after saying what's wrong. */
+function repMailRead() {
+  const S = repMailSet(),
+    reps = [...document.querySelectorAll("[data-rmk]:checked")].map(x => x.dataset.rmk),
+    auto = $("#rmAuto").checked;
+  if (auto && !S.people.length) {
+    toast("Add a person to send to.");
+    return false;
+  }
+  if (auto && !reps.length) {
+    toast("Tick at least one report.");
+    return false;
+  }
+  Object.assign(S, { reps, auto });
+  bosave();
+  return true;
+}
+async function repMailAct(a, b) {
+  if (a === "rm_add") return repMailAdd();
+  if (a === "rm_del") {
+    const S = repMailSet(),
+      [p] = S.people.splice(+b.dataset.i, 1);
+    auditAdd("Email reports", `${p.n || p.e} removed from email reports`);
+    bosave();
+    return ($("#rmPeople").innerHTML = repMailPeople());
+  }
+  if (a === "rm_acreload") return rmAccLoad();
+  if (a === "rm_acsave") return rmAccSave(b);
+  if (a === "rm_actest") return rmAccTest(b);
+  if (a === "rm_all" || a === "rm_none")
+    return document.querySelectorAll("[data-rmk]").forEach(x => (x.checked = a === "rm_all"));
+  if (!repMailRead()) return;
+  if (a === "rm_save") {
+    auditAdd("Email reports", "Email report settings changed");
+    return toast("Email reports saved.");
+  }
+  const date = $("#rmDay").value;
+  if (!date) return toast("Choose the date to send.");
+  b.disabled = true;
+  toast("Sending...");
+  const err = await repMailSend(date, false);
+  b.disabled = false;
+  toast(err || "Reports sent.");
+}
+document.addEventListener("kf:dayend", e => {
+  if (repMailSet().auto) repMailSend(dayDate(e.detail), false);
+});
+// The internet at a hotel comes and goes, so a failed send keeps trying.
+setInterval(
+  () => {
+    const S = repMailSet();
+    if (S.auto && S.last && !S.last.ok) repMailSend(S.last.day, true);
+  },
+  10 * 60 * 1000
+);
 // ---- Customers: credit customers, their terms, what they owe, statements and payments ----
 const CU_TYPES = ["Company", "Individual", "Government", "NGO"];
 const cuS = { f: "all", ed: null, pay: null, st: null };
@@ -28800,17 +29981,107 @@ function cuStatementHTML(c) {
   ${S.rows.map(r => `<tr><td>${dateGB(ymdOf(r.at))}</td><td>${esc(r.what)}</td><td>${esc(r.ref)}</td><td class="n">${r.dr ? m2(r.dr) : ""}</td><td class="n">${r.cr ? m2(r.cr) : ""}</td><td class="n">${m2(r.bal)}</td></tr>`).join("")}
   </tbody><tfoot><tr><td colspan="5">Balance due</td><td class="n">KES ${m2(c.owes)}</td></tr></tfoot></table></div>`;
 }
+const CU_LIMITS = [
+  [0, "Cash only"],
+  [10000, "10,000"],
+  [25000, "25,000"],
+  [50000, "50,000"],
+  [100000, "100,000"],
+  [250000, "250,000"]
+];
+const CU_DAYS = [7, 14, 30, 60];
+/** What the limit typed so far means, in words. */
+function cuLimitNote(raw, c) {
+  const n = parseFloat(raw);
+  if (raw === "" || !(n >= 0))
+    return "Set how much this customer may owe. Charges above it are refused at the POS and the Front Desk.";
+  const owes = c ? c.owes || 0 : 0;
+  if (n === 0)
+    return owes > 0
+      ? `No new credit allowed. They still owe KES ${m2(owes)}.`
+      : "Cash only: nothing can be charged to this account.";
+  return owes > n
+    ? `They owe KES ${m2(owes)}, which is KES ${m2(owes - n)} over this limit. New charges will be refused.`
+    : `Can owe up to KES ${m2(n)}.${owes > 0 ? ` Owes KES ${m2(owes)} now, KES ${m2(n - owes)} still available.` : " Charges above it are refused at the POS and the Front Desk."}`;
+}
 function cuFormHTML() {
-  const c = cuS.ed.i < 0 ? {} : CU[cuS.ed.i],
+  const me = cuS.ed.i < 0 ? null : CU[cuS.ed.i],
+    c = me || {},
     f = (l, k, attrs = "", wide = "") =>
-      `<label class="${wide}">${l}<input id="cu_${k}" value="${esc(c[k] === undefined ? "" : c[k])}" ${attrs}></label>`;
-  return `<div class="modal show" id="cuEd" style="z-index:66"><div class="box itm cu-box"><header class="cu-h"><div><h3>${cuS.ed.i < 0 ? "New customer" : "Edit " + esc(c.n)}</h3><p>Credit customers can be charged from the POS and the Front Desk.</p></div><button class="mini" data-a="cu_edno">Close</button></header>
-  <section><h4>Customer</h4><div class="cu-g">${f("Customer or company name", "n", 'maxlength="80" autocomplete="off"', "cu-w")}<label>Type<select id="cu_type">${CU_TYPES.map(t => `<option ${t === (c.type || "Company") ? "selected" : ""}>${t}</option>`).join("")}</select></label>${f("Account code", "code", 'maxlength="20" placeholder="Your own reference"')}${f("KRA PIN", "kra", 'maxlength="11" style="text-transform:uppercase" placeholder="A000000000B"')}${f("ID or registration no", "idNo", 'maxlength="30"')}</div></section>
-  <section><h4>Contact</h4><div class="cu-g">${f("Contact person", "contact", 'maxlength="60"')}${f("Job title", "job", 'maxlength="40"')}${f("Phone", "phone", 'type="tel" maxlength="20" placeholder="07XX XXX XXX"')}${f("Other phone", "phone2", 'type="tel" maxlength="20"')}${f("Email", "email", 'type="email" maxlength="80"', "cu-w")}</div></section>
-  <section><h4>Address</h4><div class="cu-g">${f("Physical address", "addr", 'maxlength="120"', "cu-w")}${f("Town", "town", 'maxlength="40"')}${f("P.O. Box", "box", 'maxlength="30"')}</div></section>
-  <section><h4>Credit terms</h4><div class="cu-g">${f("Credit limit (KES)", "limit", 'type="number" min="0" step="any"')}${f("Days to pay", "terms", 'type="number" min="0" step="1" placeholder="e.g. 30"')}<label class="cu-c cu-w"><input id="cu_off" type="checkbox" ${c.off ? "checked" : ""}> On hold: can't be charged until this is cleared</label></div></section>
-  <section><h4>Notes</h4><label class="cu-n">Anything staff should know<textarea id="cu_notes" rows="2" maxlength="300">${esc(c.notes || "")}</textarea></label></section>
-  <footer class="cu-f"><button class="mini" data-a="cu_edno">Cancel</button><button class="chip on" data-a="cu_save">Save customer</button></footer></div></div>`;
+      `<label class="${wide}"><span>${l}</span><input id="cu_${k}" value="${esc(c[k] === undefined ? "" : c[k])}" ${attrs}></label>`,
+    sec = (ic, t, body) =>
+      `<section class="cuf-s"><h4><span class="ph-i">${I(ic)}</span>${t}</h4><div class="cuf-g">${body}</div></section>`,
+    limit = c.limit === undefined ? "" : String(c.limit),
+    terms = c.terms === undefined ? "" : String(c.terms);
+  return `<div class="modal show" id="cuEd" style="z-index:66"><div class="box itm cuf">
+  <header class="itm-h cuf-h"><span class="cuf-av" id="cuAv" aria-hidden="true">${esc((c.n || "+")[0].toUpperCase())}</span><div><h3>${me ? "Edit " + esc(c.n) : "New customer"}</h3><p>Customers with credit can be charged from the POS and the Front Desk.</p></div><button class="itm-x" data-a="cu_edno" aria-label="Close">✕</button></header>
+  <div class="itm-b cuf-b"><div class="cuf-main">
+   ${sec(
+     "users",
+     "Customer details",
+     f(
+       "Customer or company name <em>Required</em>",
+       "n",
+       'maxlength="80" autocomplete="off"',
+       "cuf-w"
+     ) +
+       `<label><span>Type</span><select id="cu_type">${CU_TYPES.map(t => `<option ${t === (c.type || "Company") ? "selected" : ""}>${t}</option>`).join("")}</select></label>` +
+       f("Account code", "code", 'maxlength="20" placeholder="Your own reference"') +
+       f(
+         "KRA PIN",
+         "kra",
+         'maxlength="11" style="text-transform:uppercase" placeholder="A000000000B"'
+       ) +
+       f("ID or registration no", "idNo", 'maxlength="30"')
+   )}
+   ${sec(
+     "phone",
+     "Contact",
+     f("Contact person", "contact", 'maxlength="60"') +
+       f("Job title", "job", 'maxlength="40"') +
+       f("Phone", "phone", 'type="tel" maxlength="20" placeholder="07XX XXX XXX"') +
+       f("Other phone", "phone2", 'type="tel" maxlength="20"') +
+       f("Email", "email", 'type="email" maxlength="80"', "cuf-w")
+   )}
+   ${sec(
+     "home",
+     "Address",
+     f("Physical address", "addr", 'maxlength="120"', "cuf-w") +
+       f("Town", "town", 'maxlength="40"') +
+       f("P.O. Box", "box", 'maxlength="30"')
+   )}
+   ${sec(
+     "book",
+     "Notes",
+     `<label class="cuf-w"><span>Anything staff should know</span><textarea id="cu_notes" rows="2" maxlength="300">${esc(c.notes || "")}</textarea></label>`
+   )}
+  </div>
+  <div class="cuf-credit">
+   <h4><span class="ph-i">${I("cash")}</span>Credit account</h4>
+   <label class="cuf-lim"><span>Credit limit <em>Required</em></span><span class="cuf-amt"><i>KES</i><input id="cu_limit" type="number" min="0" step="any" inputmode="decimal" value="${esc(limit)}" placeholder="0"></span></label>
+   <div class="cuf-chips" role="group" aria-label="Common credit limits">${CU_LIMITS.map(([v, l]) => `<button type="button" class="${limit === String(v) ? "on" : ""}" data-a="cu_lim" data-v="${v}">${l}</button>`).join("")}</div>
+   <p class="cuf-note" id="cuLimNote">${cuLimitNote(limit, me)}</p>
+   <label class="cuf-days"><span>Days to pay</span><input id="cu_terms" type="number" min="0" step="1" value="${esc(terms)}" placeholder="e.g. 30"></label>
+   <div class="cuf-chips cuf-chips4" role="group" aria-label="Common payment terms">${CU_DAYS.map(v => `<button type="button" class="${terms === String(v) ? "on" : ""}" data-a="cu_days" data-v="${v}">${v} days</button>`).join("")}</div>
+   <label class="cuf-hold"><input id="cu_off" type="checkbox" ${c.off ? "checked" : ""}><span><b>On hold</b><small>Can't be charged until this is cleared</small></span></label>
+  </div></div>
+  <footer class="itm-f"><button class="mini" data-a="cu_edno">Cancel</button><button class="chip on" data-a="cu_save">Save customer</button></footer></div></div>`;
+}
+/** Keep the note and the quick buttons in step with what is typed. */
+function cuFormSync() {
+  const lim = $("#cu_limit"),
+    days = $("#cu_terms"),
+    mark = (a, v) =>
+      document
+        .querySelectorAll(`#cuEd [data-a="${a}"]`)
+        .forEach(b => b.classList.toggle("on", b.dataset.v === v));
+  if (!lim) return;
+  mark("cu_lim", lim.value.trim());
+  mark("cu_days", days.value.trim());
+  $("#cuLimNote").textContent = cuLimitNote(
+    lim.value.trim(),
+    cuS.ed && cuS.ed.i >= 0 ? CU[cuS.ed.i] : null
+  );
 }
 function cuPayHTML() {
   const c = CU[cuS.pay];
@@ -28848,7 +30119,7 @@ function customersHTML() {
 function cuSave() {
   const v = k => $("#cu_" + k).value.trim(),
     n = v("n"),
-    limit = parseFloat(v("limit") || 0),
+    limit = parseFloat(v("limit")),
     terms = v("terms") === "" ? "" : parseInt(v("terms"), 10),
     kra = v("kra").toUpperCase(),
     email = v("email"),
@@ -28856,12 +30127,15 @@ function cuSave() {
   if (!n) return toast("Enter the customer's name.");
   if (CU.some(c => c !== me && c.n.toLowerCase() === n.toLowerCase()))
     return toast(`${n} is already a customer.`);
-  if (!(limit >= 0)) return toast("Enter a credit limit of 0 or more.");
   if (terms !== "" && !(terms >= 0)) return toast("Enter the days to pay as a number.");
   if (kra && !/^[A-Z][0-9]{9}[A-Z]$/.test(kra))
     return toast("A KRA PIN has a letter, nine digits and a letter.");
   if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))
     return toast("That email address doesn't look right.");
+  if (!(limit >= 0)) {
+    $("#cu_limit").focus();
+    return toast("Enter a credit limit. Use 0 for a cash-only customer.");
+  }
   const rec = {
     n,
     limit,
@@ -28910,6 +30184,11 @@ function cuPayGo() {
 }
 function cuAct(a, b) {
   const i = +b.dataset.i;
+  // Quick buttons fill the box: redrawing would lose what has been typed.
+  if (a === "cu_lim" || a === "cu_days") {
+    $(a === "cu_lim" ? "#cu_limit" : "#cu_terms").value = b.dataset.v;
+    return cuFormSync();
+  }
   if (a === "cu_f") cuS.f = b.dataset.k;
   else if (a === "cu_new" || a === "cu_edit") {
     if (!boCan("cust.manage")) return boDenied();
@@ -28931,6 +30210,9 @@ function cuAct(a, b) {
   all();
 }
 $("#vSub").addEventListener("input", e => {
+  if (e.target.id === "cu_n")
+    $("#cuAv").textContent = (e.target.value.trim()[0] || "+").toUpperCase();
+  if (e.target.id === "cu_limit" || e.target.id === "cu_terms") cuFormSync();
   if (e.target.id !== "cuQ") return;
   const q = e.target.value.trim().toLowerCase();
   document.querySelectorAll("#vSub [data-cu-row]").forEach(tr => {
@@ -28939,7 +30221,7 @@ $("#vSub").addEventListener("input", e => {
 });
 // ---- inventory: stores, item setup, receive, purchase orders, requisitions, issue, damage, stock master ----
 // Stores (STORES) hold purchased stock. Selling points (ALLD) get stock from a store by requisition or issue.
-let invT = "stores",
+let invT = "home",
   invSdOpen = false,
   invPoNew = false;
 const invF = {
@@ -28995,8 +30277,9 @@ const fq = n =>
     const d = new Date(t);
     return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short" }) + " " + hm(d);
   };
-const optK = s0 =>
+const optK = (s0, place) =>
     pickKeys()
+      .filter(k => !place || storeHolds(place, k))
       .map(k => `<option value="${k}" ${k === s0 ? "selected" : ""}>${esc(ING[k])}</option>`)
       .join(""),
   optL = (s0, ex) =>
@@ -29216,6 +30499,7 @@ const RAIL = [
   ["riss", "Issues", "cart"],
   ["rdmg", "Damage report", "alert"],
   ["position", "Stock position", "chart"],
+  ["spstock", "Selling point stock", "box"],
   ["variance", "Stock take variance", "chart"],
   ["streps", "Stock take reports", "book"],
   "-",
@@ -29247,11 +30531,15 @@ const INV_PAGES = {
   riss: ["Issues report", "Everything issued from the stores, for the dates you choose."],
   rdmg: ["Damage report", "Everything written off, for the dates you choose."],
   position: ["Stock position", "How much of each item you hold and what it's worth."],
+  spstock: [
+    "Selling point stock",
+    "What each selling point is holding right now, and what it's worth at cost."
+  ],
   variance: ["Stock take variance", "The differences between the system and what was counted."],
   streps: ["Stock take reports", "Stock takes already posted."]
 };
 // The chosen store only matters on these screens.
-const INV_NO_STORE = ["stores", "items", "cats", "track"];
+const INV_NO_STORE = ["stores", "items", "cats", "track", "spstock"];
 const tabAllowed = t => {
   const x = RAIL.find(r => r !== "-" && r[0] === t);
   return boTabOk("inv", t) && (!x || x[3] !== "store" || isStore(STKT.loc));
@@ -29262,24 +30550,97 @@ const isOpenReq = r =>
 /** Requisitions that concern the selected place: sent TO it (store) or made BY it (selling point). */
 const reqsHere = () =>
   REQS.filter(r => (isStore(STKT.loc) ? (r.store || STORES[0]) === STKT.loc : r.dept === STKT.loc));
-const rail = () => {
-  const pend = reqsHere().filter(isOpenReq).length;
-  const L = RAIL.filter(x => x === "-" || x[0] === "h" || tabAllowed(x[0]));
-  return L.filter((x, i) => x[0] !== "h" || (L[i + 1] && L[i + 1][0] !== "h" && L[i + 1] !== "-"))
-    .map(x =>
-      x === "-"
-        ? '<i class="rsep"></i>'
-        : x[0] === "h"
-          ? `<div class="rhd">${x[1]}</div>`
-          : `<button class="ir ${x[0] === invT ? "on" : ""}" data-a="inv_tab" data-t="${x[0]}">${I(x[2])}<span>${x[1]}</span>${x[0] === "req" && pend ? `<b>${pend}</b>` : ""}${x[0] === "appr" && apCount() ? `<b>${apCount()}</b>` : ""}</button>`
-    )
-    .join("");
+/** RAIL as groups, each with only the screens this person can open. */
+const invGroups = () => {
+  const G = [];
+  RAIL.forEach(x => {
+    if (x === "-" || x[0] === "exit") return;
+    if (x[0] === "h") G.push({ name: x[1], tabs: [] });
+    else if (tabAllowed(x[0])) G[G.length - 1].tabs.push(x);
+  });
+  return G.filter(g => g.tabs.length);
 };
+const invBadge = t => {
+  const n = t === "req" ? reqsHere().filter(isOpenReq).length : t === "appr" ? apCount() : 0;
+  return n ? `<b>${n}</b>` : "";
+};
+/** Across the top: the groups, then the screens of the group you're in. G is [{ name, tabs: [[t, label, icon]] }]. */
+function phMenu(G, cur, act, label, badge = () => "") {
+  const attrs = typeof act === "function" ? act : t => `data-a="${act}" data-t="${t}"`,
+    btn = (t, ic, l, on, extra = "") =>
+      `<button class="${on ? "on" : ""}" ${attrs(t)} ${on ? 'aria-current="page"' : ""}>${I(ic)}<span>${l}</span>${extra}</button>`;
+  return `<nav class="ph-tabs" aria-label="${label}">${btn("home", "home", "Overview", false)}${G.map(
+    g =>
+      btn(
+        g.tabs[0][0],
+        g.tabs[0][2],
+        g.name,
+        g.tabs.some(x => x[0] === cur)
+      )
+  ).join("")}</nav>${G.map(
+    g =>
+      `<nav class="ph-subs" aria-label="${g.name}" ${g.tabs.some(x => x[0] === cur) ? "" : "hidden"}>${g.tabs.map(x => btn(x[0], x[2], x[1], x[0] === cur, badge(x[0]))).join("")}</nav>`
+  ).join("")}`;
+}
+const invMenu = () => phMenu(invGroups(), invT, "inv_tab", "Inventory", invBadge);
+/** The overview: figures, the things people come here to do, then every screen by group. */
+function invHomeHTML(popups) {
+  const items = Object.keys(ING).filter(k => STORES.some(l => have(l, k) > 0)).length,
+    low = lowCount(),
+    openReq = REQS.filter(isOpenReq).length,
+    wait = apCount(),
+    ok = tabAllowed,
+    many = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`,
+    tab = t => `data-a="inv_tab" data-t="${t}"`,
+    tile = (ic, l, v, s, t, warn) =>
+      `<${t && ok(t) ? `button ${tab(t)}` : "div"} class="ph-t ${warn ? "ph-warn" : ""}"><span class="ph-i">${I(ic)}</span><span class="ph-l">${l}</span><b>${v}</b><small>${s}</small></${t && ok(t) ? "button" : "div"}>`,
+    quick = (ic, l, t) =>
+      ok(t) ? `<button class="ph-q" ${tab(t)}><span class="ph-i">${I(ic)}</span>${l}</button>` : "",
+    card = x => {
+      const meta =
+        x[0] === "req" && openReq
+          ? `${openReq} open`
+          : x[0] === "appr" && wait
+            ? `${wait} waiting`
+            : x[0] === "master" && low
+              ? `${many(low, "line")} low`
+              : "";
+      return `<button class="ph-c" ${tab(x[0])}><span class="ph-i">${I(x[2])}</span><span class="ph-b"><b>${x[1]}</b><span>${INV_PAGES[x[0]][1]}</span>${meta ? `<em>${meta}</em>` : ""}</span><span class="ph-ch">${I("chev")}</span></button>`;
+    },
+    tiles = [
+      tile("box", "Items in stock", items, `Across ${many(STORES.length, "store")}`, "master"),
+      ok("position")
+        ? tile("wal", "Stock value", "KES " + m2(sum(STORES, storeValue)), "At cost", "position")
+        : "",
+      tile(
+        "alert",
+        "Low stock",
+        low,
+        low ? "Below the reorder level" : "All above reorder level",
+        "master",
+        low > 0
+      ),
+      tile(
+        "shield",
+        "Waiting for you",
+        openReq + wait,
+        `${many(openReq, "requisition")} · ${many(wait, "approval")}`,
+        wait ? "appr" : "req",
+        openReq + wait > 0
+      )
+    ].join("");
+  return `<div class="ph"><div class="ph-h"><h1>Inventory</h1><p>Your stores, stock levels and every movement in one place.</p></div><div class="ph-ts">${tiles}</div><div class="ph-qs">${quick("plus", "New item", "items")}${quick("box", "Count stock", "master")}${quick("cart", "Issue stock", "issue")}${quick("book", "Requisition", "req")}</div>${invGroups()
+    .map(
+      g =>
+        `<section class="ph-sec"><h2>${g.name}</h2><div class="ph-cs">${g.tabs.map(card).join("")}</div></section>`
+    )
+    .join("")}${popups}</div>`;
+}
 /** Store picker. Inventory is for stores only; selling points are managed under "Selling points". */
 const strip = () => {
   const ks = pickKeys(),
     chip = l =>
-      `<button class="sc2 ${l === STKT.loc && !(STKT.all && invT === "master") ? "on" : ""}" data-a="inv_loc" data-l="${esc(l)}"><span>${esc(l)}</span><small>${ks.filter(k => have(l, k) > 0).length} of ${ks.length} items in stock</small></button>`;
+      `<button class="sc2 ${l === STKT.loc && !(STKT.all && invT === "master") ? "on" : ""}" data-a="inv_loc" data-l="${esc(l)}"><span>${esc(l)}</span><small>${ks.filter(k => storeHolds(l, k) && have(l, k) > 0).length} of ${ks.filter(k => storeHolds(l, k)).length} items in stock</small></button>`;
   const allOn = invT === "master";
   return `<div class="stgw"><div class="stgh">Store</div><div class="stg">${allOn ? `<button class="sc2 ${STKT.all ? "on" : ""}" data-a="inv_locall"><span>${MASTER_ALL}</span><small>${STORES.length === 1 ? "1 store" : `${STORES.length} stores together`}</small></button>` : ""}${STORES.map(chip).join("")}</div></div>`;
 };
@@ -29302,9 +30663,12 @@ const qtyBoth = (k, units) => {
 const unitHint = (k, place) => (k && place ? `${place} has ${qtyBoth(k, have(place, k))}` : "");
 function lineEd(f, cost) {
   const L = invF[f].lines;
-  const k0 = invF[f].pick && ING[invF[f].pick] !== undefined ? invF[f].pick : pickKeys()[0];
-  return `<div class="fr" style="align-items:end"><label>Item<select id="l_k_${f}" data-unitfor="${f}">${optK(k0)}</select></label><label>Quantity<input id="l_q_${f}" type="number" min="0" step="any" placeholder="Qty"></label><label>Units${unitSel("l_u_" + f, k0)}</label>${cost ? `<label>Unit cost (KES)<input id="l_c_${f}" type="number" step="any" placeholder="Optional"></label>` : ""}<button class="mini" data-a="inv_ladd" data-f="${f}">Add line</button></div><div class="stk" id="l_h_${f}">${unitHint(k0, STKT.loc)}</div>${L.length ? `<div class="tw"><table class="t"><tr><th>Item</th><th class="n">Qty</th>${cost ? '<th class="n">Unit cost</th>' : ""}<th></th></tr>${L.map((x, i) => `<tr><td>${esc(iN(x.k))}</td><td class="n">${qtyBoth(x.k, x.q)}</td>${cost ? `<td class="n">${x.c ? m2(x.c) : "-"}</td>` : ""}<td><button class="mini" data-a="inv_ldel" data-f="${f}" data-i="${i}">✕</button></td></tr>`).join("")}</table></div>` : ""}`;
+  const place = f === "is" ? invF.is.from : "",
+    allowed = pickKeys().filter(k => !place || storeHolds(place, k)),
+    k0 = allowed.includes(invF[f].pick) ? invF[f].pick : allowed[0];
+  return `<div class="fr" style="align-items:end"><label>Item<select id="l_k_${f}" data-unitfor="${f}">${optK(k0, place)}</select></label><label>Quantity<input id="l_q_${f}" type="number" min="0" step="any" placeholder="Qty"></label><label>Units${unitSel("l_u_" + f, k0)}</label>${cost ? `<label>Unit cost (KES)<input id="l_c_${f}" type="number" step="any" placeholder="Optional"></label>` : ""}<button class="mini" data-a="inv_ladd" data-f="${f}">Add line</button></div><div class="stk" id="l_h_${f}">${unitHint(k0, STKT.loc)}</div>${L.length ? `<div class="tw"><table class="t"><tr><th>Item</th><th class="n">Qty</th>${cost ? '<th class="n">Unit cost</th>' : ""}<th></th></tr>${L.map((x, i) => `<tr><td>${esc(iN(x.k))}</td><td class="n">${qtyBoth(x.k, x.q)}</td>${cost ? `<td class="n">${x.c ? m2(x.c) : "-"}</td>` : ""}<td><button class="mini" data-a="inv_ldel" data-f="${f}" data-i="${i}">✕</button></td></tr>`).join("")}</table></div>` : ""}`;
 }
+let msOffList = 0;
 function mRows() {
   const loc = STKT.loc,
     // Stores hold stock items only; finished products exist only at selling points.
@@ -29312,8 +30676,8 @@ function mRows() {
     t0 = new Date(STKT.since).getTime(),
     agg = {},
     // The categories ticked on the store decide what it lists. Anything it really holds always shows too.
-    kinds = isStore(loc) ? storeKinds(loc).map(x => x.toLowerCase()) : [],
-    inKind = k => kinds.includes(String(itemInfo(k).group || "").toLowerCase());
+    kinds = isStore(loc) ? storeKinds(loc) : [],
+    inKind = k => storeHolds(loc, k);
   MOV.filter(m => m.loc === loc && m.at >= t0).forEach(m => {
     const a = (agg[m.k] = agg[m.k] || { add: 0, inn: 0, sold: 0, dmg: 0, out: 0, prod: 0 });
     // Added: received, plus stock adjustments (either way). Damages: written off as damaged only.
@@ -29364,7 +30728,9 @@ function mRows() {
           return mk(i.id, i.n, cst(k) * v, i.c, i.p, k, v);
         });
   const moved = r => Math.abs(r.sys) > 1e-9 || r.add || r.inn || r.sold || r.dmg || r.out || r.prod;
-  if (kinds.length) R = R.filter(r => inKind(r.k) || moved(r));
+  // Only what's ticked on the store. Stock held outside that is counted so it can be pointed out, not lost.
+  msOffList = kinds.length ? R.filter(r => !inKind(r.k) && Math.abs(r.sys) > 1e-9).length : 0;
+  if (kinds.length && STKT.offAt !== loc) R = R.filter(r => inKind(r.k));
   if (!STKT.zero)
     R = R.filter(
       r =>
@@ -29541,7 +30907,7 @@ function masterHTML() {
    st,
    "inv_mst"
  )}</div><span class="stm-sw"><label class="sw"><input type="checkbox" data-m="zero" ${STKT.zero ? "checked" : ""}><span>Zero balances</span></label><label class="sw"><input type="checkbox" data-m="issued" ${STKT.issued ? "checked" : ""}><span>Issued only</span></label><label class="sw"><input type="checkbox" data-a="inv_mdetail" ${D ? "checked" : ""}><span>All movements</span></label>${msFold}</span></div>
- <div class="stk stm-note">Stock take for ${placeLabel(loc)} · Shift ${esc(sh)}.${isStore(loc) && storeKinds(loc).length ? ` Lists ${storeKinds(loc).map(esc).join(", ")}, and anything else it holds.` : ""} Type a count, then press Enter for the next item.</div>
+ <div class="stk stm-note">Stock take for ${placeLabel(loc)} · Shift ${esc(sh)}.${isStore(loc) && storeKinds(loc).length ? ` Lists ${storeKinds(loc).map(esc).join(", ")} only.` : ""} Type a count, then press Enter for the next item.</div>${msOffList ? `<div class="status warn stm-off">${plural(msOffList, "item")} outside ${esc(loc)}'s categories still ${msOffList === 1 ? "has" : "have"} stock here. <button class="mini" data-a="inv_moff">${STKT.offAt === loc ? "Hide them" : "Show them"}</button></div>` : ""}
  <div class="tw tall"><table class="t stm-t ${(FINDQ.master || "").trim() ? "stm-find" : ""} ${D ? "stm-wide" : ""}"><thead><tr><th>Item</th><th class="n">Cost</th>${D ? '<th class="n">Sale price</th>' : ""}<th class="n">Opening</th>${D ? '<th class="n">Added</th><th class="n">Production</th><th class="n">Stock in</th><th class="n">Sold</th>' : '<th class="n">In</th><th class="n">Sold</th>'}<th class="n">Damages</th><th class="n">${D ? "Stock out" : "Issued out"}</th><th class="n">System</th><th class="stm-count">Physical</th><th class="n">Variance</th><th>Reason</th></tr></thead>${
    V.length
      ? msBands(V, cols, r => {
@@ -29651,7 +31017,10 @@ function dmgHTML() {
   const F = invF.dm,
     L = recent(["DAMAGE"], 15).filter(m => m.loc === STKT.loc);
   F.loc = STKT.loc;
-  return `<div class="pn"><h4>Record damaged or wasted stock in ${placeLabel(F.loc)}</h4><div class="fr"><label>Item<select data-iv="dm.k">${optK(F.k)}</select></label><label>Quantity<input data-iv="dm.q" type="number" step="any" value="${esc(F.q)}"></label><label>Reason<select data-iv="dm.why">${["Damaged", "Expired", "Spilled", "Spoiled", "Theft or loss", "Other"].map(x => `<option ${F.why === x ? "selected" : ""}>${x}</option>`).join("")}</select></label><button class="chip on" data-a="inv_dmpost">Record damage</button></div></div>
+  // A store lists only its own items, so a choice left over from another store can't stand.
+  if (!pickKeys().some(k => k === F.k && storeHolds(F.loc, k)))
+    F.k = pickKeys().find(k => storeHolds(F.loc, k)) || "";
+  return `<div class="pn"><h4>Record damaged or wasted stock in ${placeLabel(F.loc)}</h4><div class="fr"><label>Item<select data-iv="dm.k">${optK(F.k, F.loc)}</select></label><label>Quantity<input data-iv="dm.q" type="number" step="any" value="${esc(F.q)}"></label><label>Reason<select data-iv="dm.why">${["Damaged", "Expired", "Spilled", "Spoiled", "Theft or loss", "Other"].map(x => `<option ${F.why === x ? "selected" : ""}>${x}</option>`).join("")}</select></label><button class="chip on" data-a="inv_dmpost">Record damage</button></div></div>
  <div class="pn tw"><h4>Recent damages</h4>${tb(
    ["Date", "Location", "Item", "#Quantity", "Reason", "By"],
    L.map(m => [dt2(m.at), m.loc, iN(m.k), fq(-m.q), m.note, m.by]),
@@ -29668,6 +31037,83 @@ function posHTML() {
     return [iN(k), ...LOCS.map(l => fq(have(l, k))), fq(t), m2(cst(k)), m2(v)];
   });
   return `<div class="pn tw"><div class="fr" style="align-items:center;justify-content:space-between"><h4 style="margin:0">Stock position report</h4><span class="fr" style="flex:none;margin:0"><button class="mini xl-btn" style="flex:none" data-a="rep_xlsxpage" data-title="Stock position report" data-like="st_posprint">Export to Excel</button><button class="chip on" style="flex:none" data-a="st_posprint">Print</button></span></div>${tb(["Item", ...LOCS.map(l => "#" + l), "#Total", "#Unit cost", "#Value"], rows, ["Total stock value", ...LOCS.map(() => ""), "", "", m2(val)])}</div>`;
+}
+// ---- what each selling point is holding ----
+invF.sps = { pt: "All", zero: false };
+function spStockRows() {
+  const F = invF.sps,
+    P = salePoints();
+  if (F.pt !== "All" && !P.includes(F.pt)) F.pt = "All";
+  return (F.pt === "All" ? P : [F.pt])
+    .flatMap(p =>
+      pickKeys()
+        .filter(k => F.zero || Math.abs(have(p, k)) > 1e-9)
+        .map(k => {
+          const u = itemInfo(k),
+            q = have(p, k);
+          return {
+            p,
+            k,
+            code: u.code || "-",
+            name: iN(k),
+            grp: u.group || "Other",
+            q,
+            cost: cst(k),
+            value: Math.max(0, q) * cst(k),
+            level: msLevel(k, q)
+          };
+        })
+    )
+    .sort((a, b) => a.p.localeCompare(b.p) || a.name.localeCompare(b.name));
+}
+function spStockTable() {
+  const R = spStockRows();
+  return {
+    title: "Selling point stock",
+    head: `${invF.sps.pt === "All" ? "All selling points" : invF.sps.pt} · as at ${slashDate(todayYmd())} ${hm(new Date())}`,
+    c: [
+      "Selling point",
+      "Code",
+      "Item",
+      "Category",
+      "#Quantity",
+      "#Cost",
+      "#Value (KES)",
+      "Status"
+    ],
+    r: R.map(r => [
+      r.p,
+      r.code,
+      r.name,
+      r.grp,
+      qn(r.q),
+      m2(r.cost),
+      m2(r.value),
+      r.level === "out" ? "Out" : r.level === "low" ? "Low" : "In stock"
+    ]),
+    f: ["Total", "", "", "", "", "", m2(R.reduce((a, r) => a + r.value, 0)), ""]
+  };
+}
+function spStockHTML() {
+  const F = invF.sps,
+    P = salePoints(),
+    R = spStockRows(),
+    low = R.filter(r => r.level !== "in").length,
+    pill = (v, l) =>
+      `<button class="pr-pill ${F.pt === v ? "on" : ""}" data-a="inv_spspt" data-v="${esc(v)}">${esc(l)}</button>`,
+    tools = boCan("rep.print")
+      ? '<span class="inv-btns"><button class="mini xl-btn" data-a="inv_spsxl">Export to Excel</button><button class="chip on" style="flex:none" data-a="inv_spsprint">Print</button></span>'
+      : "";
+  return `<div class="stm-tiles">${msTile("Selling points", F.pt === "All" ? P.length : 1)}${msTile("Items held", new Set(R.filter(r => r.q > 0).map(r => r.k)).size)}${msTile("Value at cost", "KES " + m2(R.reduce((a, r) => a + r.value, 0)))}${msTile("Low or out", low, "", low ? "warn" : "")}</div>
+  <div class="pn" data-findscope><div class="inv-head"><span class="pr-pills">${pill("All", "All")}${P.map(p => pill(p, p)).join("")}</span>${tools}</div>
+  <div class="stm-bar">${findBox("sps", "Search item, code or category")}<label class="sw"><input type="checkbox" data-a="inv_spszero" ${F.zero ? "checked" : ""}><span>Zero balances</span></label></div>
+  <div class="tw tall"><table class="t"><thead><tr><th>Selling point</th><th>Code</th><th>Item</th><th>Category</th><th class="n">Quantity</th><th class="n">Cost</th><th class="n">Value (KES)</th><th></th></tr></thead><tbody>${
+    R.map(
+      r =>
+        `<tr${findAttr("sps", r.code, r.name, r.grp, r.p)}><td>${esc(r.p)}</td><td>${esc(r.code)}</td><td><b>${esc(r.name)}</b></td><td>${esc(r.grp)}</td><td class="n">${qn(r.q)}</td><td class="n">${m2(r.cost)}</td><td class="n">${m2(r.value)}</td><td>${msTag(r.level)}</td></tr>`
+    ).join("") ||
+    '<tr><td colspan="8" class="stm-empty">No stock at these selling points. Tick Zero balances to list every item.</td></tr>'
+  }</tbody></table></div></div>`;
 }
 // ---- stores ----
 const storeValue = l => Object.keys(ING).reduce((a, k) => a + Math.max(0, have(l, k)) * cst(k), 0);
@@ -29960,6 +31406,7 @@ function invView() {
     issue: issHTML,
     damage: dmgHTML,
     position: posHTML,
+    spstock: spStockHTML,
     riss: () => invReportHTML("iss"),
     rdmg: () => invReportHTML("dmg"),
     variance: varHTML, // stock-take-report.js
@@ -29968,7 +31415,7 @@ function invView() {
     appr: apView // approvals.js
   };
   if (!isStore(STKT.loc)) STKT.loc = STORES[0]; // Inventory works on stores only
-  if (!tabAllowed(invT) || !B[invT])
+  if (invT !== "home" && (!tabAllowed(invT) || !B[invT]))
     invT = tabAllowed("master")
       ? "master"
       : RAIL.filter(x => x !== "-" && B[x[0]] && tabAllowed(x[0]))[0][0]; // e.g. LPO / purchases now live in Purchasing
@@ -29981,8 +31428,9 @@ function invView() {
     apModalIfOpen() +
     storeModal() +
     storeDeleteModal();
+  if (invT === "home") return invHomeHTML(popups);
   const [title, what] = INV_PAGES[invT] || ["Inventory", ""];
-  return `<div class="inv invx"><nav class="inv-rail">${rail()}</nav><div class="inv-main"><div class="inv-title"><h1>${title}</h1><p>${what}</p></div>${INV_NO_STORE.includes(invT) ? "" : strip()}${(B[invT] || masterHTML)()}${popups}</div></div>`;
+  return `<div class="inv invx inv-solo"><div class="inv-main">${invMenu()}<div class="inv-title"><h1>${title}</h1><p>${what}</p></div>${INV_NO_STORE.includes(invT) ? "" : strip()}${(B[invT] || masterHTML)()}${popups}</div></div>`;
 }
 V.inv = invView;
 function updMaster() {
@@ -30595,6 +32043,34 @@ function invAct(a, b) {
   if (a === "stall" || a === "stnone") {
     document.querySelectorAll("#stEd [data-stk]").forEach(x => (x.checked = a === "stall"));
     return;
+  }
+  if (a === "spspt") {
+    invF.sps.pt = d.v;
+    return all();
+  }
+  if (a === "spszero") {
+    invF.sps.zero = b.checked;
+    return all();
+  }
+  if (a === "spsprint" || a === "spsxl") {
+    if (!boCan("rep.print")) return boDenied();
+    const T = spStockTable();
+    if (!T.r.length) return toast("There is nothing to print here.");
+    if (a === "spsprint") return tablePrint(T.title, T.head, T.c, T.r, T.f);
+    return XLSX.download(
+      {
+        company: FD_SETTINGS.name,
+        title: T.title,
+        head: T.head,
+        by: xlsxBy(),
+        sections: [{ t: T.title, c: T.c, r: T.r, f: T.f }]
+      },
+      `${T.title}_${todayYmd()}`
+    );
+  }
+  if (a === "moff") {
+    STKT.offAt = STKT.offAt === STKT.loc ? "" : STKT.loc;
+    return all();
   }
   if (a === "loc") {
     STKT.all = false;
@@ -31443,7 +32919,7 @@ const ST_CSS = `.st-doc{position:relative;background:#fff;color:#241b12;border-r
 .st-doc .st-grp{border-collapse:collapse;margin-top:14px;min-width:60%}
 .st-doc .st-grp th{padding:6px 8px;font-size:10.5px;text-align:left;color:#fff;background:#241b12}
 .st-doc .st-grp td{padding:5px 8px;border-bottom:1px solid #e8e0d0}
-.st-doc .st-t tbody .st-tot td,.st-doc .st-grp .st-tot td,.st-doc .st-t tfoot td{font-weight:700;color:#fff;background:#241b12;border:0}
+.st-doc .st-t tbody tr.st-tot td,.st-doc .st-t tbody tr.st-tot:nth-child(even) td,.st-doc .st-grp .st-tot td,.st-doc .st-t tfoot td{font-weight:700;color:#fff;background:#241b12;border:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .st-doc .st-sig{display:grid;grid-template-columns:repeat(3,1fr);gap:36px;margin-top:46px;break-inside:avoid}
 .st-doc .st-sig div{border-top:1px solid #241b12;padding-top:5px;font-size:11px}
 .st-doc .st-foot{margin-top:16px;padding-top:6px;border-top:1px solid #d9cdb8;font-size:10px;color:#6b6358;display:flex;justify-content:space-between;gap:16px}
@@ -31470,7 +32946,7 @@ function stPrint(title, html, page = "A4 landscape") {
   const w = window.open("", "_blank");
   if (!w) return toast("Allow pop-ups to print.");
   w.document.write(
-    `<!DOCTYPE html><html><head><title>${esc(title)}</title><style>body{margin:0}${ST_CSS}.st-doc{padding:0}@page{size:${page};margin:10mm}</style></head><body>${stDress(html)}<\/body><\/html>` // "<\/" so tools scanning the page for </body> don't stop here
+    `<!DOCTYPE html><html><head><title>${esc(title)}</title><style>body{margin:0}${ST_CSS}.st-doc{padding:0}@page{size:${page};margin:10mm}${a4Screen(/landscape/.test(page))}</style></head><body>${stDress(html)}<\/body><\/html>` // "<\/" so tools scanning the page for </body> don't stop here
   );
   w.document.close();
   w.focus();
@@ -32382,8 +33858,10 @@ function rcPost() {
 // ---- Purchasing: purchase orders (LPO), receiving goods (GRN) and the purchases report ----
 // Everything about buying lives here; Inventory controls the stock once it is in a store.
 // Vendors, statements and payments have their own page (People → Vendors, vendors.js).
-let purT = "lpo";
+let purT = "home",
+  purKeep = false; // on the way to one screen, so Purchasing shouldn't reopen on the overview
 const PUR_TABS = [
+  ["home", "Overview", "home"],
   ["lpo", "Purchase orders", "truck"],
   ["receive", "Receive goods", "dl"],
   ["ret", "Returns to supplier", "swap"],
@@ -32406,10 +33884,116 @@ const PUR_PAGES = {
   ],
   rpur: ["Purchases report", "Everything received, for the dates you choose."]
 };
+const purGrnDay = g => String(g.date || (g.at ? ymdOf(new Date(g.at)) : ""));
+/** The overview: figures, the four things people come here to do, then every part of Purchasing. */
+function purHomeHTML(popups) {
+  const ok = t => boTabOk("pur", t),
+    vn = boCan("vn.view"),
+    today = todayYmd(),
+    open = LPOS.filter(p => p.status === "Open" || p.status === "Partly received"),
+    late = open.filter(p => p.due && p.due < today).length,
+    month = GRNS.filter(g => purGrnDay(g).slice(0, 7) === today.slice(0, 7)),
+    owed = sum(VENDORS, v => Math.max(0, vendorBalance(v))),
+    owing = VENDORS.filter(v => vendorBalance(v) > 0.009).length,
+    plural2 = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`,
+    tile = (ic, l, v, s, go) =>
+      `<${go ? `button ${go}` : "div"} class="ph-t"><span class="ph-i">${I(ic)}</span><span class="ph-l">${l}</span><b>${v}</b><small>${s}</small></${go ? "button" : "div"}>`,
+    quick = (ic, l, a) =>
+      `<button class="ph-q" ${a}><span class="ph-i">${I(ic)}</span>${l}</button>`,
+    card = (ic, t, s, meta, a) =>
+      `<button class="ph-c" ${a}><span class="ph-i">${I(ic)}</span><span class="ph-b"><b>${t}</b><span>${s}</span>${meta ? `<em>${meta}</em>` : ""}</span><span class="ph-ch">${I("chev")}</span></button>`,
+    tab = t => `data-a="pur_tab" data-t="${t}"`,
+    vend = t => `data-a="pur_vend" data-t="${t}"`,
+    tiles = [
+      ok("lpo") &&
+        tile(
+          "truck",
+          "Open orders",
+          open.length,
+          late ? `${late} past due` : "Waiting for delivery",
+          tab("lpo")
+        ),
+      ok("receive") &&
+        tile(
+          "dl",
+          "Received this month",
+          month.length,
+          plural2(month.length, "delivery").replace("deliverys", "deliveries"),
+          tab("receive")
+        ),
+      vn &&
+        tile(
+          "wal",
+          "Owed to suppliers",
+          "KES " + m2(owed),
+          plural2(owing, "supplier") + " to pay",
+          vend("pay")
+        ),
+      vn && tile("users", "Suppliers", VENDORS.length, "On your list", vend("list"))
+    ].filter(Boolean),
+    quicks = [
+      ok("lpo") && quick("plus", "New order", tab("lpo")),
+      ok("receive") && quick("dl", "Receive stock", tab("receive")),
+      vn && quick("users", "New supplier", 'data-a="inv_vnopen"'),
+      vn && quick("wal", "Pay supplier", vend("pay"))
+    ].filter(Boolean),
+    cards = [
+      ok("lpo") &&
+        card(
+          "truck",
+          "Purchase orders",
+          "Raise and track orders to your suppliers",
+          open.length ? `${open.length} open` : "",
+          tab("lpo")
+        ),
+      ok("receive") &&
+        card(
+          "dl",
+          "Goods received (GRN)",
+          "Record what came in, with or without an order",
+          "",
+          tab("receive")
+        ),
+      ok("ret") &&
+        card(
+          "swap",
+          "Returns to supplier",
+          "Send goods back and print the return note",
+          "",
+          tab("ret")
+        ),
+      ok("rpur") &&
+        card(
+          "chart",
+          "Purchases report",
+          "Everything received, for the dates you choose",
+          "",
+          tab("rpur")
+        ),
+      vn &&
+        card(
+          "users",
+          "Suppliers",
+          "Your supplier list, contacts and payment terms",
+          "",
+          vend("list")
+        ),
+      vn &&
+        card(
+          "book",
+          "Statements and payments",
+          "What each supplier is owed, and what you've paid",
+          owing ? `KES ${m2(owed)} owed` : "",
+          vend("stmt")
+        )
+    ].filter(Boolean);
+  return `<div class="ph"><div class="ph-h"><h1>Purchases</h1><p>Orders, deliveries, returns and suppliers, all in one place.</p></div><div class="ph-ts">${tiles.join("")}</div><div class="ph-qs">${quicks.join("")}</div><div class="ph-cs">${cards.join("")}</div>${popups}</div>`;
+}
 function purchasingView() {
   if (!isStore(STKT.loc)) STKT.loc = STORES[0];
   if (!PUR_TABS.some(([t]) => t === purT) || !boTabOk("pur", purT))
     purT = PUR_TABS.map(([t]) => t).find(t => boTabOk("pur", t));
+  if (purT === "home") return purHomeHTML(vendorPopupIfOpen());
   const openN = LPOS.filter(p => p.status === "Open" || p.status === "Partly received").length,
     body =
       purT === "ret"
@@ -32421,14 +34005,16 @@ function purchasingView() {
             : storeBar("Purchase orders for") + lpoHTML(),
     popups = itemPopupIfOpen() + vendorPopupIfOpen() + apModalIfOpen();
   const [title, what] = PUR_PAGES[purT];
-  return `<div class="inv invx"><nav class="inv-rail">${PUR_TABS.filter(([t]) => boTabOk("pur", t))
+  return `<div class="inv invx inv-solo"><div class="inv-main"><nav class="ph-tabs" aria-label="Purchasing">${PUR_TABS.filter(
+    ([t]) => boTabOk("pur", t)
+  )
     .map(
       ([t, l, ic]) =>
-        `<button class="ir ${t === purT ? "on" : ""}" data-a="pur_tab" data-t="${t}">${I(ic)}<span>${l}</span>${t === "lpo" && openN ? `<b>${openN}</b>` : ""}</button>`
+        `<button class="${t === purT ? "on" : ""}" data-a="pur_tab" data-t="${t}" ${t === purT ? 'aria-current="page"' : ""}>${I(ic)}<span>${l}</span>${t === "lpo" && openN ? `<b>${openN}</b>` : ""}</button>`
     )
     .join(
       ""
-    )}</nav><div class="inv-main"><div class="inv-title"><h1>${title}</h1><p>${what}</p></div>${body}${popups}</div></div>`;
+    )}</nav><div class="inv-title"><h1>${title}</h1><p>${what}</p></div>${body}${popups}</div></div>`;
 }
 
 /** Compact store chooser (Purchasing doesn't need Inventory's stock cards). */
@@ -32441,6 +34027,11 @@ function purAct(a, b) {
     purT = d.t;
     invF.vn.open = false;
     return all();
+  }
+  if (a === "vend") {
+    vnT = d.t;
+    vnKeep = true;
+    return go("Vendors");
   }
   if (a === "rclpo") {
     // "Open in GRN" on a purchase order: receive it on the Goods Received Note
@@ -32456,6 +34047,7 @@ function purAct(a, b) {
     R.mode = "sp";
     R.sp = d.o;
     purT = "receive";
+    purKeep = true;
     return go("Purchasing");
   }
   if (a === "go") {
@@ -32468,6 +34060,7 @@ function purAct(a, b) {
       if (R.mode === "lpo") Object.assign(R, { lines: [], lpo: null, lpoPick: "", sup: "" });
       R.mode = "direct";
     }
+    purKeep = true;
     return go("Purchasing");
   }
 }
@@ -32477,8 +34070,10 @@ V.pur = purchasingView;
 // A statement shows what the business owes a vendor: goods received (GRNs) are credits, payments are
 // debits, balance = opening + credits − debits. Vendor setup itself lives in receive.js (shared with
 // the quick-add popup on purchase orders and the GRN).
-let vnT = "list";
+let vnT = "home",
+  vnKeep = false; // on the way to one screen, so Vendors shouldn't reopen on the overview
 const VN_TABS = [
+  ["home", "Overview", "home"],
   ["list", "Vendor list", "users"],
   ["stmt", "Statement", "book"],
   ["pay", "Payments made", "wal"]
@@ -32693,7 +34288,7 @@ function vsPrint(v, from, to) {
   const w = window.open("", "_blank");
   if (!w) return toast("Allow pop-ups to print the statement.");
   w.document.write(
-    `<!DOCTYPE html><html><head><title>${vsNo(v, to)}</title><style>body{margin:24px}${VS_CSS}.vs-doc{padding:0}@page{size:A4;margin:12mm}</style></head><body>${vsDocHTML(v, from, to)}<\/body><\/html>` // "<\/" so tools scanning the page for </body> don't stop here
+    `<!DOCTYPE html><html><head><title>${vsNo(v, to)}</title><style>body{margin:24px}${VS_CSS}.vs-doc{padding:0}@page{size:A4;margin:12mm}${a4Screen(false)}</style></head><body>${vsDocHTML(v, from, to)}<\/body><\/html>` // "<\/" so tools scanning the page for </body> don't stop here
   );
   w.document.close();
   w.focus();
@@ -32710,10 +34305,96 @@ const VN_PAGES = {
   ],
   pay: ["Vendor payments", "Record a payment to a vendor, and see what's already been paid."]
 };
+/** The overview: figures, the things people come here to do, then every part of Vendors. */
+function vnHomeHTML() {
+  const today = todayYmd(),
+    money = VENDORS.map(v => ({
+      v,
+      bal: vendorBalance(v),
+      S: vendorStatement(v, "0000-01-01", today)
+    })),
+    owed = sum(money, x => Math.max(0, x.bal)),
+    owing = money.filter(x => x.bal > 0.009).length,
+    late = sum(money, x => x.S.overdue),
+    lateN = money.filter(x => x.S.overdue > 0.009).length,
+    paid = VPAYS.filter(p => ymdOf(new Date(p.at)).slice(0, 7) === today.slice(0, 7)),
+    ok = t => boTabOk("vn", t),
+    tile = (ic, l, v, s, a, warn) =>
+      `<button class="ph-t ${warn ? "ph-warn" : ""}" ${a}><span class="ph-i">${I(ic)}</span><span class="ph-l">${l}</span><b>${v}</b><small>${s}</small></button>`,
+    quick = (ic, l, a) =>
+      `<button class="ph-q" ${a}><span class="ph-i">${I(ic)}</span>${l}</button>`,
+    card = (ic, t, s, meta, a) =>
+      `<button class="ph-c" ${a}><span class="ph-i">${I(ic)}</span><span class="ph-b"><b>${t}</b><span>${s}</span>${meta ? `<em>${meta}</em>` : ""}</span><span class="ph-ch">${I("chev")}</span></button>`,
+    tab = t => `data-a="vs_tab" data-t="${t}"`,
+    many = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`,
+    tiles = [
+      ok("list") && tile("users", "Suppliers", VENDORS.length, "On your list", tab("list")),
+      ok("stmt") &&
+        tile(
+          "wal",
+          "Owed to suppliers",
+          "KES " + m2(owed),
+          many(owing, "supplier") + " to pay",
+          tab("stmt")
+        ),
+      ok("stmt") &&
+        tile(
+          "alert",
+          "Past their terms",
+          "KES " + m2(late),
+          lateN ? many(lateN, "supplier") + " overdue" : "Nothing overdue",
+          tab("stmt"),
+          lateN > 0
+        ),
+      ok("pay") &&
+        tile(
+          "book",
+          "Paid this month",
+          "KES " + m2(sum(paid, p => p.amt)),
+          many(paid.length, "payment"),
+          tab("pay")
+        )
+    ].filter(Boolean),
+    quicks = [
+      ok("list") && quick("plus", "New supplier", 'data-a="vs_new"'),
+      ok("pay") && quick("wal", "Record payment", 'data-a="vs_paynow"'),
+      ok("stmt") && quick("book", "View statement", tab("stmt")),
+      boTabOk("pur", "lpo") &&
+        quick("truck", "New order", `data-a="pur_go" data-l="${esc(STKT.loc)}" data-t="lpo"`)
+    ].filter(Boolean),
+    cards = [
+      ok("list") &&
+        card(
+          "users",
+          "Supplier list",
+          "Your suppliers, contacts and payment terms",
+          VENDORS.length ? many(VENDORS.length, "supplier") : "",
+          tab("list")
+        ),
+      ok("stmt") &&
+        card(
+          "book",
+          "Statements",
+          "What was bought from a supplier and what was paid",
+          owing ? `KES ${m2(owed)} owed` : "",
+          tab("stmt")
+        ),
+      ok("pay") &&
+        card(
+          "wal",
+          "Payments made",
+          "Record a payment and see what's already been paid",
+          paid.length ? `${many(paid.length, "payment")} this month` : "",
+          tab("pay")
+        )
+    ].filter(Boolean);
+  return `<div class="ph"><div class="ph-h"><h1>Suppliers</h1><p>Your suppliers, what you owe them and what you've paid.</p></div><div class="ph-ts">${tiles.join("")}</div><div class="ph-qs">${quicks.join("")}</div><div class="ph-cs">${cards.join("")}</div></div>`;
+}
 function vendorsView() {
-  if (!boTabOk("vn", vnT)) vnT = "list";
+  if (!VN_TABS.some(([t]) => t === vnT) || !boTabOk("vn", vnT)) vnT = "home";
   invF.vn.open = false; // the vendor form is on the page itself
   if (!VENDORS.some(v => v.id === invF.vs.vendor)) invF.vs.vendor = VENDORS[0] ? VENDORS[0].id : "";
+  if (vnT === "home") return vnHomeHTML();
   const body =
     vnT === "list"
       ? `${
@@ -32727,14 +34408,16 @@ function vendorsView() {
           ? vsStatementHTML()
           : vsPaymentsHTML();
   const [title, what] = VN_PAGES[vnT];
-  return `<div class="inv invx"><nav class="inv-rail">${VN_TABS.filter(([t]) => boTabOk("vn", t))
+  return `<div class="inv invx inv-solo"><div class="inv-main"><nav class="ph-tabs" aria-label="Vendors">${VN_TABS.filter(
+    ([t]) => boTabOk("vn", t)
+  )
     .map(
       ([t, l, ic]) =>
-        `<button class="ir ${t === vnT ? "on" : ""}" data-a="vs_tab" data-t="${t}">${I(ic)}<span>${l}</span></button>`
+        `<button class="${t === vnT ? "on" : ""}" data-a="vs_tab" data-t="${t}" ${t === vnT ? 'aria-current="page"' : ""}>${I(ic)}<span>${l}</span></button>`
     )
     .join(
       ""
-    )}</nav><div class="inv-main"><div class="inv-title"><h1>${title}</h1><p>${what}</p></div>${body}</div></div>`;
+    )}</nav><div class="inv-title"><h1>${title}</h1><p>${what}</p></div>${body}</div></div>`;
 }
 
 const vsVendorSelect = () =>
@@ -32855,10 +34538,18 @@ function vsAct(a, b) {
     vnT = d.t;
     return all();
   }
+  if (a === "new") {
+    vnT = "list";
+    vnPageNew = true;
+    all();
+    const n = $("#vnName");
+    return n && n.focus();
+  }
   if (a === "open") {
     // "Statement" on a row of the vendor list (also from the vendor popup in Purchasing)
     F.vendor = d.id;
     vnT = "stmt";
+    vnKeep = true;
     return go("Vendors");
   }
   if (a === "rng") {
@@ -32904,7 +34595,7 @@ V.vendors = vendorsView;
 // Requisition:  "Awaiting approval" → approving it moves the stock. Whatever the store is short of stays open.
 // Issue:        anyone with the approve right issues straight away. Anyone else raises a note (ISSUES),
 //               and the stock moves when a manager approves that. One approval per movement, never two.
-// A manager approves by typing their PIN (Waiter setup). Each decision keeps who, when and why.
+// Who may approve is set in Users & roles (the inv.approve right). Each decision keeps who, when and why.
 const AWAIT = "Awaiting approval";
 let apM = null; // approval popup: { kind: "lpo" | "req" | "iss", id, act: "approve" | "reject" }
 
@@ -32927,7 +34618,7 @@ const apPending = () =>
 const apCount = () => apPending().length;
 /** Approve / Reject buttons for a document waiting for approval. */
 const apButtons = (kind, d) =>
-  d.status === AWAIT
+  d.status === AWAIT && boCan("inv.approve")
     ? `<button class="chip on" data-a="ap_open" data-k="${kind}" data-id="${esc(d.id)}" data-act="approve">Approve</button><button class="mini" data-a="ap_open" data-k="${kind}" data-id="${esc(d.id)}" data-act="reject">Reject</button>`
     : "";
 /** "Approved by Peter Mwangi · 31 Oct 10:20" / "Rejected by … : reason". */
@@ -33069,20 +34760,15 @@ const apTitle = (kind, d) =>
 function apModalIfOpen() {
   const d = apM && apFind(apM.kind, apM.id);
   if (!d || d.status !== AWAIT) return "";
-  const rej = apM.act === "reject",
-    mgrs = USERS.filter(u => u.role === "Manager");
+  const rej = apM.act === "reject";
   return `<div class="modal show" id="apModal" style="z-index:75"><div class="box" style="max-width:720px">
   <div class="fr" style="align-items:center;justify-content:space-between"><h3>${rej ? "Reject" : "Approve"} ${AP_KIND[apM.kind].toLowerCase()}</h3><button class="mini" data-a="ap_close" aria-label="Close">✕</button></div>
   <div class="stk"><b>${apTitle(apM.kind, d)}</b> · raised by ${esc(d.by)} · ${dt2(d.at)}${d.note ? " · " + esc(d.note) : ""}</div>
   <div class="tw"><table class="t">${apDocLines(apM.kind, d)}</table></div>
   ${rej ? `<label>Reason<input id="apWhy" placeholder="Why is it rejected?"></label>` : ""}
-  ${
-    mgrs.length
-      ? `<label>Manager PIN<input id="apPin" type="password" inputmode="numeric" autocomplete="off" placeholder="${mgrs.length} manager(s) can ${rej ? "reject" : "approve"}"></label>`
-      : '<div class="stk" style="color:var(--bad)">No manager can approve yet. Give a staff member the Manager role under Waiter setup.</div>'
-  }
+  <div class="stk">${rej ? "Rejecting" : "Approving"} as <b>${esc(boUser.n)}</b>.</div>
   <div class="stk">${apM.kind === "ret" && !rej ? "Approving takes the stock out now and reduces what's owed to the supplier." : apM.kind === "iss" && !rej ? "Approving moves the stock now." : apM.kind === "lpo" && !rej ? "Once approved the order can be received." : apM.kind === "req" && !rej ? "Once approved the store can issue it." : ""}</div>
-  <div class="fr" style="justify-content:flex-end"><button class="mini" data-a="ap_close">Cancel</button><button class="chip on" data-a="ap_ok" ${mgrs.length ? "" : "disabled"}>${rej ? "Reject" : "Approve"}</button></div>
+  <div class="fr" style="justify-content:flex-end"><button class="mini" data-a="ap_close">Cancel</button><button class="chip on" data-a="ap_ok">${rej ? "Reject" : "Approve"}</button></div>
  </div></div>`;
 }
 
@@ -33237,15 +34923,13 @@ function apAct(a, b) {
   }
   if (a === "ok") {
     const doc = apM && apFind(apM.kind, apM.id),
-      pin = ($("#apPin") || {}).value || "",
       why = (($("#apWhy") || {}).value || "").trim(),
-      mgr = USERS.find(u => u.role === "Manager" && u.pin === pin);
+      mgr = { n: boUser.n }; // the right is checked before any button action runs (ACT_RIGHTS)
     if (!doc || doc.status !== AWAIT) {
       apM = null;
       return all();
     }
     if (apM.act === "reject" && !why) return toast("Enter the reason for rejecting.");
-    if (!mgr) return toast("That is not a manager's PIN.");
     const kind = apM.kind;
     let extra = "";
     if (apM.act === "reject") apReject(kind, doc, mgr.n, why);
@@ -33509,6 +35193,7 @@ function itemSpDone(k, sp, F, units, price, msg) {
     R.eQty = want ? String(units / itemInfo(k).perBuy) : "";
     if (want && R.eUnits !== "buy") R.eQty = String(units);
     purT = "receive";
+    purKeep = true;
     toast(msg + ` Receive it into ${F.store} now.`);
     return go("Purchasing");
   }
@@ -33589,6 +35274,7 @@ function spDetail(o) {
         .join(", "),
     subs = [
       ...(mat ? [] : [["prod", `Products (${prods.length})`]]),
+      ...(mat ? [] : [["cats", "Categories"]]),
       ["stock", "Request stock"],
       ["move", "Transfer stock"],
       ["count", "Stock take"],
@@ -33621,6 +35307,7 @@ function spDetail(o) {
                 .join("")}</table>`
             : '<div class="empty">No products yet. Add one above and it appears on this POS at once.</div>'
         }</div>`,
+      cats: () => spCatsPanel(o),
       stock: () => spRequestPanel(o, keys) + spRequisitions(o),
       move: () => spTransferPanel(o),
       count: () => spCountPanel(o, keys, held),
@@ -33635,6 +35322,71 @@ function spDetail(o) {
   return `<div id="spDetail"><button class="sp-back" data-a="sp_close">← All selling points</button>
   <div class="pn sp-hero"><div><h3>${esc(o)}</h3><p>${esc(info.type)} · gets stock from ${esc(info.store)}</p></div><div class="sp-kpis">${mat ? "" : kpi("Products", prods.length)}${kpi("Items in stock", spInStock(o))}${mat ? "" : kpi("Sales today (KES)", m2(spToday(o))) + kpi("Staff", spStaff(o))}</div></div>
   ${spTabs(subs, spSub, "sp_sub")}${mat && spSub === "stock" ? '<div class="stk sp-note">A materials store holds ingredients for the kitchen. Nothing is sold here; use them under Recipes &amp; Production.</div>' : ""}${panels[spSub]()}</div>`;
+}
+
+// ---- categories at one selling point: hide them from its POS, or move them to another ----
+const spCatList = o =>
+  [...new Set(ITEMS.filter(i => i.d === o).map(i => i.c))].sort((a, b) => a.localeCompare(b));
+function spCatsPanel(o) {
+  const L = spCatList(o),
+    to = ALLD.filter(x => posSells(x) && x !== o),
+    edit = boCan("sp.manage");
+  return `<div class="pn tw"><div class="sp-head"><div><h4>Categories at ${esc(o)}</h4><p>Hide a category to take it off this POS without deleting anything, or move it and its products to another selling point.</p></div></div>${
+    L.length
+      ? `<table class="t sp-cats"><thead><tr><th>Category</th><th class="n">Products</th><th>On this POS</th><th>Move to</th></tr></thead><tbody>${L.map(
+          c => {
+            const off = catOffAt(o, c),
+              n = ITEMS.filter(i => i.d === o && i.c === c).length;
+            return `<tr class="${off ? "off" : ""}"><td><b>${esc(c)}</b></td><td class="n">${n}</td><td><label class="sp-show"><input type="checkbox" data-a="sp_catoff" data-c="${esc(c)}" ${off ? "" : "checked"} ${edit ? "" : "disabled"}><span>${off ? "Hidden" : "Showing"}</span></label></td><td>${
+              to.length && edit
+                ? `<span class="sp-mv"><select aria-label="Move ${esc(c)} to">${opts(to, to[0])}</select><button class="mini" data-a="sp_catmove" data-c="${esc(c)}">Move</button></span>`
+                : "-"
+            }</td></tr>`;
+          }
+        ).join("")}</tbody></table>`
+      : '<div class="empty">No products here yet, so there are no categories.</div>'
+  }</div>`;
+}
+function spCatToggle(o, c) {
+  const off = FD_SETTINGS.catOff || (FD_SETTINGS.catOff = {}),
+    L = off[o] || (off[o] = []),
+    at = L.indexOf(c);
+  if (at < 0) L.push(c);
+  else L.splice(at, 1);
+  auditAdd("Selling point", `${c} ${at < 0 ? "hidden from" : "shown again on"} the ${o} POS`);
+  spRefreshPos();
+  bosave();
+  toast(at < 0 ? `${c} is hidden at ${o}.` : `${c} shows at ${o} again.`);
+  all();
+}
+/** Why this category can't move, or "". */
+function spCatMoveBlock(c, o, to) {
+  const L = ITEMS.filter(i => i.d === o && i.c === c),
+    billed = L.find(i => prOnBill(i.id)),
+    twin = L.find(i => ITEMS.some(x => x.d === to && x.n.toLowerCase() === i.n.toLowerCase()));
+  if (billed) return `${billed.n} is on an open bill. Settle it first.`;
+  if (twin) return `${to} already sells ${twin.n}. Rename or delete one of them first.`;
+  return "";
+}
+function spCatMove(c, o, to) {
+  const L = ITEMS.filter(i => i.d === o && i.c === c),
+    off = FD_SETTINGS.catOff || {};
+  L.forEach(i => {
+    i.d = to;
+    if (i.from === to) delete i.from;
+  });
+  [o, to].forEach(p => {
+    if (off[p]) off[p] = off[p].filter(x => x !== c);
+  });
+  const empty = L.filter(i => Object.keys(i.r || {}).length && avail(i) <= 0).length;
+  auditAdd("Selling point", `${c} moved from ${o} to ${to} (${L.length} products)`);
+  spRefreshPos();
+  bosave();
+  toast(
+    `${c} moved to ${to}.` +
+      (empty ? ` ${empty} of its products need stock issued to ${to} before they can sell.` : "")
+  );
+  all();
 }
 
 // ---- requesting stock (requisition): the selling point asks; the store issues it in Inventory ----
@@ -33862,6 +35614,15 @@ function spAct(a, b) {
     toast(name + " created. It is on the POS now; add its products here.");
     all();
     return $("#spPage").scrollIntoView();
+  }
+  if (a === "catoff") return spCatToggle(spSel, d.c);
+  if (a === "catmove") {
+    const to = b.previousElementSibling.value,
+      why = spCatMoveBlock(d.c, spSel, to);
+    if (why) return toast(why);
+    const o = spSel,
+      c = d.c;
+    return tapConfirm(b, () => spCatMove(c, o, to), `Move ${c} to ${to}?`);
   }
   if (a === "open") {
     spSel = d.o;
@@ -34125,6 +35886,10 @@ function speModal() {
   const keys = itemsByName(),
     S = F.way === "store" ? keys : [],
     pairs = speProdPairs(),
+    makeIt =
+      !Object.keys(i.r).length && boCan("rec.view") && boCan("rec.prod")
+        ? `<button class="mini" data-a="rec_dirp" data-id="${i.id}">Make ${esc(i.n)} under Production</button>`
+        : "",
     ways = [
       ["store", "Store stock", "Issued from a store to here"],
       ["prod", "Production", "Deducts from production balances"],
@@ -34162,8 +35927,8 @@ function speModal() {
       ? `<div class="itm-g itm-gn">
      <label>Finished item<select data-iv="spe.pk">${pairs.map(p => `<option value="${esc(p.k + "|" + p.loc)}" ${p.k + "|" + p.loc === F.pk ? "selected" : ""}>${esc(itemInfo(p.k).name)} · ${esc(p.loc)} · ${qtyAt(p.loc, p.k)}</option>`).join("")}</select></label>
      <label>One sale uses<input data-iv="spe.per" type="number" min="0" step="any" value="${esc(F.per)}"></label>
-    </div>`
-      : '<div class="itm-hint">No production yet. Run one under Recipes &amp; Production first.</div>';
+    </div>${makeIt ? `<div class="itm-hint">Not made yet? ${makeIt}</div>` : ""}`
+      : `<div class="itm-hint">No production yet. ${makeIt || "Run one under Recipes &amp; Production first."}</div>`;
   else
     source = `<div class="itm-g itm-gn">
      <label>Copy ingredients from<select data-iv="spe.copy"><option value="">Keep these ingredients</option>${recipeList()
@@ -34357,7 +36122,7 @@ V.outlets = outletsView;
 //              materials becomes the cost of the batch; the items go to a selling point's stock.
 //  Recipe:     a product whose ingredients leave the materials store each time it is sold,
 //              e.g. 0.25 kg flour + 0.1 L oil per portion (ITEMS entry with r + from, see itemLoc).
-let recT = "overview";
+let recT = "home";
 const REC_TABS = [
   ["h", "Kitchen"],
   ["overview", "Kitchen materials", "box"],
@@ -34366,7 +36131,8 @@ const REC_TABS = [
   ["h", "Reports"],
   ["pbal", "Production balances", "chart"],
   ["allp", "All products", "box"],
-  ["log", "Production log", "chart"]
+  ["log", "Production log", "chart"],
+  ["report", "Recipe & Production Report", "chart"]
 ];
 const prBlank = () => ({
   from: "",
@@ -34458,33 +36224,73 @@ const REC_PAGES = {
   allp: [
     "All products in selling points",
     "Opening, added, sold and what remains of everything on sale."
+  ],
+  report: [
+    "Recipe & Production Report",
+    "What each kitchen material was used for and what remains, for the dates you choose."
   ]
 };
 let recNewOn = false;
-function recRail() {
-  const L = REC_TABS.filter(([t]) => t === "h" || boTabOk("rec", t));
-  return L.filter(([t], i) => t !== "h" || (L[i + 1] && L[i + 1][0] !== "h"))
-    .map(([t, l, ic]) =>
-      t === "h"
-        ? `<div class="rhd">${l}</div>`
-        : `<button class="ir ${t === recT ? "on" : ""}" data-a="rec_tab" data-t="${t}">${I(ic)}<span>${l}</span></button>`
+const recGroups = () => {
+  const G = [];
+  REC_TABS.forEach(x => {
+    if (x[0] === "h") G.push({ name: x[1], tabs: [] });
+    else if (boTabOk("rec", x[0])) G[G.length - 1].tabs.push(x);
+  });
+  return G.filter(g => g.tabs.length);
+};
+/** The overview: figures, the things people come here to do, then every screen by group. */
+function recHomeHTML() {
+  const M = materialStores(),
+    today = todayYmd(),
+    runs = PRODS.filter(x => ymdOf(new Date(x.at)).slice(0, 7) === today.slice(0, 7)),
+    recipes = recipeList().length,
+    value = sum(M, storeValue),
+    toAccept = ISSUES.filter(x => M.includes(x.to) && x.status === AWAIT).length,
+    ok = t => boTabOk("rec", t),
+    many = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`,
+    tab = t => `data-a="rec_tab" data-t="${t}"`,
+    tile = (ic, l, v, s, t, warn) =>
+      `<${ok(t) ? `button ${tab(t)}` : "div"} class="ph-t ${warn ? "ph-warn" : ""}"><span class="ph-i">${I(ic)}</span><span class="ph-l">${l}</span><b>${v}</b><small>${s}</small></${ok(t) ? "button" : "div"}>`,
+    quick = (ic, l, t, a) =>
+      ok(t)
+        ? `<button class="ph-q" ${a || tab(t)}><span class="ph-i">${I(ic)}</span>${l}</button>`
+        : "",
+    card = x => {
+      const meta =
+        x[0] === "recipes" && recipes
+          ? many(recipes, "recipe")
+          : x[0] === "prod" && runs.length
+            ? `${many(runs.length, "run")} this month`
+            : x[0] === "overview" && toAccept
+              ? `${toAccept} waiting`
+              : "";
+      return `<button class="ph-c" ${tab(x[0])}><span class="ph-i">${I(x[2])}</span><span class="ph-b"><b>${x[1]}</b><span>${REC_PAGES[x[0]][1]}</span>${meta ? `<em>${meta}</em>` : ""}</span><span class="ph-ch">${I("chev")}</span></button>`;
+    };
+  return `<div class="ph"><div class="ph-h"><h1>Recipes &amp; Production</h1><p>Kitchen materials, what you make from them, and what it all costs.</p></div><div class="ph-ts">${tile("box", "Kitchen materials", "KES " + m2(value), `Held in ${many(M.length, "materials store")}`, "overview")}${tile("book", "Recipes", recipes, "Taking ingredients off stock", "recipes")}${tile("chef", "Production this month", runs.length, many(runs.length, "run"), "prod")}${tile("alert", "Waiting to accept", toAccept, toAccept ? "Issued to the kitchen" : "Nothing waiting", "overview", toAccept > 0)}</div><div class="ph-qs">${quick("chef", "Run production", "prod")}${quick("plus", "New recipe", "recipes", 'data-a="rec_rnew"')}${quick("box", "Kitchen materials", "overview")}${quick("chart", "View report", "report")}</div>${recGroups()
+    .map(
+      g =>
+        `<section class="ph-sec"><h2>${g.name}</h2><div class="ph-cs">${g.tabs.map(card).join("")}</div></section>`
     )
-    .join("");
+    .join("")}${apModalIfOpen()}</div>`;
 }
 function recipesView() {
-  if (!boTabOk("rec", recT)) recT = "overview";
+  if (recT !== "home" && !boTabOk("rec", recT)) recT = "home";
+  if (recT === "home") return recHomeHTML();
   const body =
-    recT === "pbal" || recT === "allp"
-      ? recBalHTML(recT)
-      : recT === "prod"
-        ? prodHTML()
-        : recT === "recipes"
-          ? recipesHTML()
-          : recT === "log"
-            ? prodLogHTML()
-            : recOverviewHTML();
+    recT === "report"
+      ? recRepHTML()
+      : recT === "pbal" || recT === "allp"
+        ? recBalHTML(recT)
+        : recT === "prod"
+          ? prodHTML()
+          : recT === "recipes"
+            ? recipesHTML()
+            : recT === "log"
+              ? prodLogHTML()
+              : recOverviewHTML();
   const [title, what] = REC_PAGES[recT] || REC_PAGES.overview;
-  return `<div class="inv invx"><nav class="inv-rail">${recRail()}</nav><div class="inv-main"><div class="inv-title"><h1>${title}</h1><p>${what}</p></div>${body}${apModalIfOpen()}</div></div>`;
+  return `<div class="inv invx inv-solo"><div class="inv-main">${phMenu(recGroups(), recT, "rec_tab", "Recipes and production")}<div class="inv-title"><h1>${title}</h1><p>${what}</p></div>${body}${apModalIfOpen()}</div></div>`;
 }
 V.rec = recipesView;
 
@@ -34556,6 +36362,48 @@ function recOverviewHTML() {
 }
 
 // ---------------------------------------------------------------- production
+/** The product sold at this point under this name with no stock behind it, if any. */
+const prodDirect = (name, to) =>
+  ITEMS.find(
+    i =>
+      i.d === to &&
+      i.n.toLowerCase() === String(name).trim().toLowerCase() &&
+      !Object.keys(i.r || {}).length
+  );
+/** Products that keep no stock, each with the way to give it some. */
+function recDirectPanel() {
+  const L = ITEMS.filter(i => i.sell !== "acc" && !Object.keys(i.r || {}).length).sort((a, b) =>
+    a.n.localeCompare(b.n)
+  );
+  if (!L.length) return "";
+  return `<div class="pn tw"><div class="inv-head"><h4>Sold with no stock kept (${L.length})</h4></div><div class="stk">These were added directly, so a sale deducts nothing. Add a recipe or make them under production and each sale will.</div><table class="t"><tr><th>Product</th><th>Sold at</th><th class="n">Price</th><th></th></tr>${L.map(i => `<tr><td>${esc(i.n)}</td><td>${esc(i.d)}</td><td class="n">${m2(i.p)}</td><td class="n">${prGetStock(i)}</td></tr>`).join("")}</table></div>`;
+}
+/** Open the recipe or production form for a product that keeps no stock. */
+function recFromDirect(way, id) {
+  const i = ITEMS.find(x => x.id === id);
+  if (!i) return;
+  if (prOnBill(id)) return toast(i.n + " is on an open bill. Settle it first.");
+  invF.spe = null;
+  prEdit = null;
+  if (way === "dirr") {
+    invF.rcp = {
+      ...rcpBlank(),
+      edit: id,
+      name: i.n,
+      sp: i.d,
+      cat: i.c,
+      price: String(i.p),
+      tax: i.t
+    };
+    recT = "recipes";
+    toast(`Add the ingredients for ${i.n}, then press Save recipe.`);
+  } else {
+    invF.pr = { ...prBlank(), to: i.d, outName: i.n, cat: i.c, tax: i.t };
+    recT = "prod";
+    toast(`Add the materials for ${i.n}, then press Run production.`);
+  }
+  return go("Recipes & Production");
+}
 function prodHTML() {
   const M = materialStores(),
     F = invF.pr,
@@ -34567,7 +36415,8 @@ function prodHTML() {
     cost = F.lines.reduce((a, x) => a + x.q * cst(x.k), 0),
     yq = parseFloat(F.outQty),
     outK = rcExact(F.outName),
-    prod = outK ? sdProduct(outK, F.to) : null;
+    direct = prodDirect(F.outName, F.to),
+    prod = direct || (outK ? sdProduct(outK, F.to) : null);
   return `<div class="pn"><h4>Convert materials into finished items</h4>
   <div class="stk">Example: 1 kg of flour makes 10 ugali. The materials leave ${esc(F.from)} and the finished items go to the selling point's stock.</div>
   <div class="fr"><label>Materials from<select data-iv="pr.from">${opts(M, F.from)}</select></label><label>Note<input data-iv="pr.note" value="${esc(F.note)}" placeholder="Optional, e.g. lunch batch"></label></div>
@@ -34593,9 +36442,10 @@ function prodHTML() {
    <label>Tax<select data-iv="pr.tax">${taxChoices()
      .map(([v, l]) => `<option value="${v}" ${v === F.tax ? "selected" : ""}>${l}</option>`)
      .join("")}</select></label></div>
+  ${direct ? `<div class="stk">${esc(direct.n)} sells at ${esc(F.to)} with no stock kept. This production links them, so each sale deducts one finished item.</div>` : ""}
   <div class="stk" id="prInfo">${yq > 0 && cost > 0 ? `Cost per item: KES ${m2(cost / yq)}` : ""}</div>
   <div class="fr"><button class="chip on" data-a="rec_run">Run production</button><button class="mini" data-a="rec_clear" data-f="pr">Clear</button></div></div>
-  ${itemDatalists()}`;
+  ${recDirectPanel()}${itemDatalists()}`;
 }
 /** Live cost per item while typing the quantity made. */
 function prSync(p, f) {
@@ -34628,9 +36478,13 @@ function prodRun() {
   if (!(qty > 0)) return toast("Enter how many it makes.");
   if (!posSells(F.to)) return toast("Choose the selling point it goes to.");
   if (price !== null && !(price > 0)) return toast("The selling price must be more than 0.");
+  const direct = prodDirect(name, F.to);
+  if (direct && prOnBill(direct.id))
+    return toast(direct.n + " is on an open bill. Settle it first.");
   let k = rcExact(name);
   if (k && F.lines.some(x => x.k === k)) return toast(name + " cannot be made from itself.");
-  const named = !k && ITEMS.some(i => i.d === F.to && i.n.toLowerCase() === name.toLowerCase());
+  const named =
+    !k && !direct && ITEMS.some(i => i.d === F.to && i.n.toLowerCase() === name.toLowerCase());
   if (named && price !== null) return toast(F.to + " already sells a product called " + name + ".");
   if (!k) {
     const uom = F.outUom.trim() || "pcs";
@@ -34672,7 +36526,12 @@ function prodRun() {
     lines
   });
   let msg = `${id}: ${qn(qty)} ${itemInfo(k).uom} of ${itemInfo(k).name} made, KES ${m2(qty ? cost / qty : 0)} each.`;
-  if (price !== null) {
+  if (direct) {
+    direct.r = { [k]: 1 };
+    if (price !== null) direct.p = price;
+    spRefreshPos();
+    msg += ` ${direct.n} at ${F.to} now sells from this stock.`;
+  } else if (price !== null) {
     const prod = sdProduct(k, F.to);
     if (prod) prod.p = price;
     else
@@ -34734,7 +36593,7 @@ function recipesHTML() {
     !recipeList().length;
   return `${
     showForm
-      ? `<div class="pn"><h4>${F.edit ? "Edit recipe" : "New recipe"}</h4>
+      ? `<div class="pn"><h4>${F.edit ? (F.lines.length ? "Edit recipe" : "Add a recipe for " + esc(F.name)) : "New recipe"}</h4>
   <div class="stk">One portion. Choose ingredients from the store; decimals such as 0.5, 0.25, 0.1 or 0.3 are fine. Each sale deducts them from what was issued to ${esc(F.from)}.</div>
   <div class="fr"><label>Product name<input id="rcpName" data-iv="rcp.name" value="${esc(F.name)}" placeholder="e.g. Beef stew"></label>
    <label>Sold at<select data-iv="rcp.sp">${opts(S, F.sp)}</select></label>
@@ -34764,7 +36623,7 @@ function recipesHTML() {
           })
           .join("")}</table>`
       : '<div class="empty">No recipes yet.</div>'
-  }</div>`;
+  }</div>${recDirectPanel()}`;
 }
 /** How much of an item the stores hold, all together. */
 const storeQty = k => STORES.reduce((a, l) => a + have(l, k), 0);
@@ -34805,8 +36664,16 @@ function recipeSave() {
   if (!isMaterials(F.from)) return toast("Choose where the ingredients come from.");
   if (!(price > 0)) return toast("Enter the selling price.");
   if (!F.lines.length) return toast("Add at least one ingredient.");
-  if (ITEMS.some(i => i.id !== F.edit && i.d === F.sp && i.n.toLowerCase() === name.toLowerCase()))
+  // Typing the name of a product that keeps no stock gives that product the recipe.
+  const twin = ITEMS.find(
+    i => i.id !== F.edit && i.d === F.sp && i.n.toLowerCase() === name.toLowerCase()
+  );
+  if (twin && (F.edit || Object.keys(twin.r || {}).length))
     return toast(F.sp + " already sells a product called " + name + ".");
+  if (twin) F.edit = twin.id;
+  const before = ITEMS.find(i => i.id === F.edit);
+  if (before && !Object.keys(before.r || {}).length && prOnBill(before.id))
+    return toast(before.n + " is on an open bill. Settle it first.");
   const r = Object.fromEntries(F.lines.map(x => [x.k, x.q])),
     data = {
       n: name,
@@ -35242,24 +37109,21 @@ function recRepTables(D, print) {
   }</tbody></table>`;
   return wrap(main) + wrap(prod) + wrap(rec);
 }
-function recRepView() {
+function recRepHTML() {
   const F = invF.recr,
     bad = F.from > F.to,
     D = bad ? null : recRepData(),
     sum2 = f => D.items.reduce((a, r) => a + f(r), 0),
     kst = (l, v) => `<div class="kst"><span>${l}</span><b>${v}</b></div>`;
-  return `<div class="inv invx inv-solo"><div class="inv-main">
-  <div class="pn"><div class="fr" style="align-items:end"><label>From<input type="date" data-iv="recr.from" value="${esc(F.from)}"></label><label>To<input type="date" data-iv="recr.to" value="${esc(F.to)}"></label><div class="seg2"><button data-a="rec_rrange" data-rng="today">Today</button><button data-a="rec_rrange" data-rng="month">This month</button></div><button class="mini xl-btn" style="flex:none" data-a="rep_xlsxpage" data-title="Recipe and production report" data-like="rec_rprint">Export to Excel</button><button class="chip on" style="flex:none" data-a="rec_rprint" ${bad ? "disabled" : ""}>Print</button></div></div>
+  return `  <div class="pn"><div class="fr" style="align-items:end"><label>From<input type="date" data-iv="recr.from" value="${esc(F.from)}"></label><label>To<input type="date" data-iv="recr.to" value="${esc(F.to)}"></label><div class="seg2"><button data-a="rec_rrange" data-rng="today">Today</button><button data-a="rec_rrange" data-rng="month">This month</button></div><button class="mini xl-btn" style="flex:none" data-a="rep_xlsxpage" data-title="Recipe and production report" data-like="rec_rprint">Export to Excel</button><button class="chip on" style="flex:none" data-a="rec_rprint" ${bad ? "disabled" : ""}>Print</button></div></div>
   ${
     bad
       ? '<div class="pn"><div class="empty">The From date is after the To date.</div></div>'
       : `<div class="kstg">${kst("Cost used in production", "KES " + m2(sum2(r => r.prodCost)))}${kst("Cost used by recipes", "KES " + m2(sum2(r => r.recCost)))}${kst("Value left", "KES " + m2(sum2(r => r.value)))}${kst("Production runs", D.runs.length)}</div>
   ${recRepTables(D)}
   <div class="stk">Opening + issued in − used in production − used by recipes ± other = remaining. Other is damages, stock takes and transfers out. Recipes sold uses each recipe's ingredients today, and counts settled sales only.</div>`
-  }
- </div>${apModalIfOpen()}</div>`;
+  }`;
 }
-V.recrep = recRepView;
 function recRepDoc() {
   const F = invF.recr,
     D = recRepData(),
@@ -35334,7 +37198,9 @@ function recAct(a, b) {
     recT = "prod";
     return all();
   }
+  if (a === "dirr" || a === "dirp") return recFromDirect(a, +d.id);
   if (a === "rsave") return recipeSave();
+  if (a === "rnew") recT = "recipes";
   if (a === "rnew" || a === "rno") {
     recNewOn = a === "rnew";
     if (a === "rno") invF.rcp = { ...rcpBlank(), sp: invF.rcp.sp, from: invF.rcp.from };
@@ -35429,6 +37295,7 @@ V.settings = () => {
       const on = fdOn();
       return `<div class="pn"><div class="fr" style="align-items:center;justify-content:space-between"><h4 style="margin:0">Modules</h4><button class="mini" style="flex:none" data-a="hs_modlock">Lock</button></div><div class="stk">Switch off what this business doesn't use. Nothing is deleted: switch it back on and everything returns as it was.</div><div class="tw"><table class="t"><tr><td><b>Front Desk and room reports</b><small class="pr-code">Rooms, bookings, check-in, housekeeping, guest bills, Room reports and Post to room. Switch it off for a business with no rooms.</small></td><td><span class="tag ${on ? "ok" : ""}">${on ? "On" : "Off"}</span></td><td class="n"><button class="pv-sw ${on ? "on" : ""}" data-a="hs_fdtog" role="switch" aria-checked="${on}" aria-label="Front Desk and room reports"><i></i></button></td></tr></table></div></div>`;
     },
+    email: repMailHTML,
     backup: backupHTML,
     network: networkHTML
   };
@@ -35818,6 +37685,7 @@ const SET_TABS = [
   ["pos", "POS options"],
   ["tax", "Tax"],
   ["printers", "Printers"],
+  ["email", "Email reports"],
   ["modules", "Modules"],
   ["backup", "Backup and restore"],
   ["network", "Network"]
@@ -36551,7 +38419,7 @@ function hhSave() {
 }
 function hhAct(a, b) {
   if (a === "hh_rep") {
-    rp = "hh";
+    repPick("hh");
     return go("Reports");
   }
   if (!catRight()) return boDenied();
@@ -36707,7 +38575,7 @@ function pmSave() {
 }
 function pmAct(a, b) {
   if (a === "pm_rep") {
-    rp = "promo";
+    repPick("promo");
     return go("Reports");
   }
   if (!catRight()) return boDenied();
@@ -36875,7 +38743,7 @@ const PR_WAYS = [
   [
     "sell",
     "Selling item only",
-    "Goes straight on the POS with no stock kept, such as corkage or a service."
+    "Goes straight on the POS with no stock kept, such as corkage or a service. You can add a recipe or production later."
   ]
 ];
 const prPoints = () => ALLD.filter(posSells);
@@ -36885,13 +38753,21 @@ const prOnBill = id => {
   const on = L => Object.keys(L || {}).some(k => k.split("~")[0] === String(id));
   return orders.some(o => on(o.lines)) || on(cart);
 };
+/** Buttons that give an item with no stock a recipe or production. */
+function prGetStock(i) {
+  if (!prNoStock(i) || !boCan("rec.view")) return "";
+  const btn = (a, right, l) =>
+      boCan(right) ? `<button class="mini" data-a="${a}" data-id="${i.id}">${l}</button>` : "",
+    L = btn("rec_dirr", "rec.recipes", "Add recipe") + btn("rec_dirp", "rec.prod", "Production");
+  return L ? `<span class="pr-gets">${L}</span>` : "";
+}
 function prCanSell(i) {
   if (prNoStock(i)) return '<span class="tag">No stock kept</span>';
   const n = avail(i);
   return `<span class="tag ${n > 0 ? "ok" : "bad"}">${n > 0 ? qn(n) : "Out of stock"}</span>`;
 }
 function prRow(i) {
-  return `<tr${findAttr("prod", i.n, i.c, i.d, i.id)}><td><b>${esc(i.n)}</b><small class="pr-code">Code ${i.id}</small></td><td>${esc(i.d)}</td><td><span class="pr-cat" style="--h:${hue(i.c)}">${esc(i.c)}</span></td><td>${TAX[i.t] > 0 ? `${qn(TAX[i.t])}%` : "None"}</td><td><input type="number" class="pr-price" value="${i.p}" data-pr="${i.id}" aria-label="Price of ${esc(i.n)}"></td><td class="n">${prCanSell(i)}</td><td>${modCell(i)}</td><td>${accCell(i)}</td><td>${cvCell(i)}</td><td class="n"><span class="sp-acts"><button class="mini" data-a="prl_edit" data-id="${i.id}">Edit</button><button class="mini cat-del" data-a="prl_del" data-id="${i.id}">Delete</button></span></td></tr>`;
+  return `<tr${findAttr("prod", i.n, i.c, i.d, i.id)}><td><b>${esc(i.n)}</b><small class="pr-code">Code ${i.id}</small></td><td>${esc(i.d)}</td><td><span class="pr-cat" style="--h:${hue(i.c)}">${esc(i.c)}</span></td><td>${TAX[i.t] > 0 ? `${qn(TAX[i.t])}%` : "None"}</td><td><input type="number" class="pr-price" value="${i.p}" data-pr="${i.id}" aria-label="Price of ${esc(i.n)}"></td><td class="n">${prCanSell(i)}${prGetStock(i)}</td><td>${modCell(i)}</td><td>${accCell(i)}</td><td>${cvCell(i)}</td><td class="n"><span class="sp-acts"><button class="mini" data-a="prl_edit" data-id="${i.id}">Edit</button><button class="mini cat-del" data-a="prl_del" data-id="${i.id}">Delete</button></span></td></tr>`;
 }
 function productsHTML() {
   const P = prPoints();
@@ -36982,12 +38858,15 @@ function prSave() {
 }
 function prEditModal() {
   if (!prEdit) return "";
-  const F = prEdit;
+  const F = prEdit,
+    gets = prGetStock(ITEMS.find(x => x.id === F.id));
   return `<div class="modal show" id="prEd" style="z-index:63"><div class="box itm">
   <header class="itm-h"><div><h3>Edit ${esc(F.was)}</h3><p>Sold at ${esc(F.d)} · no stock kept</p></div><button class="itm-x" data-a="prl_eclose" aria-label="Close">✕</button></header>
   <div class="itm-b"><section class="itm-s"><div class="itm-g itm-g3"><label>Name on the POS<input id="preN" maxlength="60" value="${esc(F.n)}"></label><label>Category<input id="preC" list="prodCatL" value="${esc(F.c)}"></label><label>Selling price (KES)<input id="preP" type="number" min="0" step="any" value="${esc(F.p)}"></label><label>Tax<select id="preT">${taxChoices()
     .map(([v, l]) => `<option value="${v}" ${v === F.t ? "selected" : ""}>${l}</option>`)
-    .join("")}</select></label></div></section></div>
+    .join(
+      ""
+    )}</select></label></div></section>${gets ? `<section class="itm-s"><h4>Stock</h4><div class="itm-hint">No stock is deducted when this sells. Give it a recipe to deduct ingredients, or make it under production to deduct finished items.</div>${gets}</section>` : ""}</div>
   <footer class="itm-f"><button class="mini" data-a="prl_eclose">Cancel</button><button class="chip on" data-a="prl_esave">Save changes</button></footer></div></div>`;
 }
 function prEditOpen(id) {
@@ -37091,6 +38970,15 @@ let stE = null,
   stDel = null;
 const storeInfos = () => FD_SETTINGS.storeInfo || (FD_SETTINGS.storeInfo = {});
 const storeKinds = l => (storeInfos()[l] || {}).kinds || [];
+/** Does this store list this item? It does if the item's category is ticked on the store, or nothing is ticked. */
+const storeHolds = (l, k) => {
+  const norm = s =>
+      String(s || "")
+        .trim()
+        .toLowerCase(),
+    K = storeKinds(l).map(norm);
+  return !K.length || K.includes(norm(itemInfo(k).group));
+};
 /** The store that holds this kind of item, if one says so. */
 const storeForKind = g => {
   const x = String(g || "")
@@ -38552,7 +40440,7 @@ function docWindow(title, css, html) {
   const w = window.open("", "_blank");
   if (!w) return toast("Allow pop-ups to print.");
   w.document.write(
-    `<!DOCTYPE html><html><head><title>${esc(title)}</title><style>${css}</style></head><body>${html}<\/body><\/html>`
+    `<!DOCTYPE html><html><head><title>${esc(title)}</title><style>${css}${/size:\s*A4/.test(css) ? a4Screen(/landscape/.test(css)) : ""}</style></head><body>${html}<\/body><\/html>`
   );
   w.document.close();
   const go = () => {
@@ -38746,24 +40634,22 @@ function docMailPanel(m) {
 }
 /** Sends one PDF through the server. Says what went wrong, or nothing. */
 async function docMailPost(to, subject, text, file, s) {
+  const made = await docPdfSpec(s);
+  return mailServerPost({ to, subject, text, filename: file + ".pdf", pdf: btoa(PDF.sheet(made)) });
+}
+/** Ask the server to send an email. Null when it went; otherwise what went wrong. */
+async function mailServerPost(payload) {
   const ctl = new AbortController(),
     t = setTimeout(() => ctl.abort(), 30000);
   let res = null;
   try {
-    const made = await docPdfSpec(s);
     res = await fetch(printServer() + "/api/mail/send", {
       method: "POST",
       headers: {
         "content-type": "application/json",
         ...(FD_SETTINGS.printKey ? { "x-print-key": FD_SETTINGS.printKey } : {})
       },
-      body: JSON.stringify({
-        to,
-        subject,
-        text,
-        filename: file + ".pdf",
-        pdf: btoa(PDF.sheet(made))
-      }),
+      body: JSON.stringify(payload),
       signal: ctl.signal
     });
   } catch (e) {
@@ -43363,35 +45249,75 @@ function acRepExport(k, kind, from, to) {
   );
 }
 // ---- Accounting: the working screens. Everything posts through one journal, so reports always agree. ----
-const AC_TABS = [
-  ["h", "Overview"],
-  ["home", "Insights", "chart"],
-  ["h", "Ledgers"],
-  ["coa", "Chart of accounts", "book"],
-  ["jv", "Journal entries", "plus"],
-  ["gl", "Ledger transactions", "book"],
-  ["h", "Money"],
-  ["exp", "Expenses and income", "wal"],
-  ["bank", "Bank accounts", "wal"],
-  ["btx", "Bank transactions", "truck"],
-  ["rec", "Bank reconciliation", "shield"],
-  ["h", "Assets"],
-  ["fa", "Fixed assets", "box"],
-  ["h", "Financial reports"],
-  ...Object.entries(AC_REPORTS).map(([k, [n]]) => ["r_" + k, n, "chart"]),
-  ["h", "Setup"],
-  ["set", "Revenue and tax", "shield"],
-  ["imp", "Import", "dl"]
+// [screen, name on the menu, icon, the question it answers]
+const AC_GROUPS = [
+  {
+    name: "Day to day",
+    tabs: [
+      ["exp", "Money in and out", "wal", "Record money in or out"],
+      ["bank", "Bank accounts", "wal", "Your bank accounts"],
+      ["btx", "Bank transactions", "truck", "Deposits, withdrawals and transfers"],
+      ["rec", "Match the bank statement", "shield", "Does the bank agree with us?"]
+    ]
+  },
+  {
+    name: "How we're doing",
+    tabs: [
+      ["r_pl", "Profit and loss", "chart", "Did we make money?"],
+      ["r_cf", "Cash flow", "wal", "Where did our cash go?"],
+      ["r_ex", "Where the money went", "chart", "What are we spending on?"],
+      ["r_bs", "Balance sheet", "book", "What do we own and owe?"],
+      ["r_ad", "Who owes us", "users", "Who owes us money?"],
+      ["r_ac", "Who we owe", "users", "Who do we owe?"],
+      ["r_vat", "VAT and tax", "shield", "How much tax is due?"]
+    ]
+  },
+  {
+    name: "For your accountant",
+    tabs: [
+      ["coa", "Chart of accounts", "book", "Chart of accounts"],
+      ["jv", "Journal entries", "plus", "Journal entries"],
+      ["gl", "Ledger transactions", "book", "Ledger transactions"],
+      ["r_tb", "Trial balance", "chart", "Trial balance"],
+      ["r_jl", "Journal listing", "book", "Journal listing"],
+      ["fa", "Fixed assets", "box", "Fixed assets"],
+      ["set", "Revenue and tax setup", "gear", "Revenue and tax setup"],
+      ["imp", "Import", "dl", "Import from a spreadsheet"]
+    ]
+  }
 ];
+// One line on each screen, for anyone who has never kept a set of books.
+const AC_PLAIN = {
+  exp: "Use this whenever money leaves or comes in outside the POS, such as paying for repairs or receiving a rent deposit.",
+  bank: "Add each account the business uses. Everything else in banking builds on this list.",
+  btx: "Use this when money moves in the bank: you pay in cash, take cash out, move it between accounts, or the bank charges a fee.",
+  rec: "Tick each line that's also on your bank statement. When the difference reaches zero, your books agree with the bank.",
+  r_pl: "Income minus costs. A positive number at the bottom means the business made money in those dates.",
+  r_cf: "Profit and cash aren't the same thing. This shows the cash that really came in and went out.",
+  r_ex: "Your spending, biggest first. A good place to look for savings.",
+  r_bs: "A snapshot on one day: what the business owns, what it owes, and what's left for the owners.",
+  r_ad: "Customers and guests who still owe you, sorted by how long they've owed it. The oldest are the ones to chase.",
+  r_ac: "Suppliers you still have to pay, sorted by how long the bill has been open.",
+  r_vat:
+    "Tax you charged on sales, less tax you paid on purchases. The difference is what's due to KRA.",
+  coa: "The list of headings all your money is sorted under. Your accountant usually looks after this.",
+  jv: "A way to correct or add to the books by hand. Each entry must balance, so only use this if you know what it should be.",
+  gl: "Every movement on a single heading, line by line, for checking where a figure came from.",
+  r_tb: "A check that the books balance. The two totals should always match.",
+  r_jl: "Every entry in the books for the dates chosen.",
+  fa: "Things you'll own for years, like fridges or vehicles. Their value is reduced a little over time.",
+  set: "Tells the system where sales, payments and tax are filed in the books. Set once, then rarely touched.",
+  imp: "Bring in opening balances and accounts from a spreadsheet when you first start."
+};
 const AC_PAGES = {
   home: ["Insights", "How the business is doing, at a glance."],
   coa: ["Chart of accounts", "Every account in the books, with its balance today."],
   jv: ["Journal entries", "Post a transaction by hand. Entries can be reversed, never deleted."],
   gl: ["Ledger transactions", "Every movement on one account, with its running balance."],
-  exp: ["Expenses and income", "Record money going out, and income that isn't a POS sale."],
+  exp: ["Money in and out", "Record money going out, and income that isn't a POS sale."],
   bank: ["Bank accounts", "The accounts the business banks with."],
   btx: ["Bank transactions", "Deposits, withdrawals, payments, transfers and bank charges."],
-  rec: ["Bank reconciliation", "Tick what's on the statement until the difference is zero."],
+  rec: ["Match the bank statement", "Tick what's on the statement until the difference is zero."],
   fa: [
     "Fixed assets",
     "What the business owns for the long term, and what it's worth after depreciation."
@@ -43507,7 +45433,27 @@ function acHome() {
       acS().assets.some(a => !a.disposed) &&
         !acS().depTo && ["Depreciation hasn't been run on your fixed assets yet.", "fa"]
     ].filter(Boolean);
-  return `<div class="sp-kpis ac-kpis">${acKpi("Income this month", acKes(inc))}${acKpi("Gross margin", inc ? `${(((inc - cos) / inc) * 100).toFixed(1)}%` : "–")}${acKpi("Net profit this month", acKes(profit), profit < 0 ? "crit" : "")}${acKpi("Cash and bank", acKes(cash))}${acKpi("Owed to you", acKes(debt))}${acKpi("You owe vendors", acKes(owe))}</div>
+  const out2 = cos + exp,
+    say =
+      !inc && !out2
+        ? "Nothing has been recorded this month yet. Sales and expenses appear here on their own."
+        : profit >= 0
+          ? `So far this month ${acKes(inc)} has come in and ${acKes(out2)} has gone out, leaving ${acKes(profit)}.`
+          : `So far this month ${acKes(inc)} has come in and ${acKes(out2)} has gone out. That's ${acKes(-profit)} more out than in.`,
+    tab = t => `data-a="ac_tab" data-t="${t}"`,
+    tile = (ic, l, v, s, t, warn) =>
+      `<button class="ph-t ${warn ? "ph-warn" : ""}" ${tab(t)}><span class="ph-i">${I(ic)}</span><span class="ph-l">${l}</span><b>${v}</b><small>${s}</small></button>`,
+    quick = (ic, l, a) =>
+      `<button class="ph-q" ${a}><span class="ph-i">${I(ic)}</span>${l}</button>`,
+    card = x =>
+      `<button class="ph-c" ${tab(x[0])}><span class="ph-i">${I(x[2])}</span><span class="ph-b"><b>${x[3]}</b><span>${AC_PLAIN[x[0]]}</span></span><span class="ph-ch">${I("chev")}</span></button>`;
+  return `<div class="ph ac-home"><div class="ph-h"><h1>Accounting</h1><p>How the business is doing, in plain words.</p></div>
+  <div class="ac-say ${profit < 0 ? "low" : ""}"><span>This month</span><b>${say}</b></div>
+  <div class="ph-ts">${tile("cash", "Money in", acKes(inc), "Income this month", "r_pl")}${tile("cart", "Money out", acKes(out2), "Costs and expenses this month", "r_ex")}${tile("chart", "Left over", acKes(profit), profit < 0 ? "More went out than came in" : inc ? `${(((inc - cos) / inc) * 100).toFixed(0)}% kept after cost of goods` : "Profit this month", "r_pl", profit < 0)}${tile("wal", "Cash and bank", acKes(cash), "What you hold today", "bank")}${tile("users", "People owe you", acKes(debt), "Customers and guests", "r_ad")}${tile("truck", "You owe suppliers", acKes(owe), "Bills still to pay", "r_ac")}</div>
+  <div class="ph-qs">${quick("plus", "Record an expense", 'data-a="ac_quick" data-t="exp" data-x="out"')}${quick("cash", "Record other income", 'data-a="ac_quick" data-t="exp" data-x="in"')}${quick("wal", "Bank a deposit or withdrawal", tab("btx"))}${quick("chart", "Did we make money?", tab("r_pl"))}</div>
+  ${notes.length ? `<div class="pn ac-look"><h4>Worth a look</h4><div class="ac-notes">${notes.map(([x, go2]) => `<button class="ac-note" data-a="ac_tab" data-t="${go2}"><span>${esc(x)}</span><b aria-hidden="true">→</b></button>`).join("")}</div></div>` : ""}
+  ${AC_GROUPS.map(g => `<section class="ph-sec"><h2>${g.name}</h2><div class="ph-cs">${g.tabs.map(card).join("")}</div></section>`).join("")}
+  <section class="ph-sec"><h2>The last six months</h2>
   <div class="ac-two"><div class="pn"><div class="inv-head"><h4>Income against costs · last 6 months</h4><span class="ac-legend"><span><i class="s1"></i>Income</span><span><i class="s2"></i>Costs and expenses</span></span></div>
   <div class="ac-chart" role="img" aria-label="Income against costs for the last 6 months. The figures are in the table below.">${M.map(m => `<div class="ac-col"><div class="ac-bars">${bar(m.rev, "s1", `${m.long}: income ${acKes(m.rev)}`)}${bar(m.cst, "s2", `${m.long}: costs ${acKes(m.cst)}`)}</div><span>${m.l}</span></div>`).join("")}</div>
   <details class="ac-data"><summary>See the figures</summary>${acTable(
@@ -43515,7 +45461,7 @@ function acHome() {
     M.map(m => [m.long, acMoneyStr(m.rev), acMoneyStr(m.cst), acMoneyStr(m.rev - m.cst)])
   )}</details></div>
   <div class="pn"><h4>Biggest costs this month</h4>${E.length ? `<div class="trk-places">${E.map(e => `<div class="trk-place ac-hb" data-tip="${esc(e.a.name)}: ${acKes(e.v)}"><span>${esc(e.a.name)}</span><div class="trk-bar"><i style="width:${Math.max(3, (e.v / eTop) * 100)}%"></i></div><b>${acMoneyStr(e.v)}</b></div>`).join("")}</div>` : '<div class="empty">No costs recorded this month.</div>'}</div></div>
-  ${notes.length ? `<div class="pn"><h4>Worth a look</h4><div class="ac-notes">${notes.map(([x, go2]) => `<button class="ac-note" data-a="ac_tab" data-t="${go2}"><span>${esc(x)}</span><b aria-hidden="true">→</b></button>`).join("")}</div></div>` : ""}`;
+  </section></div>`;
 }
 // ---------------------------------------------------------------- chart of accounts
 function acCoaHTML() {
@@ -43973,14 +45919,6 @@ function acImport(text) {
   return `<b>${done} imported.</b>${errs.length ? `<br>${errs.length} skipped:<br>${errs.map(esc).join("<br>")}` : ""}`;
 }
 // ---------------------------------------------------------------- page
-function acRail() {
-  const L = AC_TABS;
-  return L.map(([t, l, ic]) =>
-    t === "h"
-      ? `<div class="rhd">${l}</div>`
-      : `<button class="ir ${t === acT ? "on" : ""}" data-a="ac_tab" data-t="${t}">${I(ic)}<span>${l}</span></button>`
-  ).join("");
-}
 function acctView() {
   acS();
   acFresh();
@@ -44003,7 +45941,8 @@ function acctView() {
           set: acSetHTML,
           imp: acImpHTML
         }[acT]();
-  return `<div class="inv invx acx"><nav class="inv-rail">${acRail()}</nav><div class="inv-main"><div class="inv-title"><h1>${title}</h1><p>${what}</p></div>${body}</div></div>`;
+  if (acT === "home") return `<div class="acx">${body}</div>`;
+  return `<div class="inv invx inv-solo acx"><div class="inv-main">${phMenu(AC_GROUPS, acT, "ac_tab", "Accounting")}<div class="inv-title"><h1>${title}</h1><p>${what}</p></div>${AC_PLAIN[acT] ? `<div class="ac-plain"><b>In plain words</b><span>${AC_PLAIN[acT]}</span></div>` : ""}${body}</div></div>`;
 }
 V.acct = acctView;
 const acV = id => {
@@ -44027,6 +45966,11 @@ function acAct(a, b) {
     };
   if (a === "ac_tab") {
     acT = d.t;
+    return all();
+  }
+  if (a === "ac_quick") {
+    acT = d.t;
+    acF.exp = d.x;
     return all();
   }
   if (a === "ac_range") {
@@ -44763,7 +46707,7 @@ const wsBlank = () => ({
   restrict: false,
   pts: [],
   footer: "",
-  perm: Object.fromEntries(WAITER_DEFAULTS.map(k => [k, true]))
+  perm: newStaffRights("Waiter")
 });
 let wsF = wsBlank();
 const waiters = () =>
@@ -45261,7 +47205,6 @@ const TTL = {
     rooms: "Room reports",
     rec: "Recipes & Production",
     settings: "Settings",
-    recrep: "Recipe & Production Report",
     sales: "Sales & Orders",
     prod: "Products List",
     audit: "Audit log",
@@ -45283,7 +47226,6 @@ const TTL = {
     "Room reports": "rooms",
     "Recipes & Production": "rec",
     "Settings": "settings",
-    "Recipe & Production Report": "recrep",
     "Sales & Orders": "sales",
     "Products List": "prod",
     "Audit log": "audit",
@@ -45306,9 +47248,9 @@ function render() {
   $("#vSub").style.display = h ? "none" : "";
   if (h) return;
   $("#vSub").innerHTML =
-    (["inv", "rec", "pur", "vendors", "acct", "hr"].includes(view)
+    (["inv", "rec", "pur", "vendors", "acct", "hr", "rep"].includes(view)
       ? ""
-      : `<div class="hello"><div><h1>${TTL[view]}</h1><p>${view === "audit" ? "Who did what, when and from which computer. Entries can't be changed or removed." : view === "recrep" ? "What your kitchen used, made and has left, for the dates you choose." : view === "prod" ? "Everything on sale at your selling points. Add items, change prices and set their options here." : view === "tables" ? "Tables and takeaways for the POS. Any waiter can use any of them, and several waiters can share one." : view === "license" ? "Your trial or license, and entering a new key" : view === "wait" ? "Create waiters, cashiers and managers, and choose what each may do on the POS" : view === "sales" ? br + " · the current day, unless you search" : view === "settings" ? "Hotel details, bills and receipts, POS options, tax and printers" : view === "recrep" ? "How each item was used in production and in recipes, and what remains" : view === "rec" ? "Turn kitchen materials into what you sell, by production or by recipe" : view === "rooms" ? "Occupancy, guests and room sales · revenue for the " + PL[per] : view === "rep" ? "Run any report for a date range and sale point" : view === "outlets" ? "Bars, restaurants, kitchens and shops that get stock from a store and sell on the POS" : view === "pur" ? "Purchase orders, receiving goods and what you have bought" : view === "cred" ? "Credit customers, what they owe, their statements and payments" : view === "vendors" ? "The vendors you buy from. You choose them on purchase orders and when receiving goods" : "Who can sign in, and what each role may do"}</p></div>${
+      : `<div class="hello"><div><h1>${TTL[view]}</h1><p>${view === "audit" ? "Who did what, when and from which computer. Entries can't be changed or removed." : view === "prod" ? "Everything on sale at your selling points. Add items, change prices and set their options here." : view === "tables" ? "Tables and takeaways for the POS. Any waiter can use any of them, and several waiters can share one." : view === "license" ? "Your trial or license, and entering a new key" : view === "wait" ? "Create waiters, cashiers and managers, and choose what each may do on the POS" : view === "sales" ? br + " · the current day, unless you search" : view === "settings" ? "Hotel details, bills and receipts, POS options, tax and printers" : view === "rec" ? "Turn kitchen materials into what you sell, by production or by recipe" : view === "rooms" ? "Occupancy, guests and room sales · revenue for the " + PL[per] : view === "rep" ? "Run any report for a date range and sale point" : view === "outlets" ? "Bars, restaurants, kitchens and shops that get stock from a store and sell on the POS" : view === "pur" ? "Purchase orders, receiving goods and what you have bought" : view === "cred" ? "Credit customers, what they owe, their statements and payments" : view === "vendors" ? "The vendors you buy from. You choose them on purchase orders and when receiving goods" : "Who can sign in, and what each role may do"}</p></div>${
           view === "rooms"
             ? `<div class="seg">${[
                 ["today", "Today"],
@@ -45328,6 +47270,15 @@ function go(n) {
   n = n.replace("&amp;", "&");
   if (!boPageOk(n)) return boDenied();
   mdlLock();
+  // The menu always opens Purchasing on its overview; a button heading to one screen says so first.
+  if (n === "Purchasing") {
+    if (!purKeep) purT = "home";
+    purKeep = false;
+  }
+  if (n === "Vendors") {
+    if (!vnKeep) vnT = "home";
+    vnKeep = false;
+  }
   $("#ov").classList.remove("show");
   if (n === "Front Desk") {
     boUser = null;
@@ -45352,7 +47303,13 @@ function go(n) {
 }
 $("#nav").onclick = e => {
   const b = e.target.closest("[data-n]");
-  if (b) go(b.dataset.n);
+  if (!b) return;
+  // The menu opens these on their overview.
+  if (b.dataset.n === "Inventory") invT = "home";
+  if (b.dataset.n === "Accounting") acT = "home";
+  if (b.dataset.n === "Reports") rpHome = true;
+  if (b.dataset.n === "Recipes & Production") recT = "home";
+  go(b.dataset.n);
 };
 // ---- Back Office demo data: seed() fills sample sales ----
 function seed() {
@@ -45422,9 +47379,8 @@ $("#vSub").onclick = e => {
   const a = b.dataset.a,
     v = id => $("#" + id).value.trim(),
     num = id => parseFloat($("#" + id).value);
-  if (a === "rep_full") {
-    if (REP[rp][1](rs())[5] && REP[rp][1](rs())[5].wide) rpWideList = !rpWideList;
-    else rpFull = !rpFull;
+  if (a === "rep_home" || a === "rep_open") {
+    rpHome = a === "rep_home";
     return all();
   }
   if (a === "rep_print") return repPrint(b.dataset.k);
@@ -45533,6 +47489,7 @@ $("#vSub").onclick = e => {
     recAct(a.slice(4), b);
     return;
   }
+  if (a.slice(0, 3) === "rm_") return repMailAct(a, b);
   if (a.slice(0, 3) === "hs_") {
     settingsAct(a.slice(3), b);
     return;
@@ -45652,10 +47609,6 @@ $("#vSub").onchange = e => {
   if (s.tbn !== undefined) return tbRename(t);
   if (s.psx) return psuChange(t);
   if (s.setc) return settingsChange(t);
-  if (s.rpsel !== undefined) {
-    repPick(t.value);
-    return all();
-  }
   if (s.urg !== undefined) {
     urRole = t.value;
     return all();
@@ -45663,6 +47616,7 @@ $("#vSub").onchange = e => {
   if (s.ura !== undefined) return urRoleChange(+s.ura, t.value);
   if (s.wsr !== undefined) {
     wsF.role = t.value;
+    if (wsF.i < 0) wsF.perm = newStaffRights(t.value);
     return all();
   }
   if (s.wsp) return void (wsF.perm[s.wsp] = t.checked);
@@ -45963,7 +47917,7 @@ function boShow() {
   }
 }
 function boOpen() {
-  $("#fd").classList.remove("show"); // left behind the main menu; its sign-in still holds
+  $("#fd").classList.remove("show");
   $("#fl").classList.remove("show");
   $("#start").style.display = "none";
   $("#bo").classList.add("show");
@@ -45971,7 +47925,7 @@ function boOpen() {
 }
 function posOpen() {
   fsEnter();
-  fdExit(false); // Front Desk stays behind the main menu; the POS must not open on top of it or as its user
+  fdExit(false); // the POS must not open on top of the Front Desk or as its user
   boUser = null;
   $("#bo").classList.remove("show");
   $("#start").style.display = "none";
@@ -46125,6 +48079,10 @@ $("#boBack").onclick = () => {
   $("#start").style.display = "grid";
 };
 $("#boMenu").onclick = () => {
+  auditAdd("Sign out", "Left the Back Office and was signed out", {
+    who: boUser.n,
+    mod: "Back Office"
+  });
   boUser = null;
   bosave();
   $("#bo").classList.remove("show");
@@ -46154,7 +48112,8 @@ $("#start").onclick = e => {
   if (g) g.dataset.go === "bo" ? boOpen() : g.dataset.go === "fd" ? fdOpen() : posOpen();
 };
 $("#home").onclick = boOpen;
-document.querySelectorAll(".bkm").forEach(
+$("#fdBack").onclick = () => fdExit(true); // leaving the Front Office signs out
+document.querySelectorAll(".bkm:not(#fdBack)").forEach(
   b =>
     (b.onclick = () => {
       fdPending = false;

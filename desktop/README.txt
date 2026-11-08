@@ -50,8 +50,8 @@ MOVING OR RESTORING
   on all connected computers.
 
 EMAIL (optional)
-  Copy kaytia.env.example to C:\KaytiaFlow\kaytia.env, fill in your mail account and
-  restart Kaytia POS.
+  In the Back Office open Settings > Email reports and fill in Email account on the
+  main computer. The details are kept in C:\KaytiaFlow\kaytia.env on that computer.
 
 PRINTERS
   Set up under Settings > Printers on each computer.

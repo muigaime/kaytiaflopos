@@ -5,7 +5,6 @@ const TTL = {
     rooms: "Room reports",
     rec: "Recipes & Production",
     settings: "Settings",
-    recrep: "Recipe & Production Report",
     sales: "Sales & Orders",
     prod: "Products List",
     audit: "Audit log",
@@ -27,7 +26,6 @@ const TTL = {
     "Room reports": "rooms",
     "Recipes & Production": "rec",
     "Settings": "settings",
-    "Recipe & Production Report": "recrep",
     "Sales & Orders": "sales",
     "Products List": "prod",
     "Audit log": "audit",
@@ -50,9 +48,9 @@ function render() {
   $("#vSub").style.display = h ? "none" : "";
   if (h) return;
   $("#vSub").innerHTML =
-    (["inv", "rec", "pur", "vendors", "acct", "hr"].includes(view)
+    (["inv", "rec", "pur", "vendors", "acct", "hr", "rep"].includes(view)
       ? ""
-      : `<div class="hello"><div><h1>${TTL[view]}</h1><p>${view === "audit" ? "Who did what, when and from which computer. Entries can't be changed or removed." : view === "recrep" ? "What your kitchen used, made and has left, for the dates you choose." : view === "prod" ? "Everything on sale at your selling points. Add items, change prices and set their options here." : view === "tables" ? "Tables and takeaways for the POS. Any waiter can use any of them, and several waiters can share one." : view === "license" ? "Your trial or license, and entering a new key" : view === "wait" ? "Create waiters, cashiers and managers, and choose what each may do on the POS" : view === "sales" ? br + " · the current day, unless you search" : view === "settings" ? "Hotel details, bills and receipts, POS options, tax and printers" : view === "recrep" ? "How each item was used in production and in recipes, and what remains" : view === "rec" ? "Turn kitchen materials into what you sell, by production or by recipe" : view === "rooms" ? "Occupancy, guests and room sales · revenue for the " + PL[per] : view === "rep" ? "Run any report for a date range and sale point" : view === "outlets" ? "Bars, restaurants, kitchens and shops that get stock from a store and sell on the POS" : view === "pur" ? "Purchase orders, receiving goods and what you have bought" : view === "cred" ? "Credit customers, what they owe, their statements and payments" : view === "vendors" ? "The vendors you buy from. You choose them on purchase orders and when receiving goods" : "Who can sign in, and what each role may do"}</p></div>${
+      : `<div class="hello"><div><h1>${TTL[view]}</h1><p>${view === "audit" ? "Who did what, when and from which computer. Entries can't be changed or removed." : view === "prod" ? "Everything on sale at your selling points. Add items, change prices and set their options here." : view === "tables" ? "Tables and takeaways for the POS. Any waiter can use any of them, and several waiters can share one." : view === "license" ? "Your trial or license, and entering a new key" : view === "wait" ? "Create waiters, cashiers and managers, and choose what each may do on the POS" : view === "sales" ? br + " · the current day, unless you search" : view === "settings" ? "Hotel details, bills and receipts, POS options, tax and printers" : view === "rec" ? "Turn kitchen materials into what you sell, by production or by recipe" : view === "rooms" ? "Occupancy, guests and room sales · revenue for the " + PL[per] : view === "rep" ? "Run any report for a date range and sale point" : view === "outlets" ? "Bars, restaurants, kitchens and shops that get stock from a store and sell on the POS" : view === "pur" ? "Purchase orders, receiving goods and what you have bought" : view === "cred" ? "Credit customers, what they owe, their statements and payments" : view === "vendors" ? "The vendors you buy from. You choose them on purchase orders and when receiving goods" : "Who can sign in, and what each role may do"}</p></div>${
           view === "rooms"
             ? `<div class="seg">${[
                 ["today", "Today"],
@@ -72,6 +70,15 @@ function go(n) {
   n = n.replace("&amp;", "&");
   if (!boPageOk(n)) return boDenied();
   mdlLock();
+  // The menu always opens Purchasing on its overview; a button heading to one screen says so first.
+  if (n === "Purchasing") {
+    if (!purKeep) purT = "home";
+    purKeep = false;
+  }
+  if (n === "Vendors") {
+    if (!vnKeep) vnT = "home";
+    vnKeep = false;
+  }
   $("#ov").classList.remove("show");
   if (n === "Front Desk") {
     boUser = null;
@@ -96,5 +103,11 @@ function go(n) {
 }
 $("#nav").onclick = e => {
   const b = e.target.closest("[data-n]");
-  if (b) go(b.dataset.n);
+  if (!b) return;
+  // The menu opens these on their overview.
+  if (b.dataset.n === "Inventory") invT = "home";
+  if (b.dataset.n === "Accounting") acT = "home";
+  if (b.dataset.n === "Reports") rpHome = true;
+  if (b.dataset.n === "Recipes & Production") recT = "home";
+  go(b.dataset.n);
 };

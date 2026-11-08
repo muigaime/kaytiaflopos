@@ -62,8 +62,7 @@ const NAV = [
       ["Inventory", "box"],
       ["Selling points", "pos"],
       ["Tables", "pos"],
-      ["Recipes &amp; Production", "chef"],
-      ["Recipe &amp; Production Report", "chart"]
+      ["Recipes &amp; Production", "chef"]
     ]
   ],
   [

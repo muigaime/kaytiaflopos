@@ -30,7 +30,7 @@ try{
   STK.Bar.amarula=3; STK.Bar[T]=2; const c3=MOV.length; itemStockMove(P,30); log("18 LARGE QTY 30 FROM 2 TOTS: bottles "+STK.Bar.amarula+" | tots "+STK.Bar[T]+" (2 bottles opened = 50, 52-30=22)");
   STK.Bar.amarula=1; STK.Bar[T]=0; await tab("Bar"); await cat("Tots"); log("19 BOTTLE PRODUCT SHARES: bottle can sell "+avail(ITEMS.find(i=>i.id===364))+" | tot can sell "+avail(P)); itemStockMove(ITEMS.find(i=>i.id===364),1); log("20 BOTTLE SOLD WHOLE: tot can sell "+avail(P)); STK.Bar.amarula=0; STK.Bar[T]=0; log("21 NOTHING LEFT: "+avail(P)); drawGrid(); log("22 TILE OFF: "+tile("Amarula Tot").disabled);
   STK.Bar.amarula=2; STK.Bar[T]=5; drawGrid(); bosave(); const s=JSON.parse(localStorage.getItem("kaytia_pos_bo_v1")); log("23 SAVED: "+JSON.stringify(s.FS.stockConv)+" | bar "+s.K.Bar[T]);
-  await toBO(); await nav("Reports"); log("24 COST: each "+((()=>{const c=q("#vSub table.t");return !!c})()));
+  await toBO(); await nav("Reports"); click('[data-a="rep_open"]'); await wait(40); log("24 COST: each "+((()=>{const c=q("#vSub table.t");return !!c})()));
   await nav("Products List"); await open(363); log("25 EDIT SHOWS: "+q("#cvY").value+" | "+q("#cvFrom").value+" | hint "+q("#cvEd .itm-hint").textContent.slice(0,60)); q("#cvY").value="23"; await A("cv_save"); log("26 YIELD NOW 23: "+FD_SETTINGS.stockConv[T].y+" | can sell "+avail(P)+" | tots kept "+STK.Bar[T]);
   await open(363); await A("cv_del"); log("27 DELETED: "+tst()+" | r "+JSON.stringify(P.r)+" | tots "+STK.Bar[T]+" | bottles "+STK.Bar.amarula.toFixed(3)+" | hidden from lists "+!pickKeys().includes(T));
 }catch(e){log("X "+e.message)}

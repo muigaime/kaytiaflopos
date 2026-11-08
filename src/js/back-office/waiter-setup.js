@@ -14,7 +14,7 @@ const wsBlank = () => ({
   restrict: false,
   pts: [],
   footer: "",
-  perm: Object.fromEntries(WAITER_DEFAULTS.map(k => [k, true]))
+  perm: newStaffRights("Waiter")
 });
 let wsF = wsBlank();
 const waiters = () =>

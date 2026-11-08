@@ -3,6 +3,15 @@ let stE = null,
   stDel = null;
 const storeInfos = () => FD_SETTINGS.storeInfo || (FD_SETTINGS.storeInfo = {});
 const storeKinds = l => (storeInfos()[l] || {}).kinds || [];
+/** Does this store list this item? It does if the item's category is ticked on the store, or nothing is ticked. */
+const storeHolds = (l, k) => {
+  const norm = s =>
+      String(s || "")
+        .trim()
+        .toLowerCase(),
+    K = storeKinds(l).map(norm);
+  return !K.length || K.includes(norm(itemInfo(k).group));
+};
 /** The store that holds this kind of item, if one says so. */
 const storeForKind = g => {
   const x = String(g || "")

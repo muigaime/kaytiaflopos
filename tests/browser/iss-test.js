@@ -21,7 +21,7 @@ try{
   log("1 STUCK NOTE CLEARED ON OPEN: "+iss("ISS-OLD").status+" | "+rq("REQ-3").status+" | "+ms());
   log("2 DIRECT NOTE STILL WAITING: "+iss("ISS-DIRECT").status);
   await toBO(); await nav("Inventory"); await tab("appr"); log("3 APPROVALS: "+qa('[data-a="ap_open"][data-act="approve"]').map(b=>b.dataset.id).join());
-  const ap=async id=>{q('[data-a="ap_open"][data-id="'+id+'"][data-act="approve"]').click(); await wait(25); q("#apPin").value="0000"; click('[data-a="ap_ok"]'); await wait(40);};
+  const ap=async id=>{q('[data-a="ap_open"][data-id="'+id+'"][data-act="approve"]').click(); await wait(25); click('[data-a="ap_ok"]'); await wait(40);};
   const n0=S().IS.length, m0=ms(); await ap("REQ-1"); log("4 APPROVE ONCE: "+tst()+" | "+rq("REQ-1").status+" | "+m0+" -> "+ms()+" | notes "+n0+" -> "+S().IS.length+" | new note "+S().IS.at(-1).status+" | waiting "+S().IS.filter(x=>x.status==="Awaiting approval").map(x=>x.id).join());
   await ap("REQ-2"); log("5 SHORT OF ONE ITEM: "+tst()+" | "+rq("REQ-2").status+" | c issued "+rq("REQ-2").lines[1].issued+" | store c "+S().K["Main Store"].c);
   log("6 APPROVALS LEFT: "+qa('[data-a="ap_open"][data-act="approve"]').map(b=>b.dataset.id).join());

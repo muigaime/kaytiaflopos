@@ -26,7 +26,7 @@ const BO_RIGHTS = [
   ["inv.stores", "View and create stores.", "INVENTORY", "STORES"],
   [
     "inv.approve",
-    "Open approvals for purchase orders, requisitions and issues.",
+    "Approve or reject purchase orders, requisitions and issues.",
     "INVENTORY",
     "APPROVALS"
   ],
@@ -250,8 +250,7 @@ const PAGE_RIGHTS = {
   ],
   "Selling points": ["sp.view"],
   Tables: ["tables.manage"],
-  "Recipes & Production": ["rec.view"],
-  "Recipe & Production Report": ["rec.report"],
+  "Recipes & Production": ["rec.view", "rec.report"],
   Accounting: ["fin.menu"],
   "Expenses & Income": ["fin.menu"],
   "M-Pesa & eTIMS": ["fin.menu"],
@@ -284,6 +283,7 @@ const TAB_RIGHTS = {
     riss: "inv.reports",
     rdmg: "inv.reports",
     position: "inv.reports",
+    spstock: "inv.reports",
     variance: "inv.reports",
     track: "inv.reports",
     streps: "inv.reports"
@@ -291,6 +291,7 @@ const TAB_RIGHTS = {
   pur: { lpo: "pur.lpo", receive: "pur.receive", ret: "pur.receive", rpur: "pur.report" },
   rec: {
     overview: "rec.view",
+    report: "rec.report",
     pbal: "rec.view",
     allp: "rec.view",
     log: "rec.view",
@@ -329,6 +330,7 @@ const ACT_RIGHTS = {
   inv_rqrej: "inv.issue",
   inv_isspost: "inv.issue",
   inv_dmpost: "inv.damage",
+  ap_open: "inv.approve",
   ap_ok: "inv.approve",
   ap_issue: "inv.issue",
   vs_pay: "vn.pay",
@@ -344,7 +346,17 @@ const ACT_RIGHTS = {
   sp_rqmake: "sp.move",
   rec_issue: "rec.issue",
   rec_run: "rec.prod",
+  rm_save: "set.manage",
+  rm_add: "set.manage",
+  rm_del: "set.manage",
+  rm_acsave: "set.manage",
+  rm_actest: "set.manage",
+  rm_send: "set.manage",
+  sp_catoff: "sp.manage",
+  sp_catmove: "sp.manage",
   rec_rsave: "rec.recipes",
+  rec_dirr: "rec.recipes",
+  rec_dirp: "rec.prod",
   rec_rdel: "rec.recipes"
 };
 const boDenied = () => toast("Your role doesn't include this. Ask your administrator.");

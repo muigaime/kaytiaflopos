@@ -21,7 +21,7 @@ try{
   const pay=async o=>{openPay(o); await wait(20); q("#pAmt").value="9000"; click("#pOk"); await wait(35); click("#rcClose"); await wait(10);}, snd=async l=>{await send(l); await wait(400); click("#rcClose"); await wait(10);}, tbl=s=>[...s.rows].map(r=>[...r.cells].map(c=>c.textContent).join(",")).join("\\n   ");
   await add("Tusker","Bar",2); await add("Fish","Restaurant"); await snd("T1"); await pay([orders[0]]);
   q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400);
-  qa("#nav .nv").find(x=>x.dataset.n==="Reports").click(); await wait(30);
+  qa("#nav .nv").find(x=>x.dataset.n==="Reports").click(); await wait(30); click('[data-a="rep_open"]'); await wait(40);
   const names=qa("[data-r]").map(b=>b.textContent), keys=qa("[data-r]").map(b=>b.dataset.r); log("1 LIST ("+names.length+"): "+names.join(" / ")); log("2 UNIQUE NAMES: "+(new Set(names).size===names.length));
   log("3 HOME CARD/REMOVED GONE: "+["ds","is","sw","wd","spm"].filter(k=>q('[data-r="'+k+'"]')).length);
   const res=[]; for(const k of keys){ const b=q('[data-r="'+k+'"]'); if(b) b.click(); else { const sel=q("[data-rpsel]"); sel.value=k; sel.dispatchEvent(new Event("change",{bubbles:true})); } await wait(20); const n=window.__P.length; const pb=q('[data-a="rep_print"]'); pb.click(); await wait(5); res.push(k+":"+(window.__P.length>n?"ok":"none")+" "+q("#vSub table").rows.length+"r"); } log("4 ALL OPEN AND PRINT: "+res.join(", "));
