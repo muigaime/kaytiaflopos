@@ -49,6 +49,12 @@ MOVING OR RESTORING
   Settings > Backup and restore. Restoring on a connected computer replaces the data
   on all connected computers.
 
+FIRST-TIME SETUP
+  Run KaytiaFlow_Setup.exe. Choose Install as the server on one computer, and Install
+  as a client on the others. The server can download PostgreSQL or skip it. Kaytia
+  Flow keeps its data in C:\KaytiaFlow\data either way. Clients need the server's
+  IP address, username and password. Add computers on the Connect computers page.
+
 EMAIL (optional)
   In the Back Office open Settings > Email reports and fill in Email account on the
   main computer. The details are kept in C:\KaytiaFlow\kaytia.env on that computer.

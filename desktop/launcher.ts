@@ -11,7 +11,11 @@ import path from "node:path";
 import sea from "node:sea";
 import zlib from "node:zlib";
 import express, { type NextFunction, type Request, type Response } from "express";
-import { mailRouter, setMailAccountFile } from "../server/src/modules/mail/mail.routes.ts";
+import {
+  mailRouter,
+  saveEnvValues,
+  setMailAccountFile
+} from "../server/src/modules/mail/mail.routes.ts";
 import { printRouter } from "../server/src/modules/printing/print.routes.ts";
 import { CONNECT_PAGE } from "./connect-page.ts";
 import { merge } from "./merge.js";
@@ -39,7 +43,9 @@ type Config = {
   main?: string; // a till's Main computer, as host:port
   mainCode?: string;
   idx: number; // this computer's bill number series
-  tills: Record<string, { idx: number; name: string; at: string }>;
+  tills: Record<string, { idx: number; name: string; at: string; ip?: string }>;
+  net?: { user: string; salt: string; hash: string }; // the server login other computers join with
+  machines?: { name: string; ip: string }[]; // computers added on the server before they join
 };
 const randomCode = () => {
   const A = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -60,12 +66,12 @@ function writeSafe(file: string, content: string | Buffer) {
 }
 
 // ---------------------------------------------------------------- installing
-function powershell(script: string, env: NodeJS.ProcessEnv): Promise<string> {
+function powershell(script: string, env: NodeJS.ProcessEnv, timeout = 20000): Promise<string> {
   return new Promise((ok, no) => {
     execFile(
       "powershell.exe",
       ["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", script],
-      { env: { ...process.env, ...env }, timeout: 20000 },
+      { env: { ...process.env, ...env }, timeout },
       (err, out) => (err ? no(err) : ok(out))
     );
   });
@@ -207,7 +213,9 @@ function loadConfig(): Config {
     main: c.main,
     mainCode: c.mainCode,
     idx: c.idx ?? 0,
-    tills: c.tills ?? {}
+    tills: c.tills ?? {},
+    net: c.net,
+    machines: c.machines
   };
   saveConfig(cfg);
   return cfg;
@@ -325,6 +333,144 @@ const lanAddresses = () =>
     .map(a => a!.address);
 const withPort = (host: string) => (/:\d+$/.test(host) ? host : `${host}:${MAIN_PORT_DEFAULT}`);
 
+// ---------------------------------------------------------------- the server login
+const netHash = (pass: string, salt: string) => crypto.scryptSync(pass, salt, 32).toString("hex");
+function netOk(c: Config, user: string, pass: string) {
+  if (!c.net || user !== c.net.user) return false;
+  const a = Buffer.from(netHash(pass, c.net.salt), "hex"),
+    b = Buffer.from(c.net.hash, "hex");
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+const USER_OK = /^[a-zA-Z_][a-zA-Z0-9_]{0,40}$/;
+const passProblem = (p: string) =>
+  p.length < 6
+    ? "The password needs at least 6 characters."
+    : p.length > 100 || /[\r\n]/.test(p)
+      ? "That password can't be used."
+      : "";
+
+// ---------------------------------------------------------------- PostgreSQL (optional)
+const PG_VERSION = "17.7-1";
+const PG_URL = `https://get.enterprisedb.com/postgresql/postgresql-${PG_VERSION}-windows-x64.exe`;
+const PG_ROOT = path.join(process.env.ProgramFiles ?? "C:\\Program Files", "PostgreSQL");
+type PgJob = {
+  stage: "idle" | "download" | "check" | "install" | "done" | "failed";
+  got: number;
+  total: number;
+  msg: string;
+};
+const pgJob: PgJob = { stage: "idle", got: 0, total: 0, msg: "" };
+const pgBusy = () => ["download", "check", "install"].includes(pgJob.stage);
+function pgFind() {
+  try {
+    const v = fs
+      .readdirSync(PG_ROOT)
+      .filter(x => fs.existsSync(path.join(PG_ROOT, x, "bin", "psql.exe")))
+      .sort((a, b) => parseFloat(b) - parseFloat(a))[0];
+    return v ? { version: v, bin: path.join(PG_ROOT, v, "bin") } : null;
+  } catch {
+    return null;
+  }
+}
+function psql(bin: string, user: string, pass: string, sql: string): Promise<string> {
+  return new Promise((ok, no) => {
+    execFile(
+      path.join(bin, "psql.exe"),
+      ["-h", "localhost", "-p", "5432", "-U", user, "-d", "postgres", "-w", "-tAc", sql],
+      { env: { ...process.env, PGPASSWORD: pass }, timeout: 20000 },
+      (err, stdout, stderr) => (err ? no(new Error(stderr || err.message)) : ok(stdout))
+    );
+  });
+}
+/** Check the login, make the kaytia database if it isn't there, and remember how to reach it. */
+async function pgConnect(user: string, pass: string) {
+  const pg = pgFind();
+  if (!pg) throw new Error("PostgreSQL wasn't found on this computer.");
+  try {
+    await psql(pg.bin, user, pass, "SELECT 1");
+  } catch (e) {
+    throw new Error(
+      /password authentication|role .* does not exist/i.test((e as Error).message)
+        ? "PostgreSQL refused that username or password."
+        : "PostgreSQL isn't answering on this computer."
+    );
+  }
+  const has = await psql(pg.bin, user, pass, "SELECT 1 FROM pg_database WHERE datname='kaytia'");
+  if (has.trim() !== "1") await psql(pg.bin, user, pass, "CREATE DATABASE kaytia");
+  const url = `postgresql://${encodeURIComponent(user)}:${encodeURIComponent(pass)}@localhost:5432/kaytia`;
+  saveEnvValues(path.join(HOME, "kaytia.env"), { DATABASE_URL: url });
+  process.env.DATABASE_URL = url;
+}
+/** Download, confirm it really comes from EnterpriseDB, install with Windows' permission, then connect. */
+async function pgInstall(user: string, pass: string) {
+  const file = path.join(os.tmpdir(), `kaytia-postgresql-${PG_VERSION}.exe`),
+    options = path.join(os.tmpdir(), `kaytia-pg-${crypto.randomUUID()}.txt`);
+  Object.assign(pgJob, { stage: "download", got: 0, total: 0, msg: "" });
+  try {
+    let r: globalThis.Response;
+    try {
+      r = await fetch(PG_URL, { signal: AbortSignal.timeout(3 * 3600 * 1000) });
+    } catch {
+      throw new Error("PostgreSQL could not be downloaded. Check the internet connection.");
+    }
+    if (!r.ok || !r.body) throw new Error("The PostgreSQL download isn't available right now.");
+    pgJob.total = Number(r.headers.get("content-length") ?? 0);
+    const out = await fs.promises.open(file, "w");
+    try {
+      for await (const chunk of r.body as unknown as AsyncIterable<Uint8Array>) {
+        await out.write(chunk);
+        pgJob.got += chunk.length;
+      }
+    } finally {
+      await out.close();
+    }
+    if (pgJob.total && pgJob.got !== pgJob.total)
+      throw new Error("The PostgreSQL download stopped early. Try again.");
+
+    pgJob.stage = "check";
+    const signed = await powershell(
+      "$s = Get-AuthenticodeSignature -LiteralPath $env:KF_FILE; if ($s.Status -eq 'Valid' -and $s.SignerCertificate.Subject -match 'EnterpriseDB') { 'yes' } else { 'no' }",
+      { KF_FILE: file },
+      300000
+    );
+    if (signed.trim() !== "yes")
+      throw new Error("The download failed its safety check and was not run.");
+
+    pgJob.stage = "install";
+    // The password goes in a file, so it never shows in the list of running programs.
+    fs.writeFileSync(
+      options,
+      [
+        "mode=unattended",
+        "unattendedmodeui=none",
+        `superaccount=${user}`,
+        `superpassword=${pass}`,
+        "serverport=5432",
+        "disable-components=pgAdmin,stackbuilder"
+      ].join("\n"),
+      { mode: 0o600 }
+    );
+    const code = await powershell(
+      "$p = Start-Process -FilePath $env:KF_FILE -ArgumentList @('--optionfile', ('\"' + $env:KF_OPT + '\"')) -Verb RunAs -Wait -PassThru; $p.ExitCode",
+      { KF_FILE: file, KF_OPT: options },
+      40 * 60 * 1000
+    ).catch(() => {
+      throw new Error(
+        "PostgreSQL was not installed. Windows needs an Administrator to approve it."
+      );
+    });
+    if (code.trim() !== "0")
+      throw new Error(`The PostgreSQL installer stopped (code ${code.trim()}).`);
+    await pgConnect(user, pass);
+    Object.assign(pgJob, { stage: "done", msg: "" });
+  } catch (e) {
+    Object.assign(pgJob, { stage: "failed", msg: (e as Error).message });
+  } finally {
+    fs.rmSync(options, { force: true });
+    fs.rmSync(file, { force: true });
+  }
+}
+
 // ---------------------------------------------------------------- guards
 const address = (req: Request) => (req.socket.remoteAddress ?? "").replace(/^::ffff:/, "");
 const isLocal = (req: Request) => ["127.0.0.1", "::1"].includes(address(req));
@@ -379,6 +525,8 @@ async function main() {
   const big = express.json({ limit: "64mb" });
 
   // ---- the door for tills, on the Main
+  const seen = new Map<string, number>(); // when each computer was last heard from
+  const onlineNow = (ip?: string) => !!ip && Date.now() - (seen.get(ip) ?? 0) < 90000;
   const door = express.Router();
   door.use((req, res, next) => {
     const ip = address(req);
@@ -387,23 +535,43 @@ async function main() {
       return void res.status(409).json({ error: "This computer is not the Main." });
     if (tooMany(ip))
       return void res.status(429).json({ error: "Too many wrong codes. Wait a minute." });
+    if (req.path === "/join") return next();
     if (req.get("x-kaytia-code") !== cfg.code) {
       badTry(ip);
       return void res.status(401).json({ error: "That connect code isn't right." });
     }
+    seen.set(ip, Date.now());
     next();
+  });
+  door.post("/join", big, (req, res) => {
+    if (!cfg.net)
+      return void res
+        .status(409)
+        .json({ error: "This server has no login yet. Use its connect code instead." });
+    if (!netOk(cfg, String(req.body?.user ?? ""), String(req.body?.pass ?? ""))) {
+      badTry(address(req));
+      return void res.status(401).json({ error: "That username or password isn't right." });
+    }
+    res.json({ code: cfg.code });
   });
   door.post("/pair", big, (req, res) => {
     const id = String(req.body?.id ?? ""),
       name = String(req.body?.name ?? "Till").slice(0, 40);
     if (!id) return void res.status(400).json({ error: "No computer id." });
+    const ip = address(req),
+      added = (cfg.machines ?? []).find(m => m.ip === ip);
     let till = cfg.tills[id];
+    if (till && (till.ip !== ip || (added && till.name !== added.name))) {
+      till.ip = ip;
+      if (added) till.name = added.name;
+      saveConfig(cfg);
+    }
     if (!till) {
       const used = new Set(Object.values(cfg.tills).map(t => t.idx));
       let idx = 1;
       while (used.has(idx)) idx++;
       if (idx >= 20) return void res.status(409).json({ error: "This Main already has 19 tills." });
-      till = { idx, name, at: new Date().toISOString() };
+      till = { idx, name: added ? added.name : name, at: new Date().toISOString(), ip };
       cfg.tills[id] = till;
       saveConfig(cfg);
     }
@@ -465,13 +633,18 @@ async function main() {
         computer: os.hostname(),
         addresses: lanAddresses().map(a => (PORT === MAIN_PORT_DEFAULT ? a : `${a}:${PORT}`)),
         code: cfg.code,
-        tills: Object.values(cfg.tills),
+        tills: Object.values(cfg.tills).map(t => ({ ...t, online: onlineNow(t.ip) })),
+        machines: (cfg.machines ?? []).map(m => {
+          const t = Object.values(cfg.tills).find(x => x.ip === m.ip);
+          return { ...m, joined: !!t, online: onlineNow(m.ip) };
+        }),
+        netUser: cfg.net?.user ?? "",
         main: cfg.main ?? "",
         rev: cfg.role === "main" ? readStore().rev : null,
         home: HOME
       })
   );
-  lan.post("/main", big, (_req, res) => {
+  const becomeMain = () => {
     if (cfg.role === "till") {
       // A former till starts its own set of shared data.
       cfg.epoch = crypto.randomUUID();
@@ -481,6 +654,73 @@ async function main() {
     cfg.role = "main";
     cfg.idx = 0;
     cfg.chosen = true;
+  };
+  lan.post("/main", big, (_req, res) => {
+    becomeMain();
+    saveConfig(cfg);
+    res.json({ ok: true });
+  });
+  lan.post("/server", big, (req, res) => {
+    const user = String(req.body?.user ?? "").trim(),
+      pass = String(req.body?.pass ?? "");
+    if (!USER_OK.test(user))
+      return void res
+        .status(400)
+        .json({
+          error: "Use only letters, numbers and _ in the username, starting with a letter."
+        });
+    const bad = passProblem(pass);
+    if (bad) return void res.status(400).json({ error: bad });
+    becomeMain();
+    const salt = crypto.randomBytes(16).toString("hex");
+    cfg.net = { user, salt, hash: netHash(pass, salt) };
+    saveConfig(cfg);
+    res.json({ ok: true });
+  });
+  lan.get("/pg", (_req, res) => {
+    const found = pgFind();
+    res.json({ found: found ? { version: found.version } : null, offer: PG_VERSION, job: pgJob });
+  });
+  lan.post("/pg", big, async (req, res) => {
+    const mode = String(req.body?.mode ?? ""),
+      user = String(req.body?.user ?? "").trim(),
+      pass = String(req.body?.pass ?? "");
+    if (!USER_OK.test(user) || passProblem(pass))
+      return void res.status(400).json({ error: "Check the username and password." });
+    if (pgBusy())
+      return void res.status(409).json({ error: "PostgreSQL is already being installed." });
+    if (mode === "use") {
+      try {
+        await pgConnect(user, pass);
+        return void res.json({ ok: true });
+      } catch (e) {
+        return void res.status(400).json({ error: (e as Error).message });
+      }
+    }
+    if (mode !== "install") return void res.status(400).json({ error: "Choose an option." });
+    void pgInstall(user, pass);
+    res.json({ started: true });
+  });
+  const machineIp = /^[a-zA-Z0-9.-]{1,100}$/;
+  lan.post("/machine", big, (req, res) => {
+    const name = String(req.body?.name ?? "")
+        .trim()
+        .slice(0, 40),
+      ip = String(req.body?.ip ?? "").trim();
+    if (cfg.role !== "main")
+      return void res.status(409).json({ error: "This computer isn't the server." });
+    if (!name) return void res.status(400).json({ error: "Enter the computer's name." });
+    if (!machineIp.test(ip))
+      return void res.status(400).json({ error: "Enter the computer's IP address." });
+    cfg.machines = cfg.machines ?? [];
+    if (cfg.machines.some(m => m.ip === ip))
+      return void res.status(400).json({ error: "That IP address is already on the list." });
+    cfg.machines.push({ name, ip });
+    saveConfig(cfg);
+    res.json({ ok: true });
+  });
+  lan.post("/machine/remove", big, (req, res) => {
+    cfg.machines = (cfg.machines ?? []).filter(m => m.ip !== String(req.body?.ip ?? ""));
     saveConfig(cfg);
     res.json({ ok: true });
   });
@@ -491,13 +731,28 @@ async function main() {
           .replace(/^https?:\/\//, "")
           .replace(/\/.*$/, "")
       ),
-      code = String(req.body?.code ?? "")
-        .trim()
-        .toUpperCase();
+      user = String(req.body?.user ?? "").trim(),
+      pass = String(req.body?.pass ?? "");
+    let code = String(req.body?.code ?? "")
+      .trim()
+      .toUpperCase();
     if (!/^[\w.-]+:\d+$/.test(host))
-      return void res.status(400).json({ error: "Enter the Main computer's address." });
-    if (!code) return void res.status(400).json({ error: "Enter the connect code." });
+      return void res.status(400).json({ error: "Enter the server's IP address." });
+    if (!code && !user)
+      return void res.status(400).json({ error: "Enter the server's username and password." });
     try {
+      if (!code) {
+        const r = await fetch(`http://${host}/net/join`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ user, pass }),
+          signal: AbortSignal.timeout(8000)
+        });
+        const j = (await r.json().catch(() => ({}))) as { code?: string; error?: string };
+        if (!r.ok || !j.code)
+          return void res.status(400).json({ error: j.error ?? "The server said no." });
+        code = j.code;
+      }
       const r = await fetch(`http://${host}/net/pair`, {
         method: "POST",
         headers: { "content-type": "application/json", "x-kaytia-code": code },

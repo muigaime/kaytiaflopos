@@ -68,11 +68,13 @@ function onThisComputer(req: Request): boolean {
   const origin = req.get("origin");
   return own && (!origin || /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin));
 }
-function saveAccount(file: string, values: Record<string, string>) {
+/** Change these settings in the file and leave the rest of it alone. */
+export function saveEnvValues(file: string, values: Record<string, string>) {
+  const names = Object.keys(values);
   const others = existsSync(file)
     ? readFileSync(file, "utf8")
         .split(/\r?\n/)
-        .filter(l => l.trim() && !/^\s*SMTP_(HOST|PORT|USER|PASS|FROM)\s*=/.test(l))
+        .filter(l => l.trim() && !names.some(n => new RegExp(`^\\s*${n}\\s*=`).test(l)))
     : [];
   const lines = Object.entries(values).map(([k, v]) => `${k}="${v}"`);
   writeFileSync(file + ".tmp", [...others, ...lines].join("\r\n") + "\r\n", { mode: 0o600 });
@@ -116,7 +118,7 @@ mailRouter.post("/account", (req: Request, res: Response) => {
     SMTP_FROM: from
   };
   try {
-    saveAccount(accountFile, values);
+    saveEnvValues(accountFile, values);
   } catch (e) {
     console.error("Email account not saved:", (e as Error).message);
     return refuse(res, 500, "MAIL_SAVE_FAILED", "The email account could not be saved.");
