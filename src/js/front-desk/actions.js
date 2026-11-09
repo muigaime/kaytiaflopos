@@ -1,7 +1,7 @@
 const fdNotify = (t, ok) => {
   fdNotice = t ? { t, ok: !!ok } : null;
 };
-function recPay(r, method, amt, ci) {
+function recPay(r, method, amt, ci, fx) {
   if (!(amt > 0)) return "Enter an amount above zero.";
   if (method === "account") {
     const c = CU[ci];
@@ -10,7 +10,7 @@ function recPay(r, method, amt, ci) {
   }
   if (!shiftOk()) return "__shift";
   if (method === "account") CU[ci].owes += amt;
-  r.pays.push({ at: new Date().toISOString(), method, amt, by: user.n });
+  r.pays.push({ at: new Date().toISOString(), method, amt, by: user.n, ...(fx || {}) });
   const pos = posCut(r, amt),
     fresh = amt - pos;
   SALES.push({
@@ -54,8 +54,19 @@ $("#fd").onclick = e => {
   if (!b) return;
   // Each action belongs to a right, whatever is on the screen.
   const act = b.dataset.f,
-    onHk = ["hkset", "hkprint", "hkf"].includes(act),
-    onSet = ["radd", "rdel", "rtnew", "rtedit", "rtcancel", "rtdel", "rtsave"].includes(act);
+    onHk = ["hkset", "hkprint", "hkf", "reqadd", "reqdel", "reqsend"].includes(act),
+    onSet = [
+      "radd",
+      "rdel",
+      "rtnew",
+      "rtedit",
+      "rtcancel",
+      "rtdel",
+      "rtsave",
+      "fxget",
+      "fxdel",
+      "fxadd"
+    ].includes(act);
   if (onSet ? !fdCan("set") : !fdCan("desk") && !(onHk && fdCan("hk"))) return;
   const f = b.dataset.f,
     id = b.dataset.id,
@@ -80,6 +91,87 @@ $("#fd").onclick = e => {
     fdView = "book";
   } else if (f === "rflt") {
     fdRoomF = b.dataset.k;
+  } else if (f === "fxget") {
+    fxRefresh().then(err => {
+      fdNotify(err || "Exchange rates updated.", !err);
+      fdDraw();
+    });
+    return;
+  } else if (f === "fxdel") {
+    fxList().splice(+b.dataset.i, 1);
+    sync();
+  } else if (f === "fxadd") {
+    const c = g("fx_c").toUpperCase(),
+      rate = n("fx_r");
+    if (!/^[A-Z]{3}$/.test(c) || c === "KES")
+      fdNotify("Enter a three-letter currency code, such as TZS.");
+    else if (fxList().some(x => x.c === c)) fdNotify(`${c} is already on the list.`);
+    else if (rate > 0) {
+      fxList().push({ c, rate });
+      sync();
+    } else {
+      fxList().push({ c, rate: 0 });
+      fxRefresh().then(err => {
+        const row = fxList().find(x => x.c === c);
+        if (err || !(row.rate > 0)) {
+          fxList().splice(fxList().indexOf(row), 1);
+          fdNotify(err || `No exchange rate was found for ${c}.`);
+        } else fdNotify(`${c} added.`, 1);
+        sync();
+        fdDraw();
+      });
+      return;
+    }
+  } else if (f === "reqadd" || f === "reqdel" || f === "reqsend") {
+    const F = fdReq,
+      api = window.fdReqApi;
+    F.dept = g("r_d");
+    F.store = g("r_s");
+    F.note = g("r_n");
+    if (f === "reqdel") F.lines.splice(+b.dataset.i, 1);
+    else if (f === "reqadd") {
+      const k = g("r_k"),
+        q = n("r_q");
+      if (!(q > 0)) fdNotify("Enter how many you need.");
+      else {
+        const ex = F.lines.find(x => x.k === k);
+        if (ex) ex.q += q;
+        else F.lines.push({ k, q });
+      }
+    } else if (!F.lines.length) fdNotify("Add at least one item.");
+    else {
+      const id = api.make(F.dept, F.store, F.note, F.lines, user.n);
+      F.lines = [];
+      F.note = "";
+      fdNotify(`Requisition ${id} sent for approval.`, 1);
+    }
+  } else if (f === "rxadd") {
+    const amt = n("x_amt"),
+      desc = g("x_desc");
+    if (!desc) fdNotify("Say what the money was spent on.");
+    else if (!(amt > 0)) fdNotify("Enter the amount.");
+    else {
+      const rec = {
+        id: "RX" + Date.now(),
+        at: new Date().toISOString(),
+        bd: T,
+        room: g("x_room"),
+        kind: g("x_kind"),
+        desc,
+        amt,
+        paid: g("x_paid"),
+        by: user.n
+      };
+      roomExpenses().push(rec);
+      auditAdd("Room expense", `Room ${rec.room}: ${rec.kind}, KES ${amt}, ${desc}`, {
+        who: user.n,
+        mod: "Front Desk"
+      });
+      const err = window.fdRoomExpPost ? window.fdRoomExpPost(rec) : "";
+      if (err) rec.notPosted = err;
+      sync();
+      fdNotify(err ? `Saved, but not in Accounts: ${err}` : "Room expense saved.", !err);
+    }
   } else if (f === "hkf") {
     fdHkF = b.dataset.k;
   } else if (f === "hkset") {
@@ -87,6 +179,9 @@ $("#fd").onclick = e => {
     if (stayOf(no)) fdNotify("The room is occupied.");
     else {
       rm.status = b.dataset.set;
+      // The job is done once the room is clean.
+      if (b.dataset.set === "vac") delete hkAssigned()[no];
+
       auditAdd("Room status", `Room ${no} set to ${ROOM_STATUS_LABELS[roomStatus(rm)]}`, {
         who: user ? user.n : "Front Desk",
         mod: "Front Desk"
@@ -587,7 +682,20 @@ $("#fd").onclick = e => {
     }
   } else if (f === "paygo") {
     r = RESERVATIONS.find(x => x.id === fdSelectedRes);
-    const m = recPay(r, g("m_m"), n("m_a"), +$("#m_c").value);
+    const cur = g("m_cur"),
+      fcy = n("m_a"),
+      rate = fxRate(cur);
+    if (cur !== "KES" && !(rate > 0)) {
+      fdNotify(`There is no exchange rate for ${cur} yet.`);
+      return fdDraw();
+    }
+    const m = recPay(
+      r,
+      g("m_m"),
+      cur === "KES" ? fcy : Math.round(fcy * rate * 100) / 100,
+      +$("#m_c").value,
+      cur === "KES" ? null : { cur, fcy, rate }
+    );
     if (m === "__shift") return;
     fdNotify(m || "Payment received.", !m);
   } else if (f === "out") {
@@ -683,6 +791,47 @@ $("#fd").oninput = e => {
 $("#docv").onclick = () => $("#docv").classList.remove("show");
 $("#fd").onchange = e => {
   const t = e.target;
+  if (t.dataset.hka !== undefined) return hkAssign(t.dataset.hka, t.value);
+  if (t.id === "m_cur") {
+    const rate = fxRate(t.value) || 1;
+    $("#m_a").value = Math.round((+t.dataset.bal / rate) * 100) / 100 || "";
+    return;
+  }
+  if (t.dataset.tarcur !== undefined) {
+    fdTarCur = t.value;
+    return fdDraw();
+  }
+  if (
+    t.dataset.trate !== undefined ||
+    t.dataset.fxr !== undefined ||
+    t.dataset.fxauto !== undefined
+  ) {
+    if (!fdCan("set")) return;
+    if (t.dataset.fxauto !== undefined) FD_SETTINGS.fxAuto = t.checked;
+    else if (t.dataset.fxr !== undefined) {
+      const v = parseFloat(t.value);
+      if (v > 0) fxList()[+t.dataset.fxr].rate = v;
+      else t.value = fxList()[+t.dataset.fxr].rate;
+    } else {
+      const v = parseFloat(t.value),
+        type = ROOMTYPES.find(x => x.name === t.dataset.trate);
+      if (!(v > 0) || v < (type.floor || 0)) {
+        fdNotify(v > 0 ? "That is below the room type's rate floor." : "Enter a rate above zero.");
+        return fdDraw();
+      }
+      type.rate = v;
+      ROOMS.forEach(r => {
+        if (r.type === type.name) r.rate = v;
+      });
+      auditAdd("Room rate", `${type.name} rate set to KES ${v}`, {
+        who: user.n,
+        mod: "Front Desk"
+      });
+    }
+    sync();
+    return fdDraw();
+  }
+
   if (t.dataset.up) {
     const fl = t.files[0];
     if (!fl) return;

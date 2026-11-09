@@ -1,3 +1,30 @@
+/** Which housekeeper each room is given to: { room: { to, by, at } }. */
+const hkAssigned = () => FD_SETTINGS.hkAssign || (FD_SETTINGS.hkAssign = {});
+function hkAssign(no, to) {
+  if (!fdCan("hksup")) return;
+  const A = hkAssigned();
+  if (to) A[no] = { to, by: user.n, at: new Date().toISOString() };
+  else delete A[no];
+  auditAdd("Housekeeping", to ? `Room ${no} assigned to ${to}` : `Room ${no} unassigned`, {
+    who: user.n,
+    mod: "Front Desk"
+  });
+  sync();
+  fdDraw();
+}
+const RX_KINDS = [
+  "Repairs",
+  "Plumbing",
+  "Electrical",
+  "Furniture",
+  "Linen and towels",
+  "Cleaning supplies",
+  "Amenities",
+  "Other"
+];
+const RX_PAID = ["Cash", "M-Pesa", "Bank", "On credit"];
+const roomExpenses = () => FD_SETTINGS.roomExp || (FD_SETTINGS.roomExp = []);
+const fdReq = { dept: "", store: "", note: "", lines: [] };
 const NATIONALITIES = [
     "Kenyan",
     "Ugandan",

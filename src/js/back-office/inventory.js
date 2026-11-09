@@ -700,13 +700,13 @@ function masterHTML() {
  }</table></div></div>`;
 }
 /** A selling point asks a store for stock (raised from the Selling points page). lines: [{ k, q }] in units. */
-function makeRequisition(dept, store, note, lines) {
+function makeRequisition(dept, store, note, lines, by) {
   const r = {
     id: nid("REQ"),
     at: new Date().toISOString(),
     dept,
     store,
-    by: boUser.n,
+    by: by || boUser.n,
     note,
     status: AWAIT, // a manager approves it before the store can issue (approvals.js)
     lines: lines.map(x => ({ k: x.k, q: x.q, issued: 0 }))
@@ -715,6 +715,92 @@ function makeRequisition(dept, store, note, lines) {
   bosave();
   return r;
 }
+invF.nrq = { open: false, to: "", store: "", note: "", pick: "", lines: [] };
+/** Raise a requisition from the Back Office, for any selling point or department. */
+function reqNewHTML(here) {
+  const F = invF.nrq,
+    can = boCan("inv.req");
+  if (!can) return "";
+  if (!F.open)
+    return '<div class="pn"><div class="inv-head"><h4>Need stock from a store?</h4><button class="chip on" data-a="inv_nrq">New requisition</button></div></div>';
+  F.to = pick(F.to, ALLD);
+  F.store = pick(F.store || (isStore(here) ? here : ""), STORES);
+  return `<div class="pn"><div class="inv-head"><h4>New requisition</h4><button class="mini" data-a="inv_nrq">Close</button></div>
+  <div class="fr"><label>For<select data-iv="nrq.to">${opts(ALLD, F.to)}</select></label><label>From store<select data-iv="nrq.store">${opts(STORES, F.store)}</select></label><label>Note<input data-iv="nrq.note" value="${esc(F.note)}" placeholder="Optional"></label></div>
+  ${prLineEditor("nrq", itemsByName(), "Item", "Quantity")}
+  ${F.lines.length ? `<div class="tw"><table class="t"><tr><th>Item</th><th class="n">Quantity</th><th class="n">In ${esc(F.store)}</th><th></th></tr>${F.lines.map((x, i) => `<tr><td>${esc(itemInfo(x.k).name)}</td><td class="n">${qtyBoth(x.k, x.q)}</td><td class="n">${qtyAt(F.store, x.k)}</td><td><button class="mini" data-a="rec_ldel" data-f="nrq" data-i="${i}">✕</button></td></tr>`).join("")}</table></div>` : ""}
+  <div class="fr"><button class="chip on" data-a="inv_nrqgo">Send requisition</button></div></div>`;
+}
+function reqNewSend() {
+  const F = invF.nrq;
+  if (!F.lines.length) return toast("Add at least one item.");
+  const r = makeRequisition(F.to, F.store, F.note.trim(), F.lines);
+  auditAdd("Requisition", `${r.id} raised for ${F.to} from ${F.store}`);
+  invF.nrq = { ...invF.nrq, open: false, note: "", lines: [] };
+  toast(`Requisition ${r.id} sent for approval.`);
+  all();
+}
+// The Front Desk raises requisitions and posts room expenses through these.
+window.fdReqApi = {
+  stores: () => STORES.slice(),
+  items: () => itemsByName().map(k => ({ k, name: itemInfo(k).name, uom: itemInfo(k).uom })),
+  make(dept, store, note, lines, by) {
+    if (!ALLD.includes(dept)) {
+      ALLD.push(dept);
+      OUTLET_INFO[dept] = { type: DEPARTMENT, store };
+      syncLocs();
+    }
+    const r = makeRequisition(dept, store, note, lines, by);
+    auditAdd("Requisition", `${r.id} raised for ${dept} from ${store}`, {
+      who: by,
+      mod: "Front Desk"
+    });
+    return r.id;
+  },
+  list: depts =>
+    REQS.filter(r => depts.includes(r.dept))
+      .slice(-30)
+      .reverse()
+      .map(r => ({
+        id: r.id,
+        date: dateGB(ymdOf(r.at)),
+        dept: r.dept,
+        store: r.store,
+        by: r.by,
+        status: r.status,
+        items: r.lines.map(l => `${itemInfo(l.k).name} ${qn(l.q)}`).join(", ")
+      }))
+};
+window.fdHkStaff = () =>
+  ADM.filter(a => {
+    const role = a.role || SUPER;
+    return (
+      !a.off && roleHas(role, "fo.hk") && !roleHas(role, "fo.hksup") && !roleHas(role, "fo.desk")
+    );
+  }).map(a => a.n);
+const RX_ACCOUNT = { "Linen and towels": "6220", "Cleaning supplies": "6210", Amenities: "6210" };
+const RX_MONEY = { Cash: "1000", "M-Pesa": "1020", "On credit": "2000" };
+/** A room expense goes into the books. "" when posted; otherwise why it couldn't be. */
+window.fdRoomExpPost = x => {
+  const from =
+    RX_MONEY[x.paid] || (acMoney().find(a => /bank/i.test(a.name)) || { code: "1000" }).code;
+  // Accounts records who posted; at the Front Desk nobody is signed in to the Back Office.
+  const signedIn = boUser;
+  boUser = boUser || { n: x.by };
+  const err = acPost({
+    date: x.bd,
+    narr: `Room ${x.room}: ${x.kind}, ${x.desc}`,
+    ref: x.id,
+    src: "Expense",
+    who: x.by,
+    lines: [
+      { a: RX_ACCOUNT[x.kind] || "6200", dr: x.amt, cr: 0 },
+      { a: from, dr: 0, cr: x.amt }
+    ]
+  });
+  boUser = signedIn;
+  return err || "";
+};
 function reqHTML() {
   // Requisitions SENT TO the selected store. Selling points raise them on their own page (Selling points).
   const here = STKT.loc,
@@ -722,7 +808,7 @@ function reqHTML() {
     act = isOpenReq,
     canIssue = r => act(r);
   const L = REQS.map((r, i) => [r, i]).filter(([r]) => reqsHere().includes(r));
-  return `<div class="pn"><div class="stk">Requisitions sent to ${placeLabel(here)} by selling points. Approving one moves the stock. Anything the store was short of stays open here to issue when it arrives.</div></div>
+  return `${reqNewHTML(here)}<div class="pn"><div class="stk">Requisitions sent to ${placeLabel(here)} by selling points. Approving one moves the stock. Anything the store was short of stays open here to issue when it arrives.</div></div>
  <div class="pn"><h4>${store ? "Requisitions to " : "Requisitions from "}${esc(here)}</h4>${
    L.length
      ? L.reverse()
@@ -1166,7 +1252,7 @@ function sdSync(f) {
   all();
 }
 function itemsTable(keys) {
-  return `<div class="pn tw"><div class="inv-head"><h4>Items in the Stock Master (${keys.length})</h4><span class="inv-btns">${invSdOpen ? "" : '<button class="mini" data-a="inv_sdtog">Send stock to a selling point</button>'}<button class="chip on" data-a="inv_itnew">+ New item</button></span></div><table class="t"><tr><th>Code</th><th>Item</th><th>Category</th><th>VAT / tax</th><th>Unit</th><th>Buying unit</th><th class="n">Buying price</th><th class="n">Cost / unit</th><th class="n">In stores</th><th class="n">At selling points</th><th></th></tr>${keys
+  return `<div class="pn tw"><div class="inv-head"><h4>Items in the Stock Master (${keys.length})</h4><span class="inv-btns">${invSdOpen ? "" : '<button class="mini" data-a="inv_sdtog">Send stock to a selling point</button>'}<button class="mini" data-a="prl_imp" data-k="stock">Import</button><button class="chip on" data-a="inv_itnew">+ New item</button></span></div><table class="t"><tr><th>Code</th><th>Item</th><th>Category</th><th>VAT / tax</th><th>Unit</th><th>Buying unit</th><th class="n">Buying price</th><th class="n">Cost / unit</th><th class="n">In stores</th><th class="n">At selling points</th><th></th></tr>${keys
     .map(k => {
       const u = itemInfo(k),
         all = tot(k),
@@ -1209,7 +1295,7 @@ function invView() {
     storeDeleteModal();
   if (invT === "home") return invHomeHTML(popups);
   const [title, what] = INV_PAGES[invT] || ["Inventory", ""];
-  return `<div class="inv invx inv-solo"><div class="inv-main">${invMenu()}<div class="inv-title"><h1>${title}</h1><p>${what}</p></div>${INV_NO_STORE.includes(invT) ? "" : strip()}${(B[invT] || masterHTML)()}${popups}</div></div>`;
+  return `<div class="inv invx inv-solo"><div class="inv-main">${invMenu()}<div class="inv-title"><h1>${title}</h1><p>${what}</p></div>${INV_NO_STORE.includes(invT) ? "" : strip()}${(B[invT] || masterHTML)()}${popups}${prImportModal()}</div></div>`;
 }
 V.inv = invView;
 function updMaster() {
@@ -1819,6 +1905,11 @@ function invAct(a, b) {
       `<div class="st-doc"><div class="st-head"><div>${esc(FD_SETTINGS.name)}</div><h2>${title}</h2></div><table class="st-t"><thead><tr>${T.c.map(h => `<th${num(h)}>${esc(h.replace("#", ""))}</th>`).join("")}</tr></thead><tbody>${T.r.map(r => `<tr>${r.map((v, i) => `<td${num(T.c[i])}>${esc(v)}</td>`).join("")}</tr>`).join("")}<tr class="st-tot"><td colspan="${T.c.length - 1}">Total value (KES)</td><td class="n">${m2(T.total)}</td></tr></tbody></table><div class="st-foot"><span>${printedBy()}</span></div></div>`
     );
   }
+  if (a === "nrq") {
+    invF.nrq.open = !invF.nrq.open;
+    return all();
+  }
+  if (a === "nrqgo") return reqNewSend();
   if (a === "stall" || a === "stnone") {
     document.querySelectorAll("#stEd [data-stk]").forEach(x => (x.checked = a === "stall"));
     return;

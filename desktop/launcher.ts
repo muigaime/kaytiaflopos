@@ -19,6 +19,10 @@ import {
 import { printRouter } from "../server/src/modules/printing/print.routes.ts";
 import { CONNECT_PAGE } from "./connect-page.ts";
 import { merge } from "./merge.js";
+import { createAttendance } from "./attendance.ts";
+import { createEtims } from "./etims.ts";
+import { createMpesa } from "./mpesa.ts";
+import { readImage } from "./ocr.ts";
 
 const HOME = process.env.KAYTIA_HOME ?? "C:\\KaytiaFlow";
 const PORT = Number(process.env.KAYTIA_PORT ?? 5500);
@@ -333,6 +337,24 @@ const lanAddresses = () =>
     .map(a => a!.address);
 const withPort = (host: string) => (/:\d+$/.test(host) ? host : `${host}:${MAIN_PORT_DEFAULT}`);
 
+// ---------------------------------------------------------------- the program's error log
+const ERRLOG = path.join(HOME, "error.log");
+function logError(msg: string) {
+  try {
+    fs.mkdirSync(HOME, { recursive: true });
+    if (fs.existsSync(ERRLOG) && fs.statSync(ERRLOG).size > 1048576) {
+      const text = fs.readFileSync(ERRLOG, "utf8");
+      fs.writeFileSync(ERRLOG, text.slice(-524288));
+    }
+    fs.appendFileSync(
+      ERRLOG,
+      `${new Date().toISOString()} [Program] ${msg.replace(/\r?\n/g, " ").slice(0, 2000)}\n`
+    );
+  } catch {
+    // A log that can't be written mustn't stop the program.
+  }
+}
+
 // ---------------------------------------------------------------- the server login
 const netHash = (pass: string, salt: string) => crypto.scryptSync(pass, salt, 32).toString("hex");
 function netOk(c: Config, user: string, pass: string) {
@@ -471,6 +493,22 @@ async function pgInstall(user: string, pass: string) {
   }
 }
 
+// ---------------------------------------------------------------- exchange rates
+/** Today's rates against the shilling, from a free public service. Nothing about the hotel is sent. */
+async function fxLatest(): Promise<{ status: number; json: Record<string, unknown> }> {
+  try {
+    const r = await fetch(process.env.KAYTIA_FX_URL ?? "https://open.er-api.com/v6/latest/KES", {
+      signal: AbortSignal.timeout(15000)
+    });
+    const j = (await r.json()) as { result?: string; rates?: Record<string, number> };
+    if (!r.ok || j.result !== "success" || !j.rates)
+      return { status: 502, json: { error: "The exchange rate service didn't answer properly." } };
+    return { status: 200, json: { rates: j.rates } };
+  } catch {
+    return { status: 502, json: { error: "The exchange rate service can't be reached." } };
+  }
+}
+
 // ---------------------------------------------------------------- guards
 const address = (req: Request) => (req.socket.remoteAddress ?? "").replace(/^::ffff:/, "");
 const isLocal = (req: Request) => ["127.0.0.1", "::1"].includes(address(req));
@@ -508,8 +546,17 @@ async function main() {
   process.title = "Kaytia Flow";
   if (!process.env.KAYTIA_NO_INSTALL && (await installIfNeeded()))
     return void setTimeout(() => process.exit(0), 3000);
+  const showError = console.error.bind(console);
+  console.error = (...a: unknown[]) => {
+    logError(a.map(String).join(" "));
+    showError(...a);
+  };
+  process.on("uncaughtExceptionMonitor", (e, origin) => logError(`${origin}: ${e.stack ?? e}`));
   const hasEnv = loadEnv();
   setMailAccountFile(path.join(HOME, "kaytia.env"));
+  const mpesa = createMpesa(HOME, v => saveEnvValues(path.join(HOME, "kaytia.env"), v));
+  const etims = createEtims(HOME, v => saveEnvValues(path.join(HOME, "kaytia.env"), v));
+  const attendance = createAttendance(HOME, v => saveEnvValues(path.join(HOME, "kaytia.env"), v));
   const cfg = loadConfig();
   if (!process.env.KAYTIA_NO_INSTALL) await makeShortcut(EXE).catch(() => {});
 
@@ -519,7 +566,8 @@ async function main() {
   app.disable("x-powered-by");
   app.use((req, res, next) => {
     // Other computers may only ever reach the tills' door below.
-    if (!isLocal(req) && !req.path.startsWith("/net/")) return void res.status(403).end();
+    if (!isLocal(req) && !req.path.startsWith("/net/") && !req.path.startsWith("/iclock/"))
+      return void res.status(403).end();
     next();
   });
   const big = express.json({ limit: "64mb" });
@@ -554,6 +602,21 @@ async function main() {
     }
     res.json({ code: cfg.code });
   });
+  const MPESA_OPS = ["status", "stk", "stk-state", "inbox", "check", "hold", "confirm"];
+  door.post("/mpesa/:op", big, async (req, res) => {
+    const op = String(req.params.op);
+    if (!MPESA_OPS.includes(op)) return void res.status(404).end();
+    const r = await mpesa.api(op, (req.body ?? {}) as Record<string, unknown>);
+    res.status(r.status).json(r.json);
+  });
+  door.post("/etims/:op", big, async (req, res) => {
+    const r = await etims.api(String(req.params.op), (req.body ?? {}) as Record<string, unknown>);
+    res.status(r.status).json(r.json);
+  });
+  door.post("/fx", big, async (_req, res) => {
+    const r = await fxLatest();
+    res.status(r.status).json(r.json);
+  });
   door.post("/pair", big, (req, res) => {
     const id = String(req.body?.id ?? ""),
       name = String(req.body?.name ?? "Till").slice(0, 40);
@@ -584,6 +647,30 @@ async function main() {
     (req, res) => void res.json(syncOnMain(req.body as SyncIn, String(req.body?.client ?? "till")))
   );
   app.use("/net", door);
+
+  // ---- fingerprint and face readers
+  const reader = express.Router();
+  reader.use((req, res, next) => {
+    if (!isPrivate(address(req))) return void res.status(403).end();
+    next();
+  });
+  const raw = express.text({ type: () => true, limit: "4mb" });
+  const sn = (req: Request) => String(req.query.SN ?? "");
+  reader.get("/cdata", (req, res) => void res.type("text/plain").send(attendance.options(sn(req))));
+  reader.post("/cdata", raw, (req, res) => {
+    const body = typeof req.body === "string" ? req.body : "";
+    res.type("text/plain").send(attendance.attlog(sn(req), String(req.query.table ?? ""), body));
+  });
+  reader.get(
+    "/getrequest",
+    (req, res) => void res.type("text/plain").send(attendance.poll(sn(req)))
+  );
+  reader.post("/devicecmd", raw, (_req, res) => void res.type("text/plain").send("OK"));
+  reader.post("/punch", big, (req, res) => {
+    const r = attendance.punch((req.body ?? {}) as Record<string, unknown>);
+    res.status(r.status).json(r.json);
+  });
+  app.use("/iclock", reader);
 
   // ---- this computer's own browser
   const lan = express.Router();
@@ -664,11 +751,9 @@ async function main() {
     const user = String(req.body?.user ?? "").trim(),
       pass = String(req.body?.pass ?? "");
     if (!USER_OK.test(user))
-      return void res
-        .status(400)
-        .json({
-          error: "Use only letters, numbers and _ in the username, starting with a letter."
-        });
+      return void res.status(400).json({
+        error: "Use only letters, numbers and _ in the username, starting with a letter."
+      });
     const bad = passProblem(pass);
     if (bad) return void res.status(400).json({ error: bad });
     becomeMain();
@@ -700,6 +785,82 @@ async function main() {
     if (mode !== "install") return void res.status(400).json({ error: "Choose an option." });
     void pgInstall(user, pass);
     res.json({ started: true });
+  });
+  // M-Pesa: a till asks the server, which holds the keys, the modem and the one list of payments.
+  lan.post("/mpesa/:op", big, async (req, res) => {
+    const op = String(req.params.op),
+      body = (req.body ?? {}) as Record<string, unknown>;
+    if (!MPESA_OPS.includes(op)) return void res.status(404).end();
+    try {
+      const r =
+        cfg.role === "main"
+          ? await mpesa.api(op, body)
+          : await toMain(cfg, `/net/mpesa/${op}`, body, 30000);
+      res.status(r.status).json(r.json);
+    } catch {
+      res.status(503).json({ offline: true });
+    }
+  });
+  lan.post("/etims/:op", big, async (req, res) => {
+    const op = String(req.params.op),
+      body = (req.body ?? {}) as Record<string, unknown>;
+    try {
+      const r =
+        cfg.role === "main"
+          ? await etims.api(op, body)
+          : await toMain(cfg, `/net/etims/${op}`, body, 30000);
+      res.status(r.status).json(r.json);
+    } catch {
+      res.status(503).json({ offline: true });
+    }
+  });
+  lan.post("/etims-admin/:op", big, async (req, res) => {
+    if (cfg.role !== "main")
+      return void res.status(409).json({ error: "Set this up on the main computer." });
+    const r = await etims.admin(String(req.params.op), (req.body ?? {}) as Record<string, unknown>);
+    res.status(r.status).json(r.json);
+  });
+  lan.post("/ocr", big, async (req, res) => {
+    const r = await readImage(String(req.body?.image ?? ""));
+    res.status(r.status).json(r.json);
+  });
+  lan.post("/fx", big, async (_req, res) => {
+    try {
+      const r = cfg.role === "main" ? await fxLatest() : await toMain(cfg, "/net/fx", {}, 20000);
+      res.status(r.status).json(r.json);
+    } catch {
+      res.status(503).json({ offline: true });
+    }
+  });
+  lan.post("/attendance/:op", big, (req, res) => {
+    if (cfg.role !== "main")
+      return void res.status(409).json({ error: "Set this up on the main computer." });
+    const op = String(req.params.op),
+      body = (req.body ?? {}) as Record<string, unknown>;
+    if (op === "pull") return void res.json(attendance.pull(Number(body.after) || 0));
+    if (op === "info") return void res.json(attendance.info());
+    if (op !== "save") return void res.status(404).end();
+    const r = attendance.save(body);
+    res.status(r.status).json(r.json);
+  });
+  lan.get("/errlog", (_req, res) => {
+    let lines: string[] = [];
+    try {
+      lines = fs.readFileSync(ERRLOG, "utf8").split(/\r?\n/).filter(Boolean).slice(-300);
+    } catch {
+      lines = [];
+    }
+    res.json({ lines });
+  });
+  lan.post("/errlog/clear", (_req, res) => {
+    fs.rmSync(ERRLOG, { force: true });
+    res.json({ ok: true });
+  });
+  lan.post("/mpesa-admin/:op", big, async (req, res) => {
+    if (cfg.role !== "main")
+      return void res.status(409).json({ error: "Set this up on the main computer." });
+    const r = await mpesa.admin(String(req.params.op), (req.body ?? {}) as Record<string, unknown>);
+    res.status(r.status).json(r.json);
   });
   const machineIp = /^[a-zA-Z0-9.-]{1,100}$/;
   lan.post("/machine", big, (req, res) => {
@@ -814,6 +975,12 @@ async function main() {
   api.get("/api/health", (_q, r) => void r.json({ ok: true }));
   api.use("/api/print", printRouter);
   api.use("/api/mail", mailRouter);
+  // Safaricom's answer, when the hotel gives it a public address. The long token in the address is the check.
+  api.post("/api/mpesa/cb/:token", (req, res) => {
+    const known = mpesa.callback(String(req.params.token), req.body);
+    res.status(known ? 200 : 404).json({ ResultCode: 0, ResultDesc: "Accepted" });
+  });
+  if (cfg.role === "main") mpesa.startModem();
   api.use((_q, r) => void r.status(404).end());
   const apiOk = await listen(api as unknown as http.RequestListener, API_PORT, "127.0.0.1");
   await listen(api as unknown as http.RequestListener, API_PORT, "::1");

@@ -18,7 +18,8 @@ const TTL = {
     license: "License",
     tables: "Tables",
     cred: "Customers",
-    hr: "HR & Payroll"
+    hr: "HR & Payroll",
+    mpesa: "M-Pesa & eTIMS"
   },
   VIEW = {
     "Shifts & Day": "shift",
@@ -40,7 +41,8 @@ const TTL = {
     "Users & roles": "staff",
     "Waiter setup": "wait",
     License: "license",
-    Tables: "tables"
+    Tables: "tables",
+    "M-Pesa & eTIMS": "mpesa"
   };
 function render() {
   const h = view === "home";
@@ -48,21 +50,9 @@ function render() {
   $("#vSub").style.display = h ? "none" : "";
   if (h) return;
   $("#vSub").innerHTML =
-    (["inv", "rec", "pur", "vendors", "acct", "hr", "rep"].includes(view)
+    (["inv", "rec", "pur", "vendors", "acct", "hr", "rep", "rooms", "mpesa", "prod"].includes(view)
       ? ""
-      : `<div class="hello"><div><h1>${TTL[view]}</h1><p>${view === "audit" ? "Who did what, when and from which computer. Entries can't be changed or removed." : view === "prod" ? "Everything on sale at your selling points. Add items, change prices and set their options here." : view === "tables" ? "Tables and takeaways for the POS. Any waiter can use any of them, and several waiters can share one." : view === "license" ? "Your trial or license, and entering a new key" : view === "wait" ? "Create waiters, cashiers and managers, and choose what each may do on the POS" : view === "sales" ? br + " · the current day, unless you search" : view === "settings" ? "Hotel details, bills and receipts, POS options, tax and printers" : view === "rec" ? "Turn kitchen materials into what you sell, by production or by recipe" : view === "rooms" ? "Occupancy, guests and room sales · revenue for the " + PL[per] : view === "rep" ? "Run any report for a date range and sale point" : view === "outlets" ? "Bars, restaurants, kitchens and shops that get stock from a store and sell on the POS" : view === "pur" ? "Purchase orders, receiving goods and what you have bought" : view === "cred" ? "Credit customers, what they owe, their statements and payments" : view === "vendors" ? "The vendors you buy from. You choose them on purchase orders and when receiving goods" : "Who can sign in, and what each role may do"}</p></div>${
-          view === "rooms"
-            ? `<div class="seg">${[
-                ["today", "Today"],
-                ["7", "7 days"],
-                ["30", "30 days"]
-              ]
-                .map(
-                  ([p, l]) => `<button data-p="${p}" class="${p === per ? "on" : ""}">${l}</button>`
-                )
-                .join("")}</div>`
-            : ""
-        }</div>`) +
+      : `<div class="hello"><div><h1>${TTL[view]}</h1><p>${view === "audit" ? "Who did what, when and from which computer. Entries can't be changed or removed." : view === "prod" ? "Everything on sale at your selling points. Add items, change prices and set their options here." : view === "tables" ? "Tables and takeaways for the POS. Any waiter can use any of them, and several waiters can share one." : view === "license" ? "Your trial or license, and entering a new key" : view === "wait" ? "Create waiters, cashiers and managers, and choose what each may do on the POS" : view === "sales" ? br + " · the current day, unless you search" : view === "settings" ? "Hotel details, bills and receipts, POS options, tax and printers" : view === "rec" ? "Turn kitchen materials into what you sell, by production or by recipe" : view === "rooms" ? "Occupancy, guests and room sales · revenue for the " + PL[per] : view === "rep" ? "Run any report for a date range and sale point" : view === "outlets" ? "Bars, restaurants, kitchens and shops that get stock from a store and sell on the POS" : view === "pur" ? "Purchase orders, receiving goods and what you have bought" : view === "cred" ? "Credit customers, what they owe, their statements and payments" : view === "vendors" ? "The vendors you buy from. You choose them on purchase orders and when receiving goods" : "Who can sign in, and what each role may do"}</p></div>${""}</div>`) +
     V[view]() +
     docPopup();
 }
@@ -108,6 +98,10 @@ $("#nav").onclick = e => {
   if (b.dataset.n === "Inventory") invT = "home";
   if (b.dataset.n === "Accounting") acT = "home";
   if (b.dataset.n === "Reports") rpHome = true;
+  if (b.dataset.n === "Room reports") rrHome = true;
+  if (b.dataset.n === "HR & Payroll") hrS.tab = "home";
+  if (b.dataset.n === "Products List") prEt.loaded = false;
+  if (b.dataset.n === "M-Pesa & eTIMS") mpS.loaded = false;
   if (b.dataset.n === "Recipes & Production") recT = "home";
   go(b.dataset.n);
 };

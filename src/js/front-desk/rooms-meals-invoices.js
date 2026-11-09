@@ -64,7 +64,7 @@ function mealRows(a, b) {
   return { day, plan };
 }
 function mealCard() {
-  return `<div class="fd-card"><h4>Meal plans (per person per night)</h4><div class="fd-form">${["BB", "HB", "FB"].map(k => `<label>${MEAL_PLANS[k]} (KES)<input type="number" data-mp="${k}" value="${FD_SETTINGS.meals[k] || 0}"></label>`).join("")}<label>Child price (% of adult)<input type="number" data-mc="1" value="${FD_SETTINGS.child}"></label></div><div class="stk">Room rates stay room-only. The meal plan is added on top and shown as its own line on bills, invoices and reports.</div></div>`;
+  return `<div class="fd-card"><h4>Meal plans (per person per night)</h4><div class="fd-form">${["BB", "HB", "FB", "AI"].map(k => `<label>${MEAL_PLANS[k]} (KES)<input type="number" data-mp="${k}" value="${FD_SETTINGS.meals[k] || 0}"></label>`).join("")}<label>Child price (% of adult)<input type="number" data-mc="1" value="${FD_SETTINGS.child}"></label></div><div class="stk">Room rates stay room-only. The meal plan is added on top and shown as its own line on bills, invoices and reports.</div></div>`;
 }
 function guestInvoiceHTML(r, by) {
   const f = folioOf(r);

@@ -55,6 +55,15 @@ FIRST-TIME SETUP
   Flow keeps its data in C:\KaytiaFlow\data either way. Clients need the server's
   IP address, username and password. Add computers on the Connect computers page.
 
+M-PESA (optional)
+  In the Back Office open M-Pesa & eTIMS on the main computer. Enter Daraja keys to send
+  payment requests to phones, or choose the COM port of a GSM modem to read M-Pesa
+  messages from its SIM. Other computers use whatever the main computer has set up.
+
+ETIMS
+  Open M-Pesa & eTIMS, then eTIMS. Until a live service is connected, a test stand-in
+  answers and every receipt says TEST: NOT A KRA TAX INVOICE.
+
 EMAIL (optional)
   In the Back Office open Settings > Email reports and fill in Email account on the
   main computer. The details are kept in C:\KaytiaFlow\kaytia.env on that computer.

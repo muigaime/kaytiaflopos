@@ -10,7 +10,8 @@ const SET_TABS = [
   ["email", "Email reports"],
   ["modules", "Modules"],
   ["backup", "Backup and restore"],
-  ["network", "Network"]
+  ["network", "Network"],
+  ["support", "Help and logs"]
 ];
 let setTab = "hotel";
 invF.gp = { pt: "*", m: "", v: "", a: "" };

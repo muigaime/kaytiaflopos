@@ -62,6 +62,7 @@ function boptDone(msg) {
   bopt = null;
   $("#mBopt").classList.remove("show");
   drawCart();
+  if ($("#bo").classList.contains("show") && window.boRedraw) window.boRedraw();
   if ($("#mSel").classList.contains("show")) selRender();
   fsNote(msg);
 }
@@ -132,6 +133,7 @@ function boptAuth() {
 }
 function boptChoose() {
   if (bopt.act === "ret") return retForm();
+  if (bopt.act === "void" && bopt.bill) return boptOpen(bopt.bill);
   if (bopt.act === "merge" || bopt.act === "split") return trOpen();
   const L = boptBills(bopt.act);
   if (L.length === 1) return boptOpen(L[0]);

@@ -188,20 +188,46 @@ function hrHomeHTML() {
     dTop = Math.max(1, ...D.map(x => x[1])),
     T = hrToDo(),
     types = HR_TYPES.map(t => [t, E.filter(e => (e.type || "Permanent") === t).length]);
-  return `<div class="stm-tiles">${msTile("Employees", E.length, "", "", `<small>${types.map(([t, n]) => `${n} ${t.toLowerCase()}`).join(" · ")}</small>`)}${msTile("Monthly gross (KES)", m2(gross))}${msTile("Monthly cost with employer's share (KES)", m2(cost), "", "gold")}${msTile("In today", `${present} of ${E.length}`, "", "", `<small>${onLeave} on leave</small>`)}</div>
-  <div class="hr-two"><div class="pn"><div class="inv-head"><h4>${hrMonthName(p)} payroll</h4><span class="tag ${run && run.status === "Paid" ? "ok" : "warn"}">${run ? esc(run.status) : "Not started"}</span></div>${hrSteps(HR_RUN_STEPS, hrRunStep(run))}<div class="hr-acts"><button class="chip on" data-a="hr_tab" data-t="run">${!run ? "Prepare payroll" : run.status === "Draft" ? "Review and approve" : run.status === "Paid" ? "See payroll" : "Pay salaries"}</button><button class="mini" data-a="hr_empnew">Add employee</button><button class="mini" data-a="hr_tab" data-t="exit">Pay someone off</button><button class="mini" data-a="hr_tab" data-t="adv">Give an advance</button></div></div>
-  <div class="pn"><h4>Needs your attention${T.length ? ` (${T.length})` : ""}</h4>${
+  const tab = t => `data-a="hr_tab" data-t="${t}"`,
+    tile = (ic, l, v, s, t) =>
+      `<button class="ph-t" ${tab(t)}><span class="ph-i">${I(ic)}</span><span class="ph-l">${l}</span><b>${v}</b><small>${s}</small></button>`,
+    quick = (ic, l, attrs) =>
+      `<button class="ph-q" ${attrs}><span class="ph-i">${I(ic)}</span>${l}</button>`,
+    card = ([t, l, ic]) =>
+      `<button class="ph-c" ${tab(t)}><span class="ph-i">${I(ic)}</span><span class="ph-b"><b>${l}</b><span>${HR_PAGES[t][1]}</span></span>${hrBadge(t)}<span class="ph-ch">${I("chev")}</span></button>`,
+    tot = run ? hrRunTotals(run) : null,
+    deducted = run ? hrRound(run.lines.reduce((a, l) => a + (+l.totalDed || 0), 0)) : 0,
+    next = !run
+      ? ["Not started", "Prepare it to work out everyone's pay.", "Prepare payroll"]
+      : run.status === "Draft"
+        ? ["Draft", "Check the figures, then approve them.", "Review and approve"]
+        : run.status === "Paid"
+          ? ["Paid", "Everyone has been paid for this month.", "See payroll"]
+          : ["Approved", "Approved and ready. Pay the salaries to finish.", "Pay salaries"],
+    figure = (l, v) => `<div><span>${l}</span><b>KES ${m2(v)}</b></div>`;
+  return `<div class="ph hr-hub"><div class="ph-h hr-top"><div><h1>HR &amp; Payroll</h1><p>Your people, this month's pay, and what needs doing next.</p></div><span class="hr-conf">Confidential</span></div>
+  <section class="hrp" aria-label="${hrMonthName(p)} payroll"><div class="hrp-l"><span class="hrp-m">${hrMonthName(p)} payroll</span><b class="hrp-v">KES ${m2(tot ? tot.net : gross)}</b><span class="hrp-s">${tot ? "Take-home pay" : "Estimated monthly gross"}</span><span class="hrp-st">${next[0]}</span><p>${next[1]}</p><button class="chip on" ${tab("run")}>${next[2]}</button></div>
+  <div class="hrp-r">${hrSteps(HR_RUN_STEPS, hrRunStep(run))}<div class="hrp-fs">${tot ? figure("Gross pay", tot.gross) + figure("Deductions", deducted) + figure("Take-home", tot.net) : figure("Estimated gross", gross) + figure("Employer's share", cost - gross) + figure("Total cost", cost)}</div></div></section>
+  <div class="ph-ts">${tile("users", "Employees", E.length, types.map(([t, n]) => `${n} ${t.toLowerCase()}`).join(" · "), "emp")}${tile("check", "In today", `${present} of ${E.length}`, "Clocked in", "time")}${tile("home", "On leave", onLeave, "Today", "leave")}${tile("wal", "Monthly cost", "KES " + m2(cost), "With employer's share", "run")}</div>
+  <div class="ph-qs">${quick("users", "Add employee", 'data-a="hr_empnew"')}${quick("cash", "Give an advance", tab("adv"))}${quick("home", "Record leave", tab("leave"))}${quick("dl", "Pay someone off", tab("exit"))}</div>
+  <div class="pn hr-need"><h4>Needs your attention${T.length ? ` (${T.length})` : ""}</h4>${
     T.length
       ? `<ul class="hr-todo">${T.map(x => `<li class="${x.tone}"><div><b>${esc(x.t)}</b><span>${esc(x.sub)}</span></div><button class="mini" ${x.attrs}>${esc(x.label)}</button></li>`).join("")}</ul>`
       : '<div class="hr-ok">✓ Nothing waiting. All up to date.</div>'
-  }</div></div>
+  }</div>
+  ${hrGroups()
+    .map(
+      g =>
+        `<section class="ph-sec"><h2 class="rp-gh">${g.name}</h2><div class="ph-cs">${g.tabs.map(card).join("")}</div></section>`
+    )
+    .join("")}
   <div class="hr-two acx"><div class="pn"><div class="inv-head"><h4>Payroll · last 6 months</h4><span class="ac-legend"><span><i class="s1"></i>Take-home pay</span><span><i class="s2"></i>Deductions</span></span></div>
   <div class="ac-chart" role="img" aria-label="Take-home pay and deductions for the last 6 months. The figures are in the table below.">${M.map(m => `<div class="ac-col"><div class="ac-bars">${bar(m.net, "s1", `${m.long}: take-home ${acKes(m.net)}`)}${bar(m.ded, "s2", `${m.long}: deductions ${acKes(m.ded)}`)}</div><span>${m.l}</span></div>`).join("")}</div>
   <details class="ac-data"><summary>See the figures</summary>${acTable(
     ["Month", "#Take-home pay", "#Deductions"],
     M.map(m => [m.long, m2(m.net), m2(m.ded)])
   )}</details></div>
-  <div class="pn"><h4>Monthly gross by department</h4>${D.length ? `<div class="trk-places">${D.map(([d, v]) => `<div class="trk-place ac-hb" data-tip="${esc(d)}: ${acKes(v)}"><span>${esc(d)}</span><div class="trk-bar"><i style="width:${Math.max(3, (v / dTop) * 100)}%"></i></div><b>${m2(v)}</b></div>`).join("")}</div>` : '<div class="empty">Add employees to see this.</div>'}</div></div>`;
+  <div class="pn"><h4>Monthly gross by department</h4>${D.length ? `<div class="trk-places">${D.map(([d, v]) => `<div class="trk-place ac-hb" data-tip="${esc(d)}: ${acKes(v)}"><span>${esc(d)}</span><div class="trk-bar"><i style="width:${Math.max(3, (v / dTop) * 100)}%"></i></div><b>${m2(v)}</b></div>`).join("")}</div>` : '<div class="empty">Add employees to see this.</div>'}</div></div></div>`;
 }
 // ---------------------------------------------------------------- directory
 function hrEmpHTML() {

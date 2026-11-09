@@ -31,18 +31,27 @@ function retBill(no) {
     S
   };
 }
-function retOpen(no) {
-  bopt = { act: "ret", bill: retBill(no) };
+/** The PIN step before a return or void. */
+function boptPinStep(title, note) {
   $("#bopWheel").style.display = "none";
   boptEl("Box").style.display = "";
   boptEl("Box").classList.remove("bop-tr");
   boptEl("Box").classList.add("bop-void");
   boptEl("Body").innerHTML =
-    `<h3>Return items</h3><p class="stk">${slipEsc(bopt.bill.label)} · ${slipEsc(no)}. A Manager or Super Cashier needs to authorize this.</p>
+    `<h3>${title}</h3><p class="stk">${note}. A Manager or Super Cashier needs to authorize this.</p>
   <input id="bopPin" type="password" inputmode="numeric" autocomplete="off" placeholder="Authorizing PIN"><div class="bop-msg" id="bopMsg"></div>
   <div class="row"><button class="mini" data-close>Cancel</button><button class="chip on" data-bg="auth">Continue</button></div>`;
   $("#mBopt").classList.add("show");
   $("#bopPin").focus();
+}
+function retOpen(no, whole) {
+  bopt = { act: "ret", bill: retBill(no), whole: !!whole };
+  boptPinStep(whole ? "Void bill" : "Return items", `${slipEsc(bopt.bill.label)} · ${slipEsc(no)}`);
+}
+/** A bill that hasn't been paid, voided from the Bills Report. */
+function voidOpen(o) {
+  bopt = { act: "void", bill: o };
+  boptPinStep("Void bill", `${slipEsc(o.label)} · ${slipEsc(o.no)}`);
 }
 const RETURN_REASONS = [
   "Customer changed",
@@ -54,9 +63,9 @@ const RETURN_REASONS = [
 ];
 function retForm() {
   const b = bopt.bill;
-  bopt.vq = Object.fromEntries(Object.keys(b.lines).map(id => [id, 0]));
+  bopt.vq = Object.fromEntries(Object.keys(b.lines).map(id => [id, bopt.whole ? b.lines[id] : 0]));
   boptEl("Body").innerHTML =
-    `<h3>Return items</h3><p class="stk"><b>${slipEsc(b.label)}</b> · ${slipEsc(b.dept)} · ${slipEsc(b.no)} · authorized by ${slipEsc(bopt.by)}</p>
+    `<h3>${bopt.whole ? "Void bill" : "Return items"}</h3><p class="stk"><b>${slipEsc(b.label)}</b> · ${slipEsc(b.dept)} · ${slipEsc(b.no)} · authorized by ${slipEsc(bopt.by)}</p>
   <div class="bv-wrap"><table class="bv-t"><thead><tr><th>Selected</th><th>Code</th><th>Description</th><th class="n">Qty</th><th class="n">Paid each</th><th class="n">Value</th></tr>
   <tr class="bv-f"><td colspan="6"><input id="bopVF" placeholder="Filter items" autocomplete="off"></td></tr></thead><tbody id="bopVRows"></tbody></table></div>
   <div class="bv-sum"><label class="bop-c"><input type="checkbox" id="bopVAll"> Select all</label><div id="bopVSum"></div></div>
@@ -64,7 +73,7 @@ function retForm() {
   <label>Return reason<textarea id="bopWhy" rows="2" placeholder="Tap a reason above or type your own"></textarea></label>
   <div class="status">The items go back into stock, and the bill's own payment methods are refunded. The original bill stays on record.</div>
   <div class="bop-msg" id="bopMsg"></div>
-  <div class="bv-go"><button class="bv-void" data-bg="save">Return items</button><button class="bv-close" data-close>Close</button></div>`;
+  <div class="bv-go"><button class="bv-void" data-bg="save">${bopt.whole ? "Void bill" : "Return items"}</button><button class="bv-close" data-close>Close</button></div>`;
   retRows();
 }
 const retValue = (i, q) => i.p * q * i.k;

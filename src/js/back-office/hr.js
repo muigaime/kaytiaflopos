@@ -1,22 +1,43 @@
 // ---- HR & Payroll: the screens ----
 const HR_TABS = [
-  ["h", "Overview"],
-  ["home", "Dashboard", "chart"],
   ["h", "People"],
-  ["emp", "Employees", "id"],
-  ["time", "Time and attendance", "chart"],
+  ["emp", "Employees", "users"],
+  ["time", "Time and attendance", "check"],
   ["roster", "Duty roster", "book"],
-  ["leave", "Leave", "book"],
-  ["rec", "Staff records", "shield"],
+  ["leave", "Leave", "home"],
+  ["clock", "Clock and biometric", "check"],
+  ["rec", "Staff records", "id"],
   ["h", "Pay"],
-  ["adv", "Advance payments", "wal"],
-  ["ded", "Bills, loans and deductions", "wal"],
   ["run", "Payroll", "wal"],
-  ["exit", "Final pay", "id"],
+  ["adv", "Advance payments", "cash"],
+  ["ded", "Bills, loans and deductions", "cart"],
+  ["exit", "Final pay", "dl"],
   ["stat", "Statutory returns", "shield"],
   ["h", "Setup"],
   ["set", "Rates and rules", "gear"]
 ];
+/** The tabs, in their groups. */
+const hrGroups = () => {
+  const G = [];
+  HR_TABS.forEach(([t, l, ic]) => {
+    if (t === "h") G.push({ name: l, tabs: [] });
+    else G[G.length - 1].tabs.push([t, l, ic]);
+  });
+  return G;
+};
+/** "2 to approve" beside the screens that are waiting for someone. */
+function hrBadge(t) {
+  const H = hr(),
+    n =
+      t === "leave"
+        ? H.leave.filter(l => l.status === AWAIT).length
+        : t === "adv"
+          ? H.adv.filter(a => a.status === AWAIT).length
+          : t === "roster"
+            ? hrSwaps().filter(s => s.status === AWAIT).length
+            : 0;
+  return n ? `<span class="tag warn">${n} to approve</span>` : "";
+}
 const HR_PAGES = {
   home: ["HR and payroll", "Your people, this month's payroll and what needs attention."],
   emp: ["Employees", "Everyone on the payroll, with their pay, bank and statutory details."],
@@ -26,6 +47,10 @@ const HR_PAGES = {
   ],
   roster: ["Duty roster", "Who works which shift each week, and swaps between staff."],
   leave: ["Leave", "Ask, approve and track leave. Annual leave builds up each month."],
+  clock: [
+    "Clock and biometric",
+    "Two ways for staff to clock in and out: the Staff clock page, or a fingerprint or face reader."
+  ],
   rec: [
     "Staff records",
     "Warnings, certificates, documents, uniforms, training, reviews and meals."
@@ -128,6 +153,7 @@ function hrEmpModal() {
   <section class="itm-s"><h4>Job</h4><div class="itm-g">${f("Job title", "job", 'maxlength="40" placeholder="e.g. Waiter"')}<label>Department<input data-he="dept" list="hrDepts" maxlength="30" value="${esc(E.dept)}"><datalist id="hrDepts">${[...new Set([...ALLD, ...STORES, "Front Office", "Housekeeping", "Administration"])].map(d => `<option value="${esc(d)}">`).join("")}</datalist></label><label>Employment<select data-he="type">${hrOpts(HR_TYPES, E.type)}</select></label>${f("Date started", "start", 'type="date"')}${f("Contract ends", "end", 'type="date"')}<label>POS sign-in<select data-he="user"><option value="">None</option>${users.map(u => `<option ${u === E.user ? "selected" : ""}>${esc(u)}</option>`).join("")}</select></label>${E.id ? `<label>Status<select data-he="status">${hrOpts(["Active", "Left"], E.status)}</select></label>` : ""}</div><div class="itm-hint">Link the POS sign-in so that shifts count as attendance and bills can be charged to this person.</div></section>
   <section class="itm-s"><h4>Monthly pay (KES)</h4><div class="itm-g">${money("Basic pay", "basic")}${money("House allowance", "house")}${money("Transport allowance", "transport")}${money("Other allowances", "otherAllow")}${money("Day rate (casual staff)", "dayRate")}${f("Service charge points", "svcPts", 'type="number" min="0" step="any" placeholder="1"')}${f("Annual leave days", "leaveYear", `type="number" min="0" step="any" placeholder="${hrR().annualLeave}"`)}</div><div class="hr-est" id="hrEst">${hrEstText(E)}</div></section>
   <section class="itm-s"><h4>How they are paid</h4><div class="itm-g"><label>Paid by<select data-he="via">${hrOpts(HR_VIA, E.via)}</select></label>${f("Bank", "bank", 'maxlength="40"')}${f("Branch", "branch", 'maxlength="40"')}${f("Account no", "acct", 'maxlength="30"')}${f("M-Pesa number", "mpesa", 'maxlength="15" placeholder="07…"')}</div></section>
+  <section class="itm-s"><h4>Clocking in and out</h4><div class="itm-g">${f("Clock password", "clockNew", `type="password" autocomplete="new-password" placeholder="${E.clockHash ? "Saved. Leave blank to keep it" : "At least 4 characters"}"`)}${f("ID on the fingerprint or face reader", "bioId", 'maxlength="20"')}</div></section>
   <section class="itm-s"><h4>Statutory numbers</h4><div class="itm-g">${f("KRA PIN", "kra", 'maxlength="11" style="text-transform:uppercase"')}${f("NSSF no", "nssfNo", 'maxlength="20"')}${f("SHA no", "shaNo", 'maxlength="20"')}</div></section>
   </div><footer class="itm-f"><button class="mini" data-a="hr_empno">Cancel</button><button class="chip on" data-a="hr_empsave">${E.id ? "Save changes" : "Add employee"}</button></footer></div></div>`;
 }
@@ -459,6 +485,7 @@ function hrView() {
     home: hrHomeHTML,
     emp: hrEmpHTML,
     time: hrTimeHTML,
+    clock: hrClockHTML,
     roster: hrRosterHTML,
     rec: hrRecHTML,
     adv: hrAdvHTML,
@@ -469,8 +496,10 @@ function hrView() {
     stat: hrStatHTML,
     set: hrSetHTML
   }[hrS.tab]();
+  const popups = hrProfile() + hrEmpModal() + hrPinModal();
+  if (hrS.tab === "home") return body + popups;
   const [title, what] = HR_PAGES[hrS.tab];
-  return `<div class="inv invx"><nav class="inv-rail">${HR_TABS.map(([t, l, ic]) => (t === "h" ? `<div class="rhd">${l}</div>` : `<button class="ir ${t === hrS.tab ? "on" : ""}" data-a="hr_tab" data-t="${t}">${I(ic)}<span>${l}</span></button>`)).join("")}</nav><div class="inv-main"><div class="inv-title hr-title"><div><h1>${title}</h1><p>${what}</p></div><span class="hr-conf">Confidential</span></div>${body}</div>${hrProfile()}${hrEmpModal()}${hrPinModal()}</div>`;
+  return `<div class="inv invx inv-solo"><div class="inv-main">${phMenu(hrGroups(), hrS.tab, "hr_tab", "HR and payroll", hrBadge)}<div class="inv-title hr-title"><div><h1>${title}</h1><p>${what}</p></div><span class="hr-conf">Confidential</span></div>${body}</div>${popups}</div>`;
 }
 V.hr = hrView;
 function hrExcel(title, c, r, f, file) {
@@ -670,8 +699,20 @@ function hrAct(a, b) {
     hrS.emp = null;
     return all();
   }
+  if (a === "hr_biosave") return bioSave();
   if (a === "hr_empsave") {
     const E = hrS.emp;
+    if (E.clockNew) {
+      // Stored as a hash, so nobody can read a person's password back.
+      const pw = E.clockNew;
+      if (pw.length < 4) return toast("The clock password needs at least 4 characters.");
+      E.clockSalt = crypto.randomUUID();
+      delete E.clockNew;
+      return clockHashOf(E.clockSalt, pw).then(h => {
+        E.clockHash = h;
+        b.click();
+      });
+    }
     if (!E.name.trim()) return toast("Enter the employee's name.");
     if (E.type === "Casual" ? !(+E.dayRate > 0) : !(+E.basic >= 0) || E.basic === "")
       return toast(E.type === "Casual" ? "Enter the day rate." : "Enter the basic pay.");

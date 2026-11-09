@@ -14,6 +14,12 @@ const BO_RIGHTS = [
   ["fo.desk", "Work the desk: rooms, bookings, guests and payments.", "FRONTOFFICE", "DESK"],
   ["fo.hk", "Housekeeping: change room status.", "FRONTOFFICE", "HOUSEKEEPING"],
   [
+    "fo.hksup",
+    "Housekeeping supervisor: assign rooms to housekeepers.",
+    "FRONTOFFICE",
+    "HOUSEKEEPING"
+  ],
+  [
     "fo.settings",
     "Change Front Desk settings: rooms, rates and meal plans.",
     "FRONTOFFICE",
@@ -191,6 +197,7 @@ const ROLE_DEFAULTS = {
     "rep.print"
   ],
   Housekeeping: ["fo.open", "fo.hk"],
+  "Housekeeping Supervisor": ["fo.open", "fo.hk", "fo.hksup"],
   "Front Office": ["fo.open", "fo.desk", "fo.hk", "rep.rooms", "rep.print", "cust.view"],
   Chef: [
     "inv.req",
@@ -346,6 +353,15 @@ const ACT_RIGHTS = {
   sp_rqmake: "sp.move",
   rec_issue: "rec.issue",
   rec_run: "rec.prod",
+  mp_esave: "set.manage",
+  mp_etest: "set.manage",
+  mp_eretry: "set.manage",
+  mp_dsave: "set.manage",
+  mp_msave: "set.manage",
+  mp_test: "set.manage",
+  inv_nrqgo: "inv.req",
+  su_clear: "set.manage",
+  su_send: "set.manage",
   rm_save: "set.manage",
   rm_add: "set.manage",
   rm_del: "set.manage",

@@ -134,6 +134,7 @@ async function fdLoginTry() {
     fd = {
       desk: roleHas(role, "fo.desk"),
       hk: roleHas(role, "fo.hk"),
+      hksup: roleHas(role, "fo.hksup"),
       set: roleHas(role, "fo.settings"),
       day: roleHas(role, "shift.manage")
     };
@@ -219,7 +220,7 @@ document.addEventListener("keydown", e => {
 });
 $("#start").onclick = e => {
   const g = e.target.closest("[data-go]");
-  if (g) g.dataset.go === "bo" ? boOpen() : g.dataset.go === "fd" ? fdOpen() : posOpen();
+  if (g) (({ bo: boOpen, fd: fdOpen, clock: clockOpen })[g.dataset.go] || posOpen)();
 };
 $("#home").onclick = boOpen;
 $("#fdBack").onclick = () => fdExit(true); // leaving the Front Office signs out

@@ -123,7 +123,7 @@ function mods() {
       VENDORS.length + " vendors"
     ],
     ["Accounting", "book", "#2f9e75", "Open", "Ledgers and reports"],
-    ["M-Pesa & eTIMS", "phone", "#12804a", "Next build", "Sync and invoices"],
+    ["M-Pesa & eTIMS", "phone", "#12804a", "Open", "Payments and KRA receipts"],
     [
       "Reports",
       "chart",

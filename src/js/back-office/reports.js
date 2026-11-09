@@ -41,7 +41,13 @@ const rs = () => {
 };
 const cost = l => {
   const it = get(l.id);
-  return it ? sum(Object.entries(it.r || {}), ([k, q]) => q * cst(k)) * l.q : 0;
+  if (!it) return 0;
+  // A product that keeps no stock uses the buying price entered on it.
+  return (
+    (Object.keys(it.r || {}).length
+      ? sum(Object.entries(it.r), ([k, q]) => q * cst(k))
+      : it.buy || 0) * l.q
+  );
 };
 const by = (L, kf) => {
   const o = {};
@@ -141,7 +147,7 @@ function repData(k) {
   if (k === "rooms") {
     [c, r, f] = rrData(hrr);
     title = RRL[hrr];
-    head = ["rv", "pay", "rt", "gl"].includes(hrr) ? rrRange().join(" to ") : "Live position";
+    head = rrCaption();
   } else {
     let h;
     title = REP[rp][0];
@@ -344,6 +350,100 @@ const billTotals = B => {
   const P = B.filter(b => b.status === "Pending");
   return { net: sum(B, b => b.net), g: sum(B, b => b.g), pend: sum(P, b => b.g) };
 };
+// What can be done with a bill, from a click on its line.
+let blM = null;
+function billChoices(no) {
+  const S = SALES.filter(s => s.no === no),
+    open = orders.find(o => o.no === no),
+    isRet = !!(S[0] && S[0].ret),
+    paid = S.length > 0 && !isRet,
+    keep = (S.find(s => s.slip) || {}).slip,
+    can = boCan("sales.return"),
+    back = paid && retCan(no),
+    money = can
+      ? paid
+        ? back
+          ? ""
+          : "Everything on this bill has been returned."
+        : "Only a paid bill can do this."
+      : "You don't have the right to do this.";
+  return [
+    ["reprint", "Reprint", "dl", "Print a copy", ""],
+    ["return", "Return", "swap", "Take back some items", money],
+    [
+      "assign",
+      "Assign to eTIMS",
+      "shield",
+      "Send this bill to be signed",
+      !paid
+        ? "Only a paid bill can be sent."
+        : keep && keep.etims
+          ? "Already signed."
+          : keep
+            ? ""
+            : "This bill can't be sent."
+    ],
+    [
+      "credit",
+      "Return to eTIMS",
+      "shield",
+      "Send this return as a credit note",
+      isRet ? (S[0].etCn ? "Already sent." : "") : "Open the return's own line (RET-) to send it."
+    ],
+    [
+      "void",
+      "Void",
+      "alert",
+      open ? "Cancel this bill" : "Reverse the whole bill",
+      open ? (boCan("sales.return") ? "" : "You don't have the right to do this.") : money
+    ]
+  ];
+}
+function billMenuHTML() {
+  if (!blM) return "";
+  const S = SALES.filter(s => s.no === blM),
+    open = orders.find(o => o.no === blM);
+  if (!S.length && !open) return "";
+  const label = open ? open.label : S[0].label,
+    g = open ? totals(open.lines, open).g : sum(S, s => s.g),
+    state = open ? "Pending" : S[0].ret ? "Returned" : "Settled";
+  return `<div class="modal show" id="blAct" style="z-index:60"><div class="box itm bl-act"><header class="itm-h"><div><h3>Bill ${esc(blM)}</h3><p>${esc(label || "")} · KES ${m2(g)} · ${state}</p></div><button class="itm-x" data-a="bl_close" aria-label="Close">✕</button></header>
+  <div class="itm-b bl-list">${billChoices(blM)
+    .map(
+      ([k, t, ic, s, no]) =>
+        `<button class="bl-o" data-a="bl_${k}" ${no ? "disabled" : ""}><span class="ph-i">${I(ic)}</span><span><b>${t}</b><small>${esc(no || s)}</small></span></button>`
+    )
+    .join("")}</div></div></div>`;
+}
+async function billAct(a) {
+  const no = blM;
+  if (a === "bl_close" || !no) {
+    blM = null;
+    return all();
+  }
+  const open = orders.find(o => o.no === no),
+    k = a.slice(3),
+    row = billChoices(no).find(x => x[0] === k);
+  if (!row || row[4]) return toast(row ? row[4] : "");
+  blM = null;
+  if (k === "reprint") {
+    all();
+    return billReprint(no, true);
+  }
+  if (k === "return" || k === "void") {
+    all();
+    return open ? voidOpen(open) : retOpen(no, k === "void");
+  }
+  all();
+  toast("Sending to eTIMS...");
+  if (k === "assign") {
+    const keep = (SALES.find(s => s.no === no && s.slip) || {}).slip;
+    keep.eq = 1;
+  }
+  const r = await (k === "assign" ? etimsSend(no) : etimsCredit(no));
+  toast(r === "signed" ? `Bill ${no} is signed.` : r || "eTIMS can't be reached. Try again later.");
+  all();
+}
 function billsGrid(c, r, none) {
   const opt = (L, v) =>
       L.map(
@@ -365,7 +465,7 @@ function billsGrid(c, r, none) {
   )}</select></label><label>Paymode<select data-bf="pay">${opt(
     [["All", "All paymodes"], ...Object.entries(MN)],
     billF.pay
-  )}</select></label><label class="bl-net"><input type="checkbox" data-bf="net" ${billF.net ? "checked" : ""}> Show net amount on bills</label><span class="bl-hint">Double-click a bill to reprint it</span></div>
+  )}</select></label><label class="bl-net"><input type="checkbox" data-bf="net" ${billF.net ? "checked" : ""}> Show net amount on bills</label><span class="bl-hint">Click a bill for its options</span></div>
  <div class="bl-wrap"><table class="bl-t"><thead><tr>${c.map(x => `<th class="${x[0] === "#" ? "n" : ""}">${esc(x.replace("#", ""))}</th>`).join("")}</tr>
  <tr class="bl-f">${c.map(x => `<td><input data-bc="${esc(x)}" value="${esc(billF.col[x] || "")}" placeholder="Filter" aria-label="Filter ${esc(x.replace("#", ""))}"></td>`).join("")}</tr></thead>
  <tbody>${
@@ -392,8 +492,8 @@ function billFilter(col, v) {
   if ($("#blNet")) $("#blNet").textContent = m2(t.net);
 }
 /** The bill as it was paid, on the paper chosen above, marked as a copy. */
-function billReprint(no) {
-  if (!boCan("sales.reprint")) return boDenied();
+function billReprint(no, free) {
+  if (!free && !boCan("sales.reprint")) return boDenied();
   const open = orders.find(o => o.no === no);
   if (open) {
     const print = by => {
@@ -418,9 +518,13 @@ function billReprint(no) {
       );
       all();
     };
-    return open.printed ? pinAsk("Reprint bill " + no, PIN_REPRINT, print) : print(boUser.n);
+    return open.printed && !free
+      ? pinAsk("Reprint bill " + no, PIN_REPRINT, print)
+      : print(boUser.n);
   }
-  // A receipt that was already given out is only printed again when a Manager or Super Cashier agrees.
+  // Whoever can open the Bills Report can reprint from it.
+  if (free) return reprintGo(no, boUser.n);
+  // Elsewhere, a receipt already given out is only printed again when a Manager or Super Cashier agrees.
   if (SALES.some(s => s.no === no))
     pinAsk(
       "Reprint receipt " + no,
@@ -492,9 +596,7 @@ function reprintGo(no, by) {
             .join(""),
     change: keep ? keep.change : 0,
     credit: keep ? keep.credit : !!paid.credit,
-    fiscal: keep
-      ? `CU serial: ${keep.cu}<br>CU invoice no: ${keep.inv}${qr(no + keep.cu)}Scan to verify on KRA eTIMS<br>(demo QR)`
-      : ""
+    fiscal: keep ? etimsFiscal(no, keep) : ""
   });
   logIt(`Copy ${A.copies} · ${rpSize === "a4" ? "A4" : "80mm"}`);
   bosave();
@@ -1396,6 +1498,16 @@ const REP = {
       ["Total", billCount(L), ...PMK.map(k => m2(sum(L, s => pm(s, k)))), m2(G(L))]
     ]
   ],
+  wp: [
+    "Waiter Sales by Paymode",
+    L => [
+      ["Waiter", "#Bills", ...PMH, "#Total"],
+      by(L, s => s.waiter || s.user)
+        .sort((a, b) => G(b[1]) - G(a[1]))
+        .map(([u, a]) => [u, billCount(a), ...PMK.map(k => m2(sum(a, s => pm(s, k)))), m2(G(a))]),
+      ["Total", billCount(L), ...PMK.map(k => m2(sum(L, s => pm(s, k)))), m2(G(L))]
+    ]
+  ],
   sp: [
     "Sale Point Sales",
     L => [
@@ -1472,12 +1584,13 @@ const tb = (c, r, f, none = "No sales for this report, date range and sale point
 const REP_GROUPS = [
   ["Sales", ["dr", "bills", "ps", "ts", "sp"]],
   ["Items", ["iw", "ip", "sc", "hh", "promo"]],
-  ["Staff", ["ss", "com", "tips"]],
+  ["Staff", ["wp", "ss", "com", "tips"]],
   ["Control", ["vall", "dlog", "cmp", "rets", "swp", "msp", "blog"]]
 ];
 const REP_WHAT = {
+  wp: "What each waiter's bills came to, by how they were paid.",
   dr: "What was taken each day, by payment method.",
-  bills: "Every bill, one line each. Double-click a bill to reprint it.",
+  bills: "Every bill, one line each. Click a bill to reprint, return or send it to eTIMS.",
   ps: "Sales added up over the period, by category and payment method.",
   ts: "Sales between two times of day, such as a happy hour or a shift.",
   sp: "How much each sale point sold.",
@@ -1499,6 +1612,7 @@ const REP_WHAT = {
 };
 // Words people use for what a report shows, so nobody needs to know its name.
 const REP_KEYS = {
+  wp: "waiter paymode payment mpesa cash breakdown",
   dr: "money cash mpesa m-pesa card pdq takings end of day today banking",
   bills: "receipt reprint invoice paid unpaid pending",
   ps: "summary monthly weekly category overall totals z report",
@@ -1684,7 +1798,7 @@ const V = {
  <div class="pn rp-main"><div class="rp-head"><div><h3>${title}</h3><p>${REP_WHAT[rp] || ""}</p></div></div>
  ${repExtraTop(x)}<div class="rp-filters"><label>From<input type="date" data-f="rf" value="${rf}"></label><label>To<input type="date" data-f="rt" value="${rt}"></label><label>Sale point<select data-f="rd">${["All", ...ALLD].map(d => `<option value="${esc(d)}" ${d === rd ? "selected" : ""}>${d === "All" ? "All sale points" : esc(d)}</option>`).join("")}</select></label>${rp === "ts" ? `<label>From time<input type="time" data-f="tf" value="${rtf}"></label><label>To time<input type="time" data-f="tt" value="${rtt}"></label>` : ""}${rp === "com" ? `<label>Commission rate (%)<input type="number" step="any" data-f="rc" value="${rcm}" placeholder="Rate %"></label>` : ""}${x && x.tools ? x.tools : ""}</div>
  <div class="rp-bar"><span class="pr-pills">${quick.map(([q, l]) => `<button class="pr-pill ${onQuick(+q) ? "on" : ""}" data-q="${q}">${l}</button>`).join("")}</span><span class="rp-tools">${printTools("rep")}</span></div>
- ${head ? `<div class="rp-cap">${head}</div>` : `<div class="sp-kpis rp-kpis">${kpi("Bills", bills)}${kpi("Total sales", KES(total))}${kpi("Average bill", KES(bills ? total / bills : 0))}</div><div class="rp-cap">${repDates()} · ${rd === "All" ? "all sale points" : esc(rd)}</div>`}${rp === "bills" ? billsGrid(c, r, note) : x && x.colour ? `<div class="rp-colour">${tb(c, r, f, note)}</div>` : head ? tb(c, r, f, note) : tb(c, r, f)}${repExtraBelow(x)}${note && !head ? `<div class="stk">${note}</div>` : ""}</div></div>`;
+ ${head ? `<div class="rp-cap">${head}</div>` : `<div class="sp-kpis rp-kpis">${kpi("Bills", bills)}${kpi("Total sales", KES(total))}${kpi("Average bill", KES(bills ? total / bills : 0))}</div><div class="rp-cap">${repDates()} · ${rd === "All" ? "all sale points" : esc(rd)}</div>`}${rp === "bills" ? billsGrid(c, r, note) + billMenuHTML() : x && x.colour ? `<div class="rp-colour">${tb(c, r, f, note)}</div>` : head ? tb(c, r, f, note) : tb(c, r, f)}${repExtraBelow(x)}${note && !head ? `<div class="stk">${note}</div>` : ""}</div></div>`;
   },
   sales() {
     const F = salesF,
@@ -1710,7 +1824,8 @@ const V = {
     return customersHTML();
   }
 };
-let hrr = "occ";
+let hrr = "occ",
+  rrHome = true; // the Room reports overview, until a report is chosen
 const RRL = {
   occ: "Occupancy Report",
   ih: "In-house Guests",
@@ -1720,10 +1835,24 @@ const RRL = {
   gl: "Guests and Invoices List",
   meal: "Breakfast and Meals",
   pend: "Pending Payments",
-  arr: "Arrivals and Departures"
+  arr: "Arrivals and Departures",
+  rx: "Room Expenses"
 };
 const rrRange = () => [toYmd(rngOf(0)[0]), toYmd(rngOf(0)[1] - 1)];
+/** Reports that cover a period. The rest show the position right now. */
+const RR_PERIOD = ["rv", "pay", "rt", "gl", "meal", "rx"];
+function rrCaption() {
+  if (!RR_PERIOD.includes(hrr)) return "Live position";
+  const [a, b] = rrRange();
+  return a === b ? dateGB(a) : `${dateGB(a)} to ${dateGB(b)}`;
+}
+/** The report's figures, with dates written the way people read them. */
 function rrData(k) {
+  const [c, r, f] = rrFigures(k),
+    day = v => (/^\d{4}-\d\d-\d\d$/.test(v) ? dateGB(v) : v);
+  return [c, r.map(y => y.map(day)), f];
+}
+function rrFigures(k) {
   const [a, b] = rrRange();
   if (k === "occ") {
     const o = ROOMS.filter(r => roomStatus(r) === "occ").length;
@@ -1911,6 +2040,17 @@ function rrData(k) {
       ]
     ];
   }
+  if (k === "rx") {
+    const L = (FD_SETTINGS.roomExp || [])
+      .filter(x => x.bd >= a && x.bd <= b)
+      .slice()
+      .sort((x, y) => (x.bd < y.bd ? -1 : 1));
+    return [
+      ["Date", "Room", "Type", "What it was for", "Paid by", "Recorded by", "#Amount"],
+      L.map(x => [x.bd, x.room, x.kind, x.desc, x.paid, x.by, m2(x.amt)]),
+      ["Total", "", "", "", "", "", m2(sum(L, x => x.amt))]
+    ];
+  }
   if (k === "pend") {
     const L = RESERVATIONS.filter(
       r => (r.status === "inhouse" || r.status === "out") && folioOf(r).bal > 0.009
@@ -1995,27 +2135,185 @@ function roomsKpiHTML() {
     )
     .join("")}</div>`;
 }
-/** Insights → Room reports: tabs, summary cards and the full table. */
+const RR_GROUPS = [
+  ["Rooms and guests", ["occ", "ih", "arr", "gl", "meal"]],
+  ["Money", ["rv", "pay", "rt", "pend", "rx"]]
+];
+const RR_ICONS = {
+  occ: "home",
+  ih: "users",
+  arr: "swap",
+  gl: "book",
+  meal: "chef",
+  rv: "chart",
+  pay: "wal",
+  rt: "box",
+  pend: "alert",
+  rx: "cart"
+};
+const RR_WHAT = {
+  occ: "Every room: its status, guest, dates and balance.",
+  ih: "Guests staying now, with charges and what they owe.",
+  arr: "Who arrives and who leaves in the next 7 days.",
+  gl: "Every guest who arrived in the period, with totals.",
+  meal: "Rooms and covers to feed each day, for the kitchen.",
+  rv: "Room, meal and extras revenue, day by day.",
+  pay: "Payments received each day, by how they were paid.",
+  rt: "Nights sold and revenue for each type of room.",
+  pend: "Guests who still owe money.",
+  rx: "Money spent on each room: repairs, linen, cleaning and supplies."
+};
+const rrName = k => RRL[k].replace(/ Report$/, "");
+const rrPeriods = () =>
+  `<div class="seg">${[
+    ["today", "Today"],
+    ["7", "7 days"],
+    ["30", "30 days"]
+  ]
+    .map(([p, l]) => `<button data-p="${p}" class="${p === per ? "on" : ""}">${l}</button>`)
+    .join("")}</div>`;
+const rrOwing = () =>
+  RESERVATIONS.filter(
+    r => (r.status === "inhouse" || r.status === "out") && folioOf(r).bal > 0.009
+  );
+/** The overview: the position now, then every room report by group. */
+function rrHomeHTML() {
+  const [a, b] = rrRange(),
+    c = {},
+    m = revenueByDay(a, b),
+    owing = rrOwing();
+  ROOMS.forEach(r => {
+    const x = roomStatus(r);
+    c[x] = (c[x] || 0) + 1;
+  });
+  const occ = c.occ || 0,
+    rev = sum(Object.keys(m), d => m[d].room),
+    tile = (ic, l, v, s, k) =>
+      `<button class="ph-t" data-rr="${k}"><span class="ph-i">${I(ic)}</span><span class="ph-l">${l}</span><b>${v}</b><small>${s}</small></button>`,
+    quick = (k, l) =>
+      `<button class="ph-q" data-rr="${k}"><span class="ph-i">${I(RR_ICONS[k])}</span>${l}</button>`,
+    card = k =>
+      `<button class="ph-c" data-rr="${k}"><span class="ph-i">${I(RR_ICONS[k])}</span><span class="ph-b"><b>${rrName(k)}</b><span>${RR_WHAT[k]}</span></span><span class="ph-ch">${I("chev")}</span></button>`,
+    status = [
+      ["occ", "ok"],
+      ["vac", ""],
+      ["res", "warn"],
+      ["dirty", "warn"],
+      ["ooo", "bad"]
+    ];
+  return `<div class="ph rp-hub rr-hub"><div class="ph-h rr-top"><div><h1>Room reports</h1><p>Occupancy, guests, meals and room revenue. Printed and exported the same way as Reports.</p></div>${rrPeriods()}</div>
+  <div class="ph-ts">${tile("home", "Occupancy", ROOMS.length ? Math.round((occ / ROOMS.length) * 100) + "%" : "0%", `${occ} of ${plural(ROOMS.length, "room")}`, "occ")}${tile("users", "Guests in house", RESERVATIONS.filter(r => r.status === "inhouse").length, "Staying now", "ih")}${tile("chart", "Room revenue", KES(rev), "Room rate only · " + PL[per], "rv")}${tile("alert", "Pending payments", KES(sum(owing, r => folioOf(r).bal)), plural(owing.length, "guest") + " owing", "pend")}</div>
+  <div class="rr-status" role="list" aria-label="Rooms by status">${status.map(([k, t]) => `<div class="rr-s ${t}" role="listitem"><i aria-hidden="true"></i><span>${ROOM_STATUS_LABELS[k]}</span><b>${c[k] || 0}</b></div>`).join("")}</div>
+  <div class="ph-qs">${quick("arr", "Arrivals and departures")}${quick("meal", "Breakfast and meals")}<button class="ph-q" data-rr="open"><span class="ph-i">${I("swap")}</span>Last report: ${rrName(hrr)}</button><button class="ph-q" data-rr="fd"><span class="ph-i">${I("home")}</span>Open Front Desk</button></div>
+  ${RR_GROUPS.map(([g, L]) => `<section class="ph-sec"><h2 class="rp-gh">${g}</h2><div class="ph-cs">${L.map(card).join("")}</div></section>`).join("")}</div>`;
+}
+const RR_TAGS = {
+  Occupied: "ok",
+  Vacant: "",
+  "Reserved today": "warn",
+  Dirty: "warn",
+  "Out of order": "bad",
+  "In house": "ok",
+  "Checked out": "",
+  Reserved: "warn",
+  Arrival: "ok",
+  Departure: "warn"
+};
+/** The figures at the top of a report, read from the report itself so they always agree with it. */
+function rrKpis(k, c, r, f) {
+  const at = h => c.findIndex(x => x.replace("#", "") === h),
+    tot = h => (f ? f[at(h)] : ""),
+    money = h => "KES " + tot(h),
+    count = (col, v) => r.filter(y => y[at(col)] === v).length;
+  const L = {
+    occ: [
+      ["Occupied", count("Status", "Occupied")],
+      ["Vacant", count("Status", "Vacant")],
+      ["Occupancy", f ? f[f.length - 1] : "0%"]
+    ],
+    ih: [
+      ["Guests", r.length],
+      ["Charges", money("Charges")],
+      ["Still to pay", money("Balance")]
+    ],
+    arr: [
+      ["Arrivals", count("Type", "Arrival")],
+      ["Departures", count("Type", "Departure")]
+    ],
+    gl: [
+      ["Guests", r.length],
+      ["Total", money("Total")],
+      ["Still to pay", money("Balance")]
+    ],
+    meal: [
+      ["Rooms", tot("Rooms with meals")],
+      ["Covers", tot("Covers")],
+      ["Meal revenue", money("Meal revenue")]
+    ],
+    rv: [
+      ["Room revenue", money("Room revenue")],
+      ["Breakfast and meals", money("Breakfast and meals")],
+      ["Total", money("Total")]
+    ],
+    pay: [
+      ["Cash", money("Cash")],
+      ["M-Pesa", money("M-Pesa")],
+      ["Total", money("Total")]
+    ],
+    rt: [
+      ["Nights sold", tot("Nights sold")],
+      ["Room revenue", money("Room revenue")],
+      ["Total", money("Total")]
+    ],
+    rx: [
+      ["Expenses", r.length],
+      ["Rooms", new Set(r.map(y => y[at("Room")])).size],
+      ["Total", money("Amount")]
+    ],
+    pend: [
+      ["Guests owing", r.length],
+      ["Charges", money("Charges")],
+      ["Still to pay", money("Balance")]
+    ]
+  }[k];
+  return `<div class="sp-kpis rp-kpis">${L.map(([l, v]) => `<div class="sp-kpi"><span>${l}</span><b>${esc(v === "" || v === undefined ? 0 : v)}</b></div>`).join("")}</div>`;
+}
+/** A report table that reads at a glance: statuses as labels, amounts lined up, zeros quiet. */
+function rrTable(c, r, f, k) {
+  const num = i => c[i][0] === "#",
+    head = i => c[i].replace("#", ""),
+    owed = i => head(i) === "Balance",
+    cell = (v, i) => {
+      const s = v === null || v === undefined ? "" : String(v);
+      if (s === "") return `<td class="${num(i) ? "n" : ""}"><span class="rr-none">-</span></td>`;
+      if (RR_TAGS[s] !== undefined && /Status|Type/.test(head(i)))
+        return `<td><span class="tag ${RR_TAGS[s]}">${esc(s)}</span></td>`;
+      if (num(i)) {
+        const zero = parseFloat(s.replace(/,/g, "")) === 0;
+        return `<td class="n ${zero ? "rr-zero" : owed(i) ? "rr-owed" : ""}">${esc(s)}</td>`;
+      }
+      return `<td>${i === 0 || head(i) === "Room" ? `<b>${esc(s)}</b>` : esc(s)}</td>`;
+    };
+  return r.length
+    ? `<div class="tw"><table class="t rr-t rr-${k}"><thead><tr>${c.map((x, i) => `<th class="${num(i) ? "n" : ""}">${head(i)}</th>`).join("")}</tr></thead><tbody>${r.map(y => `<tr>${y.map(cell).join("")}</tr>`).join("")}</tbody>${f ? `<tfoot><tr>${f.map((v, i) => `<td class="${num(i) ? "n" : ""}">${esc(v)}</td>`).join("")}</tr></tfoot>` : ""}</table></div>`
+    : '<div class="empty">Nothing to show for this report and period.</div>';
+}
+/** Insights → Room reports: the overview, or one report with the menu across the top. */
 function roomsReportHTML() {
   if (!ROOMS.length) fdSeed();
-  const [cols, rows, foot] = rrData(hrr),
-    q = [
-      ["occ", "Occupancy Report"],
-      ["ih", "In-house Guests"],
-      ["rv", "Periodic Room Sales"]
-    ];
-  return `<div class="fr" style="align-items:center;margin-bottom:12px"><div style="position:relative;flex:none"><button class="btn p" data-rr="menu">Rooms Report ▾</button><div class="pop rrmenu" style="left:0;right:auto;top:44px;width:260px;padding:6px">${Object.entries(
-    RRL
-  )
-    .map(
-      ([k, n]) =>
-        `<button class="mini" style="width:100%;text-align:left;border:0;background:${k === hrr ? "var(--tint)" : "none"};padding:9px 10px;margin:1px 0" data-rr="${k}">${n}</button>`
-    )
-    .join(
-      ""
-    )}</div></div>${q.map(([k, n]) => `<button class="btn ${k === hrr ? "p" : ""}" data-rr="${k}" style="flex:none">${n}</button>`).join("")}<button class="btn a" data-rr="fd" style="flex:none">Open Front Desk</button></div>
- <div style="margin-bottom:12px">${roomsKpiHTML()}</div>
- <div class="fr" style="align-items:center;justify-content:space-between"><h3 style="margin:0">${RRL[hrr]}</h3><span>${printTools("rooms")}</span></div><div class="cs">${["rv", "pay", "rt", "gl"].includes(hrr) ? rrRange().join(" to ") : "Live position"}</div>${tb(cols, rows, foot, "Nothing to show for this report and period.")}`;
+  if (rrHome) return rrHomeHTML();
+  const [c, r, f] = rrData(hrr);
+  return `${phMenu(
+    RR_GROUPS.map(([g, K]) => ({
+      name: g,
+      tabs: K.map(k => [k, rrName(k), RR_ICONS[k]])
+    })),
+    hrr,
+    t => `data-rr="${t}"`,
+    "Room reports"
+  )}<div class="rp-page wide"><div class="pn rp-main"><div class="rp-head"><div><h3>${RRL[hrr]}</h3><p>${RR_WHAT[hrr]}</p></div></div>
+  <div class="rp-bar"><span>${RR_PERIOD.includes(hrr) ? rrPeriods() : ""}</span><span class="rp-tools">${printTools("rooms")}</span></div>
+  ${rrKpis(hrr, c, r, f)}<div class="rp-cap">${rrCaption()}</div>${rrTable(c, r, f, hrr)}</div></div>`;
 }
 function roomsCard() {
   const on = fdOn();
@@ -2035,19 +2333,15 @@ function roomsCard() {
     KES(sum(Object.keys(m), d => m[d].room));
   if (!boCan("home.money")) $("#rml").textContent = ROOMS.length + " rooms · " + occ + " occupied";
 }
-V.rooms = () => `<div class="pn">${roomsReportHTML()}</div>`;
+V.rooms = () => roomsReportHTML();
 /** A click on the rooms report tabs (Room reports page). */
 function rrAct(b) {
   const k = b.dataset.rr;
-  if (k === "menu") return void b.parentElement.querySelector(".rrmenu").classList.toggle("show");
   if (k === "fd") return go("Front Desk");
-  hrr = k;
+  rrHome = k === "home";
+  if (!rrHome && k !== "open") hrr = k;
   all();
 }
-document.addEventListener("click", e => {
-  if (!e.target.closest("[data-rr=menu]"))
-    document.querySelectorAll(".rrmenu").forEach(m => m.classList.remove("show"));
-});
 const dayLate = () => {
   const d = curDay();
   if (!d) return "";

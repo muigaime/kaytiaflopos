@@ -164,6 +164,64 @@ const FD_VIEWS = {
   newacct() {
     return `<div class="fd-card"><h4>Create new customer account</h4><div class="fd-form">${inputHTML("n_n", "Customer or company name")}<input id="n_l" type="number" placeholder="Credit limit (KES)"><button class="chip on" data-f="acnew">Create account</button></div></div>`;
   },
+  tariff() {
+    return tariffView();
+  },
+  req() {
+    const F = fdReq,
+      api = window.fdReqApi,
+      D = [...(fdCan("desk") ? ["Front Office"] : []), ...(fdCan("hk") ? ["Housekeeping"] : [])],
+      stores = api ? api.stores() : [],
+      items = api ? api.items() : [],
+      name = k => (items.find(i => i.k === k) || { name: k }).name,
+      uom = k => (items.find(i => i.k === k) || { uom: "" }).uom,
+      opt = (L, v) => L.map(x => `<option ${x === v ? "selected" : ""}>${hx(x)}</option>`).join("");
+    if (!D.includes(F.dept)) F.dept = D[0];
+    if (!stores.includes(F.store)) F.store = stores[0] || "";
+    if (!items.length)
+      return '<div class="fd-card"><div class="stk">There are no stock items yet. Ask the store to add them.</div></div>';
+    const mine = api.list(D);
+    return `<div class="fd-card"><h4>New requisition</h4><div class="fd-form"><label>For<select id="r_d">${opt(D, F.dept)}</select></label><label>From store<select id="r_s">${opt(stores, F.store)}</select></label><label>Note<input id="r_n" value="${hx(F.note)}" placeholder="Optional"></label></div>
+    <div class="fd-form"><label>Item<select id="r_k">${items.map(i => `<option value="${hx(i.k)}">${hx(i.name)} (${hx(i.uom)})</option>`).join("")}</select></label><label>Quantity<input id="r_q" type="number" min="0" step="any" placeholder="e.g. 5"></label><button class="mini" data-f="reqadd">Add item</button></div>
+    ${
+      F.lines.length
+        ? tableHTML(
+            ["Item", "Quantity", ""],
+            F.lines.map((x, i) => [
+              hx(name(x.k)),
+              `${x.q} ${hx(uom(x.k))}`,
+              `<button class="mini" data-f="reqdel" data-i="${i}">Remove</button>`
+            ])
+          )
+        : ""
+    }
+    <div class="shp"><button class="chip on" data-f="reqsend">Send requisition</button></div></div>
+    <div class="fd-card"><h4>Recent requisitions<small>${mine.length}</small></h4>${tableHTML(
+      ["Date", "Number", "For", "From", "Items", "By", "Status"],
+      mine.map(r => [
+        r.date,
+        hx(r.id),
+        hx(r.dept),
+        hx(r.store),
+        hx(r.items),
+        hx(r.by),
+        hx(r.status)
+      ])
+    )}</div>`;
+  },
+  rexp() {
+    const L = roomExpenses().slice().reverse().slice(0, 100),
+      month = fdToday().slice(0, 7),
+      total = roomExpenses()
+        .filter(x => x.bd.slice(0, 7) === month)
+        .reduce((a, x) => a + x.amt, 0),
+      opt = A => A.map(x => `<option>${hx(x)}</option>`).join("");
+    return `<div class="fd-card"><h4>Record a room expense</h4><div class="fd-form"><label>Room<select id="x_room">${opt(ROOMS.map(r => String(r.no)))}</select></label><label>Type<select id="x_kind">${opt(RX_KINDS)}</select></label><label>What it was for<input id="x_desc" maxlength="120" placeholder="e.g. Replaced shower head"></label><label>Amount (KES)<input id="x_amt" type="number" min="0" step="any"></label><label>Paid by<select id="x_paid">${opt(RX_PAID)}</select></label><button class="chip on" data-f="rxadd">Save expense</button></div></div>
+    <div class="fd-card"><h4>Room expenses<small>This month KES ${R2(total)}</small></h4>${tableHTML(
+      ["Date", "Room", "Type", "What it was for", "Paid by", "Recorded by", "Amount"],
+      L.map(x => [x.bd, x.room, hx(x.kind), hx(x.desc), hx(x.paid), hx(x.by), R2(x.amt)])
+    )}</div>`;
+  },
   hk() {
     const c = roomStatusCounts(),
       btn = (r, set, l, main) =>
@@ -176,8 +234,20 @@ const FD_VIEWS = {
             : x === "ooo"
               ? btn(r, "vac", "Back in service", 1) + btn(r, "dirty", "Mark dirty")
               : btn(r, "dirty", "Mark dirty") + btn(r, "ooo", "Out of order"),
-      L = ROOMS.filter(r => !fdHkF || roomStatus(r) === fdHkF);
-    return `<div class="fd-card fd-hkbar"><div class="fd-leg" role="group" aria-label="Show rooms by status"><button class="${fdHkF ? "" : "on"}" data-f="hkf" data-k="">All <b>${ROOMS.length}</b></button>${Object.keys(
+      A = hkAssigned(),
+      sup = fdCan("hksup"),
+      staff = sup && window.fdHkStaff ? window.fdHkStaff() : [],
+      mine = ROOMS.filter(r => (A[r.no] || {}).to === user.n).length,
+      who = r =>
+        sup
+          ? `<select class="fd-hks" data-hka="${r.no}" aria-label="Assign room ${r.no}"><option value="">Not assigned</option>${[...new Set([...staff, ...(A[r.no] ? [A[r.no].to] : [])])].map(n => `<option ${A[r.no] && A[r.no].to === n ? "selected" : ""}>${hx(n)}</option>`).join("")}</select>`
+          : A[r.no]
+            ? `<span class="fd-hkw">${A[r.no].to === user.n ? "Assigned to you" : "Assigned to " + hx(A[r.no].to)}</span>`
+            : "",
+      L = ROOMS.filter(
+        r => !fdHkF || (fdHkF === "mine" ? (A[r.no] || {}).to === user.n : roomStatus(r) === fdHkF)
+      );
+    return `<div class="fd-card fd-hkbar"><div class="fd-leg" role="group" aria-label="Show rooms by status"><button class="${fdHkF ? "" : "on"}" data-f="hkf" data-k="">All <b>${ROOMS.length}</b></button>${mine || !sup ? `<button class="${fdHkF === "mine" ? "on" : ""}" data-f="hkf" data-k="mine">My rooms <b>${mine}</b></button>` : ""}${Object.keys(
       ROOM_STATUS_LABELS
     )
       .map(
@@ -190,7 +260,7 @@ const FD_VIEWS = {
     <div class="fd-hk">${
       L.map(r => {
         const x = roomStatus(r);
-        return `<div class="fd-hkr hs-${x}"><div class="fd-hkt"><b>${r.no}</b><span>${hx(r.type)}</span><em class="fs-${x}">${ROOM_STATUS_LABELS[x]}</em></div><div class="fd-hka">${acts(r, x)}</div></div>`;
+        return `<div class="fd-hkr hs-${x}"><div class="fd-hkt"><b>${r.no}</b><span>${hx(r.type)}</span><em class="fs-${x}">${ROOM_STATUS_LABELS[x]}</em></div>${who(r)}<div class="fd-hka">${acts(r, x)}</div></div>`;
       }).join("") || '<div class="stk">No rooms with this status.</div>'
     }</div>`;
   },
@@ -412,12 +482,17 @@ const FD_VIEWS = {
    r.pays.length
      ? tableHTML(
          ["Date", "Payment", "Amount"],
-         r.pays.map(p => [bizDateOf(p.at), PAY_METHODS[p.method] || p.method, R2(p.amt)])
+         r.pays.map(p => [
+           bizDateOf(p.at),
+           (PAY_METHODS[p.method] || p.method) +
+             (p.cur ? ` · ${hx(p.cur)} ${R2(p.fcy)} at ${p.rate}` : ""),
+           R2(p.amt)
+         ])
        )
      : ""
  }
  <div class="status ${f.bal > 0 ? "bad" : "ok"}">Balance due: KES ${R2(f.bal)}</div>
- ${r.status === "inhouse" || r.status === "reserved" || (r.status === "out" && f.bal > 0.009) ? `<div class="fd-form"><label>Amount (KES)<input id="m_a" type="number" value="${f.bal > 0 ? f.bal : ""}"></label><label>Method<select id="m_m"><option value="cash">Cash</option><option value="mpesa">M-Pesa</option><option value="account">Customer account</option></select></label><label>Account<select id="m_c">${CU.map((c, i) => (c.off ? "" : `<option value="${i}">${hx(c.n)}</option>`)).join("")}</select></label><button class="chip on" data-f="paygo">Receive payment</button></div>` : ""}
+ ${r.status === "inhouse" || r.status === "reserved" || (r.status === "out" && f.bal > 0.009) ? `<div class="fd-form"><label>Amount<input id="m_a" type="number" value="${f.bal > 0 ? f.bal : ""}"></label><label>Currency<select id="m_cur" data-bal="${f.bal > 0 ? f.bal : 0}">${fxOpts("KES")}</select></label><label>Method<select id="m_m"><option value="cash">Cash</option><option value="mpesa">M-Pesa</option><option value="account">Customer account</option></select></label><label>Account<select id="m_c">${CU.map((c, i) => (c.off ? "" : `<option value="${i}">${hx(c.n)}</option>`)).join("")}</select></label><button class="chip on" data-f="paygo">Receive payment</button></div>` : ""}
  <div class="shp">${r.status === "reserved" ? `<button class="chip on" data-f="ci" data-id="${r.id}">Check in</button><button class="mini" data-f="chg" data-id="${r.id}">Change dates</button>` : ""}${r.status === "inhouse" ? `<button class="chip on" data-f="out" data-id="${r.id}">Check out</button>${f.bal > 0.009 ? `<button class="mini" data-f="out" data-pend="1" data-id="${r.id}">Check out · leave KES ${R2(f.bal)} pending</button>` : ""}<button class="mini" data-f="chg" data-id="${r.id}">Change dates</button>` : ""}${r.grp ? `<button class="mini" data-f="gopen" data-id="${r.grp}">Group folio</button>` : ""}<button class="mini" data-f="inv" data-id="${r.id}">Print invoice</button></div></div>`;
   }
 };

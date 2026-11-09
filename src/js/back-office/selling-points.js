@@ -1,7 +1,16 @@
 // ---- selling points: bars, restaurants and kitchens that sell on the POS ----
 // A selling point gets stock from a store (requisition / issue) and sells products made from that stock.
 // Creating one, or adding a product to one, shows on the POS straight away.
-const SP_TYPES = ["Bar", "Restaurant", "Kitchen", "Cafe", "Room service", MATERIALS, "Other"];
+const SP_TYPES = [
+  "Bar",
+  "Restaurant",
+  "Kitchen",
+  "Cafe",
+  "Room service",
+  MATERIALS,
+  DEPARTMENT,
+  "Other"
+];
 let spSel = null;
 invF.spf = { name: "", type: "Bar", store: STORES[0] };
 invF.spp = { k: "", q: "1", name: "", cat: "", price: "", tax: "B" };
@@ -316,7 +325,7 @@ function spDetail(o) {
     prods = ITEMS.filter(i => i.d === o),
     held = keys.filter(k => Math.abs(have(o, k)) > 1e-9);
   if (!P.k || ING[P.k] === undefined) P.k = keys[0] || "";
-  const mat = isMaterials(o), // a materials store holds stock only: nothing is sold there
+  const mat = isMaterials(o) || isDepartment(o), // these hold stock only: nothing is sold there
     made = i =>
       Object.entries(i.r)
         .map(([k, v]) => `${esc(itemInfo(k).name)} × ${qn(v)} ${esc(itemInfo(k).uom)}`)
@@ -370,7 +379,7 @@ function spDetail(o) {
     };
   return `<div id="spDetail"><button class="sp-back" data-a="sp_close">← All selling points</button>
   <div class="pn sp-hero"><div><h3>${esc(o)}</h3><p>${esc(info.type)} · gets stock from ${esc(info.store)}</p></div><div class="sp-kpis">${mat ? "" : kpi("Products", prods.length)}${kpi("Items in stock", spInStock(o))}${mat ? "" : kpi("Sales today (KES)", m2(spToday(o))) + kpi("Staff", spStaff(o))}</div></div>
-  ${spTabs(subs, spSub, "sp_sub")}${mat && spSub === "stock" ? '<div class="stk sp-note">A materials store holds ingredients for the kitchen. Nothing is sold here; use them under Recipes &amp; Production.</div>' : ""}${panels[spSub]()}</div>`;
+  ${spTabs(subs, spSub, "sp_sub")}${isMaterials(o) && spSub === "stock" ? '<div class="stk sp-note">A materials store holds ingredients for the kitchen. Nothing is sold here; use them under Recipes &amp; Production.</div>' : ""}${panels[spSub]()}</div>`;
 }
 
 // ---- categories at one selling point: hide them from its POS, or move them to another ----
@@ -1002,15 +1011,18 @@ function speModal() {
     <div class="itm-g itm-g4">
      <label>Product name<input data-iv="spe.name" value="${esc(F.name)}"></label>
      <label>Selling price (KES)<input data-iv="spe.price" type="number" min="0" step="any" value="${esc(F.price)}"></label>
+     <label>Buying price (KES)<input value="${m2(spCost(i))}" disabled title="Worked out from the stock this product uses"></label>
      <label>Category<input data-iv="spe.cat" list="prodCatL" value="${esc(F.cat)}"></label>
      <label>Tax<select data-iv="spe.tax">${taxChoices()
        .map(([v, l]) => `<option value="${v}" ${v === F.tax ? "selected" : ""}>${l}</option>`)
        .join("")}</select></label>
     </div>
    </section>
+   <section class="itm-s"><h4>Can sell</h4><div class="mod-cell">${prCanSell(i)}</div></section>
    <section class="itm-s"><h4>Modifiers</h4><div class="mod-cell">${modCell(i)}</div></section>
    <section class="itm-s"><h4>Accompaniments</h4><div class="mod-cell">${accCell(i)}</div></section>
    <section class="itm-s"><h4>Stock conversion</h4><div class="mod-cell">${cvCell(i)}</div></section>
+   ${prPromoSection(i)}
    <section class="itm-s"><h4>Each sale deducts from</h4>
     <div class="grn-modes it-ways">${ways.map(([w, l, s]) => `<button class="grn-mode ${F.way === w ? "on" : ""}" data-a="sp_pway" data-w="${w}"><b>${l}</b><span>${s}</span></button>`).join("")}</div>
     ${source}

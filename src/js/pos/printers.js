@@ -113,8 +113,8 @@ function slipToLines(slip, w) {
       if (k.contains("sl-till"))
         return [{ t: `${tx(c.children[0])}: ${tx(c.children[1])}`, center: true }];
       if (k.contains("sl-fiscal"))
-        return [...c.childNodes]
-          .filter(n => n.nodeType === 3 && /^CU /.test(n.textContent))
+        return [...(c.querySelector("[data-etims]") || c).childNodes]
+          .filter(n => n.nodeType === 3 && /^(CU |TEST|eTIMS|Reprint)/.test(n.textContent))
           .map(n => ({ t: n.textContent.trim() }));
       return tx(c) ? [{ t: tx(c), center: true }] : [];
     });

@@ -43,8 +43,8 @@ try{
   log("15 COMBINED: "+br()+" | "+tt()); const set=async(s,v)=>{const e=q(s); e.value=v; e.dispatchEvent(new Event("change",{bubbles:true})); await wait(30);};
   await set('[data-bf="status"]',"Settled"); log("16 SETTLED: "+br()+" | "+tt()); await set('[data-bf="status"]',"Pending"); log("17 PENDING: "+br()+" | "+tt());
   q('[data-a="rep_print"]').click(); await wait(5); log("18 PRINT PENDING: "+(window.__P.at(-1).match(/<tr>/g)||[]).length+" rows");
-  q("[data-bill]").dispatchEvent(new MouseEvent("dblclick",{bubbles:true})); await wait(25); log("19 PENDING DBLCLICK: "+q("#rc").innerText.replace(/\\s+/g," ").slice(0,120)); click("#rcClose"); await wait(10);
-  await set('[data-bf="status"]',"Combined"); const rn=SALES.find(s=>s.ret).no; q('[data-bill="'+rn+'"]').dispatchEvent(new MouseEvent("dblclick",{bubbles:true})); await wait(25); log("20 CREDIT REPRINT: "+q(".sl-copy").textContent); click("#rcClose"); await wait(10);
+  q("[data-bill]").click(); q('[data-a="bl_reprint"]').click(); await wait(25); log("19 PENDING DBLCLICK: "+q("#rc").innerText.replace(/\\s+/g," ").slice(0,120)); click("#rcClose"); await wait(10);
+  await set('[data-bf="status"]',"Combined"); const rn=SALES.find(s=>s.ret).no; q('[data-bill="'+rn+'"]').click(); q('[data-a="bl_reprint"]').click(); await wait(25); log("20 CREDIT REPRINT: "+q(".sl-copy").textContent); click("#rcClose"); await wait(10);
   q('[data-r="blog"]').click(); await wait(30); log("21 LOG: "+[...q("#vSub table.t").rows].slice(1).map(r=>r.cells[4].textContent+":"+r.cells[5].textContent).join(" ; "));
   q('[data-r="sc"]').click(); await wait(30); log("22 SALES AND COSTS: "+[...q("#vSub table.t").rows].map(r=>[...r.cells].slice(0,3).map(c=>c.textContent).join(",")).join(" | "));
   q('#nav .nv[data-n="Home"]').click(); await wait(40); log("23 HOME ORDERS: "+qa("#kpis .k")[2].querySelector(".v").textContent+" | activity "+q("#act .row b").textContent);

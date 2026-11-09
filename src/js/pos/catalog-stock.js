@@ -58,7 +58,10 @@ const isStore = l => STORES.includes(l);
 // it gets issues and stock takes like a selling point, but never appears on the POS.
 const MATERIALS = "Materials store";
 const isMaterials = l => (OUTLET_INFO[l] || {}).type === MATERIALS;
-const posSells = l => ALLD.includes(l) && !isMaterials(l);
+/** Housekeeping or the Front Office: they request and hold stock, and nothing is sold there. */
+const DEPARTMENT = "Department";
+const isDepartment = l => (OUTLET_INFO[l] || {}).type === DEPARTMENT;
+const posSells = l => ALLD.includes(l) && !isMaterials(l) && !isDepartment(l);
 function mv(loc, k, q, t, note, peer, ref, by) {
   STK[loc][k] = (STK[loc][k] || 0) + q;
   MOV.push({

@@ -9,6 +9,9 @@ invF.hs = {
   taxB: String(TAX.B),
   taxC: String(TAX.C)
 };
+document.addEventListener("kf:fx", () => {
+  invF.hs.cur = FD_SETTINGS.currencies.map(c => `${c.c} = ${c.rate}`).join("\n");
+});
 function printersHTML() {
   const L = FD_SETTINGS.printers || [];
   return `<div class="pn"><details class="psu-net"><summary><h4>Network printers and print server</h4><span class="stk">Only for printers with their own IP address, or terminals that print through another computer.</span></summary>
@@ -51,6 +54,7 @@ V.settings = () => {
       return `<div class="pn"><div class="fr" style="align-items:center;justify-content:space-between"><h4 style="margin:0">Modules</h4><button class="mini" style="flex:none" data-a="hs_modlock">Lock</button></div><div class="stk">Switch off what this business doesn't use. Nothing is deleted: switch it back on and everything returns as it was.</div><div class="tw"><table class="t"><tr><td><b>Front Desk and room reports</b><small class="pr-code">Rooms, bookings, check-in, housekeeping, guest bills, Room reports and Post to room. Switch it off for a business with no rooms.</small></td><td><span class="tag ${on ? "ok" : ""}">${on ? "On" : "Off"}</span></td><td class="n"><button class="pv-sw ${on ? "on" : ""}" data-a="hs_fdtog" role="switch" aria-checked="${on}" aria-label="Front Desk and room reports"><i></i></button></td></tr></table></div></div>`;
     },
     email: repMailHTML,
+    support: supportHTML,
     backup: backupHTML,
     network: networkHTML
   };

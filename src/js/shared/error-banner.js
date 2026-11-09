@@ -1,7 +1,22 @@
 // ---- error banner: any unexpected error is shown on screen instead of failing silently ----
 // (Without it, an error while the page loads leaves buttons that simply do nothing.)
+const KF_ERRLOG = "kaytia_error_log";
+/** Kept on this computer, for Settings → Help and logs. */
+function kfLogError(msg) {
+  try {
+    const on = id =>
+        (
+          document.getElementById(id) || { classList: { contains: () => false } }
+        ).classList.contains("show"),
+      where = on("bo") ? "Back Office" : on("fd") ? "Front Desk" : "POS",
+      L = JSON.parse(localStorage.getItem(KF_ERRLOG) || "[]");
+    L.unshift({ at: new Date().toISOString(), where, msg: String(msg).slice(0, 2000) });
+    localStorage.setItem(KF_ERRLOG, JSON.stringify(L.slice(0, 300)));
+  } catch (e) {}
+}
 (function () {
   function show(msg) {
+    kfLogError(msg);
     let el = document.getElementById("errBanner");
     if (!el) {
       el = document.createElement("div");

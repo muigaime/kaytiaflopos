@@ -300,6 +300,14 @@
         </div>
       </div>
     </div>
+    <div class="modal" id="mMp" style="z-index: 70">
+      <div class="box" style="max-width: 480px">
+        <h3 style="margin: 0">M-Pesa payments received</h3>
+        <p class="stk" style="margin: 2px 0 10px">Tap the customer's payment to put it on this bill.</p>
+        <div id="mpList"></div>
+        <div class="row"><button class="mini" id="mpClose">Close</button><button class="chip on" id="mpAgain">Refresh</button></div>
+      </div>
+    </div>
     <div class="modal" id="mPay">
       <div class="box pay-box"><div id="pWrap"></div></div>
     </div>
@@ -471,6 +479,9 @@
     <script src="js/shared/audit.js"></script>
     <script src="js/shared/pay-modes.js"></script>
     <script src="js/shared/xlsx.js"></script>
+    <script src="js/shared/xlsx-read.js"></script>
+    <script src="js/shared/barcode.js"></script>
+    <script src="js/shared/qr.js"></script>
     <script src="js/shared/pdf.js"></script>
     <script src="js/shared/business-day.js"></script>
     <script src="js/pos/catalog-stock.js"></script>
@@ -478,6 +489,9 @@
     <script src="js/pos/promotions.js"></script>
     <script src="js/pos/cart-sale.js"></script>
     <script src="js/pos/payment.js"></script>
+    <script src="js/pos/mpesa.js"></script>
+    <script src="js/pos/etims.js"></script>
+    <script src="js/pos/scan.js"></script>
     <script src="js/pos/orders.js"></script>
     <script src="js/pos/exchange.js"></script>
     <script src="js/pos/modifiers.js"></script>
@@ -490,6 +504,19 @@
     <script src="js/pos/login-session.js"></script>
 
     <!-- ==================== Start menu (POS / Back Office / Front Desk) ==================== -->
+    <div id="sClock">
+      <div class="sc-card">
+        <div class="sc-time"><b id="scT"></b><span id="scD"></span></div>
+        <h2>Staff clock</h2>
+        <label for="scE">Your name</label>
+        <select id="scE"></select>
+        <label for="scP">Password</label>
+        <input id="scP" type="password" autocomplete="off" />
+        <div class="sc-msg" id="scMsg" role="status"></div>
+        <div class="sc-btns"><button id="scIn">Clock in</button><button id="scOut">Clock out</button></div>
+        <button class="sc-back" id="scBack">Back to main page</button>
+      </div>
+    </div>
     <div id="start">
       <div class="lbrand">
         <div class="kf-brand"><span class="kf-m" aria-hidden="true">K</span><span class="kf-t"><b>Kaytia <em>Flow</em></b></span></div>
@@ -544,6 +571,12 @@
                 <path d="M3 18V7M3 14h18v4M21 14v-2a3 3 0 00-3-3h-7v5M7 11h.01" /></svg></span
             ><span class="ot"
               ><b>Front Desk</b><span>Rooms, bookings, check-in and guest bills</span></span
+            ><span class="oa">→</span>
+          </button>
+          <button class="opt" data-go="clock">
+            <span class="oi"
+              ><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg></span
+            ><span class="ot"><b>Staff clock</b><span>Clock in or out with your password</span></span
             ><span class="oa">→</span>
           </button>
           <div class="lsep"></div>
@@ -900,6 +933,7 @@
     <script src="js/front-desk/data.js"></script>
     <script src="js/front-desk/rooms-meals-invoices.js"></script>
     <script src="js/front-desk/room-types.js"></script>
+    <script src="js/front-desk/tariffs.js"></script>
     <script src="js/front-desk/group-bookings.js"></script>
     <script src="js/front-desk/guests-housekeeping.js"></script>
     <script src="js/front-desk/views.js"></script>
@@ -925,6 +959,11 @@
     <script src="js/back-office/selling-points.js" data-private></script>
     <script src="js/back-office/production.js" data-private></script>
     <script src="js/back-office/settings.js" data-private></script>
+    <script src="js/back-office/support-page.js" data-private></script>
+    <script src="js/back-office/staff-clock.js" data-private></script>
+    <script src="js/back-office/product-import.js" data-private></script>
+    <script src="js/back-office/product-stickers.js" data-private></script>
+    <script src="js/back-office/mpesa-page.js" data-private></script>
     <script src="js/back-office/printer-setup.js" data-private></script>
     <script src="js/back-office/general-setup.js" data-private></script>
     <script src="js/back-office/modifier-setup.js" data-private></script>

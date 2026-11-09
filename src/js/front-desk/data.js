@@ -22,7 +22,13 @@ const FD_SETTINGS = {
     meals: { BB: 800, HB: 1800, FB: 2600 },
     child: 50
   },
-  MEAL_PLANS = { RO: "Room only", BB: "Bed & breakfast", HB: "Half board", FB: "Full board" };
+  MEAL_PLANS = {
+    RO: "Room only",
+    BB: "Bed & breakfast",
+    HB: "Half board",
+    FB: "Full board",
+    AI: "All inclusive"
+  };
 const mealPlanPrice = p => (!p || p === "RO" ? 0 : FD_SETTINGS.meals[p] || 0),
   mealPerNight = (p, a, c) => mealPlanPrice(p) * (a + (c * FD_SETTINGS.child) / 100);
 function fdBrand() {
@@ -170,12 +176,16 @@ const FD_MENU = [
     "Running the house",
     [
       ["hk", "Housekeeping", "broom"],
+      ["req", "Requisitions", "doc"],
+      ["tariff", "Room tariffs", "wallet"],
+      ["rexp", "Room expenses", "wallet"],
       ["shift", "Shift management", "clock"],
       ["set", "Settings", "gear"]
     ]
   ]
 ];
 const FD_TITLES = {
+  tariff: ["Room tariffs", "Rates by meal plan, in any currency, and today's exchange rates."],
   grid: ["Rooms", "Every room at a glance. Tap one to check in, book it or open its folio."],
   checkin: ["Check in", "Arrivals due today, and walk-in guests."],
   book: ["Room booking", "Reserve a room, with or without a deposit."],
@@ -186,14 +196,21 @@ const FD_TITLES = {
   pending: ["Pending payments", "Guests who still owe."],
   post: ["Cash sale and expenses", "Charges to a room, cash sales and cash paid out."],
   hk: ["Housekeeping", "Change a room's status as soon as the work is done."],
+  req: [
+    "Requisitions",
+    "Ask the store for what you need. A manager approves it and the store issues it."
+  ],
+  rexp: ["Room expenses", "Money spent on a room: repairs, linen, cleaning and supplies."],
   set: ["Settings", "Room types, meal plans, rooms and rates."],
   folio: ["Guest folio", "Charges, payments and the invoice."],
   accts: ["Customer accounts", "Balances and payments."],
   newacct: ["New customer account", ""]
 };
 /** What the signed-in person's role allows here: desk, hk (housekeeping) or set (settings). */
-const fdCan = k => !!user && !!user.fd && !!user.fd[k];
-const fdPageRight = v => (v === "hk" ? "hk" : v === "set" ? "set" : "desk");
+const fdCan = k =>
+  !!user && !!user.fd && (k === "staff" ? !!(user.fd.desk || user.fd.hk) : !!user.fd[k]);
+const fdPageRight = v =>
+  v === "hk" ? "hk" : v === "set" || v === "tariff" ? "set" : v === "req" ? "staff" : "desk";
 let fdView = "grid",
   fdSelectedRoom = null,
   fdSelectedRes = null,

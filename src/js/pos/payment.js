@@ -94,7 +94,7 @@ function drawPay() {
     rows = payRowsNow()
       .map(
         ([m, l, ph]) =>
-          `<tr class="pay-r ${m === payRow ? "on" : ""}" data-pr="${m}"><th>${l}</th><td><input ${m === "cash" ? 'id="pAmt"' : ""} data-pa="${m}" type="number" inputmode="decimal" min="0" step="any" value="${val(m, "a")}" placeholder="0.00"></td><td><input data-pt="${m}" type="number" inputmode="decimal" min="0" step="any" value="${val(m, "t")}" placeholder="0" ${m === "comp" ? "disabled" : ""}></td><td class="pay-n"><input data-pn="${m}" value="${val(m, "n")}" placeholder="${ph}" autocomplete="off">${m === "mpesa" ? '<button class="pay-stk" data-stk>Send request</button>' : ""}</td></tr>`
+          `<tr class="pay-r ${m === payRow ? "on" : ""}" data-pr="${m}"><th>${l}</th><td><input ${m === "cash" ? 'id="pAmt"' : ""} data-pa="${m}" type="number" inputmode="decimal" min="0" step="any" value="${val(m, "a")}" placeholder="0.00"></td><td><input data-pt="${m}" type="number" inputmode="decimal" min="0" step="any" value="${val(m, "t")}" placeholder="0" ${m === "comp" ? "disabled" : ""}></td><td class="pay-n"><input data-pn="${m}" value="${val(m, "n")}" placeholder="${ph}" autocomplete="off">${m === "mpesa" ? '<button class="pay-stk" data-stk>Send request</button><button class="pay-stk" data-mpin>Received</button>' : ""}</td></tr>`
       )
       .join(""),
     posted = payPost
@@ -201,8 +201,10 @@ function payCommit() {
   if (payLeft() > 0.004) return (fsNote("Balance due: " + KES(payLeft())), false);
   if (others > due + 0.004) return (fsNote("Only cash can be more than the bill."), false);
   const mp = String(V("mpesa").n || "").trim();
-  if (A("mpesa") > 0 && (!mp || /^254\d{9}$/.test(mp)))
+  if (A("mpesa") > 0 && (!mp || /^(254|0)\d{9}$/.test(mp)))
     return (fsNote("Enter the M-Pesa code, or press Send request."), false);
+  const mpWrong = A("mpesa") > 0 ? mpProblem(mp.toUpperCase(), A("mpesa")) : "";
+  if (mpWrong) return (fsNote(mpWrong), false);
   let by = "";
   if (A("comp") > 0) {
     if (!String(V("comp").n || "").trim())
@@ -357,23 +359,8 @@ $("#mPay").addEventListener("click", e => {
     payRead();
     return payAddPost(d.post);
   }
-  if (d.stk !== undefined) {
-    payRead();
-    const n = $('#pWrap [data-pn="mpesa"]'),
-      ph = n.value.trim();
-    if (!/^2547\d{8}$|^2541\d{8}$/.test(ph)) return fsNote("Enter the number as 2547XXXXXXXX.");
-    if (!(payNum((payVals.mpesa || {}).a) > 0)) return fsNote("Enter the M-Pesa amount first.");
-    b.disabled = true;
-    b.textContent = "Waiting for PIN…";
-    setTimeout(() => {
-      if (!$("#mPay").classList.contains("show")) return;
-      const box = $('#pWrap [data-pn="mpesa"]');
-      if (box) box.value = "QJ" + Math.random().toString(36).slice(2, 10).toUpperCase();
-      b.disabled = false;
-      b.textContent = "Send request";
-      payCalc();
-    }, 2800);
-  }
+  if (d.stk !== undefined) return mpSend(b);
+  if (d.mpin !== undefined) return mpInbox();
 });
 /** A POS bill on a guest's folio. posOwed remembers it was already counted as a sale, so paying it isn't counted again. */
 function roomCharge(id, amt, desc) {
@@ -432,9 +419,7 @@ function payClear() {
         );
       }
     }
-    const cu = "KRACU0100" + Math.floor(1000 + Math.random() * 8999),
-      inv = +no,
-      change = bi === targets.length - 1 ? chv : 0,
+    const change = bi === targets.length - 1 ? chv : 0,
       credit = pays.some(p => p.m === "credit" || p.m === "room" || p.m === "payroll"),
       tips = bi === 0 ? payTipsNow : {},
       roomPay = pays.find(p => p.m === "room"),
@@ -506,8 +491,7 @@ function payClear() {
                 change,
                 credit,
                 credits: pays.filter(p => p.m === "credit").map(p => ({ ci: p.ci, amt: p.amt })),
-                cu,
-                inv,
+                eq: 1,
                 cur: t.cur,
                 roomId: roomPay && roomPay.rid
               }
@@ -553,7 +537,7 @@ function payClear() {
       paid: al.join(""),
       change,
       credit,
-      fiscal: `CU serial: ${cu}<br>CU invoice no: ${inv}${qr(no + cu)}Scan to verify on KRA eTIMS<br>(demo QR)`
+      fiscal: etimsFiscal(no, { eq: 1 })
     });
   });
   if (targets.length > 1)
@@ -607,6 +591,8 @@ function payClear() {
       const i = orders.indexOf(o);
       if (i > -1) orders.splice(i, 1);
     });
+  mpConfirm(pays, billNos);
+  billNos.forEach(etimsSend);
   pays = [];
   payT = null;
   if ($("#mSel").classList.contains("show")) selRender();

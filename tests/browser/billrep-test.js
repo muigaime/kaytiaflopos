@@ -25,7 +25,7 @@ try{
   await relog("3333"); await add("Tusker"); await pay(null);
   q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400);
   q('#nav .nv[data-n="Reports"]').click(); await wait(30); q('[data-r="bills"]').click(); await wait(30);
-  const rows=()=>qa("#vSub [data-bill]").filter(r=>!r.hidden).map(r=>[...r.cells].map(c=>c.textContent).join(",")).join("\\n   "), tot=()=>q(".bl-tot").innerText.replace(/\\s+/g," "), dbl=n=>q('[data-bill="'+n+'"]').dispatchEvent(new MouseEvent("dblclick",{bubbles:true})), hdr=()=>qa(".bl-t th").map(x=>x.textContent).join("/");
+  const rows=()=>qa("#vSub [data-bill]").filter(r=>!r.hidden).map(r=>[...r.cells].map(c=>c.textContent).join(",")).join("\\n   "), tot=()=>q(".bl-tot").innerText.replace(/\\s+/g," "), dbl=n=>{ q('[data-bill="'+n+'"]').click(); q('[data-a="bl_reprint"]').click(); }, hdr=()=>qa(".bl-t th").map(x=>x.textContent).join("/");
   log("1 GRID: "+hdr()+"\\n   "+rows()+"\\n   "+tot()+" | hint "+q(".bl-hint").textContent);
   ${outPng ? 'q("[data-bill]").click(); await wait(20);' : `
   const fi=q('[data-bc="Waiter Name"]'); fi.focus(); fi.value="sam"; fi.dispatchEvent(new Event("input",{bubbles:true})); await wait(15); log("2 COLUMN FILTER: focus kept "+(document.activeElement===fi)+" | "+rows()+" | "+tot()); fi.value=""; fi.dispatchEvent(new Event("input",{bubbles:true})); await wait(15);
@@ -43,7 +43,7 @@ try{
   log("11 EVERY REPORT: "+P.length+" reports | "+res.filter(x=>x.endsWith("?")).length+" failed | "+res.filter(x=>x.endsWith("none")).join(","));
   q('[data-r="bills"]').click(); await wait(20); let rr=q('[data-rsz="a4"]'); rr.click(); rr.dispatchEvent(new Event("change",{bubbles:true})); q('[data-a="rep_print"]').click(); await wait(5); const A=window.__P.at(-1); log("12 A4 DOC: landscape "+A.includes("A4 landscape")+" | title "+(A.match(/<h2>(.*?)<\\/h2>/)||[])[1]+" | rows "+(A.match(/<tr>/g)||[]).length+" | total row "+A.includes("st-tot"));
   rr=q('[data-rsz="80"]'); rr.click(); rr.dispatchEvent(new Event("change",{bubbles:true})); q('[data-a="rep_print"]').click(); await wait(5); const T=window.__P.at(-1); log("13 80MM DOC: page "+T.includes("80mm auto")+" | blocks "+(T.match(/class="b/g)||[]).length);
-  q('#nav .nv[data-n="Room reports"]').click(); await wait(30); log("14 ROOMS print button "+!!q('[data-a="rep_print"][data-k="rooms"]')); const n0=window.__P.length; q('[data-a="rep_print"][data-k="rooms"]').click(); await wait(5); log("14b printed "+(window.__P.length>n0)+" | toast "+q("#toast").textContent);
+  q('#nav .nv[data-n="Room reports"]').click(); await wait(30); q('[data-rr="occ"]').click(); await wait(30); log("14 ROOMS print button "+!!q('[data-a="rep_print"][data-k="rooms"]')); const n0=window.__P.length; q('[data-a="rep_print"][data-k="rooms"]').click(); await wait(5); log("14b printed "+(window.__P.length>n0)+" | toast "+q("#toast").textContent);
   q('#nav .nv[data-n="Audit log"]').click(); await wait(30); log("15 AUDIT PAGE: "+q("#vSub").innerText.replace(/\\s+/g," ").slice(0,100));`}
 }catch(e){log("X "+e.message)}
 document.documentElement.setAttribute("data-test",__E.join(" @@ "));document.title="done";})();</script>`;

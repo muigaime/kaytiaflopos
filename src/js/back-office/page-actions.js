@@ -8,10 +8,10 @@ $("#vSub").onclick = e => {
       .forEach(b => b.classList.toggle("on", b.dataset.p === p));
     return all();
   }
-  const billTr = e.target.closest("[data-bill]");
+  const billTr = e.target.closest("tr[data-bill]");
   if (billTr) {
-    document.querySelectorAll("#vSub tr.on[data-bill]").forEach(x => x.classList.remove("on"));
-    return billTr.classList.add("on");
+    blM = billTr.dataset.bill;
+    return all();
   }
   const roomTab = e.target.closest("[data-rr]");
   if (roomTab) return rrAct(roomTab);
@@ -145,7 +145,10 @@ $("#vSub").onclick = e => {
     recAct(a.slice(4), b);
     return;
   }
+  if (a.slice(0, 3) === "bl_") return billAct(a);
+  if (a.slice(0, 3) === "su_") return supAct(a, b);
   if (a.slice(0, 3) === "rm_") return repMailAct(a, b);
+  if (a.slice(0, 3) === "mp_") return mpAct(a, b);
   if (a.slice(0, 3) === "hs_") {
     settingsAct(a.slice(3), b);
     return;
@@ -207,10 +210,6 @@ $("#vSub").onclick = e => {
   all();
 };
 window.boRedraw = () => all();
-$("#vSub").ondblclick = e => {
-  const b = e.target.closest("[data-bill]");
-  if (b) billReprint(b.dataset.bill);
-};
 $("#vSub").onchange = e => {
   const t = e.target,
     s = t.dataset;

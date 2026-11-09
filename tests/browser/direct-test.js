@@ -35,13 +35,13 @@ try{
   const mat=Object.keys(STK).find(k=>/Material/.test(k)); must(!!mat,"there is a materials store: "+mat);
   STK[mat].c=50; STK[mat].d=50;
   await go2("Products List");
-  must(!!q('[data-a="rec_dirr"][data-id="50"]')&&!!q('[data-a="rec_dirp"][data-id="50"]'),"a no-stock item offers recipe and production");
+  must(!q('.pr-t [data-a="rec_dirr"]')&&!q('.pr-t [data-a="rec_dirp"]'),"recipe and production are off the list");
   must(!q('[data-a="rec_dirr"][data-id="1"]'),"a stocked item does not");
   click('[data-a="prl_edit"][data-id="53"]'); await wait(40);
   must(!!q('#prEd [data-a="rec_dirr"]')&&!!q('#prEd [data-a="rec_dirp"]'),"its edit form offers them too");
   click('#prEd [data-a="prl_eclose"]'); await wait(30);
   // Blocked while on a bill
-  orders.push({lines:{50:{q:1}}}); click('[data-a="rec_dirr"][data-id="50"]'); await wait(30);
+  click('[data-a="prl_edit"][data-id="50"]'); await wait(40); orders.push({lines:{50:{q:1}}}); click('[data-a="rec_dirr"][data-id="50"]'); await wait(30);
   must(/open bill/.test(document.body.textContent)&&!!q(".pr-page"),"blocked while it is on an open bill"); orders.pop();
   // Recipe from the product list
   click('[data-a="rec_dirr"][data-id="50"]'); await wait(100);
@@ -74,7 +74,7 @@ try{
   click('[data-a="rec_rno"]'); await wait(40);
   // Production
   await go2("Products List");
-  click('[data-a="rec_dirp"][data-id="51"]'); await wait(100);
+  click('[data-a="prl_edit"][data-id="51"]'); await wait(40); click('[data-a="rec_dirp"][data-id="51"]'); await wait(100);
   const out=q('[data-iv="pr.outName"]'); must(out&&out.value==="Ugali","the production form opens with the name");
   must(/Ugali sells at Restaurant with no stock kept/.test(q("#vSub").textContent),"it says the two will be linked");
   must(q('[data-iv="pr.to"]').value==="Restaurant","to the right selling point");
