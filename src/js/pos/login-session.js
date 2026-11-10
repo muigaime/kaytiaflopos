@@ -110,6 +110,7 @@ $("#kp").onclick = e => {
   if (k) pkey(k);
 };
 function fsNote(m) {
+  m = kfTag(m, user && user.role, true);
   const n = document.createElement("div");
   n.id = "fsn";
   n.textContent = m;

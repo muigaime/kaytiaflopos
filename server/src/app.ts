@@ -2,6 +2,7 @@ import express from "express";
 import { authenticate } from "./http/auth.js";
 import { errorHandler } from "./http/errors.js";
 import { authRouter, publicAuthRouter } from "./modules/auth/auth.routes.js";
+import { cloudRouter } from "./modules/cloud/cloud.routes.js";
 import { dashboardRouter } from "./modules/dashboard/dashboard.routes.js";
 import { mailRouter } from "./modules/mail/mail.routes.js";
 import { printRouter } from "./modules/printing/print.routes.js";
@@ -13,6 +14,8 @@ import { terminalRouter } from "./modules/terminals/terminal.routes.js";
 export function createApp() {
   const app = express();
   app.disable("x-powered-by");
+  // Hotels' cloud copies: own key per site, and a larger body limit than the rest
+  app.use("/api/cloud", cloudRouter);
   app.use(express.json({ limit: "5mb" }));
 
   // Public

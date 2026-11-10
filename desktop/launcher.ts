@@ -22,6 +22,8 @@ import { merge } from "./merge.js";
 import { createAttendance } from "./attendance.ts";
 import { createEtims } from "./etims.ts";
 import { createMpesa } from "./mpesa.ts";
+import { menuLogo, menuPage } from "./menu.ts";
+import { createCloud } from "./cloud.ts";
 import { readImage } from "./ocr.ts";
 
 const HOME = process.env.KAYTIA_HOME ?? "C:\\KaytiaFlow";
@@ -30,6 +32,18 @@ const API_PORT = Number(process.env.KAYTIA_API_PORT ?? 4000);
 const MAIN_PORT_DEFAULT = 5500;
 const EXE = process.execPath;
 const SHORTCUT = "Kaytia POS.lnk";
+// The background program: the same program, marked as a windowed one so Windows never gives it a black
+// window. It runs the server quietly, like PostgreSQL, and starts when this person signs in to Windows.
+const SERVICE = "KaytiaFlowService.exe";
+const MODE = process.argv.includes("--service")
+  ? "service"
+  : process.argv.includes("--open")
+    ? "open"
+    : "";
+const RUN_KEY = "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run";
+const RUN_NAME = "Kaytia Flow";
+const AUTOSTART_OFF = () => path.join(HOME, "autostart-off");
+const STARTED = new Date().toISOString();
 const INSTALLED = "KaytiaFlow.exe";
 const CONFIG = path.join(HOME, "config.json");
 const DATA = path.join(HOME, "data");
@@ -75,16 +89,17 @@ function powershell(script: string, env: NodeJS.ProcessEnv, timeout = 20000): Pr
     execFile(
       "powershell.exe",
       ["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", script],
-      { env: { ...process.env, ...env }, timeout },
+      { env: { ...process.env, ...env }, timeout, windowsHide: true },
       (err, out) => (err ? no(err) : ok(out))
     );
   });
 }
 /** The shortcut on this person's desktop. Names go in by environment, never into the script. */
-async function makeShortcut(target: string) {
+async function makeShortcut(target: string, args = "") {
   const script = `$d = if ($env:KF_DESKTOP) { $env:KF_DESKTOP } else { [Environment]::GetFolderPath('Desktop') }
 $s = (New-Object -ComObject WScript.Shell).CreateShortcut((Join-Path $d $env:KF_NAME))
 $s.TargetPath = $env:KF_TARGET
+$s.Arguments = $env:KF_ARGS
 $s.WorkingDirectory = $env:KF_DIR
 $s.IconLocation = $env:KF_TARGET + ',0'
 $s.Description = 'Kaytia Flow POS'
@@ -92,11 +107,67 @@ $s.Save()`;
   await powershell(script, {
     KF_NAME: SHORTCUT,
     KF_TARGET: target,
+    KF_ARGS: args,
     KF_DIR: path.dirname(target),
     KF_DESKTOP: process.env.KAYTIA_DESKTOP ?? ""
   });
 }
-/** The installed copy is locked while it runs, so a running one is closed first. Its data is already on disk. */
+/** A copy of the program that Windows starts with no window: same program, subsystem set to "windows". */
+function makeServiceExe(from: string, to: string) {
+  const buf = fs.readFileSync(from),
+    pe = buf.readUInt32LE(0x3c);
+  if (buf.toString("latin1", pe, pe + 4) !== "PE\0\0") throw new Error("Not a Windows program.");
+  buf.writeUInt16LE(2, pe + 24 + 68); // IMAGE_SUBSYSTEM_WINDOWS_GUI
+  fs.writeFileSync(to + ".tmp", buf);
+  fs.renameSync(to + ".tmp", to);
+}
+/** Closes the Kaytia Flow programs running from these files, and no other. */
+function stopPrograms(files: string[]) {
+  return powershell(
+    "$f = $env:KF_FILES -split '\\|'; Get-Process -ErrorAction SilentlyContinue | Where-Object { $_.Path -and ($f -contains $_.Path) } | Stop-Process -Force",
+    { KF_FILES: files.join("|") }
+  ).catch(() => "");
+}
+const autostartCmd = () => `"${path.join(HOME, SERVICE)}" --service`;
+function autostartOn(): Promise<boolean> {
+  return new Promise(ok =>
+    execFile(
+      "reg",
+      ["query", RUN_KEY, "/v", RUN_NAME],
+      { timeout: 5000, windowsHide: true },
+      (err, out) => ok(!err && (out ?? "").toLowerCase().includes(SERVICE.toLowerCase()))
+    )
+  );
+}
+function setAutostart(on: boolean): Promise<boolean> {
+  try {
+    if (on) fs.rmSync(AUTOSTART_OFF(), { force: true });
+    else
+      fs.writeFileSync(
+        AUTOSTART_OFF(),
+        "Kaytia Flow does not start with Windows on this computer."
+      );
+  } catch {
+    /* the switch still works for this session */
+  }
+  const args = on
+    ? ["add", RUN_KEY, "/v", RUN_NAME, "/t", "REG_SZ", "/d", autostartCmd(), "/f"]
+    : ["delete", RUN_KEY, "/v", RUN_NAME, "/f"];
+  return new Promise(ok =>
+    execFile("reg", args, { timeout: 5000, windowsHide: true }, err => ok(!err || !on))
+  );
+}
+/** Starts the background program and lets this one go. */
+function startBackground(arg: "--open" | "--service") {
+  spawn(path.join(HOME, SERVICE), [arg], {
+    detached: true,
+    stdio: "ignore",
+    windowsHide: true,
+    env: process.env
+  }).unref();
+}
+/** The installed copy is locked while it runs, so it is closed first: only that copy, never another Kaytia Flow
+ * running from somewhere else on this computer. Its data is already on disk. */
 async function copyOverInstalled(target: string) {
   for (let i = 0; i < 6; i++) {
     try {
@@ -105,7 +176,7 @@ async function copyOverInstalled(target: string) {
     } catch {
       if (i === 0) {
         console.log("Closing the running Kaytia Flow...");
-        await new Promise(r => execFile("taskkill", ["/IM", INSTALLED, "/F"], () => r(null)));
+        await stopPrograms([target, path.join(path.dirname(target), SERVICE)]);
       }
       await new Promise(r => setTimeout(r, 1500));
     }
@@ -137,19 +208,33 @@ async function installIfNeeded(): Promise<boolean> {
     const from = path.join(path.dirname(EXE), f);
     if (fs.existsSync(from)) fs.copyFileSync(from, path.join(HOME, f));
   }
-  await makeShortcut(target).catch(e =>
-    console.log("Could not make the desktop shortcut:", e.message)
+  const svc = path.join(HOME, SERVICE);
+  try {
+    await stopPrograms([svc]);
+    makeServiceExe(target, svc);
+  } catch (e) {
+    console.log("Could not make the background program:", (e as Error).message);
+  }
+  await makeShortcut(fs.existsSync(svc) ? svc : target, fs.existsSync(svc) ? "--open" : "").catch(
+    e => console.log("Could not make the desktop shortcut:", e.message)
   );
+  if (!process.env.KAYTIA_NO_AUTOSTART && !fs.existsSync(AUTOSTART_OFF())) await setAutostart(true);
   console.log(
     updating
       ? "Updated. Your data was not touched. Refresh the browser page."
       : `Done. "Kaytia POS" is on your desktop.`
   );
-  spawn("cmd", ["/c", "start", "", target], {
-    detached: true,
-    stdio: "ignore",
-    env: process.env
-  }).unref();
+  console.log(
+    "Kaytia Flow now runs in the background, with no window, and starts when you sign in to Windows."
+  );
+  if (fs.existsSync(svc)) startBackground("--open");
+  else
+    spawn("cmd", ["/c", "start", "", target], {
+      detached: true,
+      stdio: "ignore",
+      windowsHide: true,
+      env: process.env
+    }).unref();
   return true;
 }
 
@@ -182,7 +267,7 @@ function openApp(url: string) {
       "/v",
       "ProgId"
     ],
-    { timeout: 5000 },
+    { timeout: 5000, windowsHide: true },
     (_err, out) => {
       const order = /msedge/i.test(out ?? "") ? ["edge", "chrome"] : ["chrome", "edge"],
         exe = order.map(browserPath).find(Boolean);
@@ -399,7 +484,7 @@ function psql(bin: string, user: string, pass: string, sql: string): Promise<str
     execFile(
       path.join(bin, "psql.exe"),
       ["-h", "localhost", "-p", "5432", "-U", user, "-d", "postgres", "-w", "-tAc", sql],
-      { env: { ...process.env, PGPASSWORD: pass }, timeout: 20000 },
+      { env: { ...process.env, PGPASSWORD: pass }, timeout: 20000, windowsHide: true },
       (err, stdout, stderr) => (err ? no(new Error(stderr || err.message)) : ok(stdout))
     );
   });
@@ -546,6 +631,17 @@ async function main() {
   process.title = "Kaytia Flow";
   if (!process.env.KAYTIA_NO_INSTALL && (await installIfNeeded()))
     return void setTimeout(() => process.exit(0), 3000);
+  if (!MODE && !process.env.KAYTIA_NO_INSTALL && !process.env.KAYTIA_FOREGROUND) {
+    const svc = path.join(HOME, SERVICE);
+    try {
+      if (!fs.existsSync(svc) || fs.statSync(svc).size !== fs.statSync(EXE).size)
+        makeServiceExe(EXE, svc);
+      startBackground("--open");
+      return void setTimeout(() => process.exit(0), 300);
+    } catch {
+      /* no background copy: run here, in this window, as before */
+    }
+  }
   const showError = console.error.bind(console);
   console.error = (...a: unknown[]) => {
     logError(a.map(String).join(" "));
@@ -558,7 +654,16 @@ async function main() {
   const etims = createEtims(HOME, v => saveEnvValues(path.join(HOME, "kaytia.env"), v));
   const attendance = createAttendance(HOME, v => saveEnvValues(path.join(HOME, "kaytia.env"), v));
   const cfg = loadConfig();
-  if (!process.env.KAYTIA_NO_INSTALL) await makeShortcut(EXE).catch(() => {});
+  const cloud = createCloud(
+    HOME,
+    v => saveEnvValues(path.join(HOME, "kaytia.env"), v),
+    () => readStore()
+  );
+  if (!process.env.KAYTIA_NO_INSTALL) {
+    const svc = path.join(HOME, SERVICE),
+      bg = fs.existsSync(svc);
+    await makeShortcut(bg ? svc : EXE, bg ? "--open" : "").catch(() => {});
+  }
 
   const html = Buffer.from(sea.getAsset("app.html") as ArrayBuffer);
   const url = `http://localhost:${PORT}`;
@@ -566,7 +671,13 @@ async function main() {
   app.disable("x-powered-by");
   app.use((req, res, next) => {
     // Other computers may only ever reach the tills' door below.
-    if (!isLocal(req) && !req.path.startsWith("/net/") && !req.path.startsWith("/iclock/"))
+    if (
+      !isLocal(req) &&
+      !req.path.startsWith("/net/") &&
+      !req.path.startsWith("/iclock/") &&
+      req.path !== "/menu" &&
+      req.path !== "/menu/logo"
+    )
       return void res.status(403).end();
     next();
   });
@@ -641,6 +752,7 @@ async function main() {
     res.json({ idx: till.idx, epoch: cfg.epoch, name: os.hostname() });
   });
   door.get("/rev", (_req, res) => void res.json({ ok: true, rev: readStore().rev }));
+  door.get("/cloud-status", (_req, res) => void res.json(cloud.status()));
   door.post(
     "/sync",
     big,
@@ -672,9 +784,110 @@ async function main() {
   });
   app.use("/iclock", reader);
 
+  // ---- the guests' menu, opened from a sticker's QR code on a phone on the hotel's network
+  const menu = express.Router();
+  menu.use((req, res, next) => {
+    if (!isPrivate(address(req))) return void res.status(403).end();
+    // A till has no menu of its own: the phone is sent on to the Main.
+    if (cfg.role !== "main" && cfg.main)
+      return void res.redirect(302, `http://${withPort(cfg.main)}${req.originalUrl}`);
+    res.set("cache-control", "no-store");
+    next();
+  });
+  menu.get("/", (req, res) => {
+    res.set(
+      "content-security-policy",
+      "default-src 'none'; img-src 'self'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'"
+    );
+    res.type("html").send(
+      menuPage(readStore().data as never, {
+        p: String(req.query.p ?? ""),
+        i: String(req.query.i ?? "")
+      })
+    );
+  });
+  menu.get("/logo", (_req, res) => {
+    const l = menuLogo(readStore().data as never);
+    if (!l) return void res.status(404).end();
+    res.type(l.type).send(l.body);
+  });
+  app.use("/menu", menu);
+
   // ---- this computer's own browser
   const lan = express.Router();
   lan.use(ownBrowserOnly);
+  lan.get("/sync-status", async (_req, res) => {
+    if (cfg.role === "main")
+      return void res.json({
+        role: "main",
+        rev: readStore().rev,
+        home: HOME,
+        tills: Object.values(cfg.tills).map(t => ({
+          name: t.name,
+          idx: t.idx,
+          ip: t.ip ?? "",
+          seen: t.ip && seen.get(t.ip) ? new Date(seen.get(t.ip)!).toISOString() : ""
+        })),
+        cloud: cloud.status()
+      });
+    let main: Record<string, unknown> = { ok: false },
+      cl: Record<string, unknown> | null = null;
+    try {
+      const r = await toMain(cfg, "/net/rev", undefined, 4000);
+      if (r.status === 200) main = r.json;
+      const c = await toMain(cfg, "/net/cloud-status", undefined, 4000);
+      if (c.status === 200) cl = c.json;
+    } catch {
+      /* the Main is out of reach: shown as offline */
+    }
+    res.json({
+      role: cfg.role,
+      main: cfg.main ?? "",
+      mainOk: main.ok === true,
+      rev: main.rev ?? null,
+      cloud: cl
+    });
+  });
+  lan.post("/cloud/:op", big, async (req, res) => {
+    if (cfg.role !== "main")
+      return void res.status(409).json({ error: "Set this up on the main computer." });
+    const r = await cloud.admin(String(req.params.op), (req.body ?? {}) as Record<string, unknown>);
+    res.status(r.status).json(r.json);
+  });
+  lan.get("/service", async (_req, res) => {
+    res.json({
+      background: !!MODE,
+      autostart: await autostartOn(),
+      since: STARTED,
+      installed: fs.existsSync(path.join(HOME, SERVICE))
+    });
+  });
+  lan.post("/service/autostart", big, async (req, res) => {
+    if (!fs.existsSync(path.join(HOME, SERVICE)))
+      return void res.status(409).json({ error: "Install Kaytia Flow on this computer first." });
+    const on = req.body?.on === true;
+    const ok = await setAutostart(on);
+    if (!ok) return void res.status(500).json({ error: "Windows didn't allow that change." });
+    res.json({ autostart: await autostartOn() });
+  });
+  lan.post("/service/restart", (_req, res) => {
+    if (!MODE)
+      return void res.status(409).json({
+        error:
+          "Kaytia Flow is running in a window here. Close that window and open it from the desktop shortcut."
+      });
+    res.json({ ok: true });
+    setTimeout(() => {
+      startBackground("--service");
+      process.exit(0);
+    }, 300);
+  });
+  lan.get("/menu-url", (_req, res) => {
+    if (cfg.role !== "main" && cfg.main)
+      return void res.json({ url: `http://${withPort(cfg.main)}/menu` });
+    const ip = lanAddresses().find(isPrivate);
+    res.json({ url: ip ? `http://${ip}:${PORT}/menu` : "" });
+  });
   lan.get(
     "/status",
     (_req, res) =>
@@ -962,10 +1175,16 @@ async function main() {
       s.listen(port, host, () => ok(true));
     });
   console.log("Kaytia Flow\n");
-  if (!(await listen(app as unknown as http.RequestListener, PORT, "0.0.0.0"))) {
+  let up = await listen(app as unknown as http.RequestListener, PORT, "0.0.0.0");
+  // After Restart, the old copy may still be letting go of the port.
+  for (let i = 0; !up && MODE === "service" && i < 20; i++) {
+    await new Promise(r => setTimeout(r, 1000));
+    up = await listen(app as unknown as http.RequestListener, PORT, "0.0.0.0");
+  }
+  if (!up) {
     console.log(`Port ${PORT} is already in use, so Kaytia Flow may already be open.`);
-    openApp(url);
-    return void setTimeout(() => process.exit(0), 4000);
+    if (MODE !== "service") openApp(url);
+    return void setTimeout(() => process.exit(0), MODE ? 1500 : 4000);
   }
   await listen(app as unknown as http.RequestListener, PORT, "::1");
 
@@ -981,6 +1200,7 @@ async function main() {
     res.status(known ? 200 : 404).json({ ResultCode: 0, ResultDesc: "Accepted" });
   });
   if (cfg.role === "main") mpesa.startModem();
+  if (cfg.role === "main") cloud.start();
   api.use((_q, r) => void r.status(404).end());
   const apiOk = await listen(api as unknown as http.RequestListener, API_PORT, "127.0.0.1");
   await listen(api as unknown as http.RequestListener, API_PORT, "::1");
@@ -997,8 +1217,12 @@ async function main() {
       : `Port ${API_PORT} is in use, so printing and email won't work from here.`
   );
   console.log(hasEnv ? "Mail settings loaded." : "Email isn't set up yet (see README.txt).");
-  console.log("\nKeep this window open while you work. Close it to stop Kaytia Flow.");
-  openApp(cfg.chosen ? url : `${url}/connect`);
+  console.log(
+    MODE
+      ? "\nRunning in the background."
+      : "\nKeep this window open while you work. Close it to stop Kaytia Flow."
+  );
+  if (MODE !== "service") openApp(cfg.chosen ? url : `${url}/connect`);
 }
 main().catch(e => {
   console.error("Kaytia Flow could not start:", e);

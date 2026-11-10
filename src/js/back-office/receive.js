@@ -21,7 +21,9 @@ const rcBlank = (keep = {}) => ({
   eName: "",
   eBatch: "",
   eExp: "",
-  eUnits: "buy",
+  eUnits: "buy", // "uom": by the piece · "buy": by the box or crate
+  eBox: "", // what the box is called: Crate, Carton...
+  ePer: "", // pieces in one box
   ePrice: "",
   eQty: "",
   eTax: String(RC_TAX),
@@ -67,6 +69,40 @@ const rcUnitOpts = (k, cur) => {
     `<option value="uom" ${cur === "uom" || !buy ? "selected" : ""}>${esc(u.uom)}</option>`
   );
 };
+const RC_BOXES = [
+  "Crate",
+  "Box",
+  "Carton",
+  "Case",
+  "Pack",
+  "Dozen",
+  "Tray",
+  "Bale",
+  "Sack",
+  "Bundle"
+];
+/** The item has its own box size (e.g. Crate of 24), not just single pieces. */
+const rcHasBox = k =>
+  !!k && !(+itemInfo(k).perBuy === 1 && itemInfo(k).buyUnit === itemInfo(k).uom);
+/** Price per piece from the item's last buying price. */
+const rcPiecePrice = k => {
+  const u = itemInfo(k);
+  return +u.buyPrice ? +u.buyPrice / (+u.perBuy || 1) : 0;
+};
+/** "= 48 pcs into stock" while typing boxes. */
+function rcConvText(R = invF.rc) {
+  if (!R.eK || R.eUnits !== "buy") return "";
+  const u = itemInfo(R.eK),
+    per = parseFloat(R.ePer),
+    q = parseFloat(R.eQty),
+    box = R.eBox || "box";
+  if (!(per > 0)) return `Type how many ${u.uom} are in one ${box.toLowerCase()}.`;
+  return q > 0
+    ? `${qn(q)} ${(q === 1 ? box : rcPlural(box)).toLowerCase()} × ${qn(per)} = ${qn(q * per)} ${u.uom} into stock`
+    : `One ${box.toLowerCase()} holds ${qn(per)} ${u.uom}`;
+}
+/** Crate -> Crates, Box -> Boxes. */
+const rcPlural = w => (/(x|s|ch|sh)$/i.test(w) ? w + "es" : w + "s");
 const rcIsBuy = (k, units) =>
   units === "buy" && !(+itemInfo(k).perBuy === 1 && itemInfo(k).buyUnit === itemInfo(k).uom);
 /** The item whose name (ignoring case, spaces and punctuation) or code is typed. */
@@ -112,7 +148,10 @@ function recvHTML() {
     keys = pickKeys().sort((a, b) => itemInfo(a).name.localeCompare(itemInfo(b).name)),
     sups = vendorNames(),
     v = VENDORS.find(x => x.name === R.sup),
-    lpo = R.lpo ? LPOS.find(x => x.id === R.lpo) : null;
+    lpo = R.lpo ? LPOS.find(x => x.id === R.lpo) : null,
+    uom = R.eK ? itemInfo(R.eK).uom : "pcs",
+    byBox = R.eUnits === "buy",
+    boxWord = (R.eBox || "box").toLowerCase();
   if (R.sup && !sups.includes(R.sup)) sups.push(R.sup); // e.g. supplier of an older LPO
   let net = 0,
     tax = 0,
@@ -122,7 +161,7 @@ function recvHTML() {
     net += c.net;
     tax += c.tax;
     gross += c.gross;
-    return `<tr class="${L.sel ? "grn-sel" : ""}"><td><input type="checkbox" data-rcsel="${i}" ${L.sel ? "checked" : ""} aria-label="Select line ${i + 1}"></td><td class="grn-no">${i + 1}</td><td><b>${esc(itemInfo(L.k).name)}</b>${itemInfo(L.k).code ? `<span class="grn-code">${esc(itemInfo(L.k).code)}</span>` : ""}${L.lpoMax !== undefined ? `<span class="grn-code">due ${qn(L.lpoMax)}</span>` : ""}</td><td>${esc(L.batch || "–")}</td><td>${esc(L.expiry || "–")}</td><td>${esc(L.units)}</td><td class="n"><input class="grn-q" type="number" min="0" step="any" data-rcq="${i}" value="${L.qty}" aria-label="Quantity, line ${i + 1}"></td><td class="n">${m2(L.unitPrice)}</td><td class="n">${qn(L.taxRate)}</td><td class="n">${m2(c.net)}</td><td class="n">${m2(c.tax)}</td><td class="n"><b>${m2(c.gross)}</b></td></tr>`;
+    return `<tr class="${L.sel ? "grn-sel" : ""}"><td><input type="checkbox" data-rcsel="${i}" ${L.sel ? "checked" : ""} aria-label="Select line ${i + 1}"></td><td class="grn-no">${i + 1}</td><td><b>${esc(itemInfo(L.k).name)}</b>${itemInfo(L.k).code ? `<span class="grn-code">${esc(itemInfo(L.k).code)}</span>` : ""}${L.lpoMax !== undefined ? `<span class="grn-code">due ${qn(L.lpoMax)}</span>` : ""}</td><td>${esc(L.batch || "–")}</td><td>${esc(L.expiry || "–")}</td><td>${esc(L.units)}${L.isBuy ? `<span class="grn-code">= ${qn(L.qty * (+L.per || +itemInfo(L.k).perBuy))} ${esc(itemInfo(L.k).uom)}</span>` : ""}</td><td class="n"><input class="grn-q" type="number" min="0" step="any" data-rcq="${i}" value="${L.qty}" aria-label="Quantity, line ${i + 1}"></td><td class="n">${m2(L.unitPrice)}</td><td class="n">${qn(L.taxRate)}</td><td class="n">${m2(c.net)}</td><td class="n">${m2(c.tax)}</td><td class="n"><b>${m2(c.gross)}</b></td></tr>`;
   });
   const openReqs = REQS.filter(r => (r.store || STORES[0]) === dest && isOpenReq(r)).length,
     selN = R.lines.filter(l => l.sel).length,
@@ -198,16 +237,17 @@ function recvHTML() {
       ? `<div class="grn-hint">${lpo ? "Lines come from the purchase order. For a part delivery, lower the quantity in the table (it cannot go above what is still due)." : "Choose an open purchase order in the Vendor card to load its lines."}</div>`
       : `<div class="grn-entry">
    <label class="grn-e-item">Item<span class="grn-inl"><input id="rcName" data-iv="rc.eName" list="rcItemsL" value="${esc(R.eName)}" placeholder="Name or code" autocomplete="off"><button class="mini" data-a="inv_rcfind">Find</button></span></label>
-   <label>Units<select id="rcUnits" data-iv="rc.eUnits">${R.eK ? rcUnitOpts(R.eK, R.eUnits) : ""}</select></label>
-   <label>Quantity<input id="rcQty" data-iv="rc.eQty" type="number" min="0" step="any" value="${esc(R.eQty)}"></label>
-   <label>Unit price<input id="rcPrice" data-iv="rc.ePrice" type="number" min="0" step="any" value="${esc(R.ePrice)}"></label>
+   <div class="grn-by"><span>Receive by</span><div class="seg2"><button class="${byBox ? "" : "on"}" data-a="inv_rcby" data-v="uom">Pieces${R.eK && uom !== "pcs" ? ` (${esc(uom)})` : ""}</button><button class="${byBox ? "on" : ""}" data-a="inv_rcby" data-v="buy">Boxes / crates</button></div></div>
+   ${byBox ? `<label>Box or crate<select data-iv="rc.eBox">${[...new Set([R.eBox, ...RC_BOXES].filter(Boolean))].map(b => `<option ${b === R.eBox ? "selected" : ""}>${esc(b)}</option>`).join("")}</select></label><label>${esc(uom)} in one ${esc(boxWord)}<input id="rcPer" data-iv="rc.ePer" type="number" min="1" step="any" value="${esc(R.ePer)}" placeholder="e.g. 24"></label>` : ""}
+   <label>${byBox ? `${esc(rcPlural(R.eBox || "Box"))} received` : `${esc(uom === "pcs" ? "Pieces" : uom)} received`}<input id="rcQty" data-iv="rc.eQty" type="number" min="0" step="any" value="${esc(R.eQty)}"></label>
+   <label>Price per ${byBox ? esc(boxWord) : esc(uom === "pcs" ? "piece" : uom)}<input id="rcPrice" data-iv="rc.ePrice" type="number" min="0" step="any" value="${esc(R.ePrice)}"></label>
    <label>VAT %<input id="rcTaxBox" data-iv="rc.eTax" type="number" min="0" step="any" value="${esc(R.eTax)}"></label>
    <label>Batch no<input data-iv="rc.eBatch" value="${esc(R.eBatch)}"></label>
    <label>Expiry<input type="date" data-iv="rc.eExp" value="${esc(R.eExp)}"></label>
    <label>Line total<input id="rcTotal" readonly></label>
    <button class="chip on grn-add" data-a="inv_rcadd">${I("plus")}Add</button>
   </div>
-  <div class="grn-hint" id="rcInfo">${esc(rcItemInfo(R.eK, dest))}</div>`
+  <div class="grn-hint" id="rcInfo">${esc(rcItemInfo(R.eK, dest))}</div><div class="grn-conv" id="rcConv">${esc(rcConvText(R))}</div>`
   }
   <div class="tw"><table class="t grn-t"><tr><th class="grn-cb"><input type="checkbox" data-rcall="1" ${R.lines.length && R.lines.every(l => l.sel) ? "checked" : ""} aria-label="Select all lines"></th><th>#</th><th>Item</th><th>Batch</th><th>Expiry</th><th>Units</th><th class="n">Qty</th><th class="n">Unit price</th><th class="n">VAT %</th><th class="n">Net</th><th class="n">VAT</th><th class="n">Gross</th></tr>${
     rows.join("") ||
@@ -277,6 +317,16 @@ function rcSync(f) {
     else Object.assign(R, { lpo: null, lines: [], sup: "" });
     return all();
   }
+  if (f === "eBox") return all();
+  if (f === "ePer" && R.eUnits === "buy" && R.eK) {
+    const per = parseFloat(R.ePer),
+      pp = rcPiecePrice(R.eK);
+    if (per > 0 && pp) {
+      R.ePrice = String(Math.round(pp * per * 100) / 100);
+      const p = $("#rcPrice");
+      if (p) p.value = R.ePrice;
+    }
+  }
   if (f === "eUnits" && R.eK) {
     // Switching Crate <-> pcs: show the matching price for that unit.
     const u = itemInfo(R.eK);
@@ -297,6 +347,8 @@ function rcSync(f) {
   };
   const info = $("#rcInfo");
   if (info) info.textContent = rcItemInfo(R.eK, rcDest(R));
+  const conv = $("#rcConv");
+  if (conv) conv.textContent = rcConvText(R);
   const t = rcCalc(R.ePrice, R.eQty, R.eTax, R.incl);
   set("rcTotal", R.ePrice !== "" && R.eQty !== "" ? m2(t.gross) : "");
 }
@@ -309,9 +361,12 @@ function rcPick(k, redraw = true) {
   const taxBox = $("#rcTaxBox");
   if (taxBox) taxBox.value = R.eTax;
   R.eName = u.name;
-  R.eUnits = rcIsBuy(k, "buy") ? "buy" : "uom";
+  const own = rcHasBox(k);
+  R.eUnits = own ? "buy" : "uom";
+  R.eBox = own ? u.buyUnit : R.eBox || "Crate";
+  R.ePer = own ? String(+u.perBuy) : "";
   R.ePrice = u.buyPrice ? String(R.eUnits === "buy" ? +u.buyPrice : +u.buyPrice / +u.perBuy) : "";
-  if (redraw) return all();
+  if (redraw || $("#rcPer") || own) return all();
   const units = $("#rcUnits"),
     price = $("#rcPrice");
   if (units) units.innerHTML = rcUnitOpts(k, R.eUnits);
@@ -332,7 +387,9 @@ function rcLoadLpo(p) {
       return {
         k: x.k,
         isBuy,
-        units: isBuy ? `${u.buyUnit} (${qn(+u.perBuy)} ${u.uom})` : u.uom,
+        units: isBuy ? `${u.buyUnit} of ${qn(+u.perBuy)} ${u.uom}` : u.uom,
+        per: isBuy ? +u.perBuy : undefined,
+        box: isBuy ? u.buyUnit : undefined,
         unitPrice: isBuy ? x.price : x.price / +u.perBuy,
         qty: due,
         lpoMax: due,
@@ -511,6 +568,26 @@ function rcAct(a, b) {
     const q = $("#rcQty");
     return q && q.focus();
   }
+  if (a === "rcby") {
+    const was = R.eUnits;
+    R.eUnits = d.v === "buy" ? "buy" : "uom";
+    if (R.eUnits === "buy" && !R.eBox) R.eBox = "Crate";
+    // The price follows: a box costs as many pieces as it holds.
+    const per = parseFloat(R.ePer),
+      p = parseFloat(R.ePrice);
+    if (was !== R.eUnits && p > 0 && per > 0)
+      R.ePrice = String(Math.round((R.eUnits === "buy" ? p * per : p / per) * 100) / 100);
+    else if (was !== R.eUnits && R.eK && rcPiecePrice(R.eK))
+      R.ePrice =
+        R.eUnits === "buy"
+          ? per > 0
+            ? String(Math.round(rcPiecePrice(R.eK) * per * 100) / 100)
+            : ""
+          : String(Math.round(rcPiecePrice(R.eK) * 100) / 100);
+    all();
+    const n = $(R.eUnits === "buy" && !(per > 0) ? "#rcPer" : "#rcQty");
+    return n && n.focus();
+  }
   if (a === "rcadd") {
     if (R.mode === "lpo") return toast("LPO lines come from the purchase order.");
     const k = R.eK || rcExact(R.eName),
@@ -523,11 +600,20 @@ function rcAct(a, b) {
     if (!(rate >= 0)) return toast("The tax rate must be 0 or more.");
     if (R.eExp && R.eExp < todayYmd()) return toast("That expiry date has already passed.");
     const u = itemInfo(k),
-      isBuy = rcIsBuy(k, R.eUnits);
+      isBuy = R.eUnits === "buy",
+      per = parseFloat(R.ePer),
+      box = (R.eBox || "Crate").trim();
+    if (isBuy && !(per > 0)) {
+      const p = $("#rcPer");
+      if (p) p.focus();
+      return toast(`Enter how many ${u.uom} are in one ${box.toLowerCase()}.`);
+    }
     R.lines.push({
       k,
       isBuy,
-      units: isBuy ? `${u.buyUnit} (${qn(+u.perBuy)} ${u.uom})` : u.uom,
+      units: isBuy ? `${box} of ${qn(per)} ${u.uom}` : u.uom,
+      per: isBuy ? per : undefined,
+      box: isBuy ? box : undefined,
       unitPrice: price,
       qty,
       taxRate: rate,
@@ -541,6 +627,7 @@ function rcAct(a, b) {
       eBatch: "",
       eExp: "",
       eUnits: "buy",
+      ePer: "",
       ePrice: "",
       eQty: ""
     });
@@ -678,10 +765,20 @@ function rcPost() {
       R.date === todayYmd()
         ? now
         : new Date(`${R.date}T${pad2(now.getHours())}:${pad2(now.getMinutes())}:00`);
+  const learnt = [];
+  R.lines.forEach(L => {
+    if (!L.isBuy || !(+L.per > 0)) return;
+    const u = itemInfo(L.k);
+    if (+u.perBuy === +L.per && u.buyUnit === L.box) return;
+    if (!INGU[L.k]) INGU[L.k] = { ...u };
+    INGU[L.k].perBuy = +L.per;
+    INGU[L.k].buyUnit = L.box;
+    learnt.push(`${u.name}: one ${L.box.toLowerCase()} holds ${qn(+L.per)} ${u.uom}`);
+  });
   const lines = R.lines.map(L => {
     const u = itemInfo(L.k),
       c = rcCalc(L.unitPrice, L.qty, L.taxRate, R.incl),
-      q = L.isBuy ? L.qty * +u.perBuy : L.qty;
+      q = L.isBuy ? L.qty * (+L.per || +u.perBuy) : L.qty;
     return {
       k: L.k,
       q,
@@ -728,10 +825,14 @@ function rcPost() {
       ? { id: r.id, store: dest, lines: r.lines.map(x => ({ k: x.k, q: x.q })) }
       : null
   });
+  if (learnt.length)
+    auditAdd("Stock item", `Box size set when receiving: ${learnt.join("; ")}`, {
+      mod: "Inventory"
+    });
   docOpen("grn", r.id);
   bosave();
   toast(
-    `${r.id} posted: ${lines.length} item(s) into ${dest}, KES ${m2(gross)}.${R.lpo ? " " + R.lpo + " updated." : ""}${intoStore ? " Use Issue items to send them on." : ""}`
+    `${r.id} posted: ${lines.length} item(s) into ${dest}, KES ${m2(gross)}.${R.lpo ? " " + R.lpo + " updated." : ""}${learnt.length ? " Remembered: " + learnt.join("; ") + "." : ""}${intoStore ? " Stock is kept in pieces: use Issue items to send them on." : ""}`
   );
   all();
 }

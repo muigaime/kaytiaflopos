@@ -56,9 +56,12 @@ V.settings = () => {
     email: repMailHTML,
     support: supportHTML,
     backup: backupHTML,
-    network: networkHTML
+    network: networkHTML,
+    sync: syncHTML
   };
-  return setTabsHTML() + panels[setTab]();
+  const lock = setTabOf(setTab)[4],
+    body = lock === "owner" && !ownOpen ? ownerGateHTML() : (panels[setTab] || panels.hotel)();
+  return `<div class="set-wrap">${setTabsHTML()}<section class="set-main">${setHeadHTML()}${body}</section></div>`;
 };
 function taxSave() {
   const B = parseFloat(invF.hs.taxB),
@@ -81,6 +84,40 @@ let mdlOpen = false,
   mdlFails = 0,
   mdlLocked = 0;
 const mdlLock = () => (mdlOpen = false);
+// ---- Database sync, Backup and restore, and Help and logs open with the system owner's password ----
+// Only its hashes are here (the browser's, and the fallback H uses where the browser has none).
+// It stays open while the owner is in Settings, and locks on leaving Settings or pressing Lock.
+const OWNER_PASS = [
+  "ba318c0b4ca2ed69575ac91b3e4a4d24eac6b017a76eb7cc6c10da1b249a622e",
+  "x323129195"
+];
+let ownOpen = false;
+const ownLock = () => (ownOpen = false);
+function ownerGateHTML() {
+  setTimeout(() => $("#ownPw") && $("#ownPw").focus(), 30);
+  const l = setTabOf(setTab)[1];
+  return `<div class="pn set-gate"><div class="set-gate-i" aria-hidden="true">${I("lock")}</div><h4>For the system owner</h4><div class="stk">${esc(l)} needs the owner password. It stays open until you leave Settings.</div><div class="set-gate-f"><label>Owner password<input id="ownPw" type="password" autocomplete="new-password" aria-label="Owner password"></label><button class="chip on" data-a="hs_owngo">Open</button></div></div>`;
+}
+async function ownUnlock() {
+  const el = $("#ownPw");
+  if (!el) return;
+  const typed = el.value;
+  el.value = "";
+  if (Date.now() < mdlLocked) return toast("Too many tries. Wait 30 seconds.");
+  if (typed && OWNER_PASS.includes(await H("owner|" + typed))) {
+    mdlFails = 0;
+    ownOpen = true;
+    auditAdd("Settings", `${setTabOf(setTab)[1]} opened with the owner password`);
+    return all();
+  }
+  if (++mdlFails >= 5) {
+    mdlLocked = Date.now() + 3e4;
+    mdlFails = 0;
+  }
+  auditAdd("Failed sign-in", "Wrong owner password", { pri: "high" });
+  toast("That is not the owner password.");
+  el.focus();
+}
 /** The one password for protected settings. Says why when it's refused; wrong tries count across every place. */
 async function mdlPassOk(typed) {
   if (Date.now() < mdlLocked) {
@@ -112,9 +149,10 @@ async function mdlUnlock() {
   el.focus();
 }
 $("#vSub").addEventListener("keydown", e => {
-  if (e.target.id !== "modPw" || e.key !== "Enter") return;
+  if (e.key !== "Enter" || !["modPw", "ownPw"].includes(e.target.id)) return;
   e.preventDefault();
-  mdlUnlock();
+  if (e.target.id === "modPw") mdlUnlock();
+  else ownUnlock();
 });
 /** Guests still in the house, booked or owing would be left with no way to reach them. */
 function fdModuleToggle() {
@@ -144,6 +182,11 @@ function fdModuleToggle() {
 }
 async function settingsAct(a, b) {
   if (a === "modgo") return mdlUnlock();
+  if (a === "owngo") return ownUnlock();
+  if (a === "ownlock") {
+    ownLock();
+    return all();
+  }
   if (a === "modlock") {
     mdlLock();
     return all();

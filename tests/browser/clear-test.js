@@ -1,6 +1,7 @@
 // node allp2-test.js <built.html> [out.png]: All sale points view and tickets on fake network printers, through the real server on :4000.
 const fs = require("fs"), net = require("net"), http = require("http"), path = require("path"), { execFile } = require("child_process");
 const [file, outPng] = process.argv.slice(2);
+const OWNPW = fs.readFileSync(path.join(__dirname, "owner-pass.local"), "utf8").trim(); // git-ignored: one line, the owner password
 const MODPW = fs.readFileSync(path.join(__dirname, "module-pass.local"), "utf8").trim(); // git-ignored
 const got = { kitchen: [], bar: [], other: [] };
 const fake = (port, who) => net.createServer(s => { let b = ""; s.on("data", d => (b += d.toString("latin1"))); s.on("end", () => got[who].push(b)); s.on("error", () => {}); }).listen(port, "127.0.0.1");
@@ -28,7 +29,7 @@ try{
   const close=async()=>{ click('[data-a="dc_close"]'); await wait(40); };
   const stubPrint=()=>{ const o=window.open; let html="",printed=0; window.open=()=>({document:{write:s=>{html=s},close(){}},focus(){},print(){printed++}}); return ()=>{window.open=o; return {html,printed}}; };
   const getPdf=async()=>{ let got=null,fn="",mk=null; const dl=PDF.download; PDF.download=(o,f,m)=>{got=o;fn=f;mk=m;}; click('[data-a="dc_pdf"]'); await wait(60); PDF.download=dl; return {got,fn,bytes:mk?mk(got):""}; };
-    const setT=async()=>{ qa("#nav .nv").find(x=>x.dataset.n==="Settings").click(); await wait(100); click('[data-a="hs_tab"][data-k="backup"]'); await wait(60); }, mainNow=()=>JSON.parse(localStorage.getItem("kaytia_pos_bo_v1")), waitFor=async f=>{ for(let w=0;w<4000&&!f();w++) await wait(5); };
+    const setT=async()=>{ qa("#nav .nv").find(x=>x.dataset.n==="Settings").click(); await wait(100); click('[data-a="hs_tab"][data-k="backup"]'); await wait(60); if(q("#ownPw")){ q("#ownPw").value="${OWNPW}"; click('[data-a="hs_owngo"]'); await wait(200); } }, mainNow=()=>JSON.parse(localStorage.getItem("kaytia_pos_bo_v1")), waitFor=async f=>{ for(let w=0;w<4000&&!f();w++) await wait(5); };
   const must=(ok,w)=>{ log((ok?"ok  ":"BAD ")+w); if(!ok) throw new Error(w); }, toastT=()=>q("#toast").textContent;
   if(sessionStorage.getItem("ph")){ JSON.parse(sessionStorage.getItem("ph")).forEach(x=>log(x)); const M=mainNow();
     must(M.S.length===0&&M.I.length===0&&M.U.length===0&&M.C.length===0,"sales, menu, staff and customers are gone"); must(M.VN.length===0&&M.GN.length===0&&M.OR.length===0,"vendors, goods received and open bills are gone"); must(!M.FS.hr&&!M.FS.custPays,"HR and customer payments are gone"); must(Object.keys(M.G||{}).length===0&&Object.values(M.K).every(x=>Object.keys(x).length===0),"stock is empty"); must(M.RM.length===0&&M.RV.length===0,"rooms and guests are gone"); fdSeed(); must(ROOMS.length===0,"demo rooms don't come back");

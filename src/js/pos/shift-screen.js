@@ -72,6 +72,7 @@ function shiftOpen(msg) {
   $("#shMgr").classList.add("show");
 }
 function shDraw(msg) {
+  if (msg) msg = kfTag(msg, user && user.role, true);
   // Shift Management is for whoever counts a till. A waiter has My shift.
   if (user && user.role === "Waiter") return msDraw(msg);
   const d = curDay(),

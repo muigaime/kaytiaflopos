@@ -1,6 +1,7 @@
 // node allp2-test.js <built.html> [out.png]: All sale points view and tickets on fake network printers, through the real server on :4000.
 const fs = require("fs"), net = require("net"), http = require("http"), path = require("path"), { execFile } = require("child_process");
 const [file, outPng] = process.argv.slice(2);
+const OWNPW = fs.readFileSync(path.join(__dirname, "owner-pass.local"), "utf8").trim(); // git-ignored: one line, the owner password
 const got = { kitchen: [], bar: [], other: [] };
 const fake = (port, who) => net.createServer(s => { let b = ""; s.on("data", d => (b += d.toString("latin1"))); s.on("end", () => got[who].push(b)); s.on("error", () => {}); }).listen(port, "127.0.0.1");
 const P = [fake(9101, "kitchen"), fake(9102, "bar"), fake(9103, "other")];
@@ -55,7 +56,7 @@ try{
   must(JSON.parse(localStorage.getItem("kaytia_error_log"))[0].msg.includes("Test failure here"),"errors are written to the log");
   { const ix=__E.findIndex(x=>/Test failure here/.test(x)); if(ix>=0) __E.splice(ix,1); }
   q("#start").style.display="none"; q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400);
-  await nav("Settings"); click('[data-a="hs_tab"][data-k="support"]'); await wait(120);
+  await nav("Settings"); click('[data-a="hs_tab"][data-k="support"]'); await wait(120); if(q("#ownPw")){ q("#ownPw").value="${OWNPW}"; click('[data-a="hs_owngo"]'); await wait(200); }
   must(/Test failure here/.test(q("#vSub").textContent)&&/Email not sent/.test(q("#vSub").textContent),"Settings shows screen and program errors");
   click('[data-a="su_send"]'); await wait(20); must(/developer's email/.test(tst()),"needs the address");
   q("#suTo").value="dev@example.com"; click('[data-a="su_send"]'); await wait(20); must(/subject/.test(tst()),"a subject");

@@ -1,22 +1,143 @@
 // ---- Settings: tabs, logos, the payment methods on guest bills, and the POS options ----
-const SET_TABS = [
-  ["hotel", "Hotel and logos"],
-  ["bills", "Bills and receipts"],
-  ["paymodes", "Payment modes"],
-  ["voids", "Void reasons"],
-  ["pos", "POS options"],
-  ["tax", "Tax"],
-  ["printers", "Printers"],
-  ["email", "Email reports"],
-  ["modules", "Modules"],
-  ["backup", "Backup and restore"],
-  ["network", "Network"],
-  ["support", "Help and logs"]
+// [key, name, short line for the menu, icon, lock ("owner" = owner password, "mod" = modules password), the page's own line]
+const SET_GROUPS = [
+  [
+    "Your business",
+    [
+      [
+        "hotel",
+        "Hotel and logos",
+        "Name, address, PIN and logos",
+        "hotel",
+        "",
+        "Your name, address, KRA PIN and the logos printed on every guest bill and receipt."
+      ],
+      [
+        "tax",
+        "Tax",
+        "VAT and Tax C rates",
+        "percent",
+        "",
+        "The tax rates added to bills. Past reports keep the rate they were paid at."
+      ],
+      [
+        "paymodes",
+        "Payment modes",
+        "Cash, M-Pesa, cards, credit",
+        "wal",
+        "",
+        "How guests can pay: cash, M-Pesa, cards, credit accounts and room charges."
+      ],
+      [
+        "email",
+        "Email reports",
+        "Daily reports by email",
+        "mail",
+        "",
+        "The reports sent at the end of each day, and who receives them."
+      ]
+    ]
+  ],
+  [
+    "Point of sale",
+    [
+      [
+        "bills",
+        "Bills and receipts",
+        "What prints on bills",
+        "receipt",
+        "",
+        "What appears on guest bills and receipts, and the payment details they show."
+      ],
+      [
+        "pos",
+        "POS options",
+        "Working day and POS rules",
+        "pos",
+        "",
+        "The working day, and the rules waiters and cashiers follow on the POS."
+      ],
+      [
+        "voids",
+        "Void reasons",
+        "Why items come off a bill",
+        "void",
+        "",
+        "The reasons staff choose when taking an item off a bill."
+      ],
+      [
+        "printers",
+        "Printers",
+        "Receipt, kitchen and bar",
+        "print",
+        "",
+        "Which printer takes receipts, kitchen orders and bar orders, on each computer."
+      ]
+    ]
+  ],
+  [
+    "System",
+    [
+      [
+        "network",
+        "Network",
+        "Computers sharing data",
+        "net",
+        "",
+        "The computers in the building that share this hotel's data."
+      ],
+      [
+        "sync",
+        "Database sync",
+        "Local network and cloud",
+        "sync",
+        "owner",
+        "Whether data is shared on the local network and kept safe in the cloud."
+      ],
+      [
+        "backup",
+        "Backup and restore",
+        "Save or bring back data",
+        "save",
+        "owner",
+        "Download all your data, bring a backup back, or start clean."
+      ],
+      [
+        "support",
+        "Help and logs",
+        "Errors, codes, developer",
+        "help",
+        "owner",
+        "Errors the system has met, what each error code means, and a message to the developer."
+      ],
+      [
+        "modules",
+        "Modules",
+        "Parts of the system",
+        "grid",
+        "mod",
+        "Switch parts of the system on or off for this business."
+      ]
+    ]
+  ]
 ];
+const SET_TABS = SET_GROUPS.flatMap(g => g[1]);
+const setTabOf = k => SET_TABS.find(t => t[0] === k) || SET_TABS[0];
 let setTab = "hotel";
 invF.gp = { pt: "*", m: "", v: "", a: "" };
 const setTabsHTML = () =>
-  `<div class="set-tabs" role="tablist">${SET_TABS.map(([k, l]) => `<button role="tab" aria-selected="${k === setTab}" class="${k === setTab ? "on" : ""}" data-a="hs_tab" data-k="${k}">${l}</button>`).join("")}</div>`;
+  `<nav class="set-tabs set-nav" role="tablist" aria-label="Settings"><div class="set-title"><h1>Settings</h1><p>How Kaytia Flow runs for your business</p></div>${SET_GROUPS.map(
+    ([g, L]) =>
+      `<div class="set-grp"><h5>${g}</h5>${L.map(([k, l, d, ic, lock]) => {
+        const shut = (lock === "owner" && !ownOpen) || (lock === "mod" && !mdlOpen);
+        return `<button role="tab" aria-selected="${k === setTab}" class="set-nv ${k === setTab ? "on" : ""}" data-a="hs_tab" data-k="${k}"><i aria-hidden="true">${I(ic)}</i><span><b>${l}</b><small>${d}</small></span>${lock ? `<em class="set-lk ${shut ? "" : "open"}" title="${lock === "owner" ? "System owner only" : "Modules password"}" aria-label="${shut ? "Locked" : "Open"}">${I(shut ? "lock" : "unlock")}</em>` : ""}</button>`;
+      }).join("")}</div>`
+  ).join("")}</nav>`;
+/** The page's own heading, with a Lock button on an owner page that is open. */
+function setHeadHTML() {
+  const [k, l, d, ic, lock, long] = setTabOf(setTab);
+  return `<header class="set-head"><i aria-hidden="true">${I(ic)}</i><div><h2>${l}</h2><p>${long || d}</p></div>${lock === "owner" && ownOpen ? '<button class="mini" data-a="hs_ownlock">Lock</button>' : ""}</header>`;
+}
 
 // ---------------------------------------------------------------- logos
 const LOGO_FITS = [

@@ -97,7 +97,7 @@ function powershell(script: string, input = "", env: NodeJS.ProcessEnv = {}): Pr
     const p = execFile(
       "powershell.exe",
       ["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", script],
-      { env: { ...process.env, ...env }, timeout: 20000, maxBuffer: 1 << 22 },
+      { env: { ...process.env, ...env }, timeout: 20000, maxBuffer: 1 << 22, windowsHide: true },
       (err, out) => (err ? reject(err) : resolve(out))
     );
     p.stdin?.end(input);

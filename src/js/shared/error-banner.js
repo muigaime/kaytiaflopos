@@ -2,7 +2,7 @@
 // (Without it, an error while the page loads leaves buttons that simply do nothing.)
 const KF_ERRLOG = "kaytia_error_log";
 /** Kept on this computer, for Settings → Help and logs. */
-function kfLogError(msg) {
+function kfLogError(msg, code) {
   try {
     const on = id =>
         (
@@ -10,13 +10,18 @@ function kfLogError(msg) {
         ).classList.contains("show"),
       where = on("bo") ? "Back Office" : on("fd") ? "Front Desk" : "POS",
       L = JSON.parse(localStorage.getItem(KF_ERRLOG) || "[]");
-    L.unshift({ at: new Date().toISOString(), where, msg: String(msg).slice(0, 2000) });
+    L.unshift({
+      at: new Date().toISOString(),
+      where,
+      code: code || 0,
+      msg: String(msg).slice(0, 2000)
+    });
     localStorage.setItem(KF_ERRLOG, JSON.stringify(L.slice(0, 300)));
   } catch (e) {}
 }
 (function () {
-  function show(msg) {
-    kfLogError(msg);
+  function show(msg, code) {
+    kfLogError(msg, code);
     let el = document.getElementById("errBanner");
     if (!el) {
       el = document.createElement("div");
@@ -30,12 +35,15 @@ function kfLogError(msg) {
       (document.body || document.documentElement).appendChild(el);
     }
     el.textContent =
-      "Something went wrong. Please send this message to support (click to hide):\n" + msg;
+      "Something went wrong (Error " +
+      code +
+      "). Please tell support this number, or send the log from Settings → Help and logs (click to hide):\n" +
+      msg;
   }
   addEventListener("error", e =>
-    show((e.message || "Error") + (e.lineno ? " (line " + e.lineno + ")" : ""))
+    show((e.message || "Error") + (e.lineno ? " (line " + e.lineno + ")" : ""), 9001)
   );
   addEventListener("unhandledrejection", e =>
-    show(String((e.reason && (e.reason.stack || e.reason.message)) || e.reason))
+    show(String((e.reason && (e.reason.stack || e.reason.message)) || e.reason), 9002)
   );
 })();

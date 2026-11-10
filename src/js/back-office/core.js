@@ -58,6 +58,7 @@ const $ = s => document.querySelector(s),
   K = n => Math.round(n).toLocaleString("en-KE"),
   KES = n => "KES " + K(n);
 const toast = m => {
+  m = kfTag(m, boUser && (boUser.role || "Super Admin"));
   const t = $("#toast");
   t.textContent = m;
   t.className = "s";

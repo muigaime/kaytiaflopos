@@ -65,11 +65,11 @@ V.wait = () => {
     L.map(u => {
       const open = orders.filter(o => o.waiter === u.n).length,
         on = USERS.indexOf(u) === F.i;
-      return `<button class="ws-w ${on ? "on" : ""}" data-a="ws_edit" data-i="${USERS.indexOf(u)}"><span class="ws-a">${esc(u.n[0])}</span><span><b>${esc(u.n)}</b><small>${esc(u.role)} · ${plural(open, "open bill")}</small></span></button>`;
+      return `<button class="ws-w ${on ? "on" : ""}" data-a="ws_edit" data-i="${USERS.indexOf(u)}"><span class="ws-a">${esc(u.n[0])}</span><span><b>${esc(u.n)}</b><small>${esc(u.role)} ${kfRoleNo(u.role, true)} · ${plural(open, "open bill")}</small></span></button>`;
     }).join("") || '<div class="empty">No POS staff yet.</div>'
   }</div>
  <div class="pn ws-form"><div class="ws-lh"><h4>${F.i < 0 ? "Create POS staff" : "Edit " + esc(F.n)}</h4><span class="ws-id">${esc(id)}</span></div>
- <div class="ws-g"><label>Role<select data-wsr>${POS_ROLES.map(
+ <div class="ws-g"><label>Role <small class="ws-rno">no. ${kfRoleNo(F.role, true)}</small><select data-wsr>${POS_ROLES.map(
    r => `<option ${r === F.role ? "selected" : ""}>${r}</option>`
  ).join(
    ""

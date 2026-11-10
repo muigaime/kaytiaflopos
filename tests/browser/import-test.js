@@ -36,7 +36,7 @@ try{
   must(/Import 3 products/.test(q("#priGo").textContent),"only good rows count");
   const pv=q('[data-pri="4.p"]'); pv.value="99"; pv.dispatchEvent(new Event("change",{bubbles:true})); await wait(10); must(st(4)==="Ready"&&/Import 4 products/.test(q("#priGo").textContent),"fixing a row counts it");
   const n0=ITEMS.length; click('[data-a="prl_impdel"][data-i="7"]'); await wait(30); must(rows().length===7,"a row can be removed");
-  must(ITEMS.length===n0,"nothing is saved yet"); click("#priGo"); await wait(60);
+  must(ITEMS.length===n0,"nothing is saved yet"); const ins=q('[data-priall="ins"]'); ins.value="0"; ins.dispatchEvent(new Event("change",{bubbles:true})); await wait(40); click("#priGo"); await wait(60);
   must(ITEMS.length===n0+4&&!q("#prImp"),"importing adds the good rows: "+tst());
   must(byN("Chips").d==="Restaurant"&&byN("Chips").p===300&&byN("Chips").buy===120&&byN("Chips").c==="Food"&&byN("Chips").t==="B","the details are right");
   must(byN("Soda").t==="A"&&Object.keys(byN("Soda").r).length===0,"no-stock and no-tax are right");

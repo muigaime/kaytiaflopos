@@ -147,6 +147,8 @@ $("#vSub").onclick = e => {
   }
   if (a.slice(0, 3) === "bl_") return billAct(a);
   if (a.slice(0, 3) === "su_") return supAct(a, b);
+  if (a.slice(0, 3) === "sy_") return syncAct(a, b);
+  if (a.slice(0, 4) === "svc_") return svcAct(a, b);
   if (a.slice(0, 3) === "rm_") return repMailAct(a, b);
   if (a.slice(0, 3) === "mp_") return mpAct(a, b);
   if (a.slice(0, 3) === "hs_") {

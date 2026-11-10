@@ -626,7 +626,7 @@ function masterAllHTML() {
     cats = msCats(R),
     V = R.filter(r => (st === "all" || r.level === st) && (!STKT.grp || r.grp === STKT.grp)),
     value = R.reduce((a, r) => a + r.value, 0),
-    cols = STORES.length + 4;
+    cols = STORES.length + 5;
   return `<div class="pn stm ${STKT.full ? "mfull" : ""}" data-findscope>
  <div class="stm-tiles">${msTile("Stores", STORES.length)}${msTile("Items listed", R.length)}${msTile("Stock value (KES)", m2(value), "", "gold")}${msTile("Low or out", count("low") + count("out"), "", count("low") + count("out") ? "warn" : "")}</div>
  <div class="stm-bar">${masterStorePick()}${findBox("master", "Search by name, code or category")}${cats}<span class="stm-acts"><button class="mini xl-btn" data-a="inv_mallx">Export to Excel</button><button class="mini" data-a="inv_mallp">Print</button><button class="mini" data-a="inv_full">${STKT.full ? "⤡ Collapse" : "⤢ Expand"}</button></span></div>
@@ -637,13 +637,13 @@ function masterAllHTML() {
    "inv_mst"
  )}</div><span class="stm-sw"><label class="sw"><input type="checkbox" data-m="zero" ${STKT.zero ? "checked" : ""}><span>Zero balances</span></label>${msFold}</span></div>
  <div class="stk stm-note">Stock in every store. To count stock, choose one store.</div>
- <div class="tw tall"><table class="t stm-t ${(FINDQ.master || "").trim() ? "stm-find" : ""}"><thead><tr><th>Item</th>${STORES.map(l => `<th class="n">${esc(l)}</th>`).join("")}<th class="n">Total</th><th class="n">Cost</th><th class="n">Value (KES)</th></tr></thead>${
+ <div class="tw tall"><table class="t stm-t ${(FINDQ.master || "").trim() ? "stm-find" : ""}"><thead><tr><th class="stm-code">Code</th><th>Item</th>${STORES.map(l => `<th class="n">${esc(l)}</th>`).join("")}<th class="n">Total</th><th class="n">Cost</th><th class="n">Value (KES)</th></tr></thead>${
    V.length
      ? msBands(
          V,
          cols,
          r =>
-           `<tr${findAttr("master", r.code, r.name, r.grp)}><td class="stm-item"><b>${esc(r.name)}</b><small>${esc(r.code)}</small></td>${r.at.map(x => `<td class="n">${qn(x)}</td>`).join("")}<td class="n"><b>${qn(r.q)}</b> ${msTag(r.level)}</td><td class="n">${m2(r.cost)}</td><td class="n">${m2(r.value)}</td></tr>`
+           `<tr${findAttr("master", r.code, r.name, r.grp)}><td class="stm-code">${esc(r.code)}</td><td class="stm-item"><b>${esc(r.name)}</b></td>${r.at.map(x => `<td class="n">${qn(x)}</td>`).join("")}<td class="n"><b>${qn(r.q)}</b> ${msTag(r.level)}</td><td class="n">${m2(r.cost)}</td><td class="n">${m2(r.value)}</td></tr>`
        )
      : `<tr><td colspan="${cols}" class="stm-empty">Nothing matches. Try All, or tick Zero balances to list every item.</td></tr>`
  }</table></div></div>`;
@@ -673,7 +673,7 @@ function masterHTML() {
         (!STKT.grp || (r.grp || "Other") === STKT.grp)
     ),
     D = !!STKT.detail,
-    cols = D ? 14 : 11;
+    cols = D ? 15 : 12;
   return `<div class="pn stm ${STKT.full ? "mfull" : ""}" data-findscope>
  <div class="stm-tiles">${msTile("Items listed", R.length)}${msTile("Stock value (KES)", m2(value), "", "gold")}${msTile("Low or out", count("low") + count("out"), "", count("low") + count("out") ? "warn" : "")}${msTile("Counted", `${done} of ${R.length}`, "msDone", "", `<div class="pbar"><i style="width:${pct}%"></i><span>${pct}%</span></div>`)}${msTile("Variance (KES)", (varVal > 0 ? "+" : "") + m2(varVal), "msVar", varVal < 0 ? "bad" : "")}</div>
  <div class="stm-bar">${masterStorePick()}${findBox("master", "Search by name, code or category")}${cats}${isStore(loc) ? "" : `<div class="seg2"><button class="${STKT.kind === "raw" ? "on" : ""}" data-a="inv_kind" data-k="raw">Stock items</button><button class="${STKT.kind === "fin" ? "on" : ""}" data-a="inv_kind" data-k="fin">Finished products</button></div>`}<span class="stm-acts"><button class="mini" data-a="inv_tab" data-t="load" title="Reload balances from the latest stock movements">Load data</button><button class="mini" data-a="inv_tab" data-t="export" title="Copy the sheet for Excel">Export</button><button class="mini" data-a="inv_full">${STKT.full ? "⤡ Collapse" : "⤢ Expand"}</button><button class="chip on" data-a="inv_tab" data-t="run" title="Post the physical counts">Run stock take</button></span></div>
@@ -687,14 +687,14 @@ function masterHTML() {
    "inv_mst"
  )}</div><span class="stm-sw"><label class="sw"><input type="checkbox" data-m="zero" ${STKT.zero ? "checked" : ""}><span>Zero balances</span></label><label class="sw"><input type="checkbox" data-m="issued" ${STKT.issued ? "checked" : ""}><span>Issued only</span></label><label class="sw"><input type="checkbox" data-a="inv_mdetail" ${D ? "checked" : ""}><span>All movements</span></label>${msFold}</span></div>
  <div class="stk stm-note">Stock take for ${placeLabel(loc)} · Shift ${esc(sh)}.${isStore(loc) && storeKinds(loc).length ? ` Lists ${storeKinds(loc).map(esc).join(", ")} only.` : ""} Type a count, then press Enter for the next item.</div>${msOffList ? `<div class="status warn stm-off">${plural(msOffList, "item")} outside ${esc(loc)}'s categories still ${msOffList === 1 ? "has" : "have"} stock here. <button class="mini" data-a="inv_moff">${STKT.offAt === loc ? "Hide them" : "Show them"}</button></div>` : ""}
- <div class="tw tall"><table class="t stm-t ${(FINDQ.master || "").trim() ? "stm-find" : ""} ${D ? "stm-wide" : ""}"><thead><tr><th>Item</th><th class="n">Cost</th>${D ? '<th class="n">Sale price</th>' : ""}<th class="n">Opening</th>${D ? '<th class="n">Added</th><th class="n">Production</th><th class="n">Stock in</th><th class="n">Sold</th>' : '<th class="n">In</th><th class="n">Sold</th>'}<th class="n">Damages</th><th class="n">${D ? "Stock out" : "Issued out"}</th><th class="n">System</th><th class="stm-count">Physical</th><th class="n">Variance</th><th>Reason</th></tr></thead>${
+ <div class="tw tall"><table class="t stm-t ${(FINDQ.master || "").trim() ? "stm-find" : ""} ${D ? "stm-wide" : ""}"><thead><tr><th class="stm-code">Code</th><th>Item</th><th class="n">Cost</th>${D ? '<th class="n">Sale price</th>' : ""}<th class="n">Opening</th>${D ? '<th class="n">Added</th><th class="n">Production</th><th class="n">Stock in</th><th class="n">Sold</th>' : '<th class="n">In</th><th class="n">Sold</th>'}<th class="n">Damages</th><th class="n">${D ? "Stock out" : "Issued out"}</th><th class="n">System</th><th class="stm-count">Physical</th><th class="n">Variance</th><th>Reason</th></tr></thead>${
    V.length
      ? msBands(V, cols, r => {
          const p = STKT.phys[r.key],
            has = msCounted(r),
            v = msVar(r),
            tint = has && v < -1e-9 ? "stm-short" : has && v > 1e-9 ? "stm-over" : "";
-         return `<tr class="${tint}"${findAttr("master", r.code, r.name, r.grp)}><td class="stm-item"><b>${esc(r.name)}</b><small>${esc(r.code)}</small></td><td class="n">${m2(r.cost)}</td>${D ? `<td class="n">${r.price === "" ? "" : m2(r.price)}</td>` : ""}<td class="n">${qn(r.op)}</td>${D ? `<td class="n">${qn(r.add)}</td><td class="n">${qn(r.prod)}</td><td class="n">${qn(r.inn)}</td>` : `<td class="n">${qn(r.add + r.prod + r.inn)}</td>`}<td class="n">${qn(r.sold)}</td><td class="n"><input type="number" min="0" step="any" class="dmg-in" data-dm="${esc(r.key)}" value="${Math.abs(r.dmg) < 1e-9 ? "" : +r.dmg.toFixed(3)}" placeholder="0" title="Type the quantity damaged: the change is written off (the Reason is the narration)" aria-label="Damages of ${esc(r.name)}"></td><td class="n">${qn(r.out)}</td><td class="n stm-sys"><b>${qn(r.sys)}</b> ${msTag(r.level)}</td><td class="stm-count"><input type="number" step="any" data-ph="${esc(r.key)}" value="${p === undefined ? "" : esc(p)}" aria-label="Physical count of ${esc(r.name)}"></td><td class="n ${v < 0 ? "neg" : ""}" data-vr="${esc(r.key)}" data-sys="${r.sys}">${has ? msSigned(v) : ""}</td><td><input data-pn="${esc(r.key)}" value="${esc(STKT.narr[r.key] || "")}" placeholder="Reason" aria-label="Reason for ${esc(r.name)}"></td></tr>`;
+         return `<tr class="${tint}"${findAttr("master", r.code, r.name, r.grp)}><td class="stm-code">${esc(r.code)}</td><td class="stm-item"><b>${esc(r.name)}</b></td><td class="n">${m2(r.cost)}</td>${D ? `<td class="n">${r.price === "" ? "" : m2(r.price)}</td>` : ""}<td class="n">${qn(r.op)}</td>${D ? `<td class="n">${qn(r.add)}</td><td class="n">${qn(r.prod)}</td><td class="n">${qn(r.inn)}</td>` : `<td class="n">${qn(r.add + r.prod + r.inn)}</td>`}<td class="n">${qn(r.sold)}</td><td class="n"><input type="number" min="0" step="any" class="dmg-in" data-dm="${esc(r.key)}" value="${Math.abs(r.dmg) < 1e-9 ? "" : +r.dmg.toFixed(3)}" placeholder="0" title="Type the quantity damaged: the change is written off (the Reason is the narration)" aria-label="Damages of ${esc(r.name)}"></td><td class="n">${qn(r.out)}</td><td class="n stm-sys"><b>${qn(r.sys)}</b> ${msTag(r.level)}</td><td class="stm-count"><input type="number" step="any" data-ph="${esc(r.key)}" value="${p === undefined ? "" : esc(p)}" aria-label="Physical count of ${esc(r.name)}"></td><td class="n ${v < 0 ? "neg" : ""}" data-vr="${esc(r.key)}" data-sys="${r.sys}">${has ? msSigned(v) : ""}</td><td><input data-pn="${esc(r.key)}" value="${esc(STKT.narr[r.key] || "")}" placeholder="Reason" aria-label="Reason for ${esc(r.name)}"></td></tr>`;
        })
      : `<tr><td colspan="${cols}" class="stm-empty">Nothing matches. Try All, or tick Zero balances to list every item.</td></tr>`
  }</table></div></div>`;

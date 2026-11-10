@@ -163,7 +163,7 @@ function raw(port, p, { host, headers = {}, method = "GET", ip = "127.0.0.1" } =
     // ---- installing: into a test folder and a test desktop
     const inst = path.join(RUN, "inst"), desk = path.join(RUN, "desk");
     fs.mkdirSync(desk, { recursive: true });
-    spawnSync(EXE, [], { env: { ...process.env, KAYTIA_HOME: inst, KAYTIA_DESKTOP: desk, KAYTIA_PORT: "5620", KAYTIA_API_PORT: "4620", KAYTIA_NO_BROWSER: "1" }, timeout: 40000 });
+    spawnSync(EXE, [], { env: { ...process.env, KAYTIA_HOME: inst, KAYTIA_DESKTOP: desk, KAYTIA_PORT: "5620", KAYTIA_API_PORT: "4620", KAYTIA_NO_BROWSER: "1", KAYTIA_NO_AUTOSTART: "1" }, timeout: 40000 });
     await sleep(3000);
     log("20 INSTALL:", fs.readdirSync(inst), "| desktop", fs.readdirSync(desk));
     log("21 SECOND START RUNS FROM THERE:", await raw(5620, "/"));

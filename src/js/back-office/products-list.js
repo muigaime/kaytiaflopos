@@ -202,7 +202,7 @@ function productsHTML() {
   <div class="pn tw" data-findscope><div class="pr-bar">${findBox("prod", "Search product, category or code")}<div class="pr-pills">${pill("All", "All selling points", L.length)}${P.map(p => pill(p, p, L.filter(i => i.d === p).length)).join("")}</div></div>
   ${
     shown.length
-      ? `<div class="tw"><table class="t pr-t"><thead><tr><th></th><th>Code</th><th>Product</th><th>Selling point</th><th>Category</th><th>Selling price</th><th>Track Stock</th><th>eTIMS Uploaded</th><th>eTIMS Code</th><th>eTIMS ID</th><th></th></tr></thead>${shown.map(prRow).join("")}</table></div><div class="pr-foot"><button class="mini" data-a="prl_stk">Print stickers</button><label class="pr-selall"><input type="checkbox" data-a="prl_etall"> Select All</label><button class="chip on" id="etSendAll" data-a="prl_etup">${prEtSendWord()}</button></div>`
+      ? `<div class="tw"><table class="t pr-t"><thead><tr><th></th><th>Code</th><th>Product</th><th>Selling point</th><th>Category</th><th>Selling price</th><th>Track Stock</th><th>eTIMS Uploaded</th><th>eTIMS Code</th><th>eTIMS ID</th><th></th></tr></thead>${shown.map(prRow).join("")}</table></div><div class="pr-foot"><button class="mini" data-a="prl_usestock" title="Give the ticked products, or all shown, a stock item">Use in stock</button><button class="mini" data-a="prl_stk">Print stickers</button><label class="pr-selall"><input type="checkbox" data-a="prl_etall"> Select All</label><button class="chip on" id="etSendAll" data-a="prl_etup">${prEtSendWord()}</button></div>`
       : '<div class="empty">Nothing here yet. Use Add item to put the first product on the POS.</div>'
   }</div></div>${prAddModal()}${prEditModal()}${prEtAdjModal()}${prImportModal()}${stkModal()}${itemPopupIfOpen()}${speModal()}`;
 }
@@ -392,6 +392,26 @@ function prAct(a, b) {
       else prEt.sel.delete(+x.dataset.id);
     });
     return prEtScope();
+  }
+  if (a === "prl_usestock") {
+    const todo = prEtPool().filter(i => prNoStock(i) && i.sell !== "acc");
+    if (!todo.length) return toast("These products already keep stock.");
+    return tapConfirm(
+      b,
+      () => {
+        todo.forEach(prMakeStock);
+        auditAdd("Product", `${plural(todo.length, "product")} now kept in stock`, {
+          mod: "Products"
+        });
+        spRefreshPos();
+        bosave();
+        toast(
+          `${plural(todo.length, "product")} now in stock. Receive them into a store, then issue to the selling point.`
+        );
+        all();
+      },
+      `Tap again: ${todo.length} into stock`
+    );
   }
   if (a === "prl_promo") return prPromoStart(+d.id);
   if (a === "prl_etone") return prEtOne(+d.id, b);

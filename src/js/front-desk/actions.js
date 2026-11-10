@@ -1,4 +1,5 @@
 const fdNotify = (t, ok) => {
+  if (t && !ok) t = kfTag(t, user && user.role, true);
   fdNotice = t ? { t, ok: !!ok } : null;
 };
 function recPay(r, method, amt, ci, fx) {

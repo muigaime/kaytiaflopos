@@ -152,7 +152,8 @@ function priRow(x, i, rows) {
           text("c", "Category") +
           num("p", "Selling price") +
           num("b", "Buying price") +
-          tax
+          tax +
+          `<td class="pri-ins"><input type="checkbox" data-pri="${i}.ins" ${priIns(x) ? "checked" : ""} ${x.s ? 'disabled title="Linked to the stock item in the file"' : ""} aria-label="Use ${esc(x.n)} in stock"></td>`
         : text("n", "Item name") +
           text("g", "Category") +
           text("u", "Unit") +
@@ -188,16 +189,24 @@ function prImportModal() {
           "Store",
           "#Opening qty"
         ]
-      : ["Product", "Selling point", "Category", "#Selling price", "#Buying price", "Tax"],
+      : [
+          "Product",
+          "Selling point",
+          "Category",
+          "#Selling price",
+          "#Buying price",
+          "Tax",
+          "Use in stock"
+        ],
     all1 = stock
       ? `<label>Store for every row<select data-priall="st"><option value="">Choose to change all</option>${STORES.map(p => `<option>${esc(p)}</option>`).join("")}</select></label><label>Category for every row<input data-priall="g" placeholder="Type to change all"></label>`
       : `<label>Selling point for every row<select data-priall="d"><option value="">Choose to change all</option>${prPoints()
           .map(p => `<option>${esc(p)}</option>`)
           .join(
             ""
-          )}</select></label><label>Category for every row<input data-priall="c" placeholder="Type to change all"></label>`;
+          )}</select></label><label>Category for every row<input data-priall="c" placeholder="Type to change all"></label><label>Use in stock for every row<select data-priall="ins"><option value="">Choose to change all</option><option value="1">Yes, keep stock</option><option value="0">No stock (made to order)</option></select></label>`;
   return `<div class="modal show" id="prImp" style="z-index:63"><div class="box itm pri-rev"><header class="itm-h"><div><h3>Check before importing</h3><p>${prI.rows.length} rows from ${esc(prI.from)}. Correct anything that's wrong.</p></div>${close}</header>
-  <div class="itm-b"><div class="pri-all">${all1}</div>
+  <div class="itm-b"><div class="pri-all">${all1}</div>${stock ? "" : '<div class="itm-hint">Ticked products get a stock item with the same name, so receiving goods, stock taking and every sale count them. Untick dishes made to order.</div>'}
   <div class="tw"><table class="t pri-t"><thead><tr>${heads.map(h => `<th class="${h[0] === "#" ? "n" : ""}">${h.replace("#", "")}</th>`).join("")}<th>Status</th><th></th></tr></thead><tbody>${prI.rows.map((x, i) => priRow(x, i, prI.rows)).join("")}</tbody></table></div></div>
   <footer class="itm-f"><button class="mini" data-a="prl_impback">Back</button><button class="chip on" id="priGo" data-a="prl_impgo" ${n ? "" : "disabled"}>${priGoWord(n)}</button></footer></div></div>`;
 }
@@ -326,6 +335,34 @@ async function priScan(file) {
   prI = { kind, step: "review", from: "the picture", rows };
   all();
 }
+/** Gives a product with no stock its own stock item, so receiving, stock taking and each sale count it.
+ * A stock item of the same name is used if there is one (Tusker at the Bar and at the Pool share one). */
+function prMakeStock(i) {
+  if (!prNoStock(i) || i.sell === "acc") return "";
+  let k = priStock(i.n);
+  if (!k) {
+    const buy = +i.buy > 0 ? +i.buy : 0;
+    k = itemKey(i.n);
+    INGU[k] = {
+      code: nextItemCode(),
+      name: i.n,
+      group: i.c || "General",
+      uom: "pcs",
+      buyUnit: "pcs",
+      perBuy: 1,
+      buyPrice: buy,
+      tax: i.t || "B"
+    };
+    ING[k] = `${i.n} (pcs)`;
+    LOCS.forEach(l => (STK[l][k] = STK[l][k] || 0));
+    INGC[k] = buy;
+    RO[k] = RO[k] !== undefined ? RO[k] : 1;
+  }
+  i.r = { [k]: 1 };
+  return k;
+}
+/** Use in stock: on unless the row says otherwise. */
+const priIns = x => x.ins !== "0";
 function priSaveStock(x) {
   const name = x.n.trim(),
     uom = x.u.trim(),
@@ -356,19 +393,22 @@ function priGo() {
     from = prI.from,
     left = prI.rows.length - good.length,
     word = priWord();
+  let stocked = 0;
   good.forEach(x => {
     if (kind === "stock") return priSaveStock(x);
-    const k = x.s ? priStock(x.s) : "";
-    ITEMS.push({
-      id: prNewId(),
-      n: x.n.trim(),
-      d: x.d,
-      c: x.c.trim() || "General",
-      p: parseFloat(x.p),
-      t: x.t,
-      r: k ? { [k]: 1 } : {},
-      ...(x.b !== "" ? { buy: parseFloat(x.b) } : {})
-    });
+    const k = x.s ? priStock(x.s) : "",
+      it = {
+        id: prNewId(),
+        n: x.n.trim(),
+        d: x.d,
+        c: x.c.trim() || "General",
+        p: parseFloat(x.p),
+        t: x.t,
+        r: k ? { [k]: 1 } : {},
+        ...(x.b !== "" ? { buy: parseFloat(x.b) } : {})
+      };
+    ITEMS.push(it);
+    if (!k && priIns(x) && prMakeStock(it)) stocked++;
   });
   auditAdd(
     kind === "stock" ? "Stock item" : "Product",
@@ -380,7 +420,9 @@ function priGo() {
   prI = null;
   spRefreshPos();
   bosave();
-  toast(`${plural(good.length, word)} imported.${left ? ` ${left} skipped.` : ""}`);
+  toast(
+    `${plural(good.length, word)} imported.${stocked ? ` ${plural(stocked, "product")} now in stock: receive them into a store, then issue to the selling point.` : ""}${left ? ` ${left} skipped.` : ""}`
+  );
   all();
 }
 function priAct(a, b) {
@@ -406,7 +448,7 @@ $("#vSub").addEventListener("change", e => {
   if (t.id === "priO" && t.files[0]) return priScan(t.files[0]);
   if (t.dataset.pri) {
     const [i, k] = t.dataset.pri.split(".");
-    prI.rows[+i][k] = t.value;
+    prI.rows[+i][k] = t.type === "checkbox" ? (t.checked ? "1" : "0") : t.value;
     return priRefresh();
   }
   if (t.dataset.priall && t.value) {

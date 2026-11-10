@@ -3,3 +3,4 @@
 *.png
 # The modules password, for module-test.js. Never commit it.
 module-pass.local
+owner-pass.local

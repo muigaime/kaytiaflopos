@@ -50,9 +50,21 @@ function render() {
   $("#vSub").style.display = h ? "none" : "";
   if (h) return;
   $("#vSub").innerHTML =
-    (["inv", "rec", "pur", "vendors", "acct", "hr", "rep", "rooms", "mpesa", "prod"].includes(view)
+    ([
+      "inv",
+      "rec",
+      "pur",
+      "vendors",
+      "acct",
+      "hr",
+      "rep",
+      "rooms",
+      "mpesa",
+      "prod",
+      "settings"
+    ].includes(view)
       ? ""
-      : `<div class="hello"><div><h1>${TTL[view]}</h1><p>${view === "audit" ? "Who did what, when and from which computer. Entries can't be changed or removed." : view === "prod" ? "Everything on sale at your selling points. Add items, change prices and set their options here." : view === "tables" ? "Tables and takeaways for the POS. Any waiter can use any of them, and several waiters can share one." : view === "license" ? "Your trial or license, and entering a new key" : view === "wait" ? "Create waiters, cashiers and managers, and choose what each may do on the POS" : view === "sales" ? br + " · the current day, unless you search" : view === "settings" ? "Hotel details, bills and receipts, POS options, tax and printers" : view === "rec" ? "Turn kitchen materials into what you sell, by production or by recipe" : view === "rooms" ? "Occupancy, guests and room sales · revenue for the " + PL[per] : view === "rep" ? "Run any report for a date range and sale point" : view === "outlets" ? "Bars, restaurants, kitchens and shops that get stock from a store and sell on the POS" : view === "pur" ? "Purchase orders, receiving goods and what you have bought" : view === "cred" ? "Credit customers, what they owe, their statements and payments" : view === "vendors" ? "The vendors you buy from. You choose them on purchase orders and when receiving goods" : "Who can sign in, and what each role may do"}</p></div>${""}</div>`) +
+      : `<div class="hello"><div><h1>${TTL[view]}</h1><p>${view === "audit" ? "Who did what, when and from which computer. Entries can't be changed or removed." : view === "prod" ? "Everything on sale at your selling points. Add items, change prices and set their options here." : view === "tables" ? "Tables and takeaways for the POS. Any waiter can use any of them, and several waiters can share one." : view === "license" ? "Your trial or license, and entering a new key" : view === "wait" ? "Create waiters, cashiers and managers, and choose what each may do on the POS" : view === "sales" ? br + " · the current day, unless you search" : view === "settings" ? "Your business, the POS and printers, and how the system runs" : view === "rec" ? "Turn kitchen materials into what you sell, by production or by recipe" : view === "rooms" ? "Occupancy, guests and room sales · revenue for the " + PL[per] : view === "rep" ? "Run any report for a date range and sale point" : view === "outlets" ? "Bars, restaurants, kitchens and shops that get stock from a store and sell on the POS" : view === "pur" ? "Purchase orders, receiving goods and what you have bought" : view === "cred" ? "Credit customers, what they owe, their statements and payments" : view === "vendors" ? "The vendors you buy from. You choose them on purchase orders and when receiving goods" : "Who can sign in, and what each role may do"}</p></div>${""}</div>`) +
     V[view]() +
     docPopup();
 }
@@ -60,6 +72,7 @@ function go(n) {
   n = n.replace("&amp;", "&");
   if (!boPageOk(n)) return boDenied();
   mdlLock();
+  ownLock();
   // The menu always opens Purchasing on its overview; a button heading to one screen says so first.
   if (n === "Purchasing") {
     if (!purKeep) purT = "home";

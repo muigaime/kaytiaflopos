@@ -4,7 +4,7 @@ const fs = require("fs"), os = require("os"), path = require("path"), http = req
 const SRC = process.argv[2] || path.join(os.homedir(), "Desktop", "compiled", "KaytiaFlow_Update.exe");
 const RUN = fs.mkdtempSync(path.join(os.tmpdir(), "kaytia-update-")), HOME = path.join(RUN, "home"), DESK = path.join(RUN, "desk"), DROP = path.join(RUN, "drop");
 [HOME, DESK, DROP].forEach(d => fs.mkdirSync(d));
-const env = { ...process.env, KAYTIA_HOME: HOME, KAYTIA_DESKTOP: DESK, KAYTIA_PORT: "5617", KAYTIA_API_PORT: "4617", KAYTIA_NO_BROWSER: "1" };
+const env = { ...process.env, KAYTIA_HOME: HOME, KAYTIA_DESKTOP: DESK, KAYTIA_PORT: "5617", KAYTIA_API_PORT: "4617", KAYTIA_NO_BROWSER: "1", KAYTIA_NO_AUTOSTART: "1" };
 const wait = ms => new Promise(r => setTimeout(r, ms));
 const up = () => new Promise(r => { const q = http.get("http://localhost:5617/", x => { x.resume(); r(x.statusCode); }); q.on("error", () => r(0)); q.setTimeout(1500, () => { q.destroy(); r(0); }); });
 const until = async (f, ms = 30000) => { const t = Date.now(); while (Date.now() - t < ms) { if (await f()) return true; await wait(300); } return false; };
@@ -35,7 +35,8 @@ const must = (ok, w) => { console.log((ok ? "ok  " : "BAD ") + w); if (!ok) proc
   must(JSON.parse(fs.readFileSync(path.join(HOME, "config.json"), "utf8")).code === "123456", "the settings are untouched");
   must(await until(async () => (await up()) === 200), "the new version started");
   must(fs.existsSync(path.join(DESK, "Kaytia POS.lnk")), "the shortcut is there");
-  try { execFileSync("taskkill", ["/IM", "KaytiaFlow.exe", "/F"], { stdio: "ignore" }); } catch (e) {}
+  // Only the copies this test started: never a Kaytia Flow someone is using on this computer.
+  try { execFileSync("powershell", ["-NoProfile", "-Command", "Get-Process -ErrorAction SilentlyContinue | Where-Object { $_.Path -and $_.Path.StartsWith($env:KF_RUN, 'OrdinalIgnoreCase') } | Stop-Process -Force"], { stdio: "ignore", env: { ...process.env, KF_RUN: RUN } }); } catch (e) {}
   await wait(1200);
   fs.rmSync(RUN, { recursive: true, force: true });
   process.exit(process.exitCode || 0);

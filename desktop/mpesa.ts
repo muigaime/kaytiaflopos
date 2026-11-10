@@ -329,6 +329,7 @@ export function createMpesa(home: string, saveEnv: (v: Record<string, string>) =
       "powershell.exe",
       ["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", MODEM_SCRIPT],
       {
+        windowsHide: true,
         env: {
           ...process.env,
           KF_PORT: env().MPESA_MODEM_PORT,
@@ -378,6 +379,7 @@ export function createMpesa(home: string, saveEnv: (v: Record<string, string>) =
           "-Command",
           "[System.IO.Ports.SerialPort]::GetPortNames()"
         ],
+        { windowsHide: true },
         { timeout: 15000, windowsHide: true },
         (_e, out) =>
           ok(

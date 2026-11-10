@@ -166,5 +166,91 @@ function networkHTML() {
   return `<div class="pn"><div class="inv-head"><h4>Computers on the network</h4><span class="tag ${live ? "ok" : "bad"}">${live ? "Connected" : "Main not reachable"}</span></div>
   <div class="stm-tiles">${msTile("This computer", LAN.role === "main" ? "Main" : "Till")}${LAN.role === "till" ? msTile("Main computer", esc(LAN.main)) : msTile("Data saved in", esc(LAN.home + "\\data"))}${msTile("Last checked", ago === null ? "-" : `${ago} seconds ago`)}${msTile("Waiting to update", LAN.pending ? "Yes" : "No")}</div>
   <div class="stk">Changes reach other computers within seconds. If a screen is busy, they wait until it's free, and nothing is lost.</div>
-  <div class="pv-form"><a class="chip on" href="/connect" target="_blank" rel="noopener">Connect computers</a></div></div>`;
+  <div class="pv-form"><a class="chip on" href="/connect" target="_blank" rel="noopener">Connect computers</a></div></div>${svcHTML()}`;
+}
+// ---- Settings → Network: Kaytia Flow running quietly in the background, and starting with Windows
+const svcS = { loaded: false, s: null, busy: "" };
+async function svcLoad() {
+  svcS.loaded = true;
+  try {
+    const r = await fetch("/lan/service");
+    svcS.s = r.ok ? await r.json() : null;
+  } catch (e) {
+    svcS.s = null;
+  }
+  if (view === "settings" && setTab === "network") all();
+}
+function svcHTML() {
+  if (!svcS.loaded) svcLoad();
+  const s = svcS.s;
+  if (!s) return "";
+  const bg = s.background,
+    since = s.since ? dt2(s.since) : "-";
+  return `<div class="pn svc"><div class="inv-head"><h4>Background program</h4><span class="tag ${bg ? "ok" : "warn"}">${bg ? "Running in the background" : "Running in a window"}</span></div>
+  <div class="stk">${bg ? "Kaytia Flow runs quietly with no window, like a database server. Closing the browser doesn't stop it, and the desktop shortcut opens it again." : "Kaytia Flow is running in a black window on this computer. Close that window and open Kaytia Flow from the desktop shortcut to run it in the background instead."}</div>
+  <div class="svc-row"><div><b>Start with Windows</b><small>Starts by itself when you sign in to this computer, so tills and the POS can always reach it.</small></div><button class="pv-sw ${s.autostart ? "on" : ""}" data-a="svc_auto" role="switch" aria-checked="${s.autostart}" aria-label="Start with Windows" ${s.installed ? "" : "disabled"}><i></i></button></div>
+  <div class="svc-row"><div><b>Running since</b><small>${since}</small></div>${bg ? `<button class="mini" data-a="svc_restart" ${svcS.busy ? "disabled" : ""}>${svcS.busy === "restart" ? "Restarting..." : "Restart"}</button>` : ""}</div></div>`;
+}
+async function svcAct(a, b) {
+  const post = async (p, body) => {
+    try {
+      const r = await fetch("/lan/service/" + p, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(body || {})
+      });
+      const j = await r.json().catch(() => ({}));
+      return r.ok ? { ok: true, j } : { ok: false, msg: j.error || "That didn't work." };
+    } catch (e) {
+      return { ok: false, msg: "The server can't be reached." };
+    }
+  };
+  if (a === "svc_auto") {
+    const on = !(svcS.s && svcS.s.autostart),
+      r = await post("autostart", { on });
+    if (!r.ok) return toast(r.msg);
+    svcS.s.autostart = r.j.autostart;
+    auditAdd(
+      "Settings",
+      `Kaytia Flow ${r.j.autostart ? "starts" : "no longer starts"} with Windows on this computer`
+    );
+    toast(
+      r.j.autostart
+        ? "Kaytia Flow will start with Windows."
+        : "Kaytia Flow won't start with Windows."
+    );
+    return all();
+  }
+  if (a === "svc_restart")
+    return tapConfirm(
+      b,
+      async () => {
+        svcS.busy = "restart";
+        all();
+        const r = await post("restart");
+        if (!r.ok) {
+          svcS.busy = "";
+          all();
+          return toast(r.msg);
+        }
+        auditAdd("Settings", "Kaytia Flow restarted from Settings");
+        toast("Restarting. This takes a few seconds.");
+        for (let i = 0; i < 30; i++) {
+          await new Promise(res => setTimeout(res, 1000));
+          try {
+            const s = await fetch("/lan/service").then(x => x.json());
+            if (s && s.since !== (svcS.s || {}).since) {
+              svcS.s = s;
+              svcS.busy = "";
+              toast("Kaytia Flow restarted.");
+              return all();
+            }
+          } catch (e) {}
+        }
+        svcS.busy = "";
+        toast("Kaytia Flow hasn't come back yet. Open it from the desktop shortcut.");
+        all();
+      },
+      "Tap again to restart"
+    );
 }

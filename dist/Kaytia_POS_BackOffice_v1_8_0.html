@@ -17611,6 +17611,739 @@ tr[data-grp].on td {
 #bo .pri-t input.n {
   width: 80px;
 }
+
+/* Stock Master: the item code in its own column, lined up on every screen */
+#bo#bo .stm-t .stm-code {
+  width: 1%;
+  padding-right: 4px;
+  text-align: left;
+  white-space: nowrap;
+}
+#bo#bo .stm-t td.stm-code {
+  color: #6b6358;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  text-align: left;
+  white-space: nowrap;
+}
+#bo#bo .stm-t td.stm-item {
+  min-width: 140px;
+}
+#bo#bo .stm-t .stm-item b {
+  display: block;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 720px) {
+  #bo#bo .stm-t td.stm-code {
+    font-size: 12px;
+  }
+  #bo#bo .stm-t td.stm-item {
+    min-width: 110px;
+  }
+}
+
+/* Help and logs: error codes and role numbers */
+#bo#bo .su-code {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+#bo#bo .su-cl {
+  padding: 1px 8px;
+  border: 1px solid var(--line, #d9cfbb);
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+#bo#bo .su-cl:hover {
+  border-color: currentColor;
+}
+#bo#bo .su-q {
+  width: 100%;
+  max-width: 420px;
+  margin: 4px 0 10px;
+}
+#bo#bo .su-ct td {
+  vertical-align: top;
+}
+#bo#bo .su-ct .su-g td {
+  padding-top: 12px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+#bo#bo .su-fix {
+  min-width: 220px;
+}
+#bo#bo .su-rl {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px;
+}
+#bo#bo .su-rl > div {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 10px;
+  align-items: baseline;
+  padding: 8px 12px;
+  border: 1px solid var(--line, #d9cfbb);
+  border-radius: 10px;
+}
+#bo#bo .su-rl b {
+  grid-row: span 2;
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+}
+#bo#bo .su-rl small {
+  opacity: 0.65;
+  font-size: 11px;
+}
+#bo#bo .ur-no {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+#bo#bo .ur-rno {
+  white-space: nowrap;
+}
+#bo#bo .ws-rno {
+  margin-left: 4px;
+  opacity: 0.65;
+  font-weight: 600;
+}
+
+/* Settings: a grouped menu beside the page */
+#bo#bo .set-wrap {
+  display: grid;
+  grid-template-columns: 270px minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+}
+#bo#bo .set-nav {
+  position: sticky;
+  top: 12px;
+  display: grid;
+  gap: 16px;
+  margin: 0;
+  padding: 14px 10px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--card);
+  overflow: visible;
+  flex-wrap: nowrap;
+}
+#bo#bo .set-grp {
+  display: grid;
+  gap: 2px;
+}
+#bo#bo .set-grp h5 {
+  margin: 0 10px 4px;
+  color: var(--mute);
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+#bo#bo .set-nv {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+#bo#bo .set-nv:hover {
+  background: var(--chip);
+}
+#bo#bo .set-nv.on {
+  border-color: var(--hair);
+  background: var(--tint);
+  box-shadow: inset 3px 0 0 var(--brass);
+}
+#bo#bo .set-nv > i {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: var(--chip);
+  font-style: normal;
+  font-size: 15px;
+}
+#bo#bo .set-nv.on > i {
+  background: var(--brass);
+  color: var(--amber-ink);
+}
+#bo#bo .set-nv span {
+  display: grid;
+  min-width: 0;
+}
+#bo#bo .set-nv b {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+#bo#bo .set-nv small {
+  overflow: hidden;
+  color: var(--mute);
+  font-size: 11.5px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+#bo#bo .set-lk {
+  font-style: normal;
+  font-size: 12px;
+  opacity: 0.8;
+}
+#bo#bo .set-main {
+  min-width: 0;
+}
+#bo#bo .set-head {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  margin: 2px 0 16px;
+}
+#bo#bo .set-head > i {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: var(--brass);
+  color: var(--amber-ink);
+  font-style: normal;
+  font-size: 22px;
+}
+#bo#bo .set-head div {
+  flex: 1;
+  min-width: 0;
+}
+#bo#bo .set-head h2 {
+  margin: 0;
+  font: 600 24px/1.2 var(--serif);
+}
+#bo#bo .set-head p {
+  margin: 2px 0 0;
+  color: var(--mute);
+}
+#bo#bo .set-gate {
+  max-width: 460px;
+  margin: 30px auto;
+  padding: 28px;
+  text-align: center;
+}
+#bo#bo .set-gate-i {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 10px;
+  border-radius: 50%;
+  background: var(--tint);
+  font-size: 26px;
+}
+#bo#bo .set-gate-f {
+  display: flex;
+  gap: 10px;
+  align-items: end;
+  margin-top: 14px;
+  text-align: left;
+}
+#bo#bo .set-gate-f label {
+  flex: 1;
+}
+@media (max-width: 980px) {
+  #bo#bo .set-wrap {
+    grid-template-columns: 1fr;
+  }
+  #bo#bo .set-nav {
+    position: static;
+    display: flex;
+    gap: 6px;
+    padding: 8px;
+    overflow-x: auto;
+  }
+  #bo#bo .set-grp {
+    display: flex;
+    gap: 6px;
+  }
+  #bo#bo .set-grp h5,
+  #bo#bo .set-nv small {
+    display: none;
+  }
+  #bo#bo .set-nv {
+    grid-template-columns: auto auto auto;
+    width: auto;
+    white-space: nowrap;
+  }
+}
+
+/* Settings → Database sync */
+#bo#bo .sy-hero {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--card);
+}
+#bo#bo .sy-hero > div {
+  flex: 1;
+}
+#bo#bo .sy-hero b {
+  font: 600 20px/1.25 var(--serif);
+}
+#bo#bo .sy-hero p {
+  margin: 3px 0 0;
+  color: var(--mute);
+}
+#bo#bo .sy-dot {
+  display: inline-block;
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--mute);
+}
+#bo#bo .sy-hero .sy-dot {
+  width: 16px;
+  height: 16px;
+}
+#bo#bo .sy-hero.ok .sy-dot,
+#bo#bo .sy-list .on .sy-dot {
+  background: var(--ok);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--ok) 18%, transparent);
+}
+#bo#bo .sy-hero.warn .sy-dot {
+  background: var(--warn);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--warn) 18%, transparent);
+}
+#bo#bo .sy-hero.ok {
+  border-color: color-mix(in srgb, var(--ok) 35%, var(--line));
+}
+#bo#bo .sy-hero.warn {
+  border-color: color-mix(in srgb, var(--warn) 45%, var(--line));
+}
+#bo#bo .sy-flow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  margin: 14px 0 18px;
+}
+#bo#bo .sy-node {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 9px 16px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--card);
+  font-weight: 600;
+}
+#bo#bo .sy-node span {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--mute);
+}
+#bo#bo .sy-node.on span {
+  background: var(--ok);
+}
+#bo#bo .sy-node.off span {
+  background: var(--bad);
+}
+#bo#bo .sy-node.idle {
+  opacity: 0.6;
+}
+#bo#bo .sy-arrow {
+  color: var(--mute);
+  font-style: normal;
+  font-size: 18px;
+}
+#bo#bo .sy-arrow.on {
+  color: var(--ok);
+}
+#bo#bo .sy-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+#bo#bo .sy-card .inv-head {
+  margin-bottom: 8px;
+}
+#bo#bo .sy-kv {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 7px 0;
+  border-bottom: 1px dashed var(--line);
+}
+#bo#bo .sy-kv span {
+  color: var(--mute);
+}
+#bo#bo .sy-kv b {
+  overflow-wrap: anywhere;
+  font-weight: 600;
+  text-align: right;
+}
+#bo#bo .sy-sub {
+  margin: 14px 0 6px;
+}
+#bo#bo .sy-list {
+  display: grid;
+  gap: 6px;
+}
+#bo#bo .sy-list > div {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 10px;
+  align-items: center;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+#bo#bo .sy-list small {
+  grid-column: 2;
+  color: var(--mute);
+}
+#bo#bo .sy-acts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+#bo#bo .sy-set {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+#bo#bo .sy-set summary {
+  font-weight: 600;
+  cursor: pointer;
+}
+#bo#bo .sy-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+  margin: 10px 0 6px;
+}
+
+/* Settings forms: every label above its box, in an even grid */
+#bo#bo .set-main .fr {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 12px 14px;
+  align-items: end;
+}
+#bo#bo .set-main .fr > label {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  margin: 0;
+}
+#bo#bo .set-main .fr > label > input,
+#bo#bo .set-main .fr > label > select,
+#bo#bo .set-main .fr > label > textarea {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+}
+#bo#bo .set-main .fr > button,
+#bo#bo .set-main .fr > .chip {
+  justify-self: start;
+}
+
+/* ---- Settings, five-star pass: line icons, calm headings, even cards ---- */
+#bo#bo .set-wrap {
+  grid-template-columns: 284px minmax(0, 1fr);
+  gap: 26px;
+  margin-top: 6px;
+}
+#bo#bo .set-nav {
+  gap: 18px;
+  padding: 18px 12px 14px;
+  border-radius: 18px;
+  box-shadow:
+    0 1px 2px rgba(40, 28, 12, 0.04),
+    0 18px 40px -30px rgba(40, 28, 12, 0.35);
+}
+#bo#bo .set-title {
+  padding: 0 10px 14px;
+  border-bottom: 1px solid var(--line);
+}
+#bo#bo .set-title h1 {
+  margin: 0;
+  font: 500 26px/1.15 var(--serif);
+  letter-spacing: 0;
+}
+#bo#bo .set-title p {
+  margin: 4px 0 0;
+  color: var(--mute);
+  font-size: 12.5px;
+}
+#bo#bo .set-grp h5 {
+  margin: 0 10px 6px;
+  color: var(--brass-lo);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+}
+#bo#bo .set-nv {
+  grid-template-columns: 34px minmax(0, 1fr) 16px;
+  gap: 12px;
+  padding: 9px 10px;
+  border-radius: 12px;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+#bo#bo .set-nv > i {
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--mute);
+}
+#bo#bo .set-nv > i svg.i {
+  width: 17px;
+  height: 17px;
+}
+#bo#bo .set-nv:hover > i {
+  color: var(--ink);
+}
+#bo#bo .set-nv.on {
+  border-color: var(--hair);
+  background: color-mix(in srgb, var(--brass) 10%, var(--card));
+  box-shadow: none;
+}
+#bo#bo .set-nv.on > i {
+  border-color: transparent;
+  background: linear-gradient(160deg, var(--brass-hi), var(--brass-lo));
+  color: var(--amber-ink);
+}
+#bo#bo .set-nv b {
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+#bo#bo .set-nv small {
+  margin-top: 1px;
+  font-size: 11.5px;
+  line-height: 1.3;
+  white-space: normal;
+}
+#bo#bo .set-lk {
+  display: grid;
+  place-items: center;
+  color: var(--mute);
+  opacity: 0.75;
+}
+#bo#bo .set-lk svg.i {
+  width: 14px;
+  height: 14px;
+}
+#bo#bo .set-lk.open {
+  color: var(--ok);
+  opacity: 1;
+}
+#bo#bo .set-head {
+  gap: 16px;
+  margin: 4px 0 22px;
+  padding: 0 0 18px;
+  border-bottom: 1px solid var(--line);
+  background: none;
+}
+#bo#bo .set-head > i {
+  width: 52px;
+  height: 52px;
+  border: 1px solid var(--hair);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--brass) 14%, var(--card));
+  color: var(--brass-lo);
+}
+#bo#bo .set-head > i svg.i {
+  width: 24px;
+  height: 24px;
+  stroke-width: 1.6;
+}
+#bo#bo .set-head h2 {
+  font: 500 28px/1.15 var(--serif);
+}
+#bo#bo .set-head p {
+  max-width: 640px;
+  margin-top: 4px;
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+#bo#bo .set-main .pn {
+  gap: 10px;
+  margin: 0 0 18px;
+  padding: 20px 22px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--card);
+  box-shadow:
+    0 1px 2px rgba(40, 28, 12, 0.04),
+    0 14px 34px -28px rgba(40, 28, 12, 0.3);
+}
+#bo#bo .set-main .pn .pn {
+  margin: 0;
+  box-shadow: none;
+}
+#bo#bo .set-main .pn h4 {
+  font: 500 18px/1.3 var(--serif);
+}
+#bo#bo .set-main .pn > .stk {
+  color: var(--mute);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+#bo#bo .set-gate {
+  max-width: 440px;
+  margin: 40px auto;
+  padding: 32px 30px;
+}
+#bo#bo .set-gate-i {
+  width: 60px;
+  height: 60px;
+  border: 1px solid var(--hair);
+  background: color-mix(in srgb, var(--brass) 14%, var(--card));
+  color: var(--brass-lo);
+}
+#bo#bo .set-gate-i svg.i {
+  width: 26px;
+  height: 26px;
+}
+#bo#bo .set-gate h4 {
+  font-size: 21px;
+}
+@media (max-width: 980px) {
+  #bo#bo .set-title {
+    display: none;
+  }
+  #bo#bo .set-nv {
+    grid-template-columns: auto auto auto;
+  }
+}
+#bo#bo .set-main .pn.set-gate {
+  margin: 40px auto;
+}
+#bo#bo .set-gate-f label {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+}
+#bo#bo .set-gate-f input {
+  width: 100%;
+  margin: 0;
+}
+#bo#bo .set-main .inv-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  align-items: center;
+  justify-content: space-between;
+}
+#bo#bo .set-main .inv-head .inv-btns {
+  display: flex;
+  gap: 8px;
+  margin: 0;
+}
+
+/* A link styled as a button reads like one: Connect computers and the like */
+#bo a.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+#bo a.chip.on,
+#bo a.chip.on:visited,
+#bo a.chip.on:hover {
+  color: var(--bi);
+}
+#bo[data-pal="five"] a.chip.on,
+#bo[data-pal="five"] a.chip.on:visited,
+#bo[data-pal="five"] a.chip.on:hover {
+  background: linear-gradient(170deg, #e3c98e, #b58a3c);
+  border-color: #b58a3c;
+  color: #1c1408;
+}
+#bo .pri-ins {
+  text-align: center;
+}
+#bo .pri-ins input {
+  width: 18px;
+  height: 18px;
+}
+#bo#bo .set-main .stm-tile {
+  background: var(--chip);
+  color: var(--ink);
+}
+#bo#bo .set-main .stm-tile b,
+#bo#bo .set-main .stm-tile span {
+  color: inherit;
+}
+
+/* Receive goods: by the piece or by the box / crate */
+#bo .grn-by {
+  display: grid;
+  gap: 4px;
+  align-content: end;
+}
+#bo .grn-by > span {
+  font-size: 12px;
+  font-weight: 600;
+}
+#bo .grn-by .seg2 {
+  display: flex;
+  margin: 0;
+}
+#bo .grn-by .seg2 button {
+  white-space: nowrap;
+}
+#bo .grn-conv {
+  margin-top: 4px;
+  color: var(--ok, #1f6f55);
+  font-size: 13px;
+  font-weight: 700;
+}
+#bo .grn-conv:empty {
+  display: none;
+}
+
+/* Settings → Network: the background program */
+#bo .svc-row {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-top: 1px dashed var(--line);
+}
+#bo .svc-row > div {
+  display: grid;
+  gap: 2px;
+}
+#bo .svc-row small {
+  color: var(--mute);
+}
 </style>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -17626,7 +18359,7 @@ tr[data-grp].on td {
 // (Without it, an error while the page loads leaves buttons that simply do nothing.)
 const KF_ERRLOG = "kaytia_error_log";
 /** Kept on this computer, for Settings → Help and logs. */
-function kfLogError(msg) {
+function kfLogError(msg, code) {
   try {
     const on = id =>
         (
@@ -17634,13 +18367,18 @@ function kfLogError(msg) {
         ).classList.contains("show"),
       where = on("bo") ? "Back Office" : on("fd") ? "Front Desk" : "POS",
       L = JSON.parse(localStorage.getItem(KF_ERRLOG) || "[]");
-    L.unshift({ at: new Date().toISOString(), where, msg: String(msg).slice(0, 2000) });
+    L.unshift({
+      at: new Date().toISOString(),
+      where,
+      code: code || 0,
+      msg: String(msg).slice(0, 2000)
+    });
     localStorage.setItem(KF_ERRLOG, JSON.stringify(L.slice(0, 300)));
   } catch (e) {}
 }
 (function () {
-  function show(msg) {
-    kfLogError(msg);
+  function show(msg, code) {
+    kfLogError(msg, code);
     let el = document.getElementById("errBanner");
     if (!el) {
       el = document.createElement("div");
@@ -17654,15 +18392,562 @@ function kfLogError(msg) {
       (document.body || document.documentElement).appendChild(el);
     }
     el.textContent =
-      "Something went wrong. Please send this message to support (click to hide):\n" + msg;
+      "Something went wrong (Error " +
+      code +
+      "). Please tell support this number, or send the log from Settings → Help and logs (click to hide):\n" +
+      msg;
   }
   addEventListener("error", e =>
-    show((e.message || "Error") + (e.lineno ? " (line " + e.lineno + ")" : ""))
+    show((e.message || "Error") + (e.lineno ? " (line " + e.lineno + ")" : ""), 9001)
   );
   addEventListener("unhandledrejection", e =>
-    show(String((e.reason && (e.reason.stack || e.reason.message)) || e.reason))
+    show(String((e.reason && (e.reason.stack || e.reason.message)) || e.reason), 9002)
   );
 })();
+// ---- Error codes: every problem the system can report has its own number, shown with the message ----
+// Staff read the number to support ("Error 4001"), and Settings → Help and logs explains each one.
+// Numbers never change once given. Groups: 2xxx sign-in and entries, 3xxx rights, 4xxx bills,
+// 5xxx payments, 6xxx Front Desk and staff, 7xxx stock, 8xxx network and devices, 9xxx the system itself.
+// Role numbers are separate (1000 to 1299), so an error number is never mistaken for a role.
+
+/** [code, area, what it means, what to do, matches the message, kept in the error log] */
+const KF_ERRORS = [
+  [
+    2001,
+    "Sign-in",
+    "Wrong username or password",
+    "Check the spelling and Caps Lock. An administrator can reset the password under Users & roles.",
+    /Wrong username or password|That username or password isn't right|Check the username and password/,
+    1
+  ],
+  [
+    2002,
+    "Sign-in",
+    "The account is disabled",
+    "An administrator turns it back on under Users & roles.",
+    /account is disabled/,
+    1
+  ],
+  [
+    2003,
+    "Sign-in",
+    "Too many wrong tries",
+    "Wait 30 to 60 seconds, then try again with the right details.",
+    /Too many (attempts|tries|wrong codes)/,
+    1
+  ],
+  [
+    2004,
+    "Sign-in",
+    "Wrong PIN, or the PIN can't approve this",
+    "Use a manager's or super cashier's PIN that has this right.",
+    /PIN is wrong|not a manager's PIN|That PIN can't|That PIN cannot/,
+    1
+  ],
+  [
+    2005,
+    "Sign-in",
+    "The PIN or pass code isn't allowed",
+    "Use 4 to 6 digits that nobody else is using.",
+    /PIN must be|pass code should|PIN is already in use|uses that pass code/,
+    0
+  ],
+  [
+    2006,
+    "Sign-in",
+    "The password is too short",
+    "Use at least 6 characters (4 for the staff clock).",
+    /password needs at least/,
+    0
+  ],
+  [
+    2007,
+    "Sign-in",
+    "The username can't be used",
+    "Use 3 or more letters or digits that no one else has.",
+    /username is taken|username needs|letters, numbers and _ in the username/,
+    0
+  ],
+  [
+    2008,
+    "Sign-in",
+    "Wrong modules or owner password",
+    "Only the system owner has this password.",
+    /not the (modules|owner) password/,
+    1
+  ],
+  [
+    2009,
+    "Sign-in",
+    "Signed in on the wrong screen",
+    "Front Desk accounts sign in on the Front Desk, not the Back Office.",
+    /account is for the Front Desk/,
+    0
+  ],
+  [
+    2010,
+    "Sign-in",
+    "The last Super Admin or Manager can't be removed",
+    "Add another one first, then change or remove this one.",
+    /Keep at least one (active Super Admin|Manager)/,
+    0
+  ],
+  [
+    3001,
+    "Rights",
+    "Your role doesn't have the right for this",
+    "Ask an administrator to grant it under Users & roles → Role rights, or ask a manager to do it.",
+    /You don't have the right|Your role doesn't include this/,
+    1
+  ],
+  [
+    3002,
+    "Rights",
+    "Your role can't open the Front Desk",
+    "An administrator gives the role a Front Desk right under Users & roles.",
+    /role doesn't include the Front Desk/,
+    1
+  ],
+  [
+    3003,
+    "Rights",
+    "The role can't be added or removed",
+    "Use a new name of 2 to 30 letters, or move its users to another role first.",
+    /role name|is already a role|Move the users on .+ to another role/,
+    0
+  ],
+  [
+    3004,
+    "Rights",
+    "A manager must approve this first",
+    "Ask a manager to approve it under Approvals.",
+    /Only an approved LPO/,
+    0
+  ],
+  [
+    4001,
+    "Bills",
+    "Open bills must be cleared first",
+    "Clear or hand over the open bills, then close the shift or day.",
+    /still has (open|pending) bills|Clear your pending bills|Other shifts are still open|has an open shift/,
+    1
+  ],
+  [
+    4002,
+    "Bills",
+    "The bill is already printed",
+    "A manager adds to it, or open a new bill.",
+    /has been printed/,
+    0
+  ],
+  [
+    4003,
+    "Bills",
+    "The order isn't sent yet",
+    "Press Send first, then print or settle.",
+    /^Send (the|this)/,
+    0
+  ],
+  [
+    4004,
+    "Bills",
+    "There's no bill to work on",
+    "Add items or open a bill first.",
+    /has no items yet|no bill to change|Keep at least one bill|needs two open bills/,
+    0
+  ],
+  [
+    4005,
+    "Bills",
+    "The item can't be sold here",
+    "Check the selling point, or add the product to it under Selling points.",
+    /isn't sold at this selling point|barcode isn't on the system|No item matches/,
+    1
+  ],
+  [
+    4006,
+    "Bills",
+    "The items can't be swapped",
+    "Only sent items of the same price can be swapped.",
+    /can be swapped|Nothing to swap|Tap Swap/,
+    0
+  ],
+  [
+    4007,
+    "Bills",
+    "More than can be returned",
+    "Check how many were sold on that bill.",
+    /can still be returned/,
+    0
+  ],
+  [
+    4008,
+    "Bills",
+    "The product is on an open bill",
+    "Settle that bill first.",
+    /on an open bill/,
+    0
+  ],
+  [
+    5001,
+    "Payments",
+    "The payment is more than what's due",
+    "Only cash can be more than the bill. Lower the amount.",
+    /more than the (balance due|bill)|Only cash can be more/,
+    0
+  ],
+  [
+    5002,
+    "Payments",
+    "The customer is over their credit limit",
+    "Take another payment, or raise the limit under Customers.",
+    /Over the credit limit|would go over its credit limit/,
+    1
+  ],
+  [
+    5003,
+    "Payments",
+    "M-Pesa payment not confirmed",
+    "Check the M-Pesa message and type the code, or ask the guest to pay again.",
+    /No answer yet|M-Pesa requests must|server can't be reached\. Enter the M-Pesa code/,
+    1
+  ],
+  [
+    5004,
+    "Payments",
+    "The M-Pesa modem isn't answering",
+    "Check the modem's cable and SIM, then choose its port again under M-Pesa & eTIMS.",
+    /No modem answered|modem stopped responding|can't be opened/,
+    1
+  ],
+  [
+    5005,
+    "Payments",
+    "eTIMS isn't reachable or didn't sign",
+    "Check the internet on the main computer and the eTIMS keys, then send again.",
+    /eTIMS service can't be reached|eTIMS: not signed/,
+    1
+  ],
+  [
+    5006,
+    "Payments",
+    "That payment is already recorded",
+    "Check the reference. The same code can't be used twice.",
+    /reference .+ is already recorded/,
+    1
+  ],
+  [
+    5007,
+    "Payments",
+    "More than what is owed",
+    "Enter what is still owed, or less.",
+    /only owes|Only KES .+ (is )?still owed|is still due/,
+    0
+  ],
+  [
+    6001,
+    "Front Desk",
+    "No guests are in-house",
+    "Check in a guest first.",
+    /no guests in-house/,
+    0
+  ],
+  [
+    6002,
+    "Front Desk",
+    "The dates don't work",
+    "Check that the end is after the start and the date isn't in the future.",
+    /can't end before it starts|From date is after|date cannot be in the future|expiry date has already passed|dates are all Sundays|overlap leave|From and To can't be the same/,
+    0
+  ],
+  [
+    6003,
+    "Front Desk",
+    "The Front Desk can't be switched off yet",
+    "Check out the guests and close what the message lists.",
+    /Front Desk can't be switched off/,
+    0
+  ],
+  [
+    6004,
+    "Staff",
+    "Payroll can't go ahead",
+    "Approve this month's payroll, or lower what is taken from pay.",
+    /no approved payroll|pay is below zero|repayment can't be more|monthly amount can't be more/,
+    1
+  ],
+  [
+    6005,
+    "Staff",
+    "That staff detail is already used",
+    "Use a different name, pass code, ID or card.",
+    /Another staff member|already on another employee|card is already assigned/,
+    0
+  ],
+  [
+    7001,
+    "Stock",
+    "Not enough stock",
+    "Receive or transfer stock in first, then try again.",
+    /^Not enough|^Only .+ (in|left in) |Nothing to issue/,
+    1
+  ],
+  [
+    7002,
+    "Stock",
+    "That delivery is already received",
+    "Check the invoice or delivery note number.",
+    /was already received on/,
+    1
+  ],
+  [
+    7003,
+    "Stock",
+    "The invoice total doesn't match the items",
+    "Check the prices and quantities against the invoice.",
+    /The invoice says KES/,
+    0
+  ],
+  [
+    7004,
+    "Stock",
+    "The stock count isn't right",
+    "Counts can't be below zero. Enter at least one count.",
+    /cannot be below zero|Enter at least one physical/,
+    0
+  ],
+  [
+    7005,
+    "Stock",
+    "Stores and selling points work differently",
+    "Stores order from vendors and issue stock. Selling points ask a store with a requisition.",
+    /Stock is issued from a store|Only stores order from vendors/,
+    0
+  ],
+  [
+    7006,
+    "Stock",
+    "Items are needed first",
+    "Create the items under Inventory → Item setup first.",
+    /Create (stock )?items in|Upload products that keep stock first|Add at least one (ingredient|material)/,
+    0
+  ],
+  [
+    7007,
+    "Stock",
+    "It already exists",
+    "Use the one already there, or pick a new name.",
+    /already exists|is already (on the list|a customer)|already sells|There are two printers called/,
+    0
+  ],
+  [
+    8001,
+    "Network",
+    "The main computer can't be reached",
+    "Check the network cable or Wi-Fi, and that Kaytia Flow is open on the main computer.",
+    /not reachable|(?<!print )server can't be reached|(?<!print )server could not be reached|Couldn't reach|This computer (is not the Main|isn't the server)|Local network only|This computer only/,
+    1
+  ],
+  [
+    8002,
+    "Network",
+    "This computer can't join the network",
+    "Check the connect code or the server's login, or remove an old till.",
+    /connect code isn't right|no login yet|already has 19 tills/,
+    1
+  ],
+  [
+    8101,
+    "Printing",
+    "The print server isn't running",
+    "Open Kaytia Flow on this computer, then press Refresh printers.",
+    /print server (could not be reached|did not answer)/,
+    1
+  ],
+  [
+    8102,
+    "Printing",
+    "The printer didn't print",
+    "Check the printer is on, has paper and is on the network, and that its address in Settings is right.",
+    /printer did not answer|not on the printer list|not printed/,
+    1
+  ],
+  [
+    8103,
+    "Printing",
+    "The browser blocked the print window",
+    "Allow pop-ups for Kaytia Flow, then print again.",
+    /Allow pop-ups/,
+    0
+  ],
+  [
+    8201,
+    "Email",
+    "The email couldn't be sent",
+    "Check the email account under Email reports, and use an app password for Gmail or Microsoft 365.",
+    /email account (could not be read|was not saved)|doesn't look like an email|email address (does not|doesn't) look right|app password|password is refused|not sent:/,
+    1
+  ],
+  [
+    8301,
+    "Files",
+    "The file or picture can't be used",
+    "Use an Excel workbook (.xlsx) from the template, or a clear PNG or JPG under 5 MB.",
+    /file can't be read|file has no|name column wasn't found|file isn't on this computer|file could not be saved|over 5 MB|too large|picture could not be opened|Nothing could be read from that picture|Choose a PNG/,
+    1
+  ],
+  [
+    8302,
+    "Files",
+    "There is nothing to export or print",
+    "Change the dates or filters.",
+    /nothing to (export|print)|Nothing to export/i,
+    0
+  ],
+  [
+    8401,
+    "Network",
+    "Exchange rates can't be fetched",
+    "Check the internet on the main computer. The last saved rates are used.",
+    /exchange rate service/,
+    1
+  ],
+  [
+    8501,
+    "Devices",
+    "The fingerprint or face reader isn't set up",
+    "Add the reader's serial number under HR & Payroll → Staff clock.",
+    /device isn't registered|serial numbers/,
+    1
+  ],
+  [
+    2103,
+    "Entries",
+    "It's in use, so it can't be deleted",
+    "Turn it off instead, so past records stay correct.",
+    /has been used\. Turn it off/,
+    0
+  ],
+  [
+    5008,
+    "Payments",
+    "Already sent to eTIMS",
+    "Nothing more to send. Untick the products already uploaded.",
+    /already uploaded/,
+    0
+  ],
+  [
+    8104,
+    "Printing",
+    "That computer still has printers set up",
+    "Open Kaytia Flow on that computer and clear its printer setup first.",
+    /has a printer setup/,
+    0
+  ],
+  [
+    9001,
+    "System",
+    "Unexpected error on the screen",
+    "Press Ctrl+F5. If it happens again, send the log to the developer from Help and logs.",
+    null,
+    1
+  ],
+  [
+    9002,
+    "System",
+    "Unexpected error in the background",
+    "Note what you were doing and send the log to the developer from Help and logs.",
+    null,
+    1
+  ],
+  [
+    9003,
+    "System",
+    "This computer's storage is full",
+    "Download a backup, then remove old ID copies or records.",
+    /storage is full|may not have enough room/,
+    1
+  ],
+  [
+    9004,
+    "System",
+    "Backup, restore or clearing failed",
+    "Nothing was changed. Free some space and try again.",
+    /backup could not be made|Restoring failed|Clearing failed/,
+    1
+  ],
+  [
+    2101,
+    "Entries",
+    "Something needed is missing",
+    "Fill in or choose what the message asks for.",
+    /^(Enter|Choose|Tick|Add|Give|Say|Write|Type|Select) /,
+    0
+  ],
+  [
+    2102,
+    "Entries",
+    "A value isn't allowed",
+    "Change it to what the message says.",
+    /must be|should be|should look like|can't be (more|over)|cannot be|looks like|has a letter|can't be the same|must match|not both|Keep the name to|can choose from/,
+    0
+  ]
+];
+const KF_ERR = new Map(KF_ERRORS.map(e => [e[0], e]));
+/** The entry for a message, or null for messages that aren't errors (Saved., Sent. ...). */
+function kfErrOf(msg) {
+  const m = String(msg || "");
+  const own = /Error ([0-9]{4})\b/.exec(m);
+  if (own && KF_ERR.has(+own[1])) return KF_ERR.get(+own[1]);
+  return KF_ERRORS.find(e => e[4] && e[4].test(m)) || null;
+}
+
+// ---- role numbers ----
+const KF_ROLE_NUMS = {
+  "Super Admin": 1000,
+  "General Manager": 1001,
+  Manager: 1002,
+  Director: 1003,
+  Supervisor: 1004,
+  Accountant: 1005,
+  Finance: 1006,
+  Controller: 1007,
+  Store: 1008,
+  Procurement: 1009,
+  Housekeeping: 1010,
+  "Housekeeping Supervisor": 1011,
+  "Front Office": 1012,
+  Chef: 1013,
+  Security: 1014,
+  Sales: 1015
+};
+const KF_POS_ROLE_NUMS = { Waiter: 1201, Cashier: 1202, "Super Cashier": 1203, Manager: 1204 };
+/** A role's number. New roles get the next free number from 1101, kept for good, even after the role is deleted. */
+function kfRoleNo(role, pos) {
+  if (!role) return "";
+  if (pos && KF_POS_ROLE_NUMS[role]) return KF_POS_ROLE_NUMS[role];
+  if (KF_ROLE_NUMS[role]) return KF_ROLE_NUMS[role];
+  if (typeof FD_SETTINGS === "undefined") return "";
+  const N = FD_SETTINGS.roleNums || (FD_SETTINGS.roleNums = {});
+  if (!N[role]) {
+    const used = Object.values(N);
+    let n = 1101;
+    while (used.includes(n)) n++;
+    N[role] = n;
+  }
+  return N[role];
+}
+
+/** The message as shown: an error gets its number, and a rights error also the person's role number. */
+function kfTag(msg, role, pos) {
+  const m = String(msg == null ? "" : msg),
+    e = kfErrOf(m);
+  if (!e || /Error [0-9]{4}\b/.test(m)) return m;
+  const rn = e[0] >= 3000 && e[0] < 3100 && role ? kfRoleNo(role, pos) : "",
+    out = `${m} · Error ${e[0]}${rn ? ` · Role ${rn}` : ""}`;
+  if (e[5]) kfLogError(out, e[0]);
+  return out;
+}
 </script>
 
     <!-- The company logo, kept once here: Start, Back Office and Front Desk screens copy it. -->
@@ -24537,6 +25822,7 @@ $("#kp").onclick = e => {
   if (k) pkey(k);
 };
 function fsNote(m) {
+  m = kfTag(m, user && user.role, true);
   const n = document.createElement("div");
   n.id = "fsn";
   n.textContent = m;
@@ -25113,6 +26399,19 @@ setInterval(tick, 30000);
             <path d="M6 16c0-2 1.5-3 3-3s3 1 3 3M15 10h3M15 14h3" />
           </symbol>
           <symbol id="i-chart" viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-8" /></symbol>
+          <symbol id="i-hotel" viewBox="0 0 24 24"><path d="M4 21V5a1 1 0 011-1h9a1 1 0 011 1v16M15 10h4a1 1 0 011 1v10M3 21h18M8 8h3M8 12h3M8 16h3" /></symbol>
+          <symbol id="i-percent" viewBox="0 0 24 24"><path d="M19 5L5 19" /><circle cx="7" cy="7" r="2.5" /><circle cx="17" cy="17" r="2.5" /></symbol>
+          <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3.5 6.5l8.5 6 8.5-6" /></symbol>
+          <symbol id="i-receipt" viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6M9 16h4" /></symbol>
+          <symbol id="i-void" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.3-5.6M4 4v4h4" /><path d="M9.5 9.5l5 5M14.5 9.5l-5 5" /></symbol>
+          <symbol id="i-print" viewBox="0 0 24 24"><path d="M7 9V3h10v6M7 17H5a2 2 0 01-2-2v-4a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2h-2M7 14h10v7H7z" /></symbol>
+          <symbol id="i-net" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="5" rx="1" /><rect x="3" y="16" width="6" height="5" rx="1" /><rect x="15" y="16" width="6" height="5" rx="1" /><path d="M12 8v4M6 16v-2h12v2" /></symbol>
+          <symbol id="i-sync" viewBox="0 0 24 24"><path d="M20 8a8 8 0 00-14.3-3M4 4v4h4M4 16a8 8 0 0014.3 3M20 20v-4h-4" /></symbol>
+          <symbol id="i-save" viewBox="0 0 24 24"><path d="M5 3h11l3 3v13a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2zM7 3v5h8V3M7 21v-7h10v7" /></symbol>
+          <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M9.5 9.5a2.5 2.5 0 114 2c-.9.6-1.5 1.1-1.5 2.2M12 17h.01" /></symbol>
+          <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /></symbol>
+          <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V7a4 4 0 018 0v4" /></symbol>
+          <symbol id="i-unlock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V7a4 4 0 017.5-2" /></symbol>
           <symbol id="i-gear" viewBox="0 0 24 24">
             <circle cx="12" cy="12" r="3" />
             <path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2" />
@@ -25213,6 +26512,7 @@ function shiftOpen(msg) {
   $("#shMgr").classList.add("show");
 }
 function shDraw(msg) {
+  if (msg) msg = kfTag(msg, user && user.role, true);
   // Shift Management is for whoever counts a till. A waiter has My shift.
   if (user && user.role === "Waiter") return msDraw(msg);
   const d = curDay(),
@@ -27303,6 +28603,7 @@ $("#flEye").onclick = () => {
 $("#flBack").onclick = () => fdExit(true);
 $("#fdOut").onclick = fdLogout;
 const fdNotify = (t, ok) => {
+  if (t && !ok) t = kfTag(t, user && user.role, true);
   fdNotice = t ? { t, ok: !!ok } : null;
 };
 function recPay(r, method, amt, ci, fx) {
@@ -28275,6 +29576,7 @@ const $ = s => document.querySelector(s),
   K = n => Math.round(n).toLocaleString("en-KE"),
   KES = n => "KES " + K(n);
 const toast = m => {
+  m = kfTag(m, boUser && (boUser.role || "Super Admin"));
   const t = $("#toast");
   t.textContent = m;
   t.className = "s";
@@ -28922,6 +30224,12 @@ const ACT_RIGHTS = {
   mp_test: "set.manage",
   inv_nrqgo: "inv.req",
   su_clear: "set.manage",
+  sy_setup: "set.manage",
+  svc_auto: "set.manage",
+  svc_restart: "set.manage",
+  sy_onoff: "set.manage",
+  sy_forget: "set.manage",
+  sy_now: "set.manage",
   su_send: "set.manage",
   rm_save: "set.manage",
   rm_add: "set.manage",
@@ -33227,7 +34535,7 @@ function masterAllHTML() {
     cats = msCats(R),
     V = R.filter(r => (st === "all" || r.level === st) && (!STKT.grp || r.grp === STKT.grp)),
     value = R.reduce((a, r) => a + r.value, 0),
-    cols = STORES.length + 4;
+    cols = STORES.length + 5;
   return `<div class="pn stm ${STKT.full ? "mfull" : ""}" data-findscope>
  <div class="stm-tiles">${msTile("Stores", STORES.length)}${msTile("Items listed", R.length)}${msTile("Stock value (KES)", m2(value), "", "gold")}${msTile("Low or out", count("low") + count("out"), "", count("low") + count("out") ? "warn" : "")}</div>
  <div class="stm-bar">${masterStorePick()}${findBox("master", "Search by name, code or category")}${cats}<span class="stm-acts"><button class="mini xl-btn" data-a="inv_mallx">Export to Excel</button><button class="mini" data-a="inv_mallp">Print</button><button class="mini" data-a="inv_full">${STKT.full ? "⤡ Collapse" : "⤢ Expand"}</button></span></div>
@@ -33238,13 +34546,13 @@ function masterAllHTML() {
    "inv_mst"
  )}</div><span class="stm-sw"><label class="sw"><input type="checkbox" data-m="zero" ${STKT.zero ? "checked" : ""}><span>Zero balances</span></label>${msFold}</span></div>
  <div class="stk stm-note">Stock in every store. To count stock, choose one store.</div>
- <div class="tw tall"><table class="t stm-t ${(FINDQ.master || "").trim() ? "stm-find" : ""}"><thead><tr><th>Item</th>${STORES.map(l => `<th class="n">${esc(l)}</th>`).join("")}<th class="n">Total</th><th class="n">Cost</th><th class="n">Value (KES)</th></tr></thead>${
+ <div class="tw tall"><table class="t stm-t ${(FINDQ.master || "").trim() ? "stm-find" : ""}"><thead><tr><th class="stm-code">Code</th><th>Item</th>${STORES.map(l => `<th class="n">${esc(l)}</th>`).join("")}<th class="n">Total</th><th class="n">Cost</th><th class="n">Value (KES)</th></tr></thead>${
    V.length
      ? msBands(
          V,
          cols,
          r =>
-           `<tr${findAttr("master", r.code, r.name, r.grp)}><td class="stm-item"><b>${esc(r.name)}</b><small>${esc(r.code)}</small></td>${r.at.map(x => `<td class="n">${qn(x)}</td>`).join("")}<td class="n"><b>${qn(r.q)}</b> ${msTag(r.level)}</td><td class="n">${m2(r.cost)}</td><td class="n">${m2(r.value)}</td></tr>`
+           `<tr${findAttr("master", r.code, r.name, r.grp)}><td class="stm-code">${esc(r.code)}</td><td class="stm-item"><b>${esc(r.name)}</b></td>${r.at.map(x => `<td class="n">${qn(x)}</td>`).join("")}<td class="n"><b>${qn(r.q)}</b> ${msTag(r.level)}</td><td class="n">${m2(r.cost)}</td><td class="n">${m2(r.value)}</td></tr>`
        )
      : `<tr><td colspan="${cols}" class="stm-empty">Nothing matches. Try All, or tick Zero balances to list every item.</td></tr>`
  }</table></div></div>`;
@@ -33274,7 +34582,7 @@ function masterHTML() {
         (!STKT.grp || (r.grp || "Other") === STKT.grp)
     ),
     D = !!STKT.detail,
-    cols = D ? 14 : 11;
+    cols = D ? 15 : 12;
   return `<div class="pn stm ${STKT.full ? "mfull" : ""}" data-findscope>
  <div class="stm-tiles">${msTile("Items listed", R.length)}${msTile("Stock value (KES)", m2(value), "", "gold")}${msTile("Low or out", count("low") + count("out"), "", count("low") + count("out") ? "warn" : "")}${msTile("Counted", `${done} of ${R.length}`, "msDone", "", `<div class="pbar"><i style="width:${pct}%"></i><span>${pct}%</span></div>`)}${msTile("Variance (KES)", (varVal > 0 ? "+" : "") + m2(varVal), "msVar", varVal < 0 ? "bad" : "")}</div>
  <div class="stm-bar">${masterStorePick()}${findBox("master", "Search by name, code or category")}${cats}${isStore(loc) ? "" : `<div class="seg2"><button class="${STKT.kind === "raw" ? "on" : ""}" data-a="inv_kind" data-k="raw">Stock items</button><button class="${STKT.kind === "fin" ? "on" : ""}" data-a="inv_kind" data-k="fin">Finished products</button></div>`}<span class="stm-acts"><button class="mini" data-a="inv_tab" data-t="load" title="Reload balances from the latest stock movements">Load data</button><button class="mini" data-a="inv_tab" data-t="export" title="Copy the sheet for Excel">Export</button><button class="mini" data-a="inv_full">${STKT.full ? "⤡ Collapse" : "⤢ Expand"}</button><button class="chip on" data-a="inv_tab" data-t="run" title="Post the physical counts">Run stock take</button></span></div>
@@ -33288,14 +34596,14 @@ function masterHTML() {
    "inv_mst"
  )}</div><span class="stm-sw"><label class="sw"><input type="checkbox" data-m="zero" ${STKT.zero ? "checked" : ""}><span>Zero balances</span></label><label class="sw"><input type="checkbox" data-m="issued" ${STKT.issued ? "checked" : ""}><span>Issued only</span></label><label class="sw"><input type="checkbox" data-a="inv_mdetail" ${D ? "checked" : ""}><span>All movements</span></label>${msFold}</span></div>
  <div class="stk stm-note">Stock take for ${placeLabel(loc)} · Shift ${esc(sh)}.${isStore(loc) && storeKinds(loc).length ? ` Lists ${storeKinds(loc).map(esc).join(", ")} only.` : ""} Type a count, then press Enter for the next item.</div>${msOffList ? `<div class="status warn stm-off">${plural(msOffList, "item")} outside ${esc(loc)}'s categories still ${msOffList === 1 ? "has" : "have"} stock here. <button class="mini" data-a="inv_moff">${STKT.offAt === loc ? "Hide them" : "Show them"}</button></div>` : ""}
- <div class="tw tall"><table class="t stm-t ${(FINDQ.master || "").trim() ? "stm-find" : ""} ${D ? "stm-wide" : ""}"><thead><tr><th>Item</th><th class="n">Cost</th>${D ? '<th class="n">Sale price</th>' : ""}<th class="n">Opening</th>${D ? '<th class="n">Added</th><th class="n">Production</th><th class="n">Stock in</th><th class="n">Sold</th>' : '<th class="n">In</th><th class="n">Sold</th>'}<th class="n">Damages</th><th class="n">${D ? "Stock out" : "Issued out"}</th><th class="n">System</th><th class="stm-count">Physical</th><th class="n">Variance</th><th>Reason</th></tr></thead>${
+ <div class="tw tall"><table class="t stm-t ${(FINDQ.master || "").trim() ? "stm-find" : ""} ${D ? "stm-wide" : ""}"><thead><tr><th class="stm-code">Code</th><th>Item</th><th class="n">Cost</th>${D ? '<th class="n">Sale price</th>' : ""}<th class="n">Opening</th>${D ? '<th class="n">Added</th><th class="n">Production</th><th class="n">Stock in</th><th class="n">Sold</th>' : '<th class="n">In</th><th class="n">Sold</th>'}<th class="n">Damages</th><th class="n">${D ? "Stock out" : "Issued out"}</th><th class="n">System</th><th class="stm-count">Physical</th><th class="n">Variance</th><th>Reason</th></tr></thead>${
    V.length
      ? msBands(V, cols, r => {
          const p = STKT.phys[r.key],
            has = msCounted(r),
            v = msVar(r),
            tint = has && v < -1e-9 ? "stm-short" : has && v > 1e-9 ? "stm-over" : "";
-         return `<tr class="${tint}"${findAttr("master", r.code, r.name, r.grp)}><td class="stm-item"><b>${esc(r.name)}</b><small>${esc(r.code)}</small></td><td class="n">${m2(r.cost)}</td>${D ? `<td class="n">${r.price === "" ? "" : m2(r.price)}</td>` : ""}<td class="n">${qn(r.op)}</td>${D ? `<td class="n">${qn(r.add)}</td><td class="n">${qn(r.prod)}</td><td class="n">${qn(r.inn)}</td>` : `<td class="n">${qn(r.add + r.prod + r.inn)}</td>`}<td class="n">${qn(r.sold)}</td><td class="n"><input type="number" min="0" step="any" class="dmg-in" data-dm="${esc(r.key)}" value="${Math.abs(r.dmg) < 1e-9 ? "" : +r.dmg.toFixed(3)}" placeholder="0" title="Type the quantity damaged: the change is written off (the Reason is the narration)" aria-label="Damages of ${esc(r.name)}"></td><td class="n">${qn(r.out)}</td><td class="n stm-sys"><b>${qn(r.sys)}</b> ${msTag(r.level)}</td><td class="stm-count"><input type="number" step="any" data-ph="${esc(r.key)}" value="${p === undefined ? "" : esc(p)}" aria-label="Physical count of ${esc(r.name)}"></td><td class="n ${v < 0 ? "neg" : ""}" data-vr="${esc(r.key)}" data-sys="${r.sys}">${has ? msSigned(v) : ""}</td><td><input data-pn="${esc(r.key)}" value="${esc(STKT.narr[r.key] || "")}" placeholder="Reason" aria-label="Reason for ${esc(r.name)}"></td></tr>`;
+         return `<tr class="${tint}"${findAttr("master", r.code, r.name, r.grp)}><td class="stm-code">${esc(r.code)}</td><td class="stm-item"><b>${esc(r.name)}</b></td><td class="n">${m2(r.cost)}</td>${D ? `<td class="n">${r.price === "" ? "" : m2(r.price)}</td>` : ""}<td class="n">${qn(r.op)}</td>${D ? `<td class="n">${qn(r.add)}</td><td class="n">${qn(r.prod)}</td><td class="n">${qn(r.inn)}</td>` : `<td class="n">${qn(r.add + r.prod + r.inn)}</td>`}<td class="n">${qn(r.sold)}</td><td class="n"><input type="number" min="0" step="any" class="dmg-in" data-dm="${esc(r.key)}" value="${Math.abs(r.dmg) < 1e-9 ? "" : +r.dmg.toFixed(3)}" placeholder="0" title="Type the quantity damaged: the change is written off (the Reason is the narration)" aria-label="Damages of ${esc(r.name)}"></td><td class="n">${qn(r.out)}</td><td class="n stm-sys"><b>${qn(r.sys)}</b> ${msTag(r.level)}</td><td class="stm-count"><input type="number" step="any" data-ph="${esc(r.key)}" value="${p === undefined ? "" : esc(p)}" aria-label="Physical count of ${esc(r.name)}"></td><td class="n ${v < 0 ? "neg" : ""}" data-vr="${esc(r.key)}" data-sys="${r.sys}">${has ? msSigned(v) : ""}</td><td><input data-pn="${esc(r.key)}" value="${esc(STKT.narr[r.key] || "")}" placeholder="Reason" aria-label="Reason for ${esc(r.name)}"></td></tr>`;
        })
      : `<tr><td colspan="${cols}" class="stm-empty">Nothing matches. Try All, or tick Zero balances to list every item.</td></tr>`
  }</table></div></div>`;
@@ -35612,7 +36920,9 @@ const rcBlank = (keep = {}) => ({
   eName: "",
   eBatch: "",
   eExp: "",
-  eUnits: "buy",
+  eUnits: "buy", // "uom": by the piece · "buy": by the box or crate
+  eBox: "", // what the box is called: Crate, Carton...
+  ePer: "", // pieces in one box
   ePrice: "",
   eQty: "",
   eTax: String(RC_TAX),
@@ -35658,6 +36968,40 @@ const rcUnitOpts = (k, cur) => {
     `<option value="uom" ${cur === "uom" || !buy ? "selected" : ""}>${esc(u.uom)}</option>`
   );
 };
+const RC_BOXES = [
+  "Crate",
+  "Box",
+  "Carton",
+  "Case",
+  "Pack",
+  "Dozen",
+  "Tray",
+  "Bale",
+  "Sack",
+  "Bundle"
+];
+/** The item has its own box size (e.g. Crate of 24), not just single pieces. */
+const rcHasBox = k =>
+  !!k && !(+itemInfo(k).perBuy === 1 && itemInfo(k).buyUnit === itemInfo(k).uom);
+/** Price per piece from the item's last buying price. */
+const rcPiecePrice = k => {
+  const u = itemInfo(k);
+  return +u.buyPrice ? +u.buyPrice / (+u.perBuy || 1) : 0;
+};
+/** "= 48 pcs into stock" while typing boxes. */
+function rcConvText(R = invF.rc) {
+  if (!R.eK || R.eUnits !== "buy") return "";
+  const u = itemInfo(R.eK),
+    per = parseFloat(R.ePer),
+    q = parseFloat(R.eQty),
+    box = R.eBox || "box";
+  if (!(per > 0)) return `Type how many ${u.uom} are in one ${box.toLowerCase()}.`;
+  return q > 0
+    ? `${qn(q)} ${(q === 1 ? box : rcPlural(box)).toLowerCase()} × ${qn(per)} = ${qn(q * per)} ${u.uom} into stock`
+    : `One ${box.toLowerCase()} holds ${qn(per)} ${u.uom}`;
+}
+/** Crate -> Crates, Box -> Boxes. */
+const rcPlural = w => (/(x|s|ch|sh)$/i.test(w) ? w + "es" : w + "s");
 const rcIsBuy = (k, units) =>
   units === "buy" && !(+itemInfo(k).perBuy === 1 && itemInfo(k).buyUnit === itemInfo(k).uom);
 /** The item whose name (ignoring case, spaces and punctuation) or code is typed. */
@@ -35703,7 +37047,10 @@ function recvHTML() {
     keys = pickKeys().sort((a, b) => itemInfo(a).name.localeCompare(itemInfo(b).name)),
     sups = vendorNames(),
     v = VENDORS.find(x => x.name === R.sup),
-    lpo = R.lpo ? LPOS.find(x => x.id === R.lpo) : null;
+    lpo = R.lpo ? LPOS.find(x => x.id === R.lpo) : null,
+    uom = R.eK ? itemInfo(R.eK).uom : "pcs",
+    byBox = R.eUnits === "buy",
+    boxWord = (R.eBox || "box").toLowerCase();
   if (R.sup && !sups.includes(R.sup)) sups.push(R.sup); // e.g. supplier of an older LPO
   let net = 0,
     tax = 0,
@@ -35713,7 +37060,7 @@ function recvHTML() {
     net += c.net;
     tax += c.tax;
     gross += c.gross;
-    return `<tr class="${L.sel ? "grn-sel" : ""}"><td><input type="checkbox" data-rcsel="${i}" ${L.sel ? "checked" : ""} aria-label="Select line ${i + 1}"></td><td class="grn-no">${i + 1}</td><td><b>${esc(itemInfo(L.k).name)}</b>${itemInfo(L.k).code ? `<span class="grn-code">${esc(itemInfo(L.k).code)}</span>` : ""}${L.lpoMax !== undefined ? `<span class="grn-code">due ${qn(L.lpoMax)}</span>` : ""}</td><td>${esc(L.batch || "–")}</td><td>${esc(L.expiry || "–")}</td><td>${esc(L.units)}</td><td class="n"><input class="grn-q" type="number" min="0" step="any" data-rcq="${i}" value="${L.qty}" aria-label="Quantity, line ${i + 1}"></td><td class="n">${m2(L.unitPrice)}</td><td class="n">${qn(L.taxRate)}</td><td class="n">${m2(c.net)}</td><td class="n">${m2(c.tax)}</td><td class="n"><b>${m2(c.gross)}</b></td></tr>`;
+    return `<tr class="${L.sel ? "grn-sel" : ""}"><td><input type="checkbox" data-rcsel="${i}" ${L.sel ? "checked" : ""} aria-label="Select line ${i + 1}"></td><td class="grn-no">${i + 1}</td><td><b>${esc(itemInfo(L.k).name)}</b>${itemInfo(L.k).code ? `<span class="grn-code">${esc(itemInfo(L.k).code)}</span>` : ""}${L.lpoMax !== undefined ? `<span class="grn-code">due ${qn(L.lpoMax)}</span>` : ""}</td><td>${esc(L.batch || "–")}</td><td>${esc(L.expiry || "–")}</td><td>${esc(L.units)}${L.isBuy ? `<span class="grn-code">= ${qn(L.qty * (+L.per || +itemInfo(L.k).perBuy))} ${esc(itemInfo(L.k).uom)}</span>` : ""}</td><td class="n"><input class="grn-q" type="number" min="0" step="any" data-rcq="${i}" value="${L.qty}" aria-label="Quantity, line ${i + 1}"></td><td class="n">${m2(L.unitPrice)}</td><td class="n">${qn(L.taxRate)}</td><td class="n">${m2(c.net)}</td><td class="n">${m2(c.tax)}</td><td class="n"><b>${m2(c.gross)}</b></td></tr>`;
   });
   const openReqs = REQS.filter(r => (r.store || STORES[0]) === dest && isOpenReq(r)).length,
     selN = R.lines.filter(l => l.sel).length,
@@ -35789,16 +37136,17 @@ function recvHTML() {
       ? `<div class="grn-hint">${lpo ? "Lines come from the purchase order. For a part delivery, lower the quantity in the table (it cannot go above what is still due)." : "Choose an open purchase order in the Vendor card to load its lines."}</div>`
       : `<div class="grn-entry">
    <label class="grn-e-item">Item<span class="grn-inl"><input id="rcName" data-iv="rc.eName" list="rcItemsL" value="${esc(R.eName)}" placeholder="Name or code" autocomplete="off"><button class="mini" data-a="inv_rcfind">Find</button></span></label>
-   <label>Units<select id="rcUnits" data-iv="rc.eUnits">${R.eK ? rcUnitOpts(R.eK, R.eUnits) : ""}</select></label>
-   <label>Quantity<input id="rcQty" data-iv="rc.eQty" type="number" min="0" step="any" value="${esc(R.eQty)}"></label>
-   <label>Unit price<input id="rcPrice" data-iv="rc.ePrice" type="number" min="0" step="any" value="${esc(R.ePrice)}"></label>
+   <div class="grn-by"><span>Receive by</span><div class="seg2"><button class="${byBox ? "" : "on"}" data-a="inv_rcby" data-v="uom">Pieces${R.eK && uom !== "pcs" ? ` (${esc(uom)})` : ""}</button><button class="${byBox ? "on" : ""}" data-a="inv_rcby" data-v="buy">Boxes / crates</button></div></div>
+   ${byBox ? `<label>Box or crate<select data-iv="rc.eBox">${[...new Set([R.eBox, ...RC_BOXES].filter(Boolean))].map(b => `<option ${b === R.eBox ? "selected" : ""}>${esc(b)}</option>`).join("")}</select></label><label>${esc(uom)} in one ${esc(boxWord)}<input id="rcPer" data-iv="rc.ePer" type="number" min="1" step="any" value="${esc(R.ePer)}" placeholder="e.g. 24"></label>` : ""}
+   <label>${byBox ? `${esc(rcPlural(R.eBox || "Box"))} received` : `${esc(uom === "pcs" ? "Pieces" : uom)} received`}<input id="rcQty" data-iv="rc.eQty" type="number" min="0" step="any" value="${esc(R.eQty)}"></label>
+   <label>Price per ${byBox ? esc(boxWord) : esc(uom === "pcs" ? "piece" : uom)}<input id="rcPrice" data-iv="rc.ePrice" type="number" min="0" step="any" value="${esc(R.ePrice)}"></label>
    <label>VAT %<input id="rcTaxBox" data-iv="rc.eTax" type="number" min="0" step="any" value="${esc(R.eTax)}"></label>
    <label>Batch no<input data-iv="rc.eBatch" value="${esc(R.eBatch)}"></label>
    <label>Expiry<input type="date" data-iv="rc.eExp" value="${esc(R.eExp)}"></label>
    <label>Line total<input id="rcTotal" readonly></label>
    <button class="chip on grn-add" data-a="inv_rcadd">${I("plus")}Add</button>
   </div>
-  <div class="grn-hint" id="rcInfo">${esc(rcItemInfo(R.eK, dest))}</div>`
+  <div class="grn-hint" id="rcInfo">${esc(rcItemInfo(R.eK, dest))}</div><div class="grn-conv" id="rcConv">${esc(rcConvText(R))}</div>`
   }
   <div class="tw"><table class="t grn-t"><tr><th class="grn-cb"><input type="checkbox" data-rcall="1" ${R.lines.length && R.lines.every(l => l.sel) ? "checked" : ""} aria-label="Select all lines"></th><th>#</th><th>Item</th><th>Batch</th><th>Expiry</th><th>Units</th><th class="n">Qty</th><th class="n">Unit price</th><th class="n">VAT %</th><th class="n">Net</th><th class="n">VAT</th><th class="n">Gross</th></tr>${
     rows.join("") ||
@@ -35868,6 +37216,16 @@ function rcSync(f) {
     else Object.assign(R, { lpo: null, lines: [], sup: "" });
     return all();
   }
+  if (f === "eBox") return all();
+  if (f === "ePer" && R.eUnits === "buy" && R.eK) {
+    const per = parseFloat(R.ePer),
+      pp = rcPiecePrice(R.eK);
+    if (per > 0 && pp) {
+      R.ePrice = String(Math.round(pp * per * 100) / 100);
+      const p = $("#rcPrice");
+      if (p) p.value = R.ePrice;
+    }
+  }
   if (f === "eUnits" && R.eK) {
     // Switching Crate <-> pcs: show the matching price for that unit.
     const u = itemInfo(R.eK);
@@ -35888,6 +37246,8 @@ function rcSync(f) {
   };
   const info = $("#rcInfo");
   if (info) info.textContent = rcItemInfo(R.eK, rcDest(R));
+  const conv = $("#rcConv");
+  if (conv) conv.textContent = rcConvText(R);
   const t = rcCalc(R.ePrice, R.eQty, R.eTax, R.incl);
   set("rcTotal", R.ePrice !== "" && R.eQty !== "" ? m2(t.gross) : "");
 }
@@ -35900,9 +37260,12 @@ function rcPick(k, redraw = true) {
   const taxBox = $("#rcTaxBox");
   if (taxBox) taxBox.value = R.eTax;
   R.eName = u.name;
-  R.eUnits = rcIsBuy(k, "buy") ? "buy" : "uom";
+  const own = rcHasBox(k);
+  R.eUnits = own ? "buy" : "uom";
+  R.eBox = own ? u.buyUnit : R.eBox || "Crate";
+  R.ePer = own ? String(+u.perBuy) : "";
   R.ePrice = u.buyPrice ? String(R.eUnits === "buy" ? +u.buyPrice : +u.buyPrice / +u.perBuy) : "";
-  if (redraw) return all();
+  if (redraw || $("#rcPer") || own) return all();
   const units = $("#rcUnits"),
     price = $("#rcPrice");
   if (units) units.innerHTML = rcUnitOpts(k, R.eUnits);
@@ -35923,7 +37286,9 @@ function rcLoadLpo(p) {
       return {
         k: x.k,
         isBuy,
-        units: isBuy ? `${u.buyUnit} (${qn(+u.perBuy)} ${u.uom})` : u.uom,
+        units: isBuy ? `${u.buyUnit} of ${qn(+u.perBuy)} ${u.uom}` : u.uom,
+        per: isBuy ? +u.perBuy : undefined,
+        box: isBuy ? u.buyUnit : undefined,
         unitPrice: isBuy ? x.price : x.price / +u.perBuy,
         qty: due,
         lpoMax: due,
@@ -36102,6 +37467,26 @@ function rcAct(a, b) {
     const q = $("#rcQty");
     return q && q.focus();
   }
+  if (a === "rcby") {
+    const was = R.eUnits;
+    R.eUnits = d.v === "buy" ? "buy" : "uom";
+    if (R.eUnits === "buy" && !R.eBox) R.eBox = "Crate";
+    // The price follows: a box costs as many pieces as it holds.
+    const per = parseFloat(R.ePer),
+      p = parseFloat(R.ePrice);
+    if (was !== R.eUnits && p > 0 && per > 0)
+      R.ePrice = String(Math.round((R.eUnits === "buy" ? p * per : p / per) * 100) / 100);
+    else if (was !== R.eUnits && R.eK && rcPiecePrice(R.eK))
+      R.ePrice =
+        R.eUnits === "buy"
+          ? per > 0
+            ? String(Math.round(rcPiecePrice(R.eK) * per * 100) / 100)
+            : ""
+          : String(Math.round(rcPiecePrice(R.eK) * 100) / 100);
+    all();
+    const n = $(R.eUnits === "buy" && !(per > 0) ? "#rcPer" : "#rcQty");
+    return n && n.focus();
+  }
   if (a === "rcadd") {
     if (R.mode === "lpo") return toast("LPO lines come from the purchase order.");
     const k = R.eK || rcExact(R.eName),
@@ -36114,11 +37499,20 @@ function rcAct(a, b) {
     if (!(rate >= 0)) return toast("The tax rate must be 0 or more.");
     if (R.eExp && R.eExp < todayYmd()) return toast("That expiry date has already passed.");
     const u = itemInfo(k),
-      isBuy = rcIsBuy(k, R.eUnits);
+      isBuy = R.eUnits === "buy",
+      per = parseFloat(R.ePer),
+      box = (R.eBox || "Crate").trim();
+    if (isBuy && !(per > 0)) {
+      const p = $("#rcPer");
+      if (p) p.focus();
+      return toast(`Enter how many ${u.uom} are in one ${box.toLowerCase()}.`);
+    }
     R.lines.push({
       k,
       isBuy,
-      units: isBuy ? `${u.buyUnit} (${qn(+u.perBuy)} ${u.uom})` : u.uom,
+      units: isBuy ? `${box} of ${qn(per)} ${u.uom}` : u.uom,
+      per: isBuy ? per : undefined,
+      box: isBuy ? box : undefined,
       unitPrice: price,
       qty,
       taxRate: rate,
@@ -36132,6 +37526,7 @@ function rcAct(a, b) {
       eBatch: "",
       eExp: "",
       eUnits: "buy",
+      ePer: "",
       ePrice: "",
       eQty: ""
     });
@@ -36269,10 +37664,20 @@ function rcPost() {
       R.date === todayYmd()
         ? now
         : new Date(`${R.date}T${pad2(now.getHours())}:${pad2(now.getMinutes())}:00`);
+  const learnt = [];
+  R.lines.forEach(L => {
+    if (!L.isBuy || !(+L.per > 0)) return;
+    const u = itemInfo(L.k);
+    if (+u.perBuy === +L.per && u.buyUnit === L.box) return;
+    if (!INGU[L.k]) INGU[L.k] = { ...u };
+    INGU[L.k].perBuy = +L.per;
+    INGU[L.k].buyUnit = L.box;
+    learnt.push(`${u.name}: one ${L.box.toLowerCase()} holds ${qn(+L.per)} ${u.uom}`);
+  });
   const lines = R.lines.map(L => {
     const u = itemInfo(L.k),
       c = rcCalc(L.unitPrice, L.qty, L.taxRate, R.incl),
-      q = L.isBuy ? L.qty * +u.perBuy : L.qty;
+      q = L.isBuy ? L.qty * (+L.per || +u.perBuy) : L.qty;
     return {
       k: L.k,
       q,
@@ -36319,10 +37724,14 @@ function rcPost() {
       ? { id: r.id, store: dest, lines: r.lines.map(x => ({ k: x.k, q: x.q })) }
       : null
   });
+  if (learnt.length)
+    auditAdd("Stock item", `Box size set when receiving: ${learnt.join("; ")}`, {
+      mod: "Inventory"
+    });
   docOpen("grn", r.id);
   bosave();
   toast(
-    `${r.id} posted: ${lines.length} item(s) into ${dest}, KES ${m2(gross)}.${R.lpo ? " " + R.lpo + " updated." : ""}${intoStore ? " Use Issue items to send them on." : ""}`
+    `${r.id} posted: ${lines.length} item(s) into ${dest}, KES ${m2(gross)}.${R.lpo ? " " + R.lpo + " updated." : ""}${learnt.length ? " Remembered: " + learnt.join("; ") + "." : ""}${intoStore ? " Stock is kept in pieces: use Issue items to send them on." : ""}`
   );
   all();
 }
@@ -39784,9 +41193,12 @@ V.settings = () => {
     email: repMailHTML,
     support: supportHTML,
     backup: backupHTML,
-    network: networkHTML
+    network: networkHTML,
+    sync: syncHTML
   };
-  return setTabsHTML() + panels[setTab]();
+  const lock = setTabOf(setTab)[4],
+    body = lock === "owner" && !ownOpen ? ownerGateHTML() : (panels[setTab] || panels.hotel)();
+  return `<div class="set-wrap">${setTabsHTML()}<section class="set-main">${setHeadHTML()}${body}</section></div>`;
 };
 function taxSave() {
   const B = parseFloat(invF.hs.taxB),
@@ -39809,6 +41221,40 @@ let mdlOpen = false,
   mdlFails = 0,
   mdlLocked = 0;
 const mdlLock = () => (mdlOpen = false);
+// ---- Database sync, Backup and restore, and Help and logs open with the system owner's password ----
+// Only its hashes are here (the browser's, and the fallback H uses where the browser has none).
+// It stays open while the owner is in Settings, and locks on leaving Settings or pressing Lock.
+const OWNER_PASS = [
+  "ba318c0b4ca2ed69575ac91b3e4a4d24eac6b017a76eb7cc6c10da1b249a622e",
+  "x323129195"
+];
+let ownOpen = false;
+const ownLock = () => (ownOpen = false);
+function ownerGateHTML() {
+  setTimeout(() => $("#ownPw") && $("#ownPw").focus(), 30);
+  const l = setTabOf(setTab)[1];
+  return `<div class="pn set-gate"><div class="set-gate-i" aria-hidden="true">${I("lock")}</div><h4>For the system owner</h4><div class="stk">${esc(l)} needs the owner password. It stays open until you leave Settings.</div><div class="set-gate-f"><label>Owner password<input id="ownPw" type="password" autocomplete="new-password" aria-label="Owner password"></label><button class="chip on" data-a="hs_owngo">Open</button></div></div>`;
+}
+async function ownUnlock() {
+  const el = $("#ownPw");
+  if (!el) return;
+  const typed = el.value;
+  el.value = "";
+  if (Date.now() < mdlLocked) return toast("Too many tries. Wait 30 seconds.");
+  if (typed && OWNER_PASS.includes(await H("owner|" + typed))) {
+    mdlFails = 0;
+    ownOpen = true;
+    auditAdd("Settings", `${setTabOf(setTab)[1]} opened with the owner password`);
+    return all();
+  }
+  if (++mdlFails >= 5) {
+    mdlLocked = Date.now() + 3e4;
+    mdlFails = 0;
+  }
+  auditAdd("Failed sign-in", "Wrong owner password", { pri: "high" });
+  toast("That is not the owner password.");
+  el.focus();
+}
 /** The one password for protected settings. Says why when it's refused; wrong tries count across every place. */
 async function mdlPassOk(typed) {
   if (Date.now() < mdlLocked) {
@@ -39840,9 +41286,10 @@ async function mdlUnlock() {
   el.focus();
 }
 $("#vSub").addEventListener("keydown", e => {
-  if (e.target.id !== "modPw" || e.key !== "Enter") return;
+  if (e.key !== "Enter" || !["modPw", "ownPw"].includes(e.target.id)) return;
   e.preventDefault();
-  mdlUnlock();
+  if (e.target.id === "modPw") mdlUnlock();
+  else ownUnlock();
 });
 /** Guests still in the house, booked or owing would be left with no way to reach them. */
 function fdModuleToggle() {
@@ -39872,6 +41319,11 @@ function fdModuleToggle() {
 }
 async function settingsAct(a, b) {
   if (a === "modgo") return mdlUnlock();
+  if (a === "owngo") return ownUnlock();
+  if (a === "ownlock") {
+    ownLock();
+    return all();
+  }
   if (a === "modlock") {
     mdlLock();
     return all();
@@ -39955,12 +41407,64 @@ async function supLoad() {
 function supRows() {
   const prog = supS.server.map(l => {
     const m = /^(\S+) \[([^\]]*)\] (.*)$/.exec(l) || [];
-    return { at: m[1] || "", where: m[2] || "Program", msg: m[3] || l };
+    const msg = m[3] || l,
+      e = kfErrOf(msg);
+    return { at: m[1] || "", where: m[2] || "Program", msg, code: e ? e[0] : 0 };
   });
   return [...supLocal(), ...prog].sort((a, b) => String(b.at).localeCompare(String(a.at)));
 }
 const supText = L =>
-  L.map(x => `${x.at}  [${x.where}]  ${x.msg}`).join("\r\n") || "No errors recorded.";
+  L.map(x => `${x.at}  [${x.where}]  ${x.code ? `Error ${x.code}  ` : ""}${x.msg}`).join("\r\n") ||
+  "No errors recorded.";
+let supQ = "";
+/** Every error number, what it means and what to do. Typing in the search hides rows in place. */
+function supCodesHTML() {
+  const groups = [...new Set(KF_ERRORS.map(e => e[1]))];
+  return `<div class="pn su-codes"><div class="inv-head"><h4>Error codes (${KF_ERRORS.length})</h4><span class="inv-btns"><button class="mini" data-a="su_codes_dl">Download the list</button></span></div>
+  <div class="stk">When a message ends with a number, such as <b>Error 4001</b>, find it here. A rights error also shows the person's role number, such as <b>Role 1201</b>.</div>
+  <input class="su-q" data-suq type="search" value="${esc(supQ)}" placeholder="Search by number or words, e.g. 4001 or printer" aria-label="Search error codes">
+  <div class="tw"><table class="t su-ct"><thead><tr><th>Code</th><th>Area</th><th>What it means</th><th>What to do</th></tr></thead>${groups
+    .map(
+      g =>
+        `<tbody data-sug="${esc(g)}"><tr class="su-g"><td colspan="4">${esc(g)}</td></tr>${KF_ERRORS.filter(
+          e => e[1] === g
+        )
+          .map(
+            e =>
+              `<tr id="err${e[0]}" data-suc="${esc(`${e[0]} ${e[1]} ${e[2]} ${e[3]}`.toLowerCase())}" ${supHit(e) ? "" : "hidden"}><td class="su-code"><b>${e[0]}</b></td><td>${esc(e[1])}</td><td>${esc(e[2])}</td><td class="su-fix">${esc(e[3])}</td></tr>`
+          )
+          .join("")}</tbody>`
+    )
+    .join("")}</table></div><div class="stk" id="suQN"></div></div>`;
+}
+const supHit = e =>
+  !supQ.trim() ||
+  `${e[0]} ${e[1]} ${e[2]} ${e[3]}`.toLowerCase().includes(supQ.trim().toLowerCase());
+function supFilter(v) {
+  supQ = v;
+  const w = v.trim().toLowerCase();
+  let n = 0;
+  document.querySelectorAll("#vSub [data-suc]").forEach(r => {
+    r.hidden = !!w && !r.dataset.suc.includes(w);
+    if (!r.hidden) n++;
+  });
+  document.querySelectorAll("#vSub [data-sug]").forEach(b => {
+    b.hidden = !b.querySelector("[data-suc]:not([hidden])");
+  });
+  $("#suQN").textContent = w
+    ? n
+      ? plural(n, "code") + " found"
+      : "No code matches. Try a number or one word."
+    : "";
+}
+/** Each role's number, as shown with rights errors. */
+function supRolesHTML() {
+  const bo = [...boRoles(), SUPER].map(r => [kfRoleNo(r), r, "Back Office"]),
+    pos = Object.entries(KF_POS_ROLE_NUMS).map(([r, n]) => [n, r, "POS"]),
+    L = [...bo, ...pos].sort((a, b) => a[0] - b[0]);
+  return `<div class="pn su-roles"><h4>Role numbers (${L.length})</h4><div class="stk">Every role has its own number. It stays the same if the role is renamed in a later version, and a deleted role's number is never given to another.</div>
+  <div class="su-rl">${L.map(([n, r, w]) => `<div><b>${n}</b><span>${esc(r)}</span><small>${w}</small></div>`).join("")}</div></div>`;
+}
 function supportHTML() {
   if (!supS.loaded) supLoad();
   const L = supRows(),
@@ -39968,17 +41472,18 @@ function supportHTML() {
   return `<div class="pn tw"><div class="inv-head"><h4>Error log (${L.length})</h4><span class="inv-btns"><button class="mini" data-a="su_dl" ${L.length ? "" : "disabled"}>Download log file</button><button class="mini cat-del" data-a="su_clear" ${L.length ? "" : "disabled"}>Clear</button></span></div>
   <div class="stk">Every error on this computer's screens and in the program. Nothing is sent anywhere unless you send it below.</div>${
     L.length
-      ? `<table class="t"><thead><tr><th>Time</th><th>Where</th><th>What happened</th></tr></thead><tbody>${L.slice(
+      ? `<table class="t"><thead><tr><th>Time</th><th>Where</th><th>Code</th><th>What happened</th></tr></thead><tbody>${L.slice(
           0,
           200
         )
           .map(
             x =>
-              `<tr><td style="white-space:nowrap">${x.at ? dt2(x.at) : "-"}</td><td>${esc(x.where)}</td><td class="su-m">${esc(x.msg)}</td></tr>`
+              `<tr><td style="white-space:nowrap">${x.at ? dt2(x.at) : "-"}</td><td>${esc(x.where)}</td><td class="su-code">${x.code ? `<button class="su-cl" data-a="su_code" data-v="${x.code}" title="What this means">${x.code}</button>` : "-"}</td><td class="su-m">${esc(x.msg)}</td></tr>`
           )
           .join("")}</tbody></table>`
       : '<div class="empty">No errors recorded.</div>'
   }</div>
+  ${supCodesHTML()}${supRolesHTML()}
   <div class="pn"><h4>Message the developer</h4><div class="stk">Sent by email from the account set under Email reports.</div>
   <div class="mp-g"><label>Developer's email<input id="suTo" type="email" value="${esc(dev)}" autocomplete="off" placeholder="developer@example.com"></label><label>Subject<input id="suS" maxlength="120" autocomplete="off"></label></div>
   <div class="su-b"><label>Message<textarea id="suM" rows="5" maxlength="4000"></textarea></label></div>
@@ -39986,6 +41491,32 @@ function supportHTML() {
   <div class="mp-b"><button class="chip on" data-a="su_send">Send message</button></div></div>`;
 }
 async function supAct(a, b) {
+  if (a === "su_code") {
+    supQ = String(b.dataset.v);
+    all();
+    const r = document.getElementById("err" + b.dataset.v);
+    if (r) r.scrollIntoView({ block: "center" });
+    return;
+  }
+  if (a === "su_codes_dl") {
+    const rows = [
+        ["Code", "Area", "What it means", "What to do"],
+        ...KF_ERRORS.map(e => [e[0], e[1], e[2], e[3]])
+      ],
+      url = URL.createObjectURL(
+        new Blob(
+          [rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\r\n")],
+          {
+            type: "text/csv"
+          }
+        )
+      ),
+      link = document.createElement("a");
+    link.href = url;
+    link.download = "kaytia-error-codes.csv";
+    link.click();
+    return setTimeout(() => URL.revokeObjectURL(url), 5000);
+  }
   if (a === "su_dl") {
     const url = URL.createObjectURL(new Blob([supText(supRows())], { type: "text/plain" })),
       link = document.createElement("a");
@@ -40032,6 +41563,9 @@ async function supAct(a, b) {
   $("#suM").value = "";
   toast("Message sent.");
 }
+$("#vSub").addEventListener("input", e => {
+  if (e.target.matches("[data-suq]")) supFilter(e.target.value);
+});
 // ---- Staff clock: the page where staff clock in and out, and punches from a fingerprint or face reader ----
 let scFails = 0,
   scLock = 0,
@@ -40375,7 +41909,8 @@ function priRow(x, i, rows) {
           text("c", "Category") +
           num("p", "Selling price") +
           num("b", "Buying price") +
-          tax
+          tax +
+          `<td class="pri-ins"><input type="checkbox" data-pri="${i}.ins" ${priIns(x) ? "checked" : ""} ${x.s ? 'disabled title="Linked to the stock item in the file"' : ""} aria-label="Use ${esc(x.n)} in stock"></td>`
         : text("n", "Item name") +
           text("g", "Category") +
           text("u", "Unit") +
@@ -40411,16 +41946,24 @@ function prImportModal() {
           "Store",
           "#Opening qty"
         ]
-      : ["Product", "Selling point", "Category", "#Selling price", "#Buying price", "Tax"],
+      : [
+          "Product",
+          "Selling point",
+          "Category",
+          "#Selling price",
+          "#Buying price",
+          "Tax",
+          "Use in stock"
+        ],
     all1 = stock
       ? `<label>Store for every row<select data-priall="st"><option value="">Choose to change all</option>${STORES.map(p => `<option>${esc(p)}</option>`).join("")}</select></label><label>Category for every row<input data-priall="g" placeholder="Type to change all"></label>`
       : `<label>Selling point for every row<select data-priall="d"><option value="">Choose to change all</option>${prPoints()
           .map(p => `<option>${esc(p)}</option>`)
           .join(
             ""
-          )}</select></label><label>Category for every row<input data-priall="c" placeholder="Type to change all"></label>`;
+          )}</select></label><label>Category for every row<input data-priall="c" placeholder="Type to change all"></label><label>Use in stock for every row<select data-priall="ins"><option value="">Choose to change all</option><option value="1">Yes, keep stock</option><option value="0">No stock (made to order)</option></select></label>`;
   return `<div class="modal show" id="prImp" style="z-index:63"><div class="box itm pri-rev"><header class="itm-h"><div><h3>Check before importing</h3><p>${prI.rows.length} rows from ${esc(prI.from)}. Correct anything that's wrong.</p></div>${close}</header>
-  <div class="itm-b"><div class="pri-all">${all1}</div>
+  <div class="itm-b"><div class="pri-all">${all1}</div>${stock ? "" : '<div class="itm-hint">Ticked products get a stock item with the same name, so receiving goods, stock taking and every sale count them. Untick dishes made to order.</div>'}
   <div class="tw"><table class="t pri-t"><thead><tr>${heads.map(h => `<th class="${h[0] === "#" ? "n" : ""}">${h.replace("#", "")}</th>`).join("")}<th>Status</th><th></th></tr></thead><tbody>${prI.rows.map((x, i) => priRow(x, i, prI.rows)).join("")}</tbody></table></div></div>
   <footer class="itm-f"><button class="mini" data-a="prl_impback">Back</button><button class="chip on" id="priGo" data-a="prl_impgo" ${n ? "" : "disabled"}>${priGoWord(n)}</button></footer></div></div>`;
 }
@@ -40549,6 +42092,34 @@ async function priScan(file) {
   prI = { kind, step: "review", from: "the picture", rows };
   all();
 }
+/** Gives a product with no stock its own stock item, so receiving, stock taking and each sale count it.
+ * A stock item of the same name is used if there is one (Tusker at the Bar and at the Pool share one). */
+function prMakeStock(i) {
+  if (!prNoStock(i) || i.sell === "acc") return "";
+  let k = priStock(i.n);
+  if (!k) {
+    const buy = +i.buy > 0 ? +i.buy : 0;
+    k = itemKey(i.n);
+    INGU[k] = {
+      code: nextItemCode(),
+      name: i.n,
+      group: i.c || "General",
+      uom: "pcs",
+      buyUnit: "pcs",
+      perBuy: 1,
+      buyPrice: buy,
+      tax: i.t || "B"
+    };
+    ING[k] = `${i.n} (pcs)`;
+    LOCS.forEach(l => (STK[l][k] = STK[l][k] || 0));
+    INGC[k] = buy;
+    RO[k] = RO[k] !== undefined ? RO[k] : 1;
+  }
+  i.r = { [k]: 1 };
+  return k;
+}
+/** Use in stock: on unless the row says otherwise. */
+const priIns = x => x.ins !== "0";
 function priSaveStock(x) {
   const name = x.n.trim(),
     uom = x.u.trim(),
@@ -40579,19 +42150,22 @@ function priGo() {
     from = prI.from,
     left = prI.rows.length - good.length,
     word = priWord();
+  let stocked = 0;
   good.forEach(x => {
     if (kind === "stock") return priSaveStock(x);
-    const k = x.s ? priStock(x.s) : "";
-    ITEMS.push({
-      id: prNewId(),
-      n: x.n.trim(),
-      d: x.d,
-      c: x.c.trim() || "General",
-      p: parseFloat(x.p),
-      t: x.t,
-      r: k ? { [k]: 1 } : {},
-      ...(x.b !== "" ? { buy: parseFloat(x.b) } : {})
-    });
+    const k = x.s ? priStock(x.s) : "",
+      it = {
+        id: prNewId(),
+        n: x.n.trim(),
+        d: x.d,
+        c: x.c.trim() || "General",
+        p: parseFloat(x.p),
+        t: x.t,
+        r: k ? { [k]: 1 } : {},
+        ...(x.b !== "" ? { buy: parseFloat(x.b) } : {})
+      };
+    ITEMS.push(it);
+    if (!k && priIns(x) && prMakeStock(it)) stocked++;
   });
   auditAdd(
     kind === "stock" ? "Stock item" : "Product",
@@ -40603,7 +42177,9 @@ function priGo() {
   prI = null;
   spRefreshPos();
   bosave();
-  toast(`${plural(good.length, word)} imported.${left ? ` ${left} skipped.` : ""}`);
+  toast(
+    `${plural(good.length, word)} imported.${stocked ? ` ${plural(stocked, "product")} now in stock: receive them into a store, then issue to the selling point.` : ""}${left ? ` ${left} skipped.` : ""}`
+  );
   all();
 }
 function priAct(a, b) {
@@ -40629,7 +42205,7 @@ $("#vSub").addEventListener("change", e => {
   if (t.id === "priO" && t.files[0]) return priScan(t.files[0]);
   if (t.dataset.pri) {
     const [i, k] = t.dataset.pri.split(".");
-    prI.rows[+i][k] = t.value;
+    prI.rows[+i][k] = t.type === "checkbox" ? (t.checked ? "1" : "0") : t.value;
     return priRefresh();
   }
   if (t.dataset.priall && t.value) {
@@ -40637,9 +42213,9 @@ $("#vSub").addEventListener("change", e => {
     all();
   }
 });
-// ---- Products List: printable stickers with the hotel's logo, the product, its price, a QR code and a barcode ----
-// The barcode is for the till. The QR code is for a guest's phone: it shows the same details as text.
-let prS = null; // { from, copies, size }
+// ---- Products List: printable black and white stickers with the hotel's logo, the product, its price and a QR code ----
+// The QR code opens the hotel's menu on a guest's phone, served by the Main computer, with this product picked out.
+let prS = null; // { from, copies, size, url }
 const STK_SIZES = {
   l80: ["Label printer roll, 80 x 50 mm", "@page{size:80mm 50mm;margin:0}"],
   l60: ["Small label, 60 x 40 mm", "@page{size:60mm 40mm;margin:0}"],
@@ -40663,20 +42239,24 @@ function stkPrices(i) {
     L = ITEMS.filter(x => x.sell !== "acc" && x.n.toLowerCase() === low);
   return [i, ...L.filter(x => x !== i)];
 }
-/** What a phone shows after scanning the QR code. Long lists are cut to fit. */
-function stkQrText(i) {
-  const head = [String(FD_SETTINGS.name).slice(0, 40).toUpperCase(), i.n.slice(0, 40)],
-    tail = `This is a product of ${String(FD_SETTINGS.name).slice(0, 40)}. Enjoy!`,
-    P = [],
-    used = () => new TextEncoder().encode([...head, ...P, tail].join("\n")).length;
-  for (const x of stkPrices(i)) {
-    P.push(`${x.d}: KSH ${posMoney(x.p)}`);
-    if (used() > 170) {
-      P.pop();
-      break;
-    }
-  }
-  return [...head, ...P, tail].join("\n");
+/** The menu's web address, as it was typed or as the Main computer reports it. */
+const stkUrlOk = u => /^https?:[/][/][^\s/]+/i.test(String(u || "").trim());
+/** What a phone opens after scanning: the menu, scrolled to this product. */
+function stkLink(i) {
+  const u = String(prS.url).trim().replace(/#.*$/, "");
+  return `${u}${u.includes("?") ? "&" : "?"}i=${i.id}#you`;
+}
+function stkFindUrl() {
+  if (FD_SETTINGS.menuUrl) return;
+  fetch("/lan/menu-url")
+    .then(r => r.json())
+    .then(j => {
+      if (prS && !prS.url && stkUrlOk(j.url)) {
+        prS.url = j.url;
+        all();
+      }
+    })
+    .catch(() => {});
 }
 /** The hotel's logo from Settings, or its initials in a crest. */
 function stkLogo() {
@@ -40693,28 +42273,32 @@ function stkLogo() {
     : `<span class="stk-crest"><b>${esc(initials)}</b><small>${esc(name)}</small></span>`;
 }
 function stkOne(i) {
-  const code = itemBarcode(i.id),
-    [m, y] = [bizDate().slice(5, 7), bizDate().slice(0, 4)],
-    others = stkPrices(i).slice(1, 3);
-  return `<div class="stk1"><div class="stk-l"><div class="stk-logo">${stkLogo()}</div><div class="stk-q">${qrSvg(stkQrText(i))}</div><div class="stk-sign"><i></i><span>Signature</span></div><div class="stk-bar">KINDLY DO NOT REMOVE</div></div>
-  <div class="stk-r"><div class="stk-pay"><span class="p-m">LIPA NA M-PESA</span><span class="p-v">VISA</span><span class="p-c">MASTERCARD</span></div><div class="stk-n">${esc(i.n)}</div><div class="stk-p"><small>KSH</small><b>${posMoney(i.p)}</b></div>${others.length ? `<div class="stk-o">${others.map(x => `${esc(x.d)} KSH ${posMoney(x.p)}`).join(" · ")}</div>` : ""}<div class="stk-bar">KINDLY DO NOT PAY MORE</div><div class="stk-b2"><span class="stk-date">${m}-${y}</span><div class="stk-code"><div class="stk-b">${code128Svg(code)}</div><span>${code}</span></div></div><div class="stk-own">${esc(stkOwn())}</div></div></div>`;
+  const [m, y] = [bizDate().slice(5, 7), bizDate().slice(0, 4)],
+    others = stkPrices(i).slice(1, 3),
+    qr = stkUrlOk(prS && prS.url)
+      ? qrSvg(stkLink(i))
+      : '<span class="stk-noq">Menu link needed</span>';
+  return `<div class="stk1"><div class="stk-l"><div class="stk-logo">${stkLogo()}</div><div class="stk-q">${qr}</div><div class="stk-scan">Scan for our menu</div><div class="stk-sign"><i></i><span>Signature</span></div><div class="stk-bar">KINDLY DO NOT REMOVE</div></div>
+  <div class="stk-r"><div class="stk-pay"><span class="p-m">LIPA NA M-PESA</span><span class="p-v">VISA</span><span class="p-c">MASTERCARD</span></div><div class="stk-orn"><i></i><span>✦</span><i></i></div><div class="stk-n">${esc(i.n)}</div><div class="stk-p"><small>KSH</small><b>${posMoney(i.p)}</b></div>${others.length ? `<div class="stk-o">${others.map(x => `${esc(x.d)} KSH ${posMoney(x.p)}`).join(" · ")}</div>` : ""}<div class="stk-bar">KINDLY DO NOT PAY MORE</div><div class="stk-b2"><span class="stk-date">${m}-${y}</span><div class="stk-own">${esc(stkOwn())}</div></div></div></div>`;
 }
-const STK_CSS = `.stk1{display:grid;grid-template-columns:33% 1fr;gap:.45em;box-sizing:border-box;overflow:hidden;background:#fff;color:#000;font-family:Arial,Helvetica,sans-serif;break-inside:avoid;page-break-inside:avoid;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+const STK_CSS = `.stk1{display:grid;grid-template-columns:32% 1fr;gap:.55em;box-sizing:border-box;overflow:hidden;background:#fff;color:#000;font-family:Arial,Helvetica,sans-serif;break-inside:avoid;page-break-inside:avoid;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .stk-l,.stk-r{display:flex;flex-direction:column;min-width:0;min-height:0}.stk-l{align-items:center;justify-content:space-between}.stk-r{justify-content:space-between}
-.stk-logo{display:grid;flex:none;place-items:center;width:3.7em;height:3.7em;overflow:hidden;border:.14em double #000;border-radius:50%}.stk-logo img{display:block;width:100%;height:100%;object-fit:cover}
-.stk-crest{display:grid;justify-items:center;width:100%;text-align:center}.stk-crest b{font:700 1.45em/1 Georgia,'Times New Roman',serif}.stk-crest small{max-width:92%;overflow:hidden;font-size:.36em;font-weight:700;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;text-overflow:ellipsis}
-.stk-q{flex:none;width:6em;height:6em}.stk-q svg{display:block;width:100%;height:100%}
-.stk-sign{align-self:stretch;text-align:right}.stk-sign i{display:block;border-top:.05em solid #000}.stk-sign span{font-size:.5em;font-weight:700}
-.stk-bar{align-self:stretch;padding:.16em .3em;background:#000;color:#fff;font-size:.54em;font-weight:800;letter-spacing:.05em;text-align:center;white-space:nowrap}
-.stk-l .stk-bar{padding:.2em 0;font-size:.43em;letter-spacing:0}.stk-pay{display:flex;gap:.25em}.stk-pay span{flex:1;padding:.22em 0;border-radius:.3em;font-size:.47em;font-weight:900;letter-spacing:.02em;text-align:center;white-space:nowrap}.p-m{flex:1.7!important;background:#3aab38;color:#fff}.p-v{background:#1a1f71;color:#fff;font-style:italic}.p-c{flex:1.5!important;background:#eb001b;color:#fff}
-.stk-n{overflow:hidden;font:700 1.25em/1.15 Georgia,'Times New Roman',serif;text-align:center;white-space:nowrap;text-overflow:ellipsis}
-.stk-p{display:flex;align-items:baseline;justify-content:center;gap:.3em;line-height:1}.stk-p small{font-size:1em;font-weight:900}.stk-p b{font-size:2.9em;font-weight:900;letter-spacing:-.02em;font-variant-numeric:lining-nums}
+.stk-logo{display:grid;flex:none;place-items:center;width:3.3em;height:3.3em;overflow:hidden;border:.16em double #000;border-radius:50%}.stk-logo img{display:block;width:100%;height:100%;object-fit:cover;filter:grayscale(1)}
+.stk-crest{display:grid;justify-items:center;width:100%;text-align:center}.stk-crest b{font:700 1.3em/1 Georgia,'Times New Roman',serif}.stk-crest small{max-width:90%;overflow:hidden;font-size:.34em;font-weight:700;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;text-overflow:ellipsis}
+.stk-q{display:grid;flex:none;place-items:center;width:5.6em;height:5.6em}.stk-q svg{display:block;width:100%;height:100%}.stk-noq{padding:.3em;border:.08em dashed #000;font-size:.5em;text-align:center}
+.stk-scan{font-size:.44em;font-weight:800;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap}
+.stk-sign{align-self:stretch;text-align:right}.stk-sign i{display:block;border-top:.05em solid #000}.stk-sign span{font-size:.45em;font-weight:700}
+.stk-bar{align-self:stretch;padding:.16em .3em;background:#000;color:#fff;font-size:.54em;font-weight:800;letter-spacing:.06em;text-align:center;white-space:nowrap}
+.stk-l .stk-bar{padding:.2em 0;font-size:.43em;letter-spacing:0}
+.stk-pay{display:flex;gap:.25em}.stk-pay span{flex:1;padding:.2em 0;border:.08em solid #000;border-radius:.3em;font-size:.46em;font-weight:900;letter-spacing:.02em;text-align:center;white-space:nowrap}.p-m{flex:1.75!important;background:#000;color:#fff}.p-v{font-style:italic}.p-c{flex:1.5!important}
+.stk-orn{display:flex;align-items:center;gap:.4em;font-size:.55em}.stk-orn i{flex:1;border-top:.1em solid #000}
+.stk-n{display:-webkit-box;overflow:hidden;font:700 1.2em/1.12 Georgia,'Times New Roman',serif;text-align:center;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow-wrap:anywhere}
+.stk-p{display:flex;align-items:baseline;justify-content:center;gap:.3em;line-height:1}.stk-p small{font-size:.95em;font-weight:900;letter-spacing:.04em}.stk-p b{font-size:2.8em;font-weight:900;letter-spacing:-.02em;font-variant-numeric:lining-nums}
 .stk-o{font-size:.56em;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.stk-b2{display:flex;align-items:center;gap:.5em}.stk-date{flex:none;padding:.1em .55em;border:.07em solid #000;border-radius:1em;font-size:.95em;font-weight:900}
-.stk-code{flex:1;min-width:0;text-align:center}.stk-b{height:1.5em}.stk-b svg{display:block;width:100%;height:100%}.stk-code span{display:block;font-size:.46em;letter-spacing:.08em;line-height:1}
-.stk-own{font:italic 700 .6em/1.1 Georgia,'Times New Roman',serif;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.l80 .stk1{width:80mm;height:50mm;padding:1.6mm 2mm;font-size:10pt}
-.l60 .stk1{width:60mm;height:40mm;padding:1.2mm 1.5mm;font-size:7.8pt}
+.stk-b2{display:flex;align-items:center;gap:.5em}.stk-date{flex:none;padding:.12em .55em;background:#000;color:#fff;border-radius:1em;font-size:.9em;font-weight:900;letter-spacing:.04em}
+.stk-own{flex:1;min-width:0;overflow:hidden;font:italic 700 .6em/1.15 Georgia,'Times New Roman',serif;text-align:center;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+.l80 .stk1{width:80mm;height:50mm;padding:1.8mm 2.2mm;font-size:10pt}
+.l60 .stk1{width:60mm;height:40mm;padding:1.3mm 1.6mm;font-size:7.8pt}
 .a4 .stk1{height:39mm;padding:1.5mm 1.8mm;font-size:7.8pt;border:.2mm dashed #999}`;
 function stkModal() {
   if (!prS) return "";
@@ -40726,20 +42310,21 @@ function stkModal() {
       ...prPoints().map(p => [p, p]),
       ["all", "All products"]
     ];
-  return `<div class="modal show" id="stkEd" style="z-index:63"><div class="box itm"><header class="itm-h"><div><h3>Print stickers</h3><p>Your logo and payment options, the product and its price, a QR code for phones and a barcode for the till.</p></div><button class="itm-x" data-a="prl_stkno" aria-label="Close">✕</button></header>
+  return `<div class="modal show" id="stkEd" style="z-index:63"><div class="box itm"><header class="itm-h"><div><h3>Print stickers</h3><p>Black and white, with your logo, payment options, the product and its price. The QR code opens your menu on a guest's phone.</p></div><button class="itm-x" data-a="prl_stkno" aria-label="Close">✕</button></header>
   <div class="itm-b"><section class="itm-s"><div class="itm-g itm-g3"><label>Products<select data-stk0="from">${src.map(([v, l]) => `<option value="${esc(v)}" ${v === F.from ? "selected" : ""}>${esc(l)}</option>`).join("")}</select></label><label>Sticker size<select data-stk0="size">${Object.entries(
     STK_SIZES
   )
     .map(([v, x]) => `<option value="${v}" ${v === F.size ? "selected" : ""}>${x[0]}</option>`)
     .join(
       ""
-    )}</select></label><label>Copies of each<input data-stk0="copies" type="number" min="1" max="50" step="1" value="${esc(F.copies)}"></label></div></section>
+    )}</select></label><label>Copies of each<input data-stk0="copies" type="number" min="1" max="50" step="1" value="${esc(F.copies)}"></label></div><label class="stk-url">Menu link for the QR code<input data-stk0="url" type="url" placeholder="http://192.168.1.10:5500/menu" value="${esc(F.url)}"></label><div class="itm-hint">${stkUrlOk(F.url) ? "Guests' phones must be on the hotel's Wi-Fi to open it. Prices on the menu are always today's." : "Type the Main computer's menu link. It fills in by itself in the installed program."}</div></section>
   <section class="itm-s"><h4>Preview</h4>${L.length ? `<div class="stk-prev ${F.size}">${L.slice(0, 4).map(stkOne).join("")}</div>` : '<div class="itm-hint">No products to print.</div>'}<div class="itm-hint">${plural(L.length * n, "sticker")} will print.</div></section></div>
-  <footer class="itm-f"><button class="mini" data-a="prl_stkno">Cancel</button><button class="chip on" data-a="prl_stkgo" ${L.length ? "" : "disabled"}>Print stickers</button></footer></div></div><style>${STK_CSS}#stkEd .stk-prev{display:flex;flex-wrap:wrap;gap:10px}#stkEd .stk1{outline:1px solid var(--line)}#stkEd .a4 .stk1{width:60mm}</style>`;
+  <footer class="itm-f"><button class="mini" data-a="prl_stkno">Cancel</button><button class="chip on" data-a="prl_stkgo" ${L.length && stkUrlOk(F.url) ? "" : "disabled"}>Print stickers</button></footer></div></div><style>${STK_CSS}#stkEd .stk-prev{display:flex;flex-wrap:wrap;gap:10px}#stkEd .stk1{outline:1px solid var(--line)}#stkEd .a4 .stk1{width:60mm}#stkEd .stk-url{display:grid;gap:4px;margin-top:12px}</style>`;
 }
 function stkPrint() {
-  const F = prS,
-    n = Math.max(1, Math.min(50, parseInt(F.copies, 10) || 1)),
+  const F = prS;
+  if (!stkUrlOk(F.url)) return toast("Add the menu link first.");
+  const n = Math.max(1, Math.min(50, parseInt(F.copies, 10) || 1)),
     L = stkItems(),
     body = L.flatMap(i => Array(n).fill(stkOne(i))).join(""),
     w = window.open("", "_blank");
@@ -40755,8 +42340,10 @@ function stkPrint() {
   all();
 }
 function stkAct(a) {
-  if (a === "prl_stk") prS = { from: stkDefault(), copies: "1", size: "l80" };
-  else if (a === "prl_stkno") prS = null;
+  if (a === "prl_stk") {
+    prS = { from: stkDefault(), copies: "1", size: "l80", url: FD_SETTINGS.menuUrl || "" };
+    stkFindUrl();
+  } else if (a === "prl_stkno") prS = null;
   else if (a === "prl_stkgo") return stkPrint();
   all();
 }
@@ -40764,6 +42351,13 @@ $("#vSub").addEventListener("change", e => {
   const k = e.target.dataset.stk0;
   if (!k || !prS) return;
   prS[k] = e.target.value;
+  if (k === "url") {
+    prS.url = prS.url.trim();
+    if (stkUrlOk(prS.url) || !prS.url) {
+      FD_SETTINGS.menuUrl = prS.url;
+      bosave();
+    }
+  }
   all();
 });
 // ---- M-Pesa setup and payments: Daraja, the modem, and everything received ----
@@ -41201,24 +42795,145 @@ function psuAct(a, b) {
   }
 }
 // ---- Settings: tabs, logos, the payment methods on guest bills, and the POS options ----
-const SET_TABS = [
-  ["hotel", "Hotel and logos"],
-  ["bills", "Bills and receipts"],
-  ["paymodes", "Payment modes"],
-  ["voids", "Void reasons"],
-  ["pos", "POS options"],
-  ["tax", "Tax"],
-  ["printers", "Printers"],
-  ["email", "Email reports"],
-  ["modules", "Modules"],
-  ["backup", "Backup and restore"],
-  ["network", "Network"],
-  ["support", "Help and logs"]
+// [key, name, short line for the menu, icon, lock ("owner" = owner password, "mod" = modules password), the page's own line]
+const SET_GROUPS = [
+  [
+    "Your business",
+    [
+      [
+        "hotel",
+        "Hotel and logos",
+        "Name, address, PIN and logos",
+        "hotel",
+        "",
+        "Your name, address, KRA PIN and the logos printed on every guest bill and receipt."
+      ],
+      [
+        "tax",
+        "Tax",
+        "VAT and Tax C rates",
+        "percent",
+        "",
+        "The tax rates added to bills. Past reports keep the rate they were paid at."
+      ],
+      [
+        "paymodes",
+        "Payment modes",
+        "Cash, M-Pesa, cards, credit",
+        "wal",
+        "",
+        "How guests can pay: cash, M-Pesa, cards, credit accounts and room charges."
+      ],
+      [
+        "email",
+        "Email reports",
+        "Daily reports by email",
+        "mail",
+        "",
+        "The reports sent at the end of each day, and who receives them."
+      ]
+    ]
+  ],
+  [
+    "Point of sale",
+    [
+      [
+        "bills",
+        "Bills and receipts",
+        "What prints on bills",
+        "receipt",
+        "",
+        "What appears on guest bills and receipts, and the payment details they show."
+      ],
+      [
+        "pos",
+        "POS options",
+        "Working day and POS rules",
+        "pos",
+        "",
+        "The working day, and the rules waiters and cashiers follow on the POS."
+      ],
+      [
+        "voids",
+        "Void reasons",
+        "Why items come off a bill",
+        "void",
+        "",
+        "The reasons staff choose when taking an item off a bill."
+      ],
+      [
+        "printers",
+        "Printers",
+        "Receipt, kitchen and bar",
+        "print",
+        "",
+        "Which printer takes receipts, kitchen orders and bar orders, on each computer."
+      ]
+    ]
+  ],
+  [
+    "System",
+    [
+      [
+        "network",
+        "Network",
+        "Computers sharing data",
+        "net",
+        "",
+        "The computers in the building that share this hotel's data."
+      ],
+      [
+        "sync",
+        "Database sync",
+        "Local network and cloud",
+        "sync",
+        "owner",
+        "Whether data is shared on the local network and kept safe in the cloud."
+      ],
+      [
+        "backup",
+        "Backup and restore",
+        "Save or bring back data",
+        "save",
+        "owner",
+        "Download all your data, bring a backup back, or start clean."
+      ],
+      [
+        "support",
+        "Help and logs",
+        "Errors, codes, developer",
+        "help",
+        "owner",
+        "Errors the system has met, what each error code means, and a message to the developer."
+      ],
+      [
+        "modules",
+        "Modules",
+        "Parts of the system",
+        "grid",
+        "mod",
+        "Switch parts of the system on or off for this business."
+      ]
+    ]
+  ]
 ];
+const SET_TABS = SET_GROUPS.flatMap(g => g[1]);
+const setTabOf = k => SET_TABS.find(t => t[0] === k) || SET_TABS[0];
 let setTab = "hotel";
 invF.gp = { pt: "*", m: "", v: "", a: "" };
 const setTabsHTML = () =>
-  `<div class="set-tabs" role="tablist">${SET_TABS.map(([k, l]) => `<button role="tab" aria-selected="${k === setTab}" class="${k === setTab ? "on" : ""}" data-a="hs_tab" data-k="${k}">${l}</button>`).join("")}</div>`;
+  `<nav class="set-tabs set-nav" role="tablist" aria-label="Settings"><div class="set-title"><h1>Settings</h1><p>How Kaytia Flow runs for your business</p></div>${SET_GROUPS.map(
+    ([g, L]) =>
+      `<div class="set-grp"><h5>${g}</h5>${L.map(([k, l, d, ic, lock]) => {
+        const shut = (lock === "owner" && !ownOpen) || (lock === "mod" && !mdlOpen);
+        return `<button role="tab" aria-selected="${k === setTab}" class="set-nv ${k === setTab ? "on" : ""}" data-a="hs_tab" data-k="${k}"><i aria-hidden="true">${I(ic)}</i><span><b>${l}</b><small>${d}</small></span>${lock ? `<em class="set-lk ${shut ? "" : "open"}" title="${lock === "owner" ? "System owner only" : "Modules password"}" aria-label="${shut ? "Locked" : "Open"}">${I(shut ? "lock" : "unlock")}</em>` : ""}</button>`;
+      }).join("")}</div>`
+  ).join("")}</nav>`;
+/** The page's own heading, with a Lock button on an owner page that is open. */
+function setHeadHTML() {
+  const [k, l, d, ic, lock, long] = setTabOf(setTab);
+  return `<header class="set-head"><i aria-hidden="true">${I(ic)}</i><div><h2>${l}</h2><p>${long || d}</p></div>${lock === "owner" && ownOpen ? '<button class="mini" data-a="hs_ownlock">Lock</button>' : ""}</header>`;
+}
 
 // ---------------------------------------------------------------- logos
 const LOGO_FITS = [
@@ -42457,7 +44172,7 @@ function productsHTML() {
   <div class="pn tw" data-findscope><div class="pr-bar">${findBox("prod", "Search product, category or code")}<div class="pr-pills">${pill("All", "All selling points", L.length)}${P.map(p => pill(p, p, L.filter(i => i.d === p).length)).join("")}</div></div>
   ${
     shown.length
-      ? `<div class="tw"><table class="t pr-t"><thead><tr><th></th><th>Code</th><th>Product</th><th>Selling point</th><th>Category</th><th>Selling price</th><th>Track Stock</th><th>eTIMS Uploaded</th><th>eTIMS Code</th><th>eTIMS ID</th><th></th></tr></thead>${shown.map(prRow).join("")}</table></div><div class="pr-foot"><button class="mini" data-a="prl_stk">Print stickers</button><label class="pr-selall"><input type="checkbox" data-a="prl_etall"> Select All</label><button class="chip on" id="etSendAll" data-a="prl_etup">${prEtSendWord()}</button></div>`
+      ? `<div class="tw"><table class="t pr-t"><thead><tr><th></th><th>Code</th><th>Product</th><th>Selling point</th><th>Category</th><th>Selling price</th><th>Track Stock</th><th>eTIMS Uploaded</th><th>eTIMS Code</th><th>eTIMS ID</th><th></th></tr></thead>${shown.map(prRow).join("")}</table></div><div class="pr-foot"><button class="mini" data-a="prl_usestock" title="Give the ticked products, or all shown, a stock item">Use in stock</button><button class="mini" data-a="prl_stk">Print stickers</button><label class="pr-selall"><input type="checkbox" data-a="prl_etall"> Select All</label><button class="chip on" id="etSendAll" data-a="prl_etup">${prEtSendWord()}</button></div>`
       : '<div class="empty">Nothing here yet. Use Add item to put the first product on the POS.</div>'
   }</div></div>${prAddModal()}${prEditModal()}${prEtAdjModal()}${prImportModal()}${stkModal()}${itemPopupIfOpen()}${speModal()}`;
 }
@@ -42647,6 +44362,26 @@ function prAct(a, b) {
       else prEt.sel.delete(+x.dataset.id);
     });
     return prEtScope();
+  }
+  if (a === "prl_usestock") {
+    const todo = prEtPool().filter(i => prNoStock(i) && i.sell !== "acc");
+    if (!todo.length) return toast("These products already keep stock.");
+    return tapConfirm(
+      b,
+      () => {
+        todo.forEach(prMakeStock);
+        auditAdd("Product", `${plural(todo.length, "product")} now kept in stock`, {
+          mod: "Products"
+        });
+        spRefreshPos();
+        bosave();
+        toast(
+          `${plural(todo.length, "product")} now in stock. Receive them into a store, then issue to the selling point.`
+        );
+        all();
+      },
+      `Tap again: ${todo.length} into stock`
+    );
   }
   if (a === "prl_promo") return prPromoStart(+d.id);
   if (a === "prl_etone") return prEtOne(+d.id, b);
@@ -48190,7 +49925,286 @@ function networkHTML() {
   return `<div class="pn"><div class="inv-head"><h4>Computers on the network</h4><span class="tag ${live ? "ok" : "bad"}">${live ? "Connected" : "Main not reachable"}</span></div>
   <div class="stm-tiles">${msTile("This computer", LAN.role === "main" ? "Main" : "Till")}${LAN.role === "till" ? msTile("Main computer", esc(LAN.main)) : msTile("Data saved in", esc(LAN.home + "\\data"))}${msTile("Last checked", ago === null ? "-" : `${ago} seconds ago`)}${msTile("Waiting to update", LAN.pending ? "Yes" : "No")}</div>
   <div class="stk">Changes reach other computers within seconds. If a screen is busy, they wait until it's free, and nothing is lost.</div>
-  <div class="pv-form"><a class="chip on" href="/connect" target="_blank" rel="noopener">Connect computers</a></div></div>`;
+  <div class="pv-form"><a class="chip on" href="/connect" target="_blank" rel="noopener">Connect computers</a></div></div>${svcHTML()}`;
+}
+// ---- Settings → Network: Kaytia Flow running quietly in the background, and starting with Windows
+const svcS = { loaded: false, s: null, busy: "" };
+async function svcLoad() {
+  svcS.loaded = true;
+  try {
+    const r = await fetch("/lan/service");
+    svcS.s = r.ok ? await r.json() : null;
+  } catch (e) {
+    svcS.s = null;
+  }
+  if (view === "settings" && setTab === "network") all();
+}
+function svcHTML() {
+  if (!svcS.loaded) svcLoad();
+  const s = svcS.s;
+  if (!s) return "";
+  const bg = s.background,
+    since = s.since ? dt2(s.since) : "-";
+  return `<div class="pn svc"><div class="inv-head"><h4>Background program</h4><span class="tag ${bg ? "ok" : "warn"}">${bg ? "Running in the background" : "Running in a window"}</span></div>
+  <div class="stk">${bg ? "Kaytia Flow runs quietly with no window, like a database server. Closing the browser doesn't stop it, and the desktop shortcut opens it again." : "Kaytia Flow is running in a black window on this computer. Close that window and open Kaytia Flow from the desktop shortcut to run it in the background instead."}</div>
+  <div class="svc-row"><div><b>Start with Windows</b><small>Starts by itself when you sign in to this computer, so tills and the POS can always reach it.</small></div><button class="pv-sw ${s.autostart ? "on" : ""}" data-a="svc_auto" role="switch" aria-checked="${s.autostart}" aria-label="Start with Windows" ${s.installed ? "" : "disabled"}><i></i></button></div>
+  <div class="svc-row"><div><b>Running since</b><small>${since}</small></div>${bg ? `<button class="mini" data-a="svc_restart" ${svcS.busy ? "disabled" : ""}>${svcS.busy === "restart" ? "Restarting..." : "Restart"}</button>` : ""}</div></div>`;
+}
+async function svcAct(a, b) {
+  const post = async (p, body) => {
+    try {
+      const r = await fetch("/lan/service/" + p, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(body || {})
+      });
+      const j = await r.json().catch(() => ({}));
+      return r.ok ? { ok: true, j } : { ok: false, msg: j.error || "That didn't work." };
+    } catch (e) {
+      return { ok: false, msg: "The server can't be reached." };
+    }
+  };
+  if (a === "svc_auto") {
+    const on = !(svcS.s && svcS.s.autostart),
+      r = await post("autostart", { on });
+    if (!r.ok) return toast(r.msg);
+    svcS.s.autostart = r.j.autostart;
+    auditAdd(
+      "Settings",
+      `Kaytia Flow ${r.j.autostart ? "starts" : "no longer starts"} with Windows on this computer`
+    );
+    toast(
+      r.j.autostart
+        ? "Kaytia Flow will start with Windows."
+        : "Kaytia Flow won't start with Windows."
+    );
+    return all();
+  }
+  if (a === "svc_restart")
+    return tapConfirm(
+      b,
+      async () => {
+        svcS.busy = "restart";
+        all();
+        const r = await post("restart");
+        if (!r.ok) {
+          svcS.busy = "";
+          all();
+          return toast(r.msg);
+        }
+        auditAdd("Settings", "Kaytia Flow restarted from Settings");
+        toast("Restarting. This takes a few seconds.");
+        for (let i = 0; i < 30; i++) {
+          await new Promise(res => setTimeout(res, 1000));
+          try {
+            const s = await fetch("/lan/service").then(x => x.json());
+            if (s && s.since !== (svcS.s || {}).since) {
+              svcS.s = s;
+              svcS.busy = "";
+              toast("Kaytia Flow restarted.");
+              return all();
+            }
+          } catch (e) {}
+        }
+        svcS.busy = "";
+        toast("Kaytia Flow hasn't come back yet. Open it from the desktop shortcut.");
+        all();
+      },
+      "Tap again to restart"
+    );
+}
+// ---- Settings → Database sync: is this computer working offline, on the local network, with the cloud, or both ----
+// Tills sync with the Main over the local network every few seconds (lan-sync.js). The Main keeps a copy in
+// the cloud when one is set up (desktop/cloud.ts). Everything keeps working with neither: changes wait here.
+const syS = { loaded: false, at: 0, s: null, busy: "" };
+async function syLoad() {
+  syS.loaded = true;
+  let s = null;
+  try {
+    const r = await fetch("/lan/sync-status");
+    if (r.ok) s = await r.json();
+  } catch (e) {}
+  syS.s = s || { role: "browser" };
+  syS.at = Date.now();
+  if (syOnPage() && !syTyping()) all();
+}
+const syOnPage = () => view === "settings" && setTab === "sync" && ownOpen;
+const syTyping = () => {
+  const a = document.activeElement;
+  return !!a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && !!a.closest("#vSub");
+};
+setInterval(() => {
+  if (syOnPage() && Date.now() - syS.at > 9000) syLoad();
+}, 3000);
+
+const syAgo = iso => {
+  if (!iso) return "never";
+  const s = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 1000));
+  return s < 60
+    ? `${s} seconds ago`
+    : s < 3600
+      ? plural(Math.round(s / 60), "minute") + " ago"
+      : s < 86400
+        ? plural(Math.round(s / 3600), "hour") + " ago"
+        : dt2(iso);
+};
+/** Where this computer stands: [local network, cloud], each "on", "off" (unreachable) or "none" (not used). */
+function syModes() {
+  const s = syS.s || {},
+    c = s.cloud || null,
+    lan =
+      !LAN.on || s.role === "browser"
+        ? "none"
+        : s.role === "till"
+          ? LAN.state === "offline" || s.mainOk === false
+            ? "off"
+            : "on"
+          : (s.tills || []).length
+            ? "on"
+            : "none",
+    cloud = !c || !c.set || !c.on ? "none" : c.online && !c.lastError ? "on" : "off";
+  return [lan, cloud];
+}
+function syHero() {
+  const [lan, cloud] = syModes(),
+    on = [lan === "on" && "local network", cloud === "on" && "cloud"].filter(Boolean),
+    bad = lan === "off" || cloud === "off",
+    title = on.length ? `Online · ${on.join(" and ")}` : "Offline · this computer only",
+    tone = bad ? "warn" : on.length ? "ok" : "idle",
+    sub = bad
+      ? `${lan === "off" ? "The main computer can't be reached" : "The cloud can't be reached"}. Keep working: changes are kept here and catch up by themselves.`
+      : on.length === 2
+        ? "Every computer shares the same data, and a copy is kept safe in the cloud."
+        : on.length
+          ? lan === "on"
+            ? "The computers in the building share the same data. Add a cloud copy below to keep it safe off site."
+            : "A copy of this computer's data is kept in the cloud."
+          : "Everything works without a network. Connect other computers or a cloud copy when you need them.";
+  return `<div class="sy-hero ${tone}"><span class="sy-dot" aria-hidden="true"></span><div><b>${title}</b><p>${sub}</p></div><button class="mini" data-a="sy_refresh">${syS.busy === "refresh" ? "Checking..." : "Check now"}</button></div>
+  <div class="sy-flow" aria-label="How data moves">${[
+    ["Tills and Front Desk", lan === "none" ? "idle" : lan],
+    ["Main computer", "on"],
+    ["Cloud", cloud === "none" ? "idle" : cloud]
+  ]
+    .map(
+      ([n, st], i) =>
+        `${i ? `<i class="sy-arrow ${st === "on" || (i === 1 && lan === "on") ? "on" : ""}" aria-hidden="true">${i === 1 ? "⇄" : "→"}</i>` : ""}<div class="sy-node ${st}"><span></span>${n}</div>`
+    )
+    .join("")}</div>`;
+}
+const syRow = (l, v) => `<div class="sy-kv"><span>${l}</span><b>${v}</b></div>`;
+const syTag = (t, l) =>
+  `<span class="tag ${t === "on" ? "ok" : t === "off" ? "bad" : ""}">${l}</span>`;
+function syLanCard() {
+  const s = syS.s || {},
+    [lan] = syModes();
+  if (!LAN.on || s.role === "browser")
+    return `<div class="pn sy-card"><div class="inv-head"><h4>Local network</h4>${syTag("none", "Not used")}</div><div class="stk">This copy runs in a browser on its own. Install Kaytia Flow to share data between computers.</div></div>`;
+  const main = s.role === "main",
+    T = s.tills || [],
+    live = t => t.seen && Date.now() - new Date(t.seen).getTime() < 90000;
+  return `<div class="pn sy-card"><div class="inv-head"><h4>Local network</h4>${syTag(lan, lan === "on" ? "Connected" : lan === "off" ? "Main not reachable" : "No other computers")}</div>
+  ${syRow("This computer", main ? "Main computer" : `Till ${esc(String(LAN.idx || ""))}`)}${main ? syRow("Data kept in", esc((s.home || LAN.home) + "\\data")) : syRow("Main computer", esc(s.main || LAN.main || "-"))}${syRow("Data version", s.rev == null ? "-" : esc(String(s.rev)))}${syRow("Last synced", LAN.at ? syAgo(new Date(LAN.at).toISOString()) : "never")}${syRow("Changes waiting", LAN.pending ? "Yes, until the screen is free" : "None")}
+  ${main ? `<h5 class="sy-sub">Computers on this network (${T.length})</h5>${T.length ? `<div class="sy-list">${T.map(t => `<div class="${live(t) ? "on" : ""}"><span class="sy-dot" aria-hidden="true"></span><b>${esc(t.name)}</b><small>${esc(t.ip || "-")} · ${live(t) ? "online" : "last seen " + syAgo(t.seen)}</small></div>`).join("")}</div>` : '<div class="stk">No other computers yet.</div>'}` : ""}
+  <div class="sy-acts">${main ? '<a class="chip on" href="/connect" target="_blank" rel="noopener">Connect computers</a>' : ""}<button class="mini" data-a="sy_lan">Sync now</button></div></div>`;
+}
+function syCloudCard() {
+  const s = syS.s || {},
+    c = s.cloud,
+    main = s.role === "main",
+    [, cl] = syModes();
+  if (s.role === "browser")
+    return `<div class="pn sy-card"><div class="inv-head"><h4>Cloud copy</h4>${syTag("none", "Not used")}</div><div class="stk">The cloud copy is kept by the main computer, in the installed program.</div></div>`;
+  if (!main && !c)
+    return `<div class="pn sy-card"><div class="inv-head"><h4>Cloud copy</h4>${syTag("off", "Unknown")}</div><div class="stk">The main computer can't be reached, so its cloud copy can't be checked from here.</div></div>`;
+  const tag = !c.set
+    ? syTag("none", "Not set up")
+    : !c.on
+      ? syTag("none", "Off")
+      : syTag(cl, cl === "on" ? (c.behind ? "Copying" : "Up to date") : "Not reachable");
+  const info = c.set
+    ? `${syRow("Cloud address", esc(c.url))}${syRow("Site", esc(c.site))}${syRow("Last copy", c.lastAt ? `${syAgo(c.lastAt)} · version ${esc(String(c.lastRev))}` : "Not yet")}${c.on ? syRow("Waiting to copy", c.behind ? plural(c.behind, "change") : "Nothing") : ""}${c.lastError ? `<div class="status warn">${esc(c.lastError)}</div>` : ""}`
+    : '<div class="stk">Keep a copy of all your data on a cloud server, so it is safe even if this computer is lost. The hotel keeps working without internet: the copy catches up when it\'s back.</div>';
+  if (!main)
+    return `<div class="pn sy-card"><div class="inv-head"><h4>Cloud copy</h4>${tag}</div>${info}<div class="stk">Set up and managed on the main computer.</div></div>`;
+  const busy = k => (syS.busy === k ? "disabled" : "");
+  return `<div class="pn sy-card"><div class="inv-head"><h4>Cloud copy</h4>${tag}</div>${info}
+  ${c.set ? `<div class="sy-acts"><button class="chip on" data-a="sy_now" ${c.on ? "" : "disabled"} ${busy("now")}>${syS.busy === "now" ? "Copying..." : "Copy now"}</button><button class="mini" data-a="sy_test" ${busy("test")}>${syS.busy === "test" ? "Testing..." : "Test connection"}</button><button class="mini" data-a="sy_onoff">${c.on ? "Turn off" : "Turn on"}</button><button class="mini cat-del" data-a="sy_forget">Disconnect</button></div>` : ""}
+  <details class="sy-set" ${c.set ? "" : "open"}><summary>${c.set ? "Change the cloud connection" : "Connect to a cloud server"}</summary>
+  <div class="sy-form"><label>Cloud address<input id="syUrl" type="url" autocomplete="off" placeholder="https://cloud.example.com" value="${esc(c.url || "")}"></label><label>Site name<input id="sySite" autocomplete="off" placeholder="the-tide" value="${esc(c.site || "")}"></label><label>Key<input id="syKey" type="password" autocomplete="new-password" placeholder="${c.hasKey ? "Saved. Type a new one to change it" : "The key the cloud gave you"}"></label></div>
+  <div class="stk">Your cloud provider gives you the address, site name and key. The key stays on this computer and is never shown again.</div>
+  <div class="sy-acts"><button class="chip on" data-a="sy_setup" ${busy("setup")}>${syS.busy === "setup" ? "Connecting..." : "Connect to cloud"}</button></div></details></div>`;
+}
+function syncHTML() {
+  if (!syS.loaded) syLoad();
+  if (!syS.s) return '<div class="pn"><div class="empty">Checking the connections...</div></div>';
+  return `${syHero()}<div class="sy-grid">${syLanCard()}${syCloudCard()}</div>`;
+}
+async function syPost(op, body) {
+  try {
+    const r = await fetch("/lan/cloud/" + op, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body || {})
+    });
+    const j = await r.json().catch(() => ({}));
+    return r.ok
+      ? { ok: true, j }
+      : { ok: false, msg: j.error || "The main computer refused that." };
+  } catch (e) {
+    return { ok: false, msg: "The server can't be reached." };
+  }
+}
+async function syncAct(a, b) {
+  if (!ownOpen) return;
+  if (a === "sy_refresh") {
+    syS.busy = "refresh";
+    all();
+    await syLoad();
+    syS.busy = "";
+    return all();
+  }
+  if (a === "sy_lan") {
+    await lanTick();
+    await syLoad();
+    return toast(
+      LAN.state === "offline" ? "Main not reachable. Keep working, it will catch up." : "Synced."
+    );
+  }
+  const run = async (op, body, done, okMsg) => {
+    syS.busy = op;
+    all();
+    const r = await syPost(op, body);
+    syS.busy = "";
+    await syLoad();
+    all();
+    if (!r.ok) return toast(r.msg);
+    if (done) auditAdd("Database sync", done, { pri: "Important" });
+    toast(r.j.msg || okMsg || "Saved.");
+  };
+  if (a === "sy_setup") {
+    const url = $("#syUrl").value.trim(),
+      site = $("#sySite").value.trim(),
+      key = $("#syKey").value.trim();
+    return run("setup", { url, site, key }, `Cloud copy set up: ${url} as ${site}`);
+  }
+  if (a === "sy_test") return run("test");
+  if (a === "sy_now") return run("now");
+  if (a === "sy_onoff") {
+    const on = !(syS.s.cloud || {}).on;
+    return run(
+      "onoff",
+      { on },
+      `Cloud copy turned ${on ? "on" : "off"}`,
+      `Cloud copy is ${on ? "on" : "off"}.`
+    );
+  }
+  if (a === "sy_forget")
+    return tapConfirm(
+      b,
+      () => run("forget", {}, "Cloud copy disconnected", "Disconnected from the cloud."),
+      "Tap again to disconnect"
+    );
 }
 // ---- Accounting: chart of accounts and the double-entry ledger ----
 // The ledger is two things read together: journals people post here, and entries worked out live from what the
@@ -50578,11 +52592,11 @@ V.wait = () => {
     L.map(u => {
       const open = orders.filter(o => o.waiter === u.n).length,
         on = USERS.indexOf(u) === F.i;
-      return `<button class="ws-w ${on ? "on" : ""}" data-a="ws_edit" data-i="${USERS.indexOf(u)}"><span class="ws-a">${esc(u.n[0])}</span><span><b>${esc(u.n)}</b><small>${esc(u.role)} · ${plural(open, "open bill")}</small></span></button>`;
+      return `<button class="ws-w ${on ? "on" : ""}" data-a="ws_edit" data-i="${USERS.indexOf(u)}"><span class="ws-a">${esc(u.n[0])}</span><span><b>${esc(u.n)}</b><small>${esc(u.role)} ${kfRoleNo(u.role, true)} · ${plural(open, "open bill")}</small></span></button>`;
     }).join("") || '<div class="empty">No POS staff yet.</div>'
   }</div>
  <div class="pn ws-form"><div class="ws-lh"><h4>${F.i < 0 ? "Create POS staff" : "Edit " + esc(F.n)}</h4><span class="ws-id">${esc(id)}</span></div>
- <div class="ws-g"><label>Role<select data-wsr>${POS_ROLES.map(
+ <div class="ws-g"><label>Role <small class="ws-rno">no. ${kfRoleNo(F.role, true)}</small><select data-wsr>${POS_ROLES.map(
    r => `<option ${r === F.role ? "selected" : ""}>${r}</option>`
  ).join(
    ""
@@ -50742,17 +52756,17 @@ function urUsersHTML() {
     .join(
       ""
     )}<option>${SUPER}</option></select></label><button class="chip on" data-a="ur_add">Create user</button></div></div>
- <div class="pn tw"><h4>Back office users (${ADM.length})</h4><table class="t ur-t"><tr><th>Name</th><th>Username</th><th>Role</th><th>Status</th><th>New password</th><th></th></tr>${ADM.map(
+ <div class="pn tw"><h4>Back office users (${ADM.length})</h4><table class="t ur-t"><tr><th>Name</th><th>Username</th><th>Role</th><th>Role no.</th><th>Status</th><th>New password</th><th></th></tr>${ADM.map(
    (a, i) => {
      const me = boUser && a.u === boUser.u;
-     return `<tr class="${a.off ? "off" : ""}"><td><span class="ws-a">${esc(a.n[0])}</span> <b>${esc(a.n)}</b>${me ? ' <small class="ur-me">You</small>' : ""}</td><td>${esc(a.u)}</td><td><select data-ura="${i}" ${me ? "disabled" : ""}>${[...boRoles(), SUPER].map(r => `<option ${(a.role || SUPER) === r ? "selected" : ""}>${r}</option>`).join("")}</select></td><td><button class="mini ur-st ${a.off ? "no" : "yes"}" data-a="ur_off" data-i="${i}" ${me ? "disabled" : ""}>${a.off ? "Disabled" : "Active"}</button></td><td><span class="ur-pw"><input type="password" id="np_${i}" autocomplete="new-password" placeholder="New password"><button class="mini" data-a="ur_pw" data-i="${i}">Change</button></span></td><td>${me ? "" : `<button class="mini" data-a="ur_del" data-i="${i}">Delete</button>`}</td></tr>`;
+     return `<tr class="${a.off ? "off" : ""}"><td><span class="ws-a">${esc(a.n[0])}</span> <b>${esc(a.n)}</b>${me ? ' <small class="ur-me">You</small>' : ""}</td><td>${esc(a.u)}</td><td><select data-ura="${i}" ${me ? "disabled" : ""}>${[...boRoles(), SUPER].map(r => `<option ${(a.role || SUPER) === r ? "selected" : ""}>${r}</option>`).join("")}</select></td><td class="ur-no">${kfRoleNo(a.role || SUPER)}</td><td><button class="mini ur-st ${a.off ? "no" : "yes"}" data-a="ur_off" data-i="${i}" ${me ? "disabled" : ""}>${a.off ? "Disabled" : "Active"}</button></td><td><span class="ur-pw"><input type="password" id="np_${i}" autocomplete="new-password" placeholder="New password"><button class="mini" data-a="ur_pw" data-i="${i}">Change</button></span></td><td>${me ? "" : `<button class="mini" data-a="ur_del" data-i="${i}">Delete</button>`}</td></tr>`;
    }
  ).join("")}</table></div>`;
 }
 function urRightsHTML() {
   const sup = urRole === SUPER,
     S = BO_RIGHTS.filter(urShown).length;
-  return `<div class="pn"><div class="ur-top"><label>User group<select data-urg>${[...boRoles(), SUPER].map(r => `<option ${r === urRole ? "selected" : ""}>${r}</option>`).join("")}</select></label><div class="ur-sum"><b id="urCount">${roleGranted(urRole)}</b> of ${BO_RIGHTS.length} rights granted · ${plural(roleCount(urRole), "user")}</div>${sup ? '<span class="ur-note">Super Admin always has every right.</span>' : `<span class="ur-acts"><button class="mini" data-a="ur_bulk" data-v="1">Grant all shown</button><button class="mini" data-a="ur_bulk" data-v="0">Revoke all shown</button><button class="mini" data-a="ur_reset">${roleCustom().includes(urRole) ? "Clear all rights" : "Reset to standard"}</button>${roleCustom().includes(urRole) ? '<button class="mini" data-a="ur_rdel">Delete this role</button>' : ""}</span>`}</div>
+  return `<div class="pn"><div class="ur-top"><label>User group<select data-urg>${[...boRoles(), SUPER].map(r => `<option ${r === urRole ? "selected" : ""}>${r}</option>`).join("")}</select></label><div class="ur-rno">Role no. <b>${kfRoleNo(urRole)}</b></div><div class="ur-sum"><b id="urCount">${roleGranted(urRole)}</b> of ${BO_RIGHTS.length} rights granted · ${plural(roleCount(urRole), "user")}</div>${sup ? '<span class="ur-note">Super Admin always has every right.</span>' : `<span class="ur-acts"><button class="mini" data-a="ur_bulk" data-v="1">Grant all shown</button><button class="mini" data-a="ur_bulk" data-v="0">Revoke all shown</button><button class="mini" data-a="ur_reset">${roleCustom().includes(urRole) ? "Clear all rights" : "Reset to standard"}</button>${roleCustom().includes(urRole) ? '<button class="mini" data-a="ur_rdel">Delete this role</button>' : ""}</span>`}</div>
  <div class="ur-newrole"><label>Add a new role<input id="urNew" maxlength="30" autocomplete="off" placeholder="e.g. Night Auditor"></label><button class="chip on" data-a="ur_radd">Add role</button><span class="stk">A new role starts with no rights. Grant them below.</span></div>
  <div class="ur-wrap"><table class="ur-m"><thead><tr>${urCols.map(([c, l]) => `<th class="${c === "yes" ? "c" : ""}">${l}</th>`).join("")}</tr><tr class="ur-f">${urCols.map(([c, l]) => `<td><input data-urf="${c}" value="${esc(urF[c] || "")}" placeholder="Filter" aria-label="Filter ${l}"></td>`).join("")}</tr></thead><tbody>${BO_RIGHTS.map(
    r => {
@@ -50833,10 +52847,11 @@ async function urAct(a, b) {
     if ([...boRoles(), SUPER].some(r => r.toLowerCase() === n.toLowerCase()))
       return toast(`${n} is already a role.`);
     roleCustom().push(n);
+    const no = kfRoleNo(n);
     urRole = n;
-    auditAdd("Users", `Role ${n} added`);
+    auditAdd("Users", `Role ${n} (${no}) added`);
     bosave();
-    toast(`${n} added. Now grant its rights.`);
+    toast(`${n} added as role ${no}. Now grant its rights.`);
     return all();
   }
   if (a === "ur_rdel") {
@@ -51070,9 +53085,21 @@ function render() {
   $("#vSub").style.display = h ? "none" : "";
   if (h) return;
   $("#vSub").innerHTML =
-    (["inv", "rec", "pur", "vendors", "acct", "hr", "rep", "rooms", "mpesa", "prod"].includes(view)
+    ([
+      "inv",
+      "rec",
+      "pur",
+      "vendors",
+      "acct",
+      "hr",
+      "rep",
+      "rooms",
+      "mpesa",
+      "prod",
+      "settings"
+    ].includes(view)
       ? ""
-      : `<div class="hello"><div><h1>${TTL[view]}</h1><p>${view === "audit" ? "Who did what, when and from which computer. Entries can't be changed or removed." : view === "prod" ? "Everything on sale at your selling points. Add items, change prices and set their options here." : view === "tables" ? "Tables and takeaways for the POS. Any waiter can use any of them, and several waiters can share one." : view === "license" ? "Your trial or license, and entering a new key" : view === "wait" ? "Create waiters, cashiers and managers, and choose what each may do on the POS" : view === "sales" ? br + " · the current day, unless you search" : view === "settings" ? "Hotel details, bills and receipts, POS options, tax and printers" : view === "rec" ? "Turn kitchen materials into what you sell, by production or by recipe" : view === "rooms" ? "Occupancy, guests and room sales · revenue for the " + PL[per] : view === "rep" ? "Run any report for a date range and sale point" : view === "outlets" ? "Bars, restaurants, kitchens and shops that get stock from a store and sell on the POS" : view === "pur" ? "Purchase orders, receiving goods and what you have bought" : view === "cred" ? "Credit customers, what they owe, their statements and payments" : view === "vendors" ? "The vendors you buy from. You choose them on purchase orders and when receiving goods" : "Who can sign in, and what each role may do"}</p></div>${""}</div>`) +
+      : `<div class="hello"><div><h1>${TTL[view]}</h1><p>${view === "audit" ? "Who did what, when and from which computer. Entries can't be changed or removed." : view === "prod" ? "Everything on sale at your selling points. Add items, change prices and set their options here." : view === "tables" ? "Tables and takeaways for the POS. Any waiter can use any of them, and several waiters can share one." : view === "license" ? "Your trial or license, and entering a new key" : view === "wait" ? "Create waiters, cashiers and managers, and choose what each may do on the POS" : view === "sales" ? br + " · the current day, unless you search" : view === "settings" ? "Your business, the POS and printers, and how the system runs" : view === "rec" ? "Turn kitchen materials into what you sell, by production or by recipe" : view === "rooms" ? "Occupancy, guests and room sales · revenue for the " + PL[per] : view === "rep" ? "Run any report for a date range and sale point" : view === "outlets" ? "Bars, restaurants, kitchens and shops that get stock from a store and sell on the POS" : view === "pur" ? "Purchase orders, receiving goods and what you have bought" : view === "cred" ? "Credit customers, what they owe, their statements and payments" : view === "vendors" ? "The vendors you buy from. You choose them on purchase orders and when receiving goods" : "Who can sign in, and what each role may do"}</p></div>${""}</div>`) +
     V[view]() +
     docPopup();
 }
@@ -51080,6 +53107,7 @@ function go(n) {
   n = n.replace("&amp;", "&");
   if (!boPageOk(n)) return boDenied();
   mdlLock();
+  ownLock();
   // The menu always opens Purchasing on its overview; a button heading to one screen says so first.
   if (n === "Purchasing") {
     if (!purKeep) purT = "home";
@@ -51305,6 +53333,8 @@ $("#vSub").onclick = e => {
   }
   if (a.slice(0, 3) === "bl_") return billAct(a);
   if (a.slice(0, 3) === "su_") return supAct(a, b);
+  if (a.slice(0, 3) === "sy_") return syncAct(a, b);
+  if (a.slice(0, 4) === "svc_") return svcAct(a, b);
   if (a.slice(0, 3) === "rm_") return repMailAct(a, b);
   if (a.slice(0, 3) === "mp_") return mpAct(a, b);
   if (a.slice(0, 3) === "hs_") {

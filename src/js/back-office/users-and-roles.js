@@ -26,17 +26,17 @@ function urUsersHTML() {
     .join(
       ""
     )}<option>${SUPER}</option></select></label><button class="chip on" data-a="ur_add">Create user</button></div></div>
- <div class="pn tw"><h4>Back office users (${ADM.length})</h4><table class="t ur-t"><tr><th>Name</th><th>Username</th><th>Role</th><th>Status</th><th>New password</th><th></th></tr>${ADM.map(
+ <div class="pn tw"><h4>Back office users (${ADM.length})</h4><table class="t ur-t"><tr><th>Name</th><th>Username</th><th>Role</th><th>Role no.</th><th>Status</th><th>New password</th><th></th></tr>${ADM.map(
    (a, i) => {
      const me = boUser && a.u === boUser.u;
-     return `<tr class="${a.off ? "off" : ""}"><td><span class="ws-a">${esc(a.n[0])}</span> <b>${esc(a.n)}</b>${me ? ' <small class="ur-me">You</small>' : ""}</td><td>${esc(a.u)}</td><td><select data-ura="${i}" ${me ? "disabled" : ""}>${[...boRoles(), SUPER].map(r => `<option ${(a.role || SUPER) === r ? "selected" : ""}>${r}</option>`).join("")}</select></td><td><button class="mini ur-st ${a.off ? "no" : "yes"}" data-a="ur_off" data-i="${i}" ${me ? "disabled" : ""}>${a.off ? "Disabled" : "Active"}</button></td><td><span class="ur-pw"><input type="password" id="np_${i}" autocomplete="new-password" placeholder="New password"><button class="mini" data-a="ur_pw" data-i="${i}">Change</button></span></td><td>${me ? "" : `<button class="mini" data-a="ur_del" data-i="${i}">Delete</button>`}</td></tr>`;
+     return `<tr class="${a.off ? "off" : ""}"><td><span class="ws-a">${esc(a.n[0])}</span> <b>${esc(a.n)}</b>${me ? ' <small class="ur-me">You</small>' : ""}</td><td>${esc(a.u)}</td><td><select data-ura="${i}" ${me ? "disabled" : ""}>${[...boRoles(), SUPER].map(r => `<option ${(a.role || SUPER) === r ? "selected" : ""}>${r}</option>`).join("")}</select></td><td class="ur-no">${kfRoleNo(a.role || SUPER)}</td><td><button class="mini ur-st ${a.off ? "no" : "yes"}" data-a="ur_off" data-i="${i}" ${me ? "disabled" : ""}>${a.off ? "Disabled" : "Active"}</button></td><td><span class="ur-pw"><input type="password" id="np_${i}" autocomplete="new-password" placeholder="New password"><button class="mini" data-a="ur_pw" data-i="${i}">Change</button></span></td><td>${me ? "" : `<button class="mini" data-a="ur_del" data-i="${i}">Delete</button>`}</td></tr>`;
    }
  ).join("")}</table></div>`;
 }
 function urRightsHTML() {
   const sup = urRole === SUPER,
     S = BO_RIGHTS.filter(urShown).length;
-  return `<div class="pn"><div class="ur-top"><label>User group<select data-urg>${[...boRoles(), SUPER].map(r => `<option ${r === urRole ? "selected" : ""}>${r}</option>`).join("")}</select></label><div class="ur-sum"><b id="urCount">${roleGranted(urRole)}</b> of ${BO_RIGHTS.length} rights granted · ${plural(roleCount(urRole), "user")}</div>${sup ? '<span class="ur-note">Super Admin always has every right.</span>' : `<span class="ur-acts"><button class="mini" data-a="ur_bulk" data-v="1">Grant all shown</button><button class="mini" data-a="ur_bulk" data-v="0">Revoke all shown</button><button class="mini" data-a="ur_reset">${roleCustom().includes(urRole) ? "Clear all rights" : "Reset to standard"}</button>${roleCustom().includes(urRole) ? '<button class="mini" data-a="ur_rdel">Delete this role</button>' : ""}</span>`}</div>
+  return `<div class="pn"><div class="ur-top"><label>User group<select data-urg>${[...boRoles(), SUPER].map(r => `<option ${r === urRole ? "selected" : ""}>${r}</option>`).join("")}</select></label><div class="ur-rno">Role no. <b>${kfRoleNo(urRole)}</b></div><div class="ur-sum"><b id="urCount">${roleGranted(urRole)}</b> of ${BO_RIGHTS.length} rights granted · ${plural(roleCount(urRole), "user")}</div>${sup ? '<span class="ur-note">Super Admin always has every right.</span>' : `<span class="ur-acts"><button class="mini" data-a="ur_bulk" data-v="1">Grant all shown</button><button class="mini" data-a="ur_bulk" data-v="0">Revoke all shown</button><button class="mini" data-a="ur_reset">${roleCustom().includes(urRole) ? "Clear all rights" : "Reset to standard"}</button>${roleCustom().includes(urRole) ? '<button class="mini" data-a="ur_rdel">Delete this role</button>' : ""}</span>`}</div>
  <div class="ur-newrole"><label>Add a new role<input id="urNew" maxlength="30" autocomplete="off" placeholder="e.g. Night Auditor"></label><button class="chip on" data-a="ur_radd">Add role</button><span class="stk">A new role starts with no rights. Grant them below.</span></div>
  <div class="ur-wrap"><table class="ur-m"><thead><tr>${urCols.map(([c, l]) => `<th class="${c === "yes" ? "c" : ""}">${l}</th>`).join("")}</tr><tr class="ur-f">${urCols.map(([c, l]) => `<td><input data-urf="${c}" value="${esc(urF[c] || "")}" placeholder="Filter" aria-label="Filter ${l}"></td>`).join("")}</tr></thead><tbody>${BO_RIGHTS.map(
    r => {
@@ -117,10 +117,11 @@ async function urAct(a, b) {
     if ([...boRoles(), SUPER].some(r => r.toLowerCase() === n.toLowerCase()))
       return toast(`${n} is already a role.`);
     roleCustom().push(n);
+    const no = kfRoleNo(n);
     urRole = n;
-    auditAdd("Users", `Role ${n} added`);
+    auditAdd("Users", `Role ${n} (${no}) added`);
     bosave();
-    toast(`${n} added. Now grant its rights.`);
+    toast(`${n} added as role ${no}. Now grant its rights.`);
     return all();
   }
   if (a === "ur_rdel") {
