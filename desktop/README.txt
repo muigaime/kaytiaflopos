@@ -3,7 +3,10 @@ KAYTIA FLOW
 FIRST TIME
   Double-click KaytiaFlow.exe. It installs itself to C:\KaytiaFlow and puts a
   "Kaytia POS" shortcut on your desktop. From then on, use the shortcut.
-  Keep the small window open while you work. Close it to stop Kaytia Flow.
+  Kaytia Flow runs quietly in the background, with no window, and starts by itself
+  when you sign in to Windows. Closing the browser doesn't stop it. To stop it, use
+  Task Manager (KaytiaFlowService), or turn off Start with Windows under
+  Settings > Network and restart the computer.
 
   Windows may say "Windows protected your PC", because the program isn't digitally
   signed yet. Press More info, then Run anyway.
