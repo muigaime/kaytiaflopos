@@ -9,7 +9,7 @@ async function syLoad() {
     const r = await fetch("/lan/sync-status");
     if (r.ok) s = await r.json();
   } catch (e) {}
-  syS.s = s || { role: "browser" };
+  syS.s = s || (LAN.browser ? { role: "till", main: LAN.main, device: true } : { role: "browser" });
   syS.at = Date.now();
   if (syOnPage() && !syTyping()) all();
 }
@@ -89,7 +89,7 @@ function syLanCard() {
     T = s.tills || [],
     live = t => t.seen && Date.now() - new Date(t.seen).getTime() < 90000;
   return `<div class="pn sy-card"><div class="inv-head"><h4>Local network</h4>${syTag(lan, lan === "on" ? "Connected" : lan === "off" ? "Main not reachable" : "No other computers")}</div>
-  ${syRow("This computer", main ? "Main computer" : `Till ${esc(String(LAN.idx || ""))}`)}${main ? syRow("Data kept in", esc((s.home || LAN.home) + "\\data")) : syRow("Main computer", esc(s.main || LAN.main || "-"))}${syRow("Data version", s.rev == null ? "-" : esc(String(s.rev)))}${syRow("Last synced", LAN.at ? syAgo(new Date(LAN.at).toISOString()) : "never")}${syRow("Changes waiting", LAN.pending ? "Yes, until the screen is free" : "None")}
+  ${syRow(s.device ? "This device" : "This computer", main ? "Main computer" : s.device ? esc(LAN.device || "Phone") : `Till ${esc(String(LAN.idx || ""))}`)}${main ? syRow("Data kept in", esc((s.home || LAN.home) + "\\data")) : syRow("Main computer", esc(s.main || LAN.main || "-"))}${syRow("Data version", s.rev == null ? "-" : esc(String(s.rev)))}${syRow("Last synced", LAN.at ? syAgo(new Date(LAN.at).toISOString()) : "never")}${syRow("Changes waiting", LAN.pending ? "Yes, until the screen is free" : "None")}
   ${main ? `<h5 class="sy-sub">Computers on this network (${T.length})</h5>${T.length ? `<div class="sy-list">${T.map(t => `<div class="${live(t) ? "on" : ""}"><span class="sy-dot" aria-hidden="true"></span><b>${esc(t.name)}</b><small>${esc(t.ip || "-")} · ${live(t) ? "online" : "last seen " + syAgo(t.seen)}</small></div>`).join("")}</div>` : '<div class="stk">No other computers yet.</div>'}` : ""}
   <div class="sy-acts">${main ? '<a class="chip on" href="/connect" target="_blank" rel="noopener">Connect computers</a>' : ""}<button class="mini" data-a="sy_lan">Sync now</button></div></div>`;
 }
@@ -98,7 +98,7 @@ function syCloudCard() {
     c = s.cloud,
     main = s.role === "main",
     [, cl] = syModes();
-  if (s.role === "browser")
+  if (s.role === "browser" || s.device)
     return `<div class="pn sy-card"><div class="inv-head"><h4>Cloud copy</h4>${syTag("none", "Not used")}</div><div class="stk">The cloud copy is kept by the main computer, in the installed program.</div></div>`;
   if (!main && !c)
     return `<div class="pn sy-card"><div class="inv-head"><h4>Cloud copy</h4>${syTag("off", "Unknown")}</div><div class="stk">The main computer can't be reached, so its cloud copy can't be checked from here.</div></div>`;

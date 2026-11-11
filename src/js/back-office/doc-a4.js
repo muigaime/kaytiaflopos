@@ -135,7 +135,7 @@ const DOC_SPECS = {
       r: p.lines.map(x => [
         ...docCode(x, code),
         itemInfo(x.k).name,
-        itemInfo(x.k).buyUnit,
+        x.unit ? (+x.per > 1 ? `${x.unit} of ${qn(+x.per)}` : x.unit) : itemInfo(x.k).buyUnit,
         qn(x.qty),
         m2(x.price),
         m2(x.qty * x.price)

@@ -716,6 +716,167 @@ function makeRequisition(dept, store, note, lines, by) {
   return r;
 }
 invF.nrq = { open: false, to: "", store: "", note: "", pick: "", lines: [] };
+// ---- Issue items and New requisition share one entry row: the item picker (only what the store holds) and
+// Pieces or Boxes / crates. Crates use the item's own crate size, so stock always moves in exact pieces.
+/** "2 Crates = 48 pcs" or "6 pcs", as a badge that tells the two apart at a glance. */
+function unitBadge(k, units, per, un) {
+  const u = itemInfo(k),
+    p = +per || 0;
+  if (p > 1) {
+    const n = units / p;
+    return `<span class="u-badge crate"><b>${qn(n)}</b> ${esc(n === 1 ? un : rcPlural(un))}</span><small class="u-eq">= ${qn(units)} ${esc(u.uom)}</small>`;
+  }
+  return `<span class="u-badge pcs"><b>${qn(units)}</b> ${esc(u.uom)}</span>`;
+}
+/** What the store holds: pieces first, and the same in crates underneath when the item comes in crates. */
+function stockCell(k, left, short) {
+  const u = itemInfo(k),
+    p = +u.perBuy || 0,
+    un = u.buyUnit || "Crate",
+    cr =
+      p > 1 && left > 0
+        ? `<small class="u-eq">${qn(Math.floor(left / p))} ${esc(Math.floor(left / p) === 1 ? un : rcPlural(un))}${left % p ? " + " + qn(left % p) + " " + esc(u.uom) : ""}</small>`
+        : "";
+  return `<span class="st-have${short ? " short" : left > 0 ? "" : " none"}"><b>${qn(left)}</b> ${esc(u.uom)}</span>${cr}`;
+}
+/** The lines of a new purchase order, in the same look as issue and requisition. */
+function poLinesHTML(F) {
+  const L = F.lines.map(x => ({
+    k: x.k,
+    q: x.qty * (+x.per || 1),
+    per: +x.per > 1 ? +x.per : 0,
+    un: x.unit
+  }));
+  return `<div class="tw"><table class="t se-t po-t"><tr><th>Item</th><th>Quantity</th><th class="n">Price</th><th class="n">Total (KES)</th><th></th></tr>${F.lines
+    .map((x, i) => {
+      const u = itemInfo(x.k),
+        box = +x.per > 1;
+      return `<tr class="${box ? "is-crate" : "is-pcs"}"><td><span class="se-it"><span class="rc-av">${esc((pkName(x.k) || "?")[0].toUpperCase())}</span><span><b>${esc(pkName(x.k))}</b><small>${u.code ? esc(u.code) + " · " : ""}${esc(u.group || "")}</small></span></span></td><td>${unitBadge(x.k, L[i].q, L[i].per, x.unit)}</td><td class="n">${m2(x.price)}<small class="u-eq">per ${esc(box ? String(x.unit || "crate").toLowerCase() : u.uom)}</small></td><td class="n"><b>${m2(x.qty * x.price)}</b></td><td class="n"><button class="mini" data-a="inv_poldel" data-i="${i}" aria-label="Remove ${esc(pkName(x.k))}">✕</button></td></tr>`;
+    })
+    .join(
+      ""
+    )}<tr class="se-tot"><td>${plural(F.lines.length, "line")}</td><td>${seTotals(L)}</td><td class="n">Order total</td><td class="n po-sum">KES ${m2(lpoTotal(F))}</td><td></td></tr></table></div>`;
+}
+/** The store the stock comes from, for this form. */
+const seFrom = f => (f === "is" ? invF.is.from || STKT.loc : invF.nrq.store);
+const seKeys = f => {
+  const s = seFrom(f);
+  return pickKeys().filter(k => !isStore(s) || storeHolds(s, k));
+};
+function seChoose(f, k) {
+  const F = invF[f];
+  Object.assign(F, { eK: k, eName: pkName(k), eBy: rcHasBox(k) ? F.eBy || "uom" : "uom" });
+  all();
+  const q = $("#" + f + "Qty");
+  if (q) q.focus();
+}
+function seConv(f) {
+  const F = invF[f];
+  if (!F.eK) return "";
+  const u = itemInfo(F.eK),
+    q = parseFloat(F.eQty),
+    have0 = have(seFrom(f), F.eK),
+    inStore = `${seFrom(f)} has ${qtyBoth(F.eK, have0)}`;
+  if (F.eBy === "buy" && q > 0)
+    return `${qn(q)} ${(q === 1 ? u.buyUnit : rcPlural(u.buyUnit)).toLowerCase()} × ${qn(+u.perBuy)} = ${qn(q * u.perBuy)} ${u.uom} · ${inStore}`;
+  return inStore;
+}
+function seHTML(f, verb) {
+  const F = invF[f],
+    id = f + "Name";
+  PICKERS[id] = PICKERS[id] || {
+    box: f + "Pick",
+    text: () => invF[f].eName || "",
+    keys: () => seKeys(f),
+    dest: () => seFrom(f),
+    choose: k => seChoose(f, k)
+  };
+  if (F.eK && !seKeys(f).includes(F.eK)) Object.assign(F, { eK: "", eName: "" });
+  const u = F.eK ? itemInfo(F.eK) : null,
+    box = !!(F.eK && rcHasBox(F.eK)),
+    byBox = box && F.eBy === "buy";
+  return `<div class="grn-entry se-entry">
+   <label class="grn-e-item">Item<span class="grn-inl rc-combo"><input id="${id}" data-iv="${f}.eName" value="${esc(F.eName || "")}" placeholder="Type a name, code or category" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="${f}Pick"><div class="rc-pick" id="${f}Pick" role="listbox" hidden></div></span></label>
+   <div class="grn-by"><span>${verb} by</span><div class="seg2"><button class="${byBox ? "" : "on"}" data-a="inv_seby" data-f="${f}" data-v="uom">Pieces${u && u.uom !== "pcs" ? ` (${esc(u.uom)})` : ""}</button><button class="${byBox ? "on" : ""}" data-a="inv_seby" data-f="${f}" data-v="buy" ${box ? "" : 'disabled title="This item has no crate size yet. It gets one when it is received or ordered by the crate."'}>${box ? `${esc(rcPlural(u.buyUnit))} of ${qn(+u.perBuy)}` : "Boxes / crates"}</button></div></div>
+   <label>${byBox ? `${esc(rcPlural(u.buyUnit))}` : u && u.uom !== "pcs" ? esc(u.uom) : "Pieces"} to ${verb.toLowerCase()}<input id="${f}Qty" data-iv="${f}.eQty" type="number" min="0" step="any" value="${esc(F.eQty || "")}"></label>
+   <button class="chip on grn-add" data-a="inv_seadd" data-f="${f}">${I("plus")}Add line</button>
+  </div><div class="grn-conv se-conv" id="${f}Conv">${esc(seConv(f))}</div>`;
+}
+/** The lines on an issue or requisition: the item, how much in pieces or crates, and what the store holds. */
+function seLinesHTML(f, delAct) {
+  const F = invF[f],
+    s = seFrom(f);
+  if (!F.lines.length) return '<div class="se-empty">No lines yet. Pick an item above.</div>';
+  return `<div class="tw"><table class="t se-t"><tr><th>Item</th><th>Quantity</th><th class="n">In ${esc(s)}</th><th></th></tr>${F.lines
+    .map((x, i) => {
+      const u = itemInfo(x.k),
+        left = have(s, x.k),
+        short = left + 1e-9 < x.q;
+      return `<tr class="${+x.per > 1 ? "is-crate" : "is-pcs"}"><td><span class="se-it"><span class="rc-av">${esc((pkName(x.k) || "?")[0].toUpperCase())}</span><span><b>${esc(pkName(x.k))}</b><small>${u.code ? esc(u.code) + " · " : ""}${esc(u.group || "")}</small></span></span></td><td>${unitBadge(x.k, x.q, x.per, x.un)}</td><td class="n">${stockCell(x.k, left, short)}</td><td class="n"><button class="mini" data-a="${delAct}" data-f="${f}" data-i="${i}" aria-label="Remove ${esc(pkName(x.k))}">✕</button></td></tr>`;
+    })
+    .join(
+      ""
+    )}<tr class="se-tot"><td>${plural(F.lines.length, "line")}</td><td colspan="3">${seTotals(F.lines)}</td></tr></table></div>`;
+}
+/** Crates and pieces added up separately, then all in pieces. */
+function seTotals(L) {
+  const crates = {},
+    pcs = {};
+  L.forEach(x => {
+    const u = itemInfo(x.k);
+    if (+x.per > 1) crates[x.un] = (crates[x.un] || 0) + x.q / x.per;
+    else pcs[u.uom] = (pcs[u.uom] || 0) + x.q;
+  });
+  const parts = [
+    ...Object.entries(crates).map(
+      ([un, n]) =>
+        `<span class="u-badge crate"><b>${qn(n)}</b> ${esc(n === 1 ? un : rcPlural(un))}</span>`
+    ),
+    ...Object.entries(pcs).map(
+      ([uom, n]) => `<span class="u-badge pcs"><b>${qn(n)}</b> ${esc(uom)}</span>`
+    )
+  ];
+  return parts.join(" ");
+}
+function seSync(f, field) {
+  const F = invF[f];
+  if (field === "eName") {
+    pkShow(f + "Name", true);
+    const n = itemNorm(F.eName),
+      k = n && seKeys(f).find(x => itemNorm(pkName(x)) === n || itemNorm(itemInfo(x).code) === n);
+    if (k && k !== F.eK) return seChoose(f, k);
+    if (!k) F.eK = "";
+  }
+  const c = $("#" + f + "Conv");
+  if (c) c.textContent = seConv(f);
+}
+function seAdd(f) {
+  const F = invF[f],
+    k = F.eK,
+    n = parseFloat(F.eQty);
+  if (!k) return toast("Choose an item (type its name, then pick it from the list).");
+  if (!(n > 0)) return toast("Enter a quantity above zero.");
+  const u = itemInfo(k),
+    byBox = F.eBy === "buy" && rcHasBox(k),
+    per = byBox ? +u.perBuy : 0,
+    q = byBox ? n * per : n,
+    src = seFrom(f),
+    ex = F.lines.find(x => x.k === k),
+    want = q + (ex ? ex.q : 0);
+  if (f === "is" && want > have(src, k) + 1e-9)
+    return toast(`Only ${qtyBoth(k, have(src, k))} of ${pkName(k)} in ${src}.`);
+  if (ex) {
+    ex.q = want;
+    if (+ex.per !== per) {
+      delete ex.per;
+      delete ex.un;
+    }
+  } else F.lines.push({ k, q, ...(per ? { per, un: u.buyUnit } : {}) });
+  Object.assign(F, { eK: "", eName: "", eQty: "" });
+  all();
+  const x = $("#" + f + "Name");
+  if (x) x.focus();
+}
 /** Raise a requisition from the Back Office, for any selling point or department. */
 function reqNewHTML(here) {
   const F = invF.nrq,
@@ -727,8 +888,8 @@ function reqNewHTML(here) {
   F.store = pick(F.store || (isStore(here) ? here : ""), STORES);
   return `<div class="pn"><div class="inv-head"><h4>New requisition</h4><button class="mini" data-a="inv_nrq">Close</button></div>
   <div class="fr"><label>For<select data-iv="nrq.to">${opts(ALLD, F.to)}</select></label><label>From store<select data-iv="nrq.store">${opts(STORES, F.store)}</select></label><label>Note<input data-iv="nrq.note" value="${esc(F.note)}" placeholder="Optional"></label></div>
-  ${prLineEditor("nrq", itemsByName(), "Item", "Quantity")}
-  ${F.lines.length ? `<div class="tw"><table class="t"><tr><th>Item</th><th class="n">Quantity</th><th class="n">In ${esc(F.store)}</th><th></th></tr>${F.lines.map((x, i) => `<tr><td>${esc(itemInfo(x.k).name)}</td><td class="n">${qtyBoth(x.k, x.q)}</td><td class="n">${qtyAt(F.store, x.k)}</td><td><button class="mini" data-a="rec_ldel" data-f="nrq" data-i="${i}">✕</button></td></tr>`).join("")}</table></div>` : ""}
+  ${seHTML("nrq", "Request")}
+  ${seLinesHTML("nrq", "rec_ldel")}
   <div class="fr"><button class="chip on" data-a="inv_nrqgo">Send requisition</button></div></div>`;
 }
 function reqNewSend() {
@@ -840,7 +1001,7 @@ function issHTML() {
   F.from = STKT.loc;
   // Until someone chooses, stock goes to the store's materials store first (Recipes & Production).
   F.to = ALLD.includes(F.to) ? F.to : issueDefault(F.from);
-  return `<div class="pn"><h4>Issue stock from ${placeLabel(F.from)} to a selling point</h4><div class="fr"><label>Issue to selling point<select data-iv="is.to">${opts(ALLD, F.to)}</select></label><label>Note<input data-iv="is.note" value="${esc(F.note)}" placeholder="Optional"></label></div>${lineEd("is")}<button class="chip on" data-a="inv_isspost">${boCan("inv.approve") ? "Issue stock" : "Raise issue note"}</button><div class="stk">${boCan("inv.approve") ? "No requisition needed. The stock moves as soon as you issue it." : "No requisition needed. The stock moves when a manager approves the issue note."}</div></div>
+  return `<div class="pn"><h4>Issue stock from ${placeLabel(F.from)} to a selling point</h4><div class="fr"><label>Issue to selling point<select data-iv="is.to">${opts(ALLD, F.to)}</select></label><label>Note<input data-iv="is.note" value="${esc(F.note)}" placeholder="Optional"></label></div>${seHTML("is", "Issue")}${seLinesHTML("is", "inv_ldel")}<button class="chip on" data-a="inv_isspost">${boCan("inv.approve") ? "Issue stock" : "Raise issue note"}</button><div class="stk">${boCan("inv.approve") ? "No requisition needed. The stock moves as soon as you issue it." : "No requisition needed. The stock moves when a manager approves the issue note."}</div></div>
  ${apIssueNotes(F.from)}
  <div class="pn tw"><h4>Recent issues</h4>${tb(
    ["Date", "Reference", "From", "To", "Item", "#Quantity", "By"],
@@ -990,7 +1151,7 @@ function storesHTML() {
     supplies = l => ALLD.filter(o => (OUTLET_INFO[o] || {}).store === l);
   return `<div class="pn tw"><div class="inv-head"><h4>Stores (${STORES.length})</h4><button class="chip on" data-a="inv_stnew">New store</button></div><table class="t"><tr><th>Store</th><th>Holds</th><th class="n">Items in stock</th><th class="n">Stock value (KES)</th><th>Supplies</th><th class="n">Open requisitions</th><th class="n">Open LPOs</th><th></th></tr>${STORES.map(
     l =>
-      `<tr><td><b>${esc(l)}</b></td><td>${storeKindCell(l)}</td><td class="n">${Object.keys(ING).filter(k => have(l, k) > 0).length}</td><td class="n">${m2(storeValue(l))}</td><td>${esc(supplies(l).join(", ") || "-")}</td><td class="n">${reqOpen(l)}</td><td class="n">${lpoOpenN(l)}</td><td class="n"><span class="sp-acts"><button class="mini" data-a="inv_loc" data-l="${esc(l)}">Stock master</button><button class="mini" data-a="pur_go" data-l="${esc(l)}" data-t="receive">Receive</button><button class="mini" data-a="pur_go" data-l="${esc(l)}" data-t="lpo">LPO</button><button class="mini" data-a="inv_stedit" data-l="${esc(l)}">Edit</button><button class="mini cat-del" data-a="inv_stdel" data-l="${esc(l)}">Delete</button></span></td></tr>`
+      `<tr><td><b>${esc(l)}</b>${l === defaultStore() ? ' <span class="tag ok" title="Receive goods opens on this store">Default</span>' : ""}</td><td>${storeKindCell(l)}</td><td class="n">${Object.keys(ING).filter(k => have(l, k) > 0).length}</td><td class="n">${m2(storeValue(l))}</td><td>${esc(supplies(l).join(", ") || "-")}</td><td class="n">${reqOpen(l)}</td><td class="n">${lpoOpenN(l)}</td><td class="n"><span class="sp-acts"><button class="mini" data-a="inv_loc" data-l="${esc(l)}">Stock master</button><button class="mini" data-a="pur_go" data-l="${esc(l)}" data-t="receive">Receive</button><button class="mini" data-a="pur_go" data-l="${esc(l)}" data-t="lpo">LPO</button><button class="mini" data-a="inv_stedit" data-l="${esc(l)}">Edit</button><button class="mini cat-del" data-a="inv_stdel" data-l="${esc(l)}">Delete</button></span></td></tr>`
   ).join("")}</table></div>`;
 }
 /** A new store or selling point name must be unique across all places. */
@@ -1004,12 +1165,101 @@ function placeNameError(name) {
 }
 
 // ---- local purchase orders ----
+/** Pieces in one unit of an order line: its own (Crate of 24, or 1 for pieces), or for older orders the item's. */
+const lpoPer = x => +x.per || +itemInfo(x.k).perBuy || 1,
+  lpoUnit = x => x.unit || itemInfo(x.k).buyUnit;
+/** Before an item's box size changes, its open orders keep the size they were made with. */
+function lpoKeepUnits(k) {
+  const u = itemInfo(k);
+  LPOS.forEach(p =>
+    p.lines.forEach(x => {
+      if (x.k === k && !x.per) {
+        x.per = +u.perBuy || 1;
+        x.unit = u.buyUnit;
+      }
+    })
+  );
+}
 const lpoTotal = p => p.lines.reduce((a, x) => a + x.qty * x.price, 0),
   lpoOpen = p => p.status === "Open" || p.status === "Partly received";
-function lpoHTML() {
+/** The store an order is for: the one chosen above, or the default store. */
+const poStore = () => (isStore(invF.rc.dept) ? invF.rc.dept : defaultStore());
+const poKeys = () => {
+  const s = poStore();
+  return pickKeys().filter(k => storeHolds(s, k));
+};
+/** Choose the item to order: its own box if it has one, at its last price. */
+function poPickItem(k) {
   const F = invF.po,
-    keys = pickKeys().sort((a, b) => itemInfo(a).name.localeCompare(itemInfo(b).name));
-  F.store = STKT.loc;
+    u = itemInfo(k),
+    own = +u.perBuy !== 1 || u.buyUnit !== u.uom;
+  Object.assign(F, {
+    eK: k,
+    eName: u.name,
+    eUnits: own ? "buy" : "uom",
+    eBox: own ? u.buyUnit : F.eBox || "Crate",
+    ePer: own ? String(+u.perBuy) : "",
+    ePrice: +u.buyPrice
+      ? String(Math.round((own ? +u.buyPrice : +u.buyPrice / (+u.perBuy || 1)) * 100) / 100)
+      : ""
+  });
+  all();
+  const q = $("#po_q");
+  if (q) q.focus();
+}
+function poConvText() {
+  const F = invF.po;
+  if (!F.eK || F.eUnits !== "buy") return "";
+  const u = itemInfo(F.eK),
+    per = parseFloat(F.ePer),
+    q = parseFloat(F.eQty),
+    box = (F.eBox || "box").toLowerCase();
+  if (!(per > 0)) return `Type how many ${u.uom} are in one ${box}.`;
+  return q > 0
+    ? `${qn(q)} ${q === 1 ? box : rcPlural(box)} × ${qn(per)} = ${qn(q * per)} ${u.uom}`
+    : `One ${box} holds ${qn(per)} ${u.uom}`;
+}
+function poEntryHTML() {
+  const F = invF.po,
+    byBox = F.eUnits === "buy",
+    uom = F.eK ? itemInfo(F.eK).uom : "pcs",
+    boxWord = (F.eBox || "box").toLowerCase();
+  return `<div class="grn-entry po-entry">
+   <label class="grn-e-item">Item<span class="grn-inl rc-combo"><input id="poName" data-iv="po.eName" value="${esc(F.eName || "")}" placeholder="Type a name, code or category" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="poPick"><div class="rc-pick" id="poPick" role="listbox" hidden></div></span></label>
+   <div class="grn-by"><span>Order by</span><div class="seg2"><button class="${byBox ? "" : "on"}" data-a="inv_poby" data-v="uom">Pieces${F.eK && uom !== "pcs" ? ` (${esc(uom)})` : ""}</button><button class="${byBox ? "on" : ""}" data-a="inv_poby" data-v="buy">Boxes / crates</button></div></div>
+   ${byBox ? `<label>Box or crate<select data-iv="po.eBox">${[...new Set([F.eBox, ...RC_BOXES].filter(Boolean))].map(b => `<option ${b === F.eBox ? "selected" : ""}>${esc(b)}</option>`).join("")}</select></label><label>${esc(uom)} in one ${esc(boxWord)}<input id="poPer" data-iv="po.ePer" type="number" min="1" step="any" value="${esc(F.ePer || "")}" placeholder="e.g. 24"></label>` : ""}
+   <label>${byBox ? `${esc(rcPlural(F.eBox || "Box"))} to order` : `${esc(uom === "pcs" ? "Pieces" : uom)} to order`}<input id="po_q" data-iv="po.eQty" type="number" min="0" step="any" value="${esc(F.eQty || "")}"></label>
+   <label>Price per ${byBox ? esc(boxWord) : esc(uom === "pcs" ? "piece" : uom)} (KES)<input id="po_p" data-iv="po.ePrice" type="number" min="0" step="any" value="${esc(F.ePrice || "")}" placeholder="Last price"></label>
+   <button class="chip on grn-add" data-a="inv_poladd">${I("plus")}Add line</button>
+  </div><div class="grn-conv" id="poConv">${esc(poConvText())}</div>`;
+}
+/** Typing in the order's entry row: the list, the boxes-to-pieces line, and the price for a new box size. */
+function poSync(f) {
+  const F = invF.po;
+  if (f === "eName") {
+    pkShow("poName", true);
+    const n = itemNorm(F.eName),
+      k = n && poKeys().find(x => itemNorm(pkName(x)) === n || itemNorm(itemInfo(x).code) === n);
+    if (k && k !== F.eK) return poPickItem(k);
+    if (!k) F.eK = "";
+  }
+  if (f === "eBox") return all();
+  if (f === "ePer" && F.eK && F.eUnits === "buy") {
+    const u = itemInfo(F.eK),
+      pp = +u.buyPrice ? +u.buyPrice / (+u.perBuy || 1) : 0,
+      per = parseFloat(F.ePer);
+    if (pp && per > 0) {
+      F.ePrice = String(Math.round(pp * per * 100) / 100);
+      const p = $("#po_p");
+      if (p) p.value = F.ePrice;
+    }
+  }
+  const c = $("#poConv");
+  if (c) c.textContent = poConvText();
+}
+function lpoHTML() {
+  const F = invF.po;
+  F.store = STKT.loc = poStore();
   const tag = s => (s === "Received" ? "ok" : s === "Cancelled" || s === "Closed" ? "bad" : "warn"),
     mine = LPOS.map((p, i) => [p, i]).filter(([p]) => p.store === F.store);
   const showForm = invPoNew || F.lines.length > 0 || !mine.length;
@@ -1017,12 +1267,8 @@ function lpoHTML() {
     showForm
       ? `<div class="pn"><h4>New local purchase order (LPO) for ${placeLabel(F.store)}</h4>
   <div class="fr"><label>Vendor<span class="fr" style="flex-wrap:nowrap"><select data-iv="po.sup"><option value="">Choose a vendor…</option>${[...new Set([...vendorNames(), ...(F.sup ? [F.sup] : [])])].map(s => `<option ${s === F.sup ? "selected" : ""}>${esc(s)}</option>`).join("")}</select><button class="mini" data-a="inv_vnopen" title="Add a vendor">+</button></span></label><label>Expected delivery<input type="date" data-iv="po.due" value="${esc(F.due)}"></label><label>Note<input data-iv="po.note" value="${esc(F.note)}" placeholder="Optional"></label></div>
-  <div class="fr" style="align-items:end"><label>Item<select id="po_k">${keys.map(k => `<option value="${k}">${esc(itemInfo(k).name)} · ${esc(buyLabel(itemInfo(k)))}</option>`).join("")}</select></label><label>Quantity (buying units)<input id="po_q" type="number" min="0" step="any"></label><label>Price per buying unit (KES)<input id="po_p" type="number" min="0" step="any" placeholder="Last price"></label><button class="mini" data-a="inv_poladd">Add line</button></div>
-  ${
-    F.lines.length
-      ? `<div class="tw"><table class="t"><tr><th>Item</th><th class="n">Quantity</th><th class="n">Price</th><th class="n">Total (KES)</th><th></th></tr>${F.lines.map((x, i) => `<tr><td>${esc(itemInfo(x.k).name)}</td><td class="n">${qn(x.qty)} ${esc(itemInfo(x.k).buyUnit)}</td><td class="n">${m2(x.price)}</td><td class="n">${m2(x.qty * x.price)}</td><td><button class="mini" data-a="inv_poldel" data-i="${i}">✕</button></td></tr>`).join("")}<tr><td colspan="3"><b>Order total</b></td><td class="n"><b>${m2(lpoTotal(F))}</b></td><td></td></tr></table></div>`
-      : ""
-  }
+  ${poEntryHTML()}
+  ${F.lines.length ? poLinesHTML(F) : ""}
   <div class="fr"><button class="chip on" data-a="inv_pomake">Create LPO</button><button class="mini" data-a="inv_ponew">Cancel</button></div></div>`
       : ""
   }
@@ -1035,7 +1281,7 @@ function lpoHTML() {
              `<details ${lpoOpen(p) ? "open" : ""}><summary>${dt2(p.at)} · ${p.id} · ${esc(p.sup)} → ${esc(p.store)} · KES ${m2(lpoTotal(p))}${p.due ? " · due " + esc(p.due) : ""} <span class="tag ${tag(p.status)}" style="float:right">${p.status}</span></summary><div style="padding:8px 0"><div class="tw"><table class="t"><tr><th>Item</th><th class="n">Ordered</th><th class="n">Received</th><th class="n">Remaining</th><th class="n">Price</th><th class="n">Total (KES)</th>${lpoOpen(p) ? "<th>Receive now</th>" : ""}</tr>${p.lines
                .map((x, j) => {
                  const left = Math.max(0, x.qty - x.recv);
-                 return `<tr><td>${esc(itemInfo(x.k).name)}</td><td class="n">${qn(x.qty)} ${esc(itemInfo(x.k).buyUnit)}</td><td class="n">${qn(x.recv)}</td><td class="n">${qn(left)}</td><td class="n">${m2(x.price)}</td><td class="n">${m2(x.qty * x.price)}</td>${lpoOpen(p) ? `<td><input type="number" min="0" step="any" id="pr_${i}_${j}" value="${left}" style="max-width:110px"></td>` : ""}</tr>`;
+                 return `<tr><td>${esc(itemInfo(x.k).name)}</td><td class="n">${qn(x.qty)} ${esc(lpoUnit(x))}</td><td class="n">${qn(x.recv)}</td><td class="n">${qn(left)}</td><td class="n">${m2(x.price)}</td><td class="n">${m2(x.qty * x.price)}</td>${lpoOpen(p) ? `<td><input type="number" min="0" step="any" id="pr_${i}_${j}" value="${left}" style="max-width:110px"></td>` : ""}</tr>`;
                })
                .join(
                  ""
@@ -1452,7 +1698,7 @@ function invExport() {
   } catch (e) {}
   ta.remove();
   try {
-    navigator.clipboard.writeText(T).catch(() => {});
+    if (navigator.clipboard) navigator.clipboard.writeText(T).catch(() => {});
     ok = true;
   } catch (e) {}
   toast(ok ? "Stock master copied. Paste it into Excel." : "Could not copy. Try again.");
@@ -1602,7 +1848,7 @@ function invAct(a, b) {
     stE =
       a === "stnew"
         ? { was: "", name: "", kinds: [] }
-        : { was: d.l, name: d.l, kinds: storeKinds(d.l) };
+        : { was: d.l, name: d.l, kinds: storeKinds(d.l), def: !!(storeInfos()[d.l] || {}).def };
     all();
     return $("#stName").focus();
   }
@@ -1644,19 +1890,48 @@ function invAct(a, b) {
     return all();
   }
   // ---- local purchase orders
+  if (a === "poby") {
+    const F = invF.po,
+      was = F.eUnits;
+    F.eUnits = d.v === "buy" ? "buy" : "uom";
+    if (F.eUnits === "buy" && !F.eBox) F.eBox = "Crate";
+    const per = parseFloat(F.ePer),
+      p = parseFloat(F.ePrice);
+    if (was !== F.eUnits && p > 0 && per > 0)
+      F.ePrice = String(Math.round((F.eUnits === "buy" ? p * per : p / per) * 100) / 100);
+    all();
+    const n = $(F.eUnits === "buy" && !(per > 0) ? "#poPer" : "#po_q");
+    return n && n.focus();
+  }
   if (a === "poladd") {
-    const k = $("#po_k").value,
-      q = parseFloat($("#po_q").value),
-      pv = $("#po_p").value.trim(),
-      p = pv === "" ? +itemInfo(k).buyPrice : parseFloat(pv);
-    if (!k) return toast("Create items in Item setup first.");
+    const F = invF.po,
+      k = F.eK,
+      q = parseFloat(F.eQty),
+      pv = String(F.ePrice || "").trim(),
+      u = k ? itemInfo(k) : null,
+      byBox = F.eUnits === "buy",
+      per = byBox ? parseFloat(F.ePer) : 1,
+      unit = byBox ? (F.eBox || "Crate").trim() : u ? u.uom : "",
+      p =
+        pv === "" && u
+          ? byBox
+            ? (+u.buyPrice / (+u.perBuy || 1)) * per
+            : +u.buyPrice / (+u.perBuy || 1)
+          : parseFloat(pv);
+    if (!poKeys().length) return toast("Create items in Item setup first.");
+    if (!k) return toast("Choose an item (type its name, then pick it from the list).");
+    if (byBox && !(per > 0))
+      return toast(`Enter how many ${u.uom} are in one ${unit.toLowerCase()}.`);
     if (!(q > 0)) return toast("Enter the quantity to order.");
     if (!(p >= 0)) return toast("The price must be 0 or more.");
-    const L = invF.po.lines,
-      ex = L.find(x => x.k === k && x.price === p);
+    const L = F.lines,
+      ex = L.find(x => x.k === k && x.price === p && x.unit === unit && +x.per === per);
     if (ex) ex.qty += q;
-    else L.push({ k, qty: q, price: p });
-    return all();
+    else L.push({ k, qty: q, price: p, per, unit });
+    Object.assign(F, { eK: "", eName: "", eQty: "", ePrice: "", ePer: "", eUnits: F.eUnits });
+    all();
+    const n = $("#poName");
+    return n && n.focus();
   }
   if (a === "poldel") {
     invF.po.lines.splice(+d.i, 1);
@@ -1673,6 +1948,14 @@ function invAct(a, b) {
     if (!isStore(F.store)) return toast("Choose a store above. Only stores order from vendors.");
     if (!F.sup.trim()) return toast("Choose the vendor.");
     if (!F.lines.length) return toast("Add at least one line.");
+    // An item ordered in a box it didn't have before keeps that box size for next time.
+    F.lines.forEach(x => {
+      const u = itemInfo(x.k);
+      if (+x.per > 1 && +u.perBuy === 1 && u.buyUnit === u.uom) {
+        lpoKeepUnits(x.k);
+        INGU[x.k] = { ...u, perBuy: +x.per, buyUnit: x.unit, buyPrice: x.price };
+      }
+    });
     const p = {
       id: nid("LPO"),
       at: new Date().toISOString(),
@@ -1706,7 +1989,13 @@ function invAct(a, b) {
     if (!got.length) return toast("Enter the quantities delivered.");
     const r = receiveLines(
       p.store,
-      got.map(({ x, q }) => ({ k: x.k, qtyBuy: q, price: x.price })),
+      got.map(({ x, q }) => ({
+        k: x.k,
+        q: q * lpoPer(x),
+        qtyBuy: q,
+        cost: x.price / lpoPer(x),
+        buyPrice: (x.price / lpoPer(x)) * (+itemInfo(x.k).perBuy || 1)
+      })),
       p.sup,
       ref.trim(),
       p.id
@@ -1979,6 +2268,13 @@ function invAct(a, b) {
     STKT.full = false;
     return all();
   }
+  if (a === "seadd") return seAdd(d.f);
+  if (a === "seby") {
+    invF[d.f].eBy = d.v === "buy" ? "buy" : "uom";
+    all();
+    const q = $("#" + d.f + "Qty");
+    return q && q.focus();
+  }
   if (a === "ladd") {
     const k = $("#l_k_" + f).value,
       typed = parseFloat($("#l_q_" + f).value),
@@ -2115,6 +2411,8 @@ $("#vSub").oninput = e => {
     if (p === "spp") spPreview();
     if (p === "spr" && f === "store") all(); // show the new store's quantities
     if (p === "rc") rcSync(f); // direct receive (receive.js)
+    if (p === "po") poSync(f); // purchase order entry row
+    if ((p === "is" || p === "nrq") && (f === "eName" || f === "eQty")) seSync(p, f); // issue / requisition row
     if (p === "vs") vsSync(f); // vendor statement (vendors.js)
     if (p === "pr" || p === "rcp" || p === "recb" || p === "recr") prSync(p, f);
     if (p === "spe") speSync(f); // editing a selling point product (selling-points.js) // Recipes & Production (production.js)

@@ -18344,6 +18344,2092 @@ tr[data-grp].on td {
 #bo .svc-row small {
   color: var(--mute);
 }
+
+/* ---- Kitchen display ---- */
+#kds {
+  display: none;
+}
+#kds.show {
+  --k-bg: #f2eee6;
+  --k-card: #fffdf8;
+  --k-ink: #221a12;
+  --k-mute: #7a6e60;
+  --k-line: #e5dccb;
+  --k-chip: #f3ede1;
+  --k-new: #3c5a99;
+  --k-prep: #c07a12;
+  --k-ready: #1f7a55;
+  --k-late: #b33427;
+  --k-done: #7a6e60;
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--k-bg);
+  color: var(--k-ink);
+  font:
+    14px/1.4 "Segoe UI",
+    system-ui,
+    sans-serif;
+}
+#kds.show.dark {
+  --k-bg: #0f0c09;
+  --k-card: #1a1611;
+  --k-ink: #f2ebdf;
+  --k-mute: #a49884;
+  --k-line: #2f271d;
+  --k-chip: #241e17;
+  --k-new: #6f8fd6;
+  --k-prep: #e0a23c;
+  --k-ready: #4cc08b;
+  --k-late: #ee6b5c;
+  --k-done: #a49884;
+}
+#kds .kds-top {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 18px;
+  align-items: center;
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--k-line);
+  background: var(--k-card);
+}
+#kds .kds-brand {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+#kds .kds-brand b {
+  display: block;
+  font:
+    600 19px/1.1 Georgia,
+    "Times New Roman",
+    serif;
+}
+#kds .kds-brand small {
+  color: var(--k-mute);
+}
+#kds .kds-mark {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(160deg, #e3c98e, #9c7a36);
+  color: #1c1408;
+  font:
+    700 19px Georgia,
+    serif;
+}
+#kds .kds-tabs {
+  display: flex;
+  gap: 6px;
+  justify-self: center;
+  padding: 5px;
+  border: 1px solid var(--k-line);
+  border-radius: 14px;
+  background: var(--k-chip);
+}
+#kds .kds-tabs button {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 9px 16px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--k-ink);
+  font: 600 14px inherit;
+  font-family: inherit;
+  cursor: pointer;
+}
+#kds .kds-tabs button i {
+  min-width: 24px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--k-card);
+  font-style: normal;
+  font-size: 12px;
+  text-align: center;
+}
+#kds .kds-tabs button.on {
+  background: var(--k-ink);
+  color: var(--k-bg);
+}
+#kds .kds-tabs button.on i {
+  background: var(--k-bg);
+  color: var(--k-ink);
+}
+#kds .kds-tabs button.new i {
+  box-shadow: inset 0 0 0 2px var(--k-new);
+}
+#kds .kds-tabs button.prep i {
+  box-shadow: inset 0 0 0 2px var(--k-prep);
+}
+#kds .kds-tabs button.ready i {
+  box-shadow: inset 0 0 0 2px var(--k-ready);
+}
+#kds .kds-tools {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+#kds .kds-stat {
+  display: grid;
+  margin-right: 6px;
+  text-align: right;
+}
+#kds .kds-stat b.bad {
+  color: var(--k-late);
+}
+#kds .kds-stat b.ok {
+  color: var(--k-ready);
+}
+#kds .kds-stat small {
+  color: var(--k-mute);
+  font-size: 12px;
+}
+#kds #kdsNow {
+  margin: 0 6px;
+  font:
+    600 20px/1 Georgia,
+    serif;
+  font-variant-numeric: tabular-nums;
+}
+#kds .kds-ic,
+#kds .kds-exit {
+  height: 38px;
+  min-width: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--k-line);
+  border-radius: 10px;
+  background: var(--k-chip);
+  color: var(--k-ink);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+#kds .kds-exit {
+  padding: 0 16px;
+  background: var(--k-ink);
+  color: var(--k-bg);
+}
+#kds .kds-filters {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 22px;
+}
+#kds .kds-seg {
+  display: flex;
+  gap: 6px;
+}
+#kds .kds-seg button {
+  padding: 7px 14px;
+  border: 1px solid var(--k-line);
+  border-radius: 999px;
+  background: var(--k-card);
+  color: var(--k-ink);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+#kds .kds-seg button.on {
+  border-color: var(--k-ink);
+  background: var(--k-ink);
+  color: var(--k-bg);
+}
+#kds .kds-filters label {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--k-mute);
+  font-weight: 600;
+}
+#kds .kds-filters select {
+  padding: 7px 10px;
+  border: 1px solid var(--k-line);
+  border-radius: 10px;
+  background: var(--k-card);
+  color: var(--k-ink);
+  font: inherit;
+}
+#kds .kds-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 16px;
+  align-content: start;
+  overflow: auto;
+  padding: 4px 22px 24px;
+}
+#kds .kds-t {
+  --tone: var(--k-new);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--k-line);
+  border-radius: 16px;
+  background: var(--k-card);
+  box-shadow:
+    0 1px 2px rgba(30, 20, 8, 0.05),
+    0 16px 34px -26px rgba(30, 20, 8, 0.45);
+}
+#kds .kds-t.prep {
+  --tone: var(--k-prep);
+}
+#kds .kds-t.ready {
+  --tone: var(--k-ready);
+}
+#kds .kds-t.late {
+  --tone: var(--k-late);
+  animation: kdsPulse 2s ease-in-out infinite;
+}
+#kds .kds-t.done {
+  --tone: var(--k-done);
+  opacity: 0.8;
+}
+@keyframes kdsPulse {
+  50% {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--k-late) 35%, transparent);
+  }
+}
+#kds .kds-t header {
+  padding: 12px 14px 10px;
+  background: var(--tone);
+  color: #fff;
+}
+#kds .kds-h1 {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+#kds .kds-h1 b {
+  font:
+    600 18px/1.1 Georgia,
+    serif;
+}
+#kds .kds-st {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+#kds .kds-h1 time {
+  margin-left: auto;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+#kds .kds-h2 {
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  margin-top: 4px;
+  font-size: 12.5px;
+  opacity: 0.92;
+}
+#kds .kds-tbl {
+  font-weight: 700;
+}
+#kds .kds-round {
+  padding: 6px 14px;
+  background: color-mix(in srgb, var(--tone) 12%, var(--k-card));
+  color: var(--tone);
+  font-size: 12px;
+  font-weight: 700;
+}
+#kds .kds-t ul {
+  flex: 1;
+  margin: 0;
+  padding: 6px 0;
+  list-style: none;
+}
+#kds .kds-t li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 8px 14px;
+  border-bottom: 1px dashed var(--k-line);
+  cursor: pointer;
+}
+#kds .kds-t li:last-child {
+  border-bottom: 0;
+}
+#kds .kds-q {
+  display: grid;
+  flex: none;
+  place-items: center;
+  min-width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--tone) 14%, var(--k-card));
+  color: var(--tone);
+  font-size: 16px;
+  font-weight: 800;
+}
+#kds .kds-n {
+  display: grid;
+  padding-top: 4px;
+  font-size: 15px;
+  font-weight: 600;
+}
+#kds .kds-n small {
+  color: var(--k-mute);
+  font-size: 12px;
+  font-weight: 500;
+  font-style: italic;
+}
+#kds .kds-t li.x .kds-n {
+  color: var(--k-mute);
+  text-decoration: line-through;
+}
+#kds .kds-t li.x .kds-q {
+  opacity: 0.45;
+}
+#kds .kds-note {
+  margin: 0 14px 10px;
+  padding: 8px 10px;
+  border-left: 3px solid var(--tone);
+  border-radius: 6px;
+  background: var(--k-chip);
+  font-size: 13px;
+  font-weight: 600;
+}
+#kds .kds-t footer {
+  padding: 10px 14px 14px;
+  border-top: 1px solid var(--k-line);
+}
+#kds .kds-time {
+  margin-bottom: 10px;
+  color: var(--k-mute);
+  font-size: 12.5px;
+  text-align: center;
+}
+#kds .kds-time b {
+  color: var(--tone);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+#kds .kds-btns {
+  display: flex;
+  gap: 8px;
+}
+#kds .kds-go {
+  flex: 1;
+  height: 44px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--k-ink);
+  color: var(--k-bg);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+#kds .kds-go.start {
+  background: var(--k-new);
+  color: #fff;
+}
+#kds .kds-go.served {
+  background: var(--k-ready);
+  color: #fff;
+}
+#kds .kds-back {
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--k-line);
+  border-radius: 12px;
+  background: var(--k-chip);
+  color: var(--k-ink);
+  font: inherit;
+  font-size: 16px;
+  cursor: pointer;
+}
+#kds .kds-back.wide {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+}
+#kds .kds-empty {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 6px;
+  place-items: center;
+  padding: 80px 20px;
+  color: var(--k-mute);
+  text-align: center;
+}
+#kds .kds-empty b {
+  color: var(--k-ink);
+  font:
+    500 22px Georgia,
+    serif;
+}
+@media (max-width: 1000px) {
+  #kds .kds-top {
+    grid-template-columns: 1fr auto;
+  }
+  #kds .kds-tabs {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+    overflow-x: auto;
+  }
+  #kds .kds-stat {
+    display: none;
+  }
+}
+/* the order status on the POS */
+.kds-chip {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  margin-left: 6px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.kds-chip:empty {
+  display: none;
+}
+.kds-chip i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.kds-chip.new {
+  background: #e3e9f6;
+  color: #3c5a99;
+}
+.kds-chip.prep {
+  background: #fbefd9;
+  color: #a5650a;
+}
+.kds-chip.prep i {
+  animation: kdsBlink 1.2s ease-in-out infinite;
+}
+.kds-chip.ready {
+  background: #dcf1e7;
+  color: #1f7a55;
+}
+.kds-chip.done {
+  background: #ece8e1;
+  color: #7a6e60;
+}
+@keyframes kdsBlink {
+  50% {
+    opacity: 0.3;
+  }
+}
+.sr-no .kds-chip {
+  display: flex;
+  width: max-content;
+  margin: 3px 0 0;
+}
+.sr-no .kds-chip:empty {
+  display: none;
+}
+#start .oi.kd {
+  background: linear-gradient(160deg, #f0c27b, #c0762a);
+}
+#kds .kds-t header {
+  display: block;
+}
+#kds .kds-t header .kds-h1,
+#kds .kds-t header .kds-h2 {
+  width: 100%;
+}
+
+/* Kitchen display: a screen set up in Back Office says where it is */
+#kds .kds-loc {
+  justify-content: flex-start;
+  gap: 12px;
+  margin: 12px 22px 0;
+  padding: 10px 14px;
+  border: 1px solid var(--k-line);
+  border-radius: 12px;
+  background: var(--k-card);
+}
+#kds .kds-loc b {
+  font-weight: 700;
+}
+#kds .kds-loc small {
+  display: block;
+  color: var(--k-mute);
+  font-size: 12px;
+}
+#kds .kds-pin {
+  color: var(--k-ready);
+  font-size: 14px;
+}
+/* Settings → Kitchen display */
+#bo .kdss {
+  display: grid;
+  gap: 10px;
+}
+#bo .kdss-row {
+  display: grid;
+  grid-template-columns: 200px 200px 1fr;
+  gap: 16px;
+  align-items: start;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+#bo .kdss-pc {
+  display: grid;
+  gap: 4px;
+  align-content: start;
+}
+#bo .kdss-row > label {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+}
+#bo .kdss-pts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  align-items: center;
+}
+#bo .kdss-pts > span {
+  flex-basis: 100%;
+  font-size: 12px;
+  font-weight: 600;
+}
+#bo .kdss-pts label {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin: 0;
+}
+#bo .kdss-pts small {
+  color: var(--mute);
+}
+@media (max-width: 900px) {
+  #bo .kdss-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---- The start page: the first thing everyone sees ---- */
+#start.st2 {
+  --st-bg: #120d08;
+  --st-ink: #f5ecdc;
+  --st-mute: #b5a68f;
+  --st-line: rgba(227, 201, 142, 0.18);
+  --st-card: rgba(255, 248, 235, 0.05);
+  --st-gold: #e3c98e;
+  --st-gold2: #b58a3c;
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 1fr auto;
+  overflow: auto;
+  background:
+    radial-gradient(1200px 600px at 85% -10%, rgba(199, 162, 90, 0.22), transparent 60%),
+    radial-gradient(900px 500px at -10% 110%, rgba(120, 72, 30, 0.35), transparent 60%),
+    linear-gradient(160deg, #1c140c 0%, #120d08 55%, #0b0805 100%);
+  color: var(--st-ink);
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+#start.st2 .st-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(227, 201, 142, 0.08) 1px, transparent 1px);
+  background-size: 26px 26px;
+  mask-image: linear-gradient(180deg, #000, transparent 75%);
+}
+#start.st2 .st-top {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 20px;
+  align-items: center;
+  padding: 22px 40px;
+  border-bottom: 1px solid var(--st-line);
+}
+#start.st2 .kf-brand {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+#start.st2 .kf-m {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--st-gold2);
+  border-radius: 50%;
+  color: var(--st-gold);
+  font:
+    600 20px Georgia,
+    serif;
+}
+#start.st2 .kf-t b {
+  color: var(--st-ink);
+  font:
+    500 22px Georgia,
+    "Times New Roman",
+    serif;
+}
+#start.st2 .kf-t em {
+  color: var(--st-gold);
+}
+#start.st2 .st-hotel {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 18px 8px 8px;
+  border: 1px solid var(--st-line);
+  border-radius: 999px;
+  background: var(--st-card);
+}
+#start.st2 .st-logo {
+  display: grid;
+  overflow: hidden;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(160deg, var(--st-gold), var(--st-gold2));
+  color: #1c1408;
+  font:
+    700 15px Georgia,
+    serif;
+}
+#start.st2 .st-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #fff;
+}
+#start.st2 .st-hotel b {
+  display: block;
+  font:
+    600 16px/1.2 Georgia,
+    serif;
+}
+#start.st2 .st-hotel small,
+#start.st2 .st-clock small {
+  color: var(--st-mute);
+  font-size: 12px;
+}
+#start.st2 .st-clock {
+  display: grid;
+  justify-items: end;
+}
+#start.st2 .st-clock b {
+  font:
+    500 30px/1 Georgia,
+    serif;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+#start.st2 .st-main {
+  position: relative;
+  display: grid;
+  gap: 34px;
+  align-content: center;
+  width: min(1180px, 100%);
+  margin: 0 auto;
+  padding: 36px 40px;
+}
+#start.st2 .st-kicker {
+  margin: 0 0 8px;
+  color: var(--st-gold);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+#start.st2 .st-hero h1 {
+  display: grid;
+  margin: 0;
+  font:
+    400 clamp(34px, 4.4vw, 58px) / 1.08 Georgia,
+    "Times New Roman",
+    serif;
+  letter-spacing: -0.01em;
+}
+#start.st2 .st-hero h1 em {
+  color: var(--st-gold);
+  font-style: italic;
+}
+#start.st2 .lic-chip {
+  display: inline-flex;
+  width: max-content;
+  margin-top: 16px;
+}
+#start.st2 .lic-chip:empty {
+  display: none;
+}
+#start.st2 .st-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1fr;
+  grid-auto-rows: minmax(138px, auto);
+  gap: 16px;
+}
+#start.st2 .st-tile {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 14px;
+  padding: 22px;
+  overflow: hidden;
+  border: 1px solid var(--st-line);
+  border-radius: 20px;
+  background: var(--st-card);
+  color: var(--st-ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease;
+}
+#start.st2 .st-tile::after {
+  content: "";
+  position: absolute;
+  inset: auto -40% -60% auto;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(227, 201, 142, 0.16), transparent 70%);
+  transition: transform 0.3s ease;
+}
+#start.st2 .st-tile:hover,
+#start.st2 .st-tile:focus-visible {
+  transform: translateY(-3px);
+  border-color: rgba(227, 201, 142, 0.55);
+  background: rgba(255, 248, 235, 0.09);
+  outline: none;
+}
+#start.st2 .st-tile:hover::after {
+  transform: scale(1.25);
+}
+#start.st2 .st-tile.big {
+  grid-row: span 2;
+  padding: 28px;
+  border-color: rgba(227, 201, 142, 0.4);
+  background: linear-gradient(160deg, rgba(227, 201, 142, 0.2), rgba(181, 138, 60, 0.08));
+}
+#start.st2 .st-ic {
+  display: grid;
+  place-items: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 15px;
+  background: rgba(227, 201, 142, 0.14);
+  color: var(--st-gold);
+}
+#start.st2 .st-tile.big .st-ic {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  background: linear-gradient(160deg, var(--st-gold), var(--st-gold2));
+  color: #1c1408;
+}
+#start.st2 .st-ic svg {
+  width: 26px;
+  height: 26px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+#start.st2 .st-tile.big .st-ic svg {
+  width: 32px;
+  height: 32px;
+}
+#start.st2 .st-tx {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+}
+#start.st2 .st-tx b {
+  font:
+    500 22px/1.15 Georgia,
+    serif;
+}
+#start.st2 .st-tile.big .st-tx b {
+  font-size: 32px;
+}
+#start.st2 .st-tx span {
+  color: var(--st-mute);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+#start.st2 .st-tile.big .st-tx span {
+  max-width: 340px;
+  font-size: 15px;
+}
+#start.st2 .st-go {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+#start.st2 .st-go kbd {
+  padding: 3px 9px;
+  border: 1px solid var(--st-line);
+  border-radius: 7px;
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--st-mute);
+  font:
+    700 12px "Segoe UI",
+    sans-serif;
+}
+#start.st2 .st-go i {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(227, 201, 142, 0.12);
+  color: var(--st-gold);
+  font-style: normal;
+  font-size: 18px;
+  transition:
+    transform 0.18s ease,
+    background 0.18s ease;
+}
+#start.st2 .st-tile:hover .st-go i {
+  transform: translateX(4px);
+  background: var(--st-gold);
+  color: #1c1408;
+}
+#start.st2 .st-tile.big .st-go i {
+  width: 46px;
+  height: 46px;
+  background: var(--st-gold);
+  color: #1c1408;
+}
+#start.st2 .st-foot {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 26px;
+  justify-content: center;
+  padding: 16px 40px 22px;
+  border-top: 1px solid var(--st-line);
+  color: var(--st-mute);
+  font-size: 12.5px;
+}
+#start.st2 .st-foot span:empty {
+  display: none;
+}
+#start.st2 #stNet::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 7px;
+  border-radius: 50%;
+  background: #5cc29a;
+  vertical-align: 1px;
+}
+@media (max-width: 980px) {
+  #start.st2 .st-top {
+    grid-template-columns: 1fr auto;
+  }
+  #start.st2 .st-hotel {
+    display: none;
+  }
+  #start.st2 .st-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  #start.st2 .st-tile.big {
+    grid-column: 1 / -1;
+    grid-row: auto;
+  }
+}
+@media (max-width: 620px) {
+  #start.st2 .st-grid {
+    grid-template-columns: 1fr;
+  }
+  #start.st2 .st-main,
+  #start.st2 .st-top,
+  #start.st2 .st-foot {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+/* the start page's own layout wins over general header, main and nav styles */
+#start.st2 > header.st-top {
+  margin: 0;
+  background: transparent;
+  box-shadow: none;
+  height: auto;
+}
+#start.st2 > main.st-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  place-items: stretch;
+  max-width: none;
+  width: min(1180px, 100%);
+  height: auto;
+  margin: 0 auto;
+  background: transparent;
+}
+#start.st2 nav.st-grid {
+  display: grid;
+  width: 100%;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  position: static;
+  flex-direction: unset;
+  overflow: visible;
+}
+#start.st2 .st-hero {
+  max-width: 820px;
+}
+
+/* Receive goods: the item picker */
+#bo .rc-combo {
+  position: relative;
+}
+#bo .rc-pick {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 40;
+  width: min(560px, 90vw);
+  max-height: 380px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--card);
+  box-shadow: 0 24px 50px -20px rgba(30, 20, 8, 0.45);
+}
+#bo .rc-pick[hidden] {
+  display: none;
+}
+#bo .rc-ph {
+  position: sticky;
+  top: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  background: var(--card);
+  color: var(--mute);
+  font-size: 12px;
+}
+#bo .rc-ph b {
+  color: var(--ink);
+}
+#bo .rc-opt {
+  display: grid;
+  grid-template-columns: 34px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  padding: 9px 14px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+#bo .rc-opt:last-child {
+  border-bottom: 0;
+}
+#bo .rc-opt:hover,
+#bo .rc-opt.on {
+  background: var(--tint);
+}
+#bo .rc-av {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: linear-gradient(160deg, var(--brass-hi), var(--brass-lo));
+  color: var(--amber-ink);
+  font: 700 15px var(--serif);
+}
+#bo .rc-nm {
+  display: grid;
+  min-width: 0;
+}
+#bo .rc-nm b {
+  overflow: hidden;
+  font-size: 14px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+#bo .rc-nm small,
+#bo .rc-st small {
+  color: var(--mute);
+  font-size: 11.5px;
+}
+#bo .rc-nm i {
+  margin-right: 6px;
+  padding: 0 6px;
+  border-radius: 6px;
+  background: var(--chip);
+  font-style: normal;
+  font-weight: 700;
+}
+#bo .rc-st {
+  display: grid;
+  justify-items: end;
+}
+#bo .rc-st b {
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+#bo .rc-st b.zero {
+  color: var(--bad);
+}
+#bo .rc-none,
+#bo .rc-more {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  padding: 16px;
+  color: var(--mute);
+  text-align: center;
+}
+/* the start page's POS card lists what it does */
+#start.st2 .st-feat {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+#start.st2 .st-feat em {
+  padding: 5px 12px;
+  border: 1px solid var(--st-line);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.18);
+  color: var(--st-ink);
+  font-style: normal;
+  font-size: 12.5px;
+}
+
+/* the start page fits the modules that are on */
+#start.st2 .st-grid[data-n="0"] {
+  grid-template-columns: minmax(0, 1fr);
+  grid-auto-rows: auto;
+}
+#start.st2 .st-grid[data-n="0"] .st-tile.big {
+  grid-row: auto;
+  grid-template-columns: auto 1fr auto;
+  grid-template-rows: auto;
+  align-items: center;
+  gap: 24px;
+  padding: 30px 34px;
+}
+#start.st2 .st-grid[data-n="0"] .st-tile.big .st-tx span:not(.st-feat) {
+  max-width: 520px;
+}
+#start.st2 .st-grid[data-n="1"] {
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  grid-auto-rows: minmax(300px, auto);
+}
+#start.st2 .st-grid[data-n="1"] .st-tile.big {
+  grid-row: auto;
+}
+#start.st2 .st-grid[data-n="1"] .st-tile:not(.big) {
+  padding: 28px;
+}
+#start.st2 .st-grid[data-n="1"] .st-tile:not(.big) .st-tx b {
+  font-size: 28px;
+}
+#start.st2 .st-grid[data-n="2"] {
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+}
+#start.st2 .st-grid[data-n="3"] .st-tile.wide {
+  grid-column: span 2;
+}
+@media (max-width: 980px) {
+  #start.st2 .st-grid[data-n] {
+    grid-template-columns: 1fr 1fr;
+  }
+  #start.st2 .st-grid[data-n="0"],
+  #start.st2 .st-grid[data-n="1"] {
+    grid-template-columns: 1fr;
+  }
+  #start.st2 .st-grid[data-n] .st-tile.big {
+    grid-column: 1 / -1;
+    grid-row: auto;
+  }
+  #start.st2 .st-grid[data-n="0"] .st-tile.big {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 620px) {
+  #start.st2 .st-grid[data-n] {
+    grid-template-columns: 1fr;
+  }
+  #start.st2 .st-grid[data-n] .st-tile.wide {
+    grid-column: auto;
+  }
+}
+#start.st2 .st-feat-bo {
+  display: none;
+}
+#start.st2 .st-grid[data-n="1"] .st-feat-bo {
+  display: flex;
+}
+/* Purchase orders: the same entry row as Receive goods */
+#bo .po-entry {
+  margin: 6px 0 4px;
+}
+#bo .po-entry > label {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+}
+#bo .po-entry > label > input,
+#bo .po-entry > label > select,
+#bo .po-entry .grn-inl input {
+  width: 100%;
+  margin: 0;
+}
+#bo .po-entry .grn-e-item .grn-inl {
+  display: flex;
+}
+
+/* ---- Crates or pieces, at a glance: purchase orders, issuing and requisitions ---- */
+#bo .u-badge {
+  display: inline-flex;
+  gap: 5px;
+  align-items: baseline;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+#bo .u-badge b {
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+#bo .u-badge.crate {
+  border: 1px solid var(--hair);
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--brass) 26%, var(--card)),
+    color-mix(in srgb, var(--brass) 12%, var(--card))
+  );
+  color: var(--ink);
+}
+#bo .u-badge.crate::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  margin-right: 2px;
+  border: 1.5px solid var(--brass-lo);
+  border-radius: 2px;
+  background: repeating-linear-gradient(90deg, transparent 0 3px, var(--brass-lo) 3px 4px);
+  align-self: center;
+}
+#bo .u-badge.pcs {
+  border: 1px solid var(--line);
+  background: var(--chip);
+  color: var(--ink);
+}
+#bo .u-badge.pcs::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  margin-right: 2px;
+  border-radius: 50%;
+  background: var(--mute);
+  align-self: center;
+}
+#bo .u-eq {
+  margin-left: 8px;
+  color: var(--mute);
+  font-size: 12px;
+  white-space: nowrap;
+}
+#bo .se-entry {
+  margin: 8px 0 4px;
+}
+#bo .se-entry > label {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+}
+#bo .se-entry > label > input,
+#bo .se-entry .grn-inl input {
+  width: 100%;
+  margin: 0;
+}
+#bo .se-entry .grn-e-item .grn-inl {
+  display: flex;
+}
+#bo .se-entry .grn-by .seg2 button[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+#bo .se-conv {
+  color: var(--mute);
+  font-weight: 600;
+}
+#bo .se-t td {
+  vertical-align: middle;
+}
+#bo .se-it {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+#bo .se-it span {
+  display: grid;
+}
+#bo .se-it small {
+  color: var(--mute);
+  font-size: 11.5px;
+}
+#bo .se-it .rc-av {
+  width: 30px;
+  height: 30px;
+  font-size: 13px;
+}
+#bo .se-empty {
+  padding: 14px;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  color: var(--mute);
+  text-align: center;
+}
+
+#bo .se-t tr.is-crate td:first-child {
+  box-shadow: inset 4px 0 0 var(--brass);
+}
+#bo .se-t tr.is-pcs td:first-child {
+  box-shadow: inset 4px 0 0 var(--line);
+}
+#bo .se-t tr.se-tot td {
+  border-top: 2px solid var(--line);
+  color: var(--mute);
+  font-weight: 600;
+}
+#bo .se-t tr.se-tot .u-badge {
+  margin-right: 6px;
+}
+
+#bo .st-have {
+  display: inline-block;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+#bo .st-have.none {
+  color: var(--mute);
+}
+#bo .st-have.short {
+  color: var(--bad, #b3261e);
+}
+#bo .se-t td.n .u-eq {
+  display: block;
+  margin: 2px 0 0;
+}
+
+#bo .se-t td.n small.u-eq {
+  display: block;
+  margin: 2px 0 0;
+}
+#bo .po-t tr.se-tot td.po-sum {
+  color: var(--ink);
+  font-size: 1.05em;
+  font-weight: 700;
+}
+
+#bo .web-acc .svc-row {
+  margin-top: 4px;
+}
+#bo .web-go {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  margin: 14px 0 10px;
+  padding: 16px;
+  background: var(--card2, #f9f5ed);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--brass);
+  border-radius: 12px;
+}
+#bo .web-qr {
+  flex: none;
+  width: 132px;
+  height: 132px;
+  padding: 6px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+#bo .web-qr svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+#bo .web-k {
+  display: block;
+  color: var(--mute);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+#bo .web-url {
+  display: block;
+  margin: 2px 0 4px;
+  font:
+    700 20px/1.3 Consolas,
+    "SFMono-Regular",
+    monospace;
+  color: var(--ink);
+  word-break: break-all;
+  user-select: all;
+}
+#bo .web-steps {
+  margin: 10px 0 0;
+  padding-left: 20px;
+  color: var(--mute);
+  font-size: 13px;
+}
+#bo .web-steps li {
+  margin: 2px 0;
+}
+#bo .web-acc .sy-list > div {
+  align-items: center;
+}
+#bo .web-acc .sy-list .mini {
+  margin-left: auto;
+}
+@media (max-width: 560px) {
+  #bo .web-go {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  #bo .web-steps {
+    text-align: left;
+  }
+}
+
+#bo .web-devs {
+  display: grid;
+  gap: 8px;
+}
+#bo .web-dev {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--card2, #f9f5ed);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+#bo .web-dev .sy-dot {
+  flex: none;
+}
+#bo#bo .web-dev.on .sy-dot {
+  background: var(--ok, #1f7a4d);
+}
+#bo .web-dn {
+  flex: 1;
+  min-width: 0;
+}
+#bo .web-dn b,
+#bo .web-dn small {
+  display: block;
+}
+#bo .web-dn small {
+  color: var(--mute);
+}
+
+#bo .web-fw {
+  display: block;
+  margin-top: 8px;
+  color: var(--mute);
+  font-size: 12px;
+}
+
+/* Start page on phones and tablets: the middle grows with its tiles (never squeezed under the footer) */
+#start.st2 {
+  grid-template-rows: auto minmax(max-content, 1fr) auto;
+}
+#start.st2 .st-grid {
+  grid-auto-rows: auto;
+}
+#start.st2 .st-tile {
+  min-height: 138px;
+}
+#start.st2 .st-tx span,
+#start.st2 .st-tx b {
+  overflow-wrap: anywhere;
+}
+@media (hover: none), (max-width: 900px) {
+  #start.st2 .st-go kbd {
+    visibility: hidden;
+  }
+}
+@media (max-width: 980px) {
+  #start.st2 .st-main {
+    align-content: start;
+    gap: 26px;
+    padding-top: 28px;
+    padding-bottom: 28px;
+  }
+}
+@media (max-width: 620px) {
+  #start.st2 .st-top {
+    gap: 10px;
+    padding-top: 14px;
+    padding-bottom: 14px;
+  }
+  #start.st2 .kf-m {
+    width: 36px;
+    height: 36px;
+    font-size: 17px;
+  }
+  #start.st2 .kf-t b {
+    font-size: 19px;
+  }
+  #start.st2 .st-clock b {
+    font-size: 22px;
+  }
+  #start.st2 .st-clock small {
+    max-width: 130px;
+    font-size: 11px;
+    line-height: 1.3;
+    text-align: right;
+  }
+  #start.st2 .st-main {
+    gap: 20px;
+    padding-top: 22px;
+  }
+  #start.st2 .st-kicker {
+    font-size: 10.5px;
+    letter-spacing: 0.22em;
+  }
+  #start.st2 .st-hero h1 {
+    font-size: clamp(26px, 7.4vw, 34px);
+    line-height: 1.12;
+  }
+  #start.st2 .st-grid[data-n],
+  #start.st2 .st-grid {
+    gap: 12px;
+  }
+  /* each tile is one tidy row: icon, name and a short line, arrow */
+  #start.st2 .st-tile,
+  #start.st2 .st-grid[data-n] .st-tile,
+  #start.st2 .st-grid[data-n="0"] .st-tile.big {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-rows: auto;
+    align-items: center;
+    gap: 14px;
+    min-height: 0;
+    padding: 16px;
+    border-radius: 16px;
+  }
+  #start.st2 .st-ic,
+  #start.st2 .st-tile.big .st-ic {
+    width: 46px;
+    height: 46px;
+    border-radius: 13px;
+  }
+  #start.st2 .st-ic svg,
+  #start.st2 .st-tile.big .st-ic svg {
+    width: 24px;
+    height: 24px;
+  }
+  #start.st2 .st-tx {
+    gap: 3px;
+  }
+  #start.st2 .st-tx b,
+  #start.st2 .st-grid[data-n="1"] .st-tile:not(.big) .st-tx b {
+    font-size: 19px;
+  }
+  #start.st2 .st-tile.big .st-tx b {
+    font-size: 22px;
+  }
+  #start.st2 .st-tx span,
+  #start.st2 .st-tile.big .st-tx span {
+    font-size: 12.5px;
+    line-height: 1.35;
+  }
+  #start.st2 .st-tile.big {
+    padding: 18px 16px;
+  }
+  #start.st2 .st-feat,
+  #start.st2 .st-grid[data-n="1"] .st-feat-bo {
+    display: none;
+  }
+  #start.st2 .st-go kbd {
+    display: none;
+  }
+  #start.st2 .st-go i,
+  #start.st2 .st-tile.big .st-go i {
+    width: 36px;
+    height: 36px;
+    font-size: 17px;
+  }
+  #start.st2 .st-foot {
+    gap: 4px 16px;
+    padding-top: 14px;
+    padding-bottom: 18px;
+    font-size: 11.5px;
+    text-align: center;
+  }
+}
+@media (max-width: 380px) {
+  #start.st2 .st-clock small {
+    display: none;
+  }
+  #start.st2 .st-tx span:not(.st-feat) {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+#start.st2 > main.st-main {
+  align-self: center;
+}
+@media (max-width: 980px) {
+  #start.st2 > main.st-main {
+    align-self: start;
+  }
+}
+/* the POS screen's small-screen rows (main: 1fr 46%) must not reach the start page */
+#start.st2 > main.st-main {
+  grid-template-rows: none;
+  grid-auto-rows: auto;
+}
+@media (max-width: 620px) {
+  #start.st2 .st-clock small {
+    max-width: 190px;
+  }
+}
+/* tablets: POS across the top as one wide row, the others two by two */
+@media (min-width: 621px) and (max-width: 980px) {
+  #start.st2 .st-grid[data-n] .st-tile.big,
+  #start.st2 .st-tile.big {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-rows: auto;
+    align-items: center;
+    gap: 22px;
+    padding: 26px;
+  }
+  #start.st2 .st-tile.big .st-tx b {
+    font-size: 28px;
+  }
+  #start.st2 .st-tile.big .st-tx span:not(.st-feat) {
+    max-width: none;
+  }
+  #start.st2 .st-feat {
+    margin-top: 10px;
+  }
+  #start.st2 .st-tile:not(.big) {
+    min-height: 0;
+    padding: 20px;
+  }
+}
+@media (max-width: 980px) {
+  #start.st2 .st-grid[data-n] {
+    grid-auto-rows: auto;
+  }
+}
+@media (max-width: 620px) {
+  #start.st2 .st-grid[data-n="1"] .st-tile:not(.big) {
+    padding: 16px;
+  }
+}
+@media (min-width: 621px) and (max-width: 980px) {
+  #start.st2 .st-grid[data-n="1"] .st-tile:not(.big),
+  #start.st2 .st-grid[data-n="0"] .st-tile:not(.big) {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-rows: auto;
+    align-items: center;
+    gap: 22px;
+    padding: 26px;
+  }
+}
+
+/* ================================================================ POS on phones and tablets
+   Phones: one column. Sale points and categories are swipeable chips, the items two by two, and the
+   bill waits in a bar at the bottom that opens over the menu. Tablets: chips on top, items, and the
+   bill always open on the right. */
+.pbar,
+.rp-hd {
+  display: none;
+}
+@media (max-width: 1100px) {
+  html body .pos {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    grid-template-rows: auto auto auto minmax(0, 1fr) auto auto;
+    grid-template-areas:
+      "tb rp"
+      "sp rp"
+      "cats rp"
+      "grid rp"
+      "botb rp"
+      "tools rp";
+    gap: 10px;
+    height: 100vh;
+    height: 100dvh;
+    padding: 0 0 0 14px;
+  }
+  html body .pos > .rail,
+  html body .pos > .ws {
+    display: contents;
+  }
+  html body .pos .mk {
+    display: none;
+  }
+  html body .pos .tb {
+    grid-area: tb;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 12px 0 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  html body .pos .tb .ttl {
+    min-width: 0;
+  }
+  html body .pos .tb .ttl b {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  html body .pos #spBtn {
+    display: none;
+  }
+  html body .pos .sp-tabs {
+    grid-area: sp;
+    flex-wrap: nowrap;
+    gap: 8px;
+    margin: 0;
+    padding: 2px 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  html body .pos .sp-tabs::-webkit-scrollbar,
+  html body .pos .cats::-webkit-scrollbar,
+  html body .pos .rtools::-webkit-scrollbar {
+    display: none;
+  }
+  html body .pos .sp-tab {
+    flex: none;
+    max-width: none;
+    min-height: 40px;
+    padding: 0 18px;
+    border-radius: 999px;
+    font-size: 12px;
+  }
+  html body .pos .cats {
+    grid-area: cats;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 8px;
+    margin: 0;
+    padding: 2px 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  html body .pos .cat {
+    flex: none;
+    min-height: 38px;
+    padding: 0 16px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--card);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  html body .pos .cat.on {
+    border-color: var(--rail);
+    background: var(--rail);
+    color: var(--brass-hi);
+  }
+  html body .pos .items {
+    grid-area: grid;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    align-content: start;
+    gap: 10px;
+    min-height: 0;
+    padding: 2px 2px 10px;
+    overflow: auto;
+  }
+  html body .pos .it {
+    min-height: 96px;
+  }
+  html body .pos .botb {
+    grid-area: botb;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin: 0;
+  }
+  html body .pos .botb .b {
+    min-height: 42px;
+    padding: 0 8px;
+    font-size: 13px;
+  }
+  html body .pos .rtools {
+    grid-area: tools;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 6px;
+    margin: 0 0 12px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  html body .pos .rtools .b {
+    flex: none;
+    min-height: 34px;
+    padding: 0 12px;
+    border-color: var(--line);
+    color: var(--mute);
+    font-size: 12px;
+  }
+  html body .pos .rp {
+    grid-area: rp;
+    grid-column: auto;
+    grid-row: auto;
+    min-height: 0;
+    overflow: auto;
+    border-left: 1px solid var(--line);
+  }
+}
+/* phones */
+@media (max-width: 760px) {
+  html body .pos {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto minmax(0, 1fr) auto auto;
+    grid-template-areas: "tb" "sp" "cats" "grid" "botb" "tools";
+    padding: 0 12px 84px;
+  }
+  html body .pos .tb {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    padding: 10px 0 8px;
+    background: var(--bg);
+  }
+  html body .pos .tb .bkm span {
+    display: none;
+  }
+  html body .pos .tb .b {
+    min-height: 38px;
+    padding: 0 12px;
+    font-size: 13px;
+  }
+  html body .pos .tb .ttl b {
+    font-size: 20px;
+  }
+  html body .pos .tb .ttl span {
+    font-size: 11.5px;
+  }
+  html body .pos .items {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  html body .pos .it {
+    min-height: 84px;
+    padding: 10px 11px;
+  }
+  /* the bill opens over the menu, from the bottom */
+  html body .pos .rp {
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0 12px 14px;
+    border: 0;
+    background: var(--bg);
+    transform: translateY(102%);
+    visibility: hidden;
+    transition:
+      transform 0.26s ease,
+      visibility 0s linear 0.26s;
+  }
+  body.bill-open .pos .rp {
+    transform: none;
+    visibility: visible;
+    transition: transform 0.26s ease;
+  }
+  html body .pos .rp-hd {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 -12px;
+    padding: 12px;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg);
+  }
+  html body .pos .rp-hd b {
+    font-family: var(--serif, Georgia, serif);
+    font-size: 20px;
+    font-weight: 500;
+  }
+  html body .pos .rp-hd span {
+    margin-left: auto;
+    color: var(--mute);
+    font-size: 13px;
+    font-weight: 600;
+  }
+  html body .pos .rp-hd .b {
+    min-height: 38px;
+    padding: 0 14px;
+  }
+  html body .pos .rp .paper {
+    flex: none;
+  }
+  html body .pos .rp .acts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  html body .pos .rp .acts .act {
+    min-height: 48px;
+  }
+  /* the bar along the bottom */
+  html body .pos .pbar {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 60px;
+    padding: 8px 10px 8px 8px;
+    border: 1px solid var(--rail);
+    border-radius: 16px;
+    background: var(--rail);
+    box-shadow: 0 14px 34px -12px rgba(0, 0, 0, 0.55);
+    color: #f5ecdc;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+  html body .pos .pb-n {
+    display: grid;
+    flex: none;
+    place-items: center;
+    min-width: 44px;
+    height: 44px;
+    padding: 0 8px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--brass-hi);
+    font-size: 18px;
+    font-weight: 800;
+  }
+  html body .pos .pbar.has .pb-n {
+    background: linear-gradient(160deg, var(--brass-hi), var(--brass-lo));
+    color: #1c1408;
+  }
+  html body .pos .pb-t {
+    display: grid;
+    flex: 1;
+    min-width: 0;
+  }
+  html body .pos .pb-t b {
+    font-size: 18px;
+    font-variant-numeric: tabular-nums;
+  }
+  html body .pos .pb-t small {
+    overflow: hidden;
+    color: #b5a68f;
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  html body .pos .pb-go {
+    flex: none;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--brass-hi);
+    font-size: 13.5px;
+    font-weight: 700;
+  }
+  html body .pos .pbar.has .pb-go {
+    background: var(--brass);
+    color: #1c1408;
+  }
+  html body .pos .pb-go i {
+    font-style: normal;
+  }
+  body.bill-open {
+    overflow: hidden;
+  }
+  html body #login .fsl {
+    display: none;
+  }
+}
+
+/* tablets: the bill is a fixed column on the right, the menu fills the rest */
+@media (min-width: 761px) and (max-width: 1100px) {
+  html body .pos {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto minmax(0, 1fr) auto auto;
+    grid-template-areas: "tb" "sp" "cats" "grid" "botb" "tools";
+    padding: 0 386px 0 16px;
+  }
+  html body .pos .rp {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 370px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+    overflow-y: auto;
+    background: var(--bg);
+    box-shadow: -10px 0 30px -20px rgba(0, 0, 0, 0.35);
+  }
+}
+@media (max-width: 1100px) {
+  html body .pos .rp .paper {
+    flex: none;
+    min-height: 0;
+    height: auto;
+    overflow: visible;
+  }
+  html body .pos .rp .acts {
+    flex: none;
+  }
+  html body .pos .rp .mid {
+    flex-wrap: wrap;
+  }
+}
+
+/* POS PIN screen on phones: a slim header (crest, hotel, clock) above the keypad */
+@media (max-width: 760px) {
+  html body #login {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 12px;
+  }
+  html body #login .lt {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas: "crest name clock" "crest tag clock";
+    align-items: center;
+    column-gap: 12px;
+    flex: none;
+    height: auto;
+    min-height: 0;
+    padding: 14px 16px;
+    border-radius: 16px;
+    text-align: left;
+  }
+  html body #login .lt::before,
+  html body #login .lt::after {
+    display: none;
+  }
+  html body #login .lt .bkm {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: none;
+  }
+  html body #login .lt .crest {
+    grid-area: crest;
+    width: 46px;
+    height: 46px;
+    margin: 0;
+    font-size: 20px;
+  }
+  html body #login .lt .hotelName {
+    grid-area: name;
+    margin: 0;
+    overflow: hidden;
+    font-size: 20px;
+    line-height: 1.15;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  html body #login .lt .ltag {
+    grid-area: tag;
+    margin: 2px 0 0;
+    font-size: 10px;
+  }
+  html body #login .lt .lclock {
+    grid-area: clock;
+    margin: 0;
+    font-size: 26px;
+    line-height: 1;
+  }
+  html body #login .lt .meta {
+    display: none;
+  }
+  html body #login .rt {
+    flex: 1;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 18px 16px;
+  }
+  html body #login .kp button {
+    min-height: 58px;
+    font-size: 24px;
+  }
+}
+/* phones: pop-ups (z 20) open over the bill; the PIN, start and other screens (50+) cover both */
+@media (max-width: 760px) {
+  html body .pos .rp {
+    z-index: 18;
+  }
+  html body .pos .pbar {
+    z-index: 17;
+  }
+}
 </style>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -18374,6 +20460,12 @@ function kfLogError(msg, code) {
       msg: String(msg).slice(0, 2000)
     });
     localStorage.setItem(KF_ERRLOG, JSON.stringify(L.slice(0, 300)));
+    if (/^https?:$/.test(location.protocol) && code >= 9000)
+      fetch("/lan/errlog/add", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ where, code, msg: String(msg).slice(0, 2000) })
+      }).catch(() => {});
   } catch (e) {}
 }
 (function () {
@@ -19032,7 +21124,11 @@ function kfTag(msg, role, pos) {
           ><button class="b" id="selBtn">Select</button><button class="b" id="findBtn">Find</button>
         </div>
       </section>
-      <section class="rp">
+      <section class="rp" id="rpSheet" aria-label="Bill">
+        <div class="rp-hd">
+          <button class="b" id="rpClose" type="button" aria-label="Back to the menu">← Menu</button
+          ><b>Bill</b><span id="rpSum"></span>
+        </div>
         <div class="paper">
           <div class="rh">
             Date <span id="hDate"></span>, Shift no 1043, Cashier <b id="cname"></b>
@@ -19084,6 +21180,12 @@ function kfTag(msg, role, pos) {
           ><button class="act a7" id="billBtn">Bill options</button>
         </div>
       </section>
+      <!-- phones: the bill rides along at the bottom, and opens over the menu -->
+      <button class="pbar" id="pBar" type="button" aria-controls="rpSheet">
+        <span class="pb-n" id="pbN">0</span
+        ><span class="pb-t"><b id="pbTot">0.00</b><small id="pbS">Tap an item to start</small></span
+        ><span class="pb-go">View bill <i aria-hidden="true">→</i></span>
+      </button>
     </div>
     <!-- ==================== POS: modals ==================== -->
     <div class="modal" id="mSel">
@@ -19522,7 +21624,8 @@ const LIC = (() => {
       };
       save();
     }
-    s.log = s.log || [];
+    // Only the key in use now is kept on record (older copies kept every key ever entered).
+    s.log = (s.log || []).slice(-1);
     return s;
   }
   function save() {
@@ -19604,9 +21707,12 @@ const LIC = (() => {
     }
     s.bad = false;
     s.lastAt = K.at;
-    s.log.push({ at: Date.now(), t: K.t, c: K.c, e: K.e });
+    s.log = [{ at: Date.now(), t: K.t, c: K.c, e: K.e, m: K.m }];
     save();
     gate();
+    try {
+      dispatchEvent(new CustomEvent("kf:license", { detail: raw }));
+    } catch (e) {}
     return "";
   }
   let box;
@@ -19780,6 +21886,11 @@ const PAY_BUILT = [
   ["room", "Post to room", "Charged to a guest's room."]
 ];
 /** A business without rooms switches the Front Desk off in Settings → Modules. Its data stays. */
+/** Kitchen display and staff clock: on unless switched off in Settings → Modules. */
+const kdsOn = () => typeof FD_SETTINGS === "undefined" || !FD_SETTINGS.kdsOff;
+/** Product stickers and the guest menu their QR codes open. */
+const stkOn = () => typeof FD_SETTINGS === "undefined" || !FD_SETTINGS.stickersOff;
+const clockOn = () => typeof FD_SETTINGS === "undefined" || !FD_SETTINGS.clockOff;
 const fdOn = () => typeof FD_SETTINGS === "undefined" || !FD_SETTINGS.frontDeskOff;
 const payCfg = () => {
   if (typeof FD_SETTINGS === "undefined") return { off: {}, custom: [] };
@@ -22179,7 +24290,7 @@ function selRender() {
     ? `<div class="sr sh"><label><input type="checkbox" id="selAll" ${ch.length === L.length ? "checked" : ""}></label><span>Bill no</span><span>Table no</span><span>Waiter</span><span>Guest name</span><span>Date</span><span>Time</span><span>Curr</span><span class="n">Amount</span><span>S point</span></div>` +
       L.map(
         o =>
-          `<div class="sr ${selSet.has(o.no) ? "on" : ""} ${o.printed ? "printed" : ""} ${o.billCopies ? "rep" : ""}" data-row="${o.no}"><label><input type="checkbox" data-s="${o.no}" ${selSet.has(o.no) ? "checked" : ""}></label><span class="sr-no" title="Bill ${slipEsc(o.no)}, order ${slipEsc(o.ord)}">${slipEsc(o.no)}<small>Order ${slipEsc(o.ord)}${emptyTag(o)}</small></span><span class="sr-t" title="${slipEsc(o.label)}"><b>${slipEsc(o.label)}</b></span>${cell(o.waiter || "–")}${cell(o.guest || "N/A")}${cell(o.at.toLocaleDateString("en-GB"))}${cell(o.at.toLocaleTimeString("en-GB"))}${cell("KES", "sr-cur")}<span class="n"><b>${bill2(totals(o.lines, o).g)}</b></span>${cell(billWhere(o))}</div>`
+          `<div class="sr ${selSet.has(o.no) ? "on" : ""} ${o.printed ? "printed" : ""} ${o.billCopies ? "rep" : ""}" data-row="${o.no}"><label><input type="checkbox" data-s="${o.no}" ${selSet.has(o.no) ? "checked" : ""}></label><span class="sr-no" title="Bill ${slipEsc(o.no)}, order ${slipEsc(o.ord)}">${slipEsc(o.no)}<small>Order ${slipEsc(o.ord)}${emptyTag(o)}</small>${kdsChip(o.no)}</span><span class="sr-t" title="${slipEsc(o.label)}"><b>${slipEsc(o.label)}</b></span>${cell(o.waiter || "–")}${cell(o.guest || "N/A")}${cell(o.at.toLocaleDateString("en-GB"))}${cell(o.at.toLocaleTimeString("en-GB"))}${cell("KES", "sr-cur")}<span class="n"><b>${bill2(totals(o.lines, o).g)}</b></span>${cell(billWhere(o))}</div>`
       ).join("")
     : '<div class="empty">No pending bills for ' + w + ".</div>";
   // These work on one bill: highlight exactly one.
@@ -22496,6 +24607,44 @@ document.addEventListener("click", e => {
   if (e.target.dataset.close !== undefined) e.target.closest(".modal").classList.remove("show");
   if (e.target.classList.contains("modal")) e.target.classList.remove("show");
 });
+
+// ---- phones: a bar at the bottom shows the bill's count and total; tapping it opens the bill over the menu
+function pbarDraw() {
+  const b = $("#pBar");
+  if (!b) return;
+  const n = Object.values(cart).reduce((a, q) => a + q, 0),
+    t = totals(),
+    who = cur ? cur.label : draft ? draft.no : "";
+  $("#pbN").textContent = n;
+  $("#pbTot").textContent = bill2(t.g);
+  $("#pbS").textContent = n
+    ? `${n} item${n === 1 ? "" : "s"}${who ? " · " + who : ""}`
+    : who
+      ? `${who} · tap items to add`
+      : "Tap an item to start";
+  $("#rpSum").textContent = n ? `${n} item${n === 1 ? "" : "s"} · ${bill2(t.g)}` : "";
+  b.classList.toggle("has", n > 0);
+}
+const billSheet = on => document.body.classList.toggle("bill-open", !!on);
+$("#pBar").onclick = () => billSheet(true);
+$("#rpClose").onclick = () => billSheet(false);
+{
+  const draw0 = drawCart;
+  drawCart = function () {
+    draw0.apply(this, arguments);
+    pbarDraw();
+  };
+}
+addEventListener("keydown", e => {
+  if (
+    e.key === "Escape" &&
+    document.body.classList.contains("bill-open") &&
+    !document.querySelector(".modal.show")
+  )
+    billSheet(false);
+});
+// leaving the till closes the bill, so the next person starts on the menu
+$("#lock").addEventListener("click", () => billSheet(false));
 // payment
 let pays = [],
   payT = null;
@@ -23711,6 +25860,10 @@ function doSend(label) {
     null,
     "Close"
   );
+  if (kdsOn()) {
+    kdsAdd(tickets, o, kmsg);
+    kdsSave();
+  }
   printOrderTickets(tickets).then(async r => {
     if (both && (await printSlips("GUEST BILL", true)) !== "ok") r = "bad";
     rcDone(r, both ? "Order sent and bill printed." : "Order sent.");
@@ -23747,7 +25900,7 @@ function ordList() {
   $("#ordList").innerHTML = L.length
     ? L.map(o => {
         const t = totals(o.lines, o);
-        return `<div class="ord ${o.printed ? "printed" : ""} ${o.billCopies ? "rep" : ""}"><div class="h"><span>${o.label} · ${billWhere(o)}</span><span>${KES(t.g)}</span></div><div class="m">Bill ${o.no} · Order ${o.ord}${emptyTag(o)} · ${seesAllBills(user) ? slipEsc(o.waiter || "No waiter") + " · " : ""}${cnt(o.lines)} items · ${o.rounds} round${o.rounds > 1 ? "s" : ""} · sent ${hhmm(o.at)} · <b>${o.billCopies ? "REPRINTED" : o.printed ? "PRINTED" : "SENT"}</b></div><div class="row"><button class="mini" data-oa="add" data-o="${o.no}">Add items</button><button class="mini" data-oa="bill" data-o="${o.no}">Print bill</button>${can("swap") ? `<button class="mini" data-oa="swap" data-o="${o.no}">Swap</button>` : ""}<button class="chip on" data-oa="pay" data-o="${o.no}">Charge</button></div></div>`;
+        return `<div class="ord ${o.printed ? "printed" : ""} ${o.billCopies ? "rep" : ""}"><div class="h"><span>${o.label} · ${billWhere(o)}</span><span>${KES(t.g)}</span></div><div class="m">Bill ${o.no} · Order ${o.ord}${emptyTag(o)} · ${seesAllBills(user) ? slipEsc(o.waiter || "No waiter") + " · " : ""}${cnt(o.lines)} items · ${o.rounds} round${o.rounds > 1 ? "s" : ""} · sent ${hhmm(o.at)} · <b>${o.billCopies ? "REPRINTED" : o.printed ? "PRINTED" : "SENT"}</b> ${kdsChip(o.no)}</div><div class="row"><button class="mini" data-oa="add" data-o="${o.no}">Add items</button><button class="mini" data-oa="bill" data-o="${o.no}">Print bill</button>${can("swap") ? `<button class="mini" data-oa="swap" data-o="${o.no}">Swap</button>` : ""}<button class="chip on" data-oa="pay" data-o="${o.no}">Charge</button></div></div>`;
       }).join("")
     : '<div class="empty">No open orders. Use Send order to start one.</div>';
 }
@@ -24404,6 +26557,379 @@ $("#rcPrint").onclick = async () => {
     rcPrint(); // no receipt printer set up: the print dialog
   else if (r === "ok") $("#rcClose").click();
 };
+// ---- Kitchen display: every order sent from the POS, from the queue to the pass, and its status on the POS ----
+// A ticket is made for each station (Kitchen, Bar) each time a waiter sends items. Tickets live in their own
+// list (saved as KD), so a takeaway paid at once still reaches the kitchen. They move:
+//   new (in the queue) -> prep (being made) -> ready (at the pass) -> done (served)
+// and the POS shows each open bill's status from them. Changes reach other computers with the rest of the data.
+const KDS = [];
+// Settings → Kitchen display: when a ticket turns red, how long served ones stay, and what each screen shows.
+const kdsCfg = () => (typeof FD_SETTINGS !== "undefined" && FD_SETTINGS.kds) || {};
+const kdsLate = () => ({
+  new: +(kdsCfg().late || {}).new || 8,
+  prep: +(kdsCfg().late || {}).prep || 15
+});
+const kdsKeepH = () => +kdsCfg().keepH || 12;
+/** This computer's screen, as set in Back Office: { station, points }, or null to choose on screen. */
+const kdsScreen = () => {
+  const s = (kdsCfg().screens || {})[typeof MACHINE !== "undefined" ? MACHINE.name() : ""];
+  return s && (s.station !== "All" || (s.points || []).length) ? s : null;
+};
+const KDS_STATES = [
+  ["new", "Incoming"],
+  ["prep", "Preparing"],
+  ["ready", "Ready"],
+  ["done", "Served"]
+];
+const kdsMins = iso => Math.max(0, (Date.now() - new Date(iso).getTime()) / 60000);
+const kdsClock = m => {
+  const s = Math.floor(m * 60);
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+};
+const kdsEsc = s =>
+  String(s ?? "").replace(
+    /[&<>"]/g,
+    c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]
+  );
+const kdsSave = () => window.bosave && window.bosave();
+/** Tickets for what was just sent: one per station, like the printed order tickets. */
+function kdsAdd(tickets, o, note) {
+  const at = new Date().toISOString();
+  tickets.forEach(t =>
+    KDS.push({
+      id: `${o.no}-${o.rounds}-${t.station}`,
+      no: o.no,
+      ord: o.ord,
+      label: o.label,
+      waiter: t.d.waiter || o.waiter || "",
+      covers: o.covers || "",
+      guest: o.guest || "",
+      room: o.room || "",
+      dept: t.point || o.dept || "",
+      station: t.station,
+      round: o.rounds,
+      at,
+      note: note || "",
+      items: t.d.lines.map(l => ({ n: l.n, q: l.q })),
+      st: "new",
+      t: {}
+    })
+  );
+  kdsPrune();
+}
+function kdsPrune() {
+  const cut = Date.now() - kdsKeepH() * 3600e3;
+  for (let i = KDS.length - 1; i >= 0; i--)
+    if (KDS[i].st === "done" && new Date(KDS[i].t.done || KDS[i].at).getTime() < cut)
+      KDS.splice(i, 1);
+  if (KDS.length > 600) KDS.splice(0, KDS.length - 600);
+}
+
+// ---------------------------------------------------------------- status on the POS
+/** One word for where a bill's food and drinks are: "", new, prep, ready or done. */
+function kdsBillState(no) {
+  const T = KDS.filter(k => k.no === no);
+  if (!T.length) return "";
+  if (T.every(k => k.st === "done")) return "done";
+  const open = T.filter(k => k.st !== "done");
+  if (open.every(k => k.st === "ready")) return "ready";
+  if (open.some(k => k.st === "prep" || k.st === "ready")) return "prep";
+  return "new";
+}
+const KDS_WORDS = {
+  new: "In the queue",
+  prep: "Preparing",
+  ready: "Ready to serve",
+  done: "Served"
+};
+const kdsChip = no => {
+  const s = kdsOn() ? kdsBillState(no) : "";
+  return `<span class="kds-chip ${s}" data-kst="${kdsEsc(no)}">${s ? `<i></i>${KDS_WORDS[s]}` : ""}</span>`;
+};
+/** Keeps the status chips on the POS current, and tells a waiter when their order is ready. */
+const kdsSeen = {};
+function kdsPosTick() {
+  if (!kdsOn()) return;
+  document.querySelectorAll("[data-kst]").forEach(el => {
+    const s = kdsBillState(el.dataset.kst);
+    if (el.dataset.s === s) return;
+    el.dataset.s = s;
+    el.className = "kds-chip " + s;
+    el.innerHTML = s ? `<i></i>${KDS_WORDS[s]}` : "";
+  });
+  if (typeof user === "undefined" || !user || typeof orders === "undefined") return;
+  orders.forEach(o => {
+    const s = kdsBillState(o.no),
+      was = kdsSeen[o.no];
+    kdsSeen[o.no] = s;
+    if (
+      was !== undefined &&
+      was !== s &&
+      s === "ready" &&
+      o.waiter === user.n &&
+      !$("#kds").classList.contains("show")
+    ) {
+      kdsChime(2);
+      fsNote(`${o.label}: order ${o.ord} is ready to serve.`);
+    }
+  });
+}
+setInterval(kdsPosTick, 2000);
+
+// ---------------------------------------------------------------- the display
+const kdsV = {
+  tab: "new",
+  station: localStorage.getItem("kaytia_kds_station") || "All",
+  point: localStorage.getItem("kaytia_kds_point") || "All",
+  sound: localStorage.getItem("kaytia_kds_sound") !== "0",
+  dark: localStorage.getItem("kaytia_kds_dark") === "1",
+  sig: "",
+  known: null
+};
+let kdsTimer = null,
+  kdsAudio = null;
+/** Browsers keep sound off until someone taps the page: the first tap on the display turns it on. */
+function kdsUnlock() {
+  try {
+    kdsAudio = kdsAudio || new (window.AudioContext || window.webkitAudioContext)();
+    if (kdsAudio.state === "suspended") kdsAudio.resume().catch(() => {});
+  } catch (e) {}
+}
+function kdsChime(times = 1) {
+  if (!kdsV.sound) return;
+  try {
+    kdsAudio = kdsAudio || new (window.AudioContext || window.webkitAudioContext)();
+    for (let i = 0; i < times; i++)
+      [880, 1320].forEach((f, j) => {
+        const o = kdsAudio.createOscillator(),
+          g = kdsAudio.createGain(),
+          t0 = kdsAudio.currentTime + i * 0.45 + j * 0.16;
+        o.type = "sine";
+        o.frequency.value = f;
+        g.gain.setValueAtTime(0.0001, t0);
+        g.gain.exponentialRampToValueAtTime(0.25, t0 + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.35);
+        o.connect(g).connect(kdsAudio.destination);
+        o.start(t0);
+        o.stop(t0 + 0.4);
+      });
+  } catch (e) {}
+}
+const kdsShown = () => {
+  const s = kdsScreen(),
+    station = s ? s.station || "All" : kdsV.station,
+    pts = s ? s.points || [] : kdsV.point === "All" ? [] : [kdsV.point];
+  return KDS.filter(
+    k => (station === "All" || k.station === station) && (!pts.length || pts.includes(k.dept))
+  );
+};
+/** How long a ticket has been in its step, and whether that is too long. */
+function kdsAge(k) {
+  const since =
+      k.st === "new"
+        ? k.at
+        : k.st === "prep"
+          ? k.t.prep || k.at
+          : k.st === "ready"
+            ? k.t.ready
+            : k.t.done,
+    m = kdsMins(since || k.at),
+    late =
+      (k.st === "new" && m >= kdsLate().new) ||
+      (k.st === "prep" && kdsMins(k.at) >= kdsLate().prep);
+  return { m, late };
+}
+function kdsCard(k) {
+  const { m, late } = kdsAge(k),
+    tone = late ? "late" : k.st,
+    who = [
+      k.waiter,
+      k.covers ? `${k.covers} guest${k.covers === "1" ? "" : "s"}` : "",
+      k.room ? `Room ${k.room}` : ""
+    ]
+      .filter(Boolean)
+      .join(" · "),
+    total = kdsMins(k.at),
+    foot =
+      k.st === "new"
+        ? `Waiting <b data-kage="${k.id}">${kdsClock(m)}</b>`
+        : k.st === "prep"
+          ? `Preparing <b data-kage="${k.id}">${kdsClock(m)}</b> · ${Math.round(total)} min since sent`
+          : k.st === "ready"
+            ? `Ready <b data-kage="${k.id}">${kdsClock(m)}</b> ago · made in ${Math.max(1, Math.round(kdsMins(k.at) - m))} min`
+            : `Served ${new Date(k.t.done).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}`,
+    btn =
+      k.st === "new"
+        ? `<button class="kds-go start" data-kgo="prep" data-k="${k.id}">Start</button>`
+        : k.st === "prep"
+          ? `<button class="kds-go" data-kgo="ready" data-k="${k.id}">Mark ready</button><button class="kds-back" data-kgo="new" data-k="${k.id}" title="Back to the queue">↺</button>`
+          : k.st === "ready"
+            ? `<button class="kds-go served" data-kgo="done" data-k="${k.id}">Served</button><button class="kds-back" data-kgo="prep" data-k="${k.id}" title="Back to preparing">↺</button>`
+            : `<button class="kds-back wide" data-kgo="ready" data-k="${k.id}">Recall to the pass</button>`,
+    left = k.items.filter(x => !x.x).reduce((a, x) => a + x.q, 0),
+    all = k.items.reduce((a, x) => a + x.q, 0);
+  return `<article class="kds-t ${tone}" data-tk="${k.id}">
+  <header><div class="kds-h1"><b>Order ${kdsEsc(k.ord || k.no)}</b><span class="kds-st">${kdsEsc(k.station)}</span><time>${new Date(k.at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}</time></div>
+  <div class="kds-h2"><span class="kds-tbl">${kdsEsc(k.label || "No table")}</span><span>${kdsEsc(who)}</span></div></header>
+  ${k.round > 1 ? `<div class="kds-round">Round ${k.round} · added to bill ${kdsEsc(k.no)}</div>` : ""}
+  <ul>${k.items
+    .map(
+      (x, i) =>
+        `<li class="${x.x ? "x" : ""}" data-kx="${k.id}" data-i="${i}"><span class="kds-q">${x.q}</span><span class="kds-n">${kdsEsc(x.n.replace(/\s*\(.*\)$/, ""))}${/\(.*\)$/.test(x.n) ? `<small>${kdsEsc(x.n.match(/\((.*)\)$/)[1])}</small>` : ""}</span></li>`
+    )
+    .join("")}</ul>
+  ${k.note ? `<div class="kds-note">${kdsEsc(k.note)}</div>` : ""}
+  <footer><div class="kds-time">${foot}${k.st === "prep" && left < all ? ` · ${all - left} of ${all} done` : ""}</div><div class="kds-btns">${btn}</div></footer></article>`;
+}
+function kdsHTML() {
+  const L = kdsShown(),
+    n = s => L.filter(k => k.st === s).length,
+    list = L.filter(k => k.st === kdsV.tab).sort((a, b) =>
+      kdsV.tab === "done"
+        ? (b.t.done || "").localeCompare(a.t.done || "")
+        : a.at.localeCompare(b.at)
+    ),
+    points = [...new Set(KDS.map(k => k.dept).filter(Boolean))].sort(),
+    madeToday = KDS.filter(
+      k => k.t.ready && new Date(k.t.ready).toDateString() === new Date().toDateString()
+    ),
+    avg = madeToday.length
+      ? Math.round(
+          madeToday.reduce((a, k) => a + (new Date(k.t.ready) - new Date(k.at)) / 60000, 0) /
+            madeToday.length
+        )
+      : null,
+    late = L.filter(k => kdsAge(k).late && (k.st === "new" || k.st === "prep")).length;
+  return `<div class="kds-top">
+   <div class="kds-brand"><span class="kds-mark">K</span><div><b>Kitchen display</b><small>${kdsEsc(typeof FD_SETTINGS !== "undefined" ? FD_SETTINGS.name : "")}</small></div></div>
+   <nav class="kds-tabs">${KDS_STATES.map(([s, l]) => `<button class="${kdsV.tab === s ? "on" : ""} ${s}" data-ktab="${s}">${l}<i>${n(s)}</i></button>`).join("")}</nav>
+   <div class="kds-tools"><span class="kds-stat">${late ? `<b class="bad">${late} late</b>` : '<b class="ok">On time</b>'}<small>${avg === null ? "No orders made yet today" : avg < 1 ? "Average under a minute to make" : `Average ${avg} min to make`}</small></span><time id="kdsNow"></time>
+   <button class="kds-ic ${kdsV.sound ? "on" : ""}" data-kt="sound" title="Sound for new orders">${kdsV.sound ? "🔔" : "🔕"}</button><button class="kds-ic" data-kt="dark" title="Dark or light">${kdsV.dark ? "☀" : "☾"}</button><button class="kds-ic" data-kt="full" title="Full screen">⤢</button><button class="kds-exit" data-kt="exit">Exit</button></div>
+  </div>
+  ${
+    kdsScreen()
+      ? kdsLocHTML()
+      : `<div class="kds-filters"><div class="kds-seg">${["All", "Kitchen", "Bar"].map(s => `<button class="${kdsV.station === s ? "on" : ""}" data-kst2="${s}">${s === "All" ? "All stations" : s}</button>`).join("")}</div>
+   <label>Selling point<select data-kpt>${["All", ...points].map(p => `<option ${p === kdsV.point ? "selected" : ""} value="${kdsEsc(p)}">${p === "All" ? "All selling points" : kdsEsc(p)}</option>`).join("")}</select></label></div>`
+  }
+  <main class="kds-grid">${list.length ? list.map(kdsCard).join("") : `<div class="kds-empty"><b>${{ new: "No new orders", prep: "Nothing being prepared", ready: "Nothing waiting at the pass", done: "Nothing served yet" }[kdsV.tab]}</b><span>${kdsV.tab === "new" ? "Orders appear here as soon as a waiter sends them." : "Orders move here from the step before."}</span></div>`}</main>`;
+}
+/** A screen set up in Back Office says where it is, instead of offering filters. */
+function kdsLocHTML() {
+  const s = kdsScreen(),
+    pts = s.points || [];
+  return `<div class="kds-filters kds-loc"><span class="kds-pin" aria-hidden="true">●</span><div><b>${kdsEsc(typeof MACHINE !== "undefined" ? MACHINE.name() : "This screen")}</b> shows ${s.station === "All" || !s.station ? "kitchen and bar" : s.station === "Bar" ? "bar" : "kitchen"} orders from ${pts.length ? pts.map(kdsEsc).join(", ") : "every selling point"}<small>Set in Back Office → Settings → Kitchen display</small></div></div>`;
+}
+function kdsDraw(force) {
+  const box = $("#kds");
+  if (!box || !box.classList.contains("show")) return;
+  // Only what is shown: never the last signature or the known tickets, or it would grow every second.
+  const sig = JSON.stringify([
+    [kdsV.tab, kdsV.station, kdsV.point, kdsV.dark, kdsV.sound],
+    kdsScreen(),
+    kdsLate(),
+    kdsShown().map(k => [k.id, k.st, k.items.map(x => (x.x ? 1 : 0))])
+  ]);
+  // New orders since the last look: a chime, unless this is the first look.
+  const ids = new Set(KDS.filter(k => k.st === "new").map(k => k.id));
+  if (kdsV.known && [...ids].some(id => !kdsV.known.has(id))) kdsChime(1);
+  kdsV.known = ids;
+  if (force || sig !== kdsV.sig) {
+    kdsV.sig = sig;
+    box.className = `show ${kdsV.dark ? "dark" : ""}`;
+    box.innerHTML = kdsHTML();
+  }
+  // Timers and the clock tick without redrawing.
+  box.querySelectorAll("[data-kage]").forEach(el => {
+    const k = KDS.find(x => x.id === el.dataset.kage);
+    if (!k) return;
+    const a = kdsAge(k);
+    el.textContent = kdsClock(a.m);
+    const card = el.closest(".kds-t");
+    if (card && a.late && !card.classList.contains("late") && (k.st === "new" || k.st === "prep"))
+      kdsDraw(true);
+  });
+  const now = $("#kdsNow");
+  if (now)
+    now.textContent = new Date().toLocaleTimeString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+}
+function kdsOpen() {
+  if (!kdsOn()) return;
+  $("#start").style.display = "none";
+  $("#kds").classList.add("show");
+  kdsV.sig = "";
+  kdsV.known = null;
+  kdsDraw(true);
+  clearInterval(kdsTimer);
+  kdsTimer = setInterval(() => kdsDraw(false), 1000);
+}
+function kdsClose() {
+  clearInterval(kdsTimer);
+  $("#kds").className = "";
+  $("#kds").innerHTML = "";
+  if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+  $("#start").style.display = "grid";
+}
+function kdsMove(id, to) {
+  const k = KDS.find(x => x.id === id);
+  if (!k) return;
+  k.st = to;
+  k.t = { ...k.t, [to]: new Date().toISOString() };
+  if (to === "new") delete k.t.prep;
+  kdsPrune();
+  kdsSave();
+  kdsDraw(true);
+}
+document.addEventListener("click", e => {
+  const box = e.target.closest && e.target.closest("#kds");
+  if (!box) return;
+  const t = e.target.closest("[data-ktab],[data-kgo],[data-kt],[data-kst2],[data-kx]");
+  if (!t) return;
+  kdsUnlock();
+  const d = t.dataset;
+  if (d.ktab) {
+    kdsV.tab = d.ktab;
+    return kdsDraw(true);
+  }
+  if (d.kgo) return kdsMove(d.k, d.kgo);
+  if (d.kst2) {
+    kdsV.station = d.kst2;
+    localStorage.setItem("kaytia_kds_station", d.kst2);
+    return kdsDraw(true);
+  }
+  if (d.kx) {
+    const k = KDS.find(x => x.id === d.kx),
+      it = k && k.items[+d.i];
+    if (!it || k.st === "done") return;
+    it.x = !it.x;
+    kdsSave();
+    return kdsDraw(true);
+  }
+  if (d.kt === "exit") return kdsClose();
+  if (d.kt === "sound") {
+    kdsV.sound = !kdsV.sound;
+    localStorage.setItem("kaytia_kds_sound", kdsV.sound ? "1" : "0");
+    if (kdsV.sound) kdsChime(1);
+  }
+  if (d.kt === "dark") {
+    kdsV.dark = !kdsV.dark;
+    localStorage.setItem("kaytia_kds_dark", kdsV.dark ? "1" : "0");
+  }
+  if (d.kt === "full") {
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    else document.documentElement.requestFullscreen().catch(() => {});
+  }
+  kdsDraw(true);
+});
+document.addEventListener("change", e => {
+  if (!e.target.matches || !e.target.matches("#kds [data-kpt]")) return;
+  kdsV.point = e.target.value;
+  localStorage.setItem("kaytia_kds_point", e.target.value);
+  kdsDraw(true);
+});
 // ---- sending tickets to their own printers, through the master server ----
 // A browser cannot choose a printer without its print dialog, so tickets go to POST /api/print/ticket,
 // which talks to the network printer. If that fails the slip stays on screen to print by hand.
@@ -26003,6 +28529,7 @@ setInterval(tick, 30000);
 </script>
 
     <!-- ==================== Start menu (POS / Back Office / Front Desk) ==================== -->
+    <div id="kds" role="application" aria-label="Kitchen display"></div>
     <div id="sClock">
       <div class="sc-card">
         <div class="sc-time"><b id="scT"></b><span id="scD"></span></div>
@@ -26016,77 +28543,52 @@ setInterval(tick, 30000);
         <button class="sc-back" id="scBack">Back to main page</button>
       </div>
     </div>
-    <div id="start">
-      <div class="lbrand">
+    <div id="start" class="st2">
+      <div class="st-glow" aria-hidden="true"></div>
+      <header class="st-top">
         <div class="kf-brand"><span class="kf-m" aria-hidden="true">K</span><span class="kf-t"><b>Kaytia <em>Flow</em></b></span></div>
-        <h2>Everything your hotel needs.<br /><em>One smart place.</em></h2>
-        <p>
-          Sell at the counter, then watch sales, stock and staff update in the Back Office, all from
-          the same system.
-        </p>
-        <div class="sfloat">
-          <div class="fc c1">
-            <svg viewBox="0 0 24 24"><path d="M3 4h3l2 11h10l2-8H7M9 20h.01M17 20h.01" /></svg
-            ><b>Sell</b><span>One fast till for bar, kitchen and restaurant</span>
-          </div>
-          <div class="fc c2">
-            <svg viewBox="0 0 24 24"><path d="M12 3l8 4v10l-8 4-8-4V7zM4 7l8 4 8-4M12 11v10" /></svg
-            ><b>Track</b><span>Stock that updates with every sale</span>
-          </div>
-          <div class="fc c3">
-            <svg viewBox="0 0 24 24">
-              <path d="M5 4h11a3 3 0 013 3v13H8a3 3 0 01-3-3zM5 17a3 3 0 013-3h11" /></svg
-            ><b>Report</b><span>18 sales reports at your fingertips</span>
-          </div>
-        </div>
-        <small>Kaytia Flow · Developed by Kaytia Tech Services · POS Software · POS Hardware</small>
-      </div>
-      <div class="lform">
-        <div class="lcard">
-          <h3 id="stHi">Good evening,</h3>
-          <p class="ls">Welcome to Kaytia Flow. Where would you like to start?</p>
+        <div class="st-hotel"><span class="st-logo" id="stLogo" aria-hidden="true"></span><div><b id="stHotel"></b><small id="stBiz"></small></div></div>
+        <div class="st-clock"><b id="stTime"></b><small id="stDate"></small></div>
+      </header>
+      <main class="st-main">
+        <section class="st-hero">
+          <p class="st-kicker">Welcome to Kaytia Flow</p>
+          <h1><span id="stHi">Good evening,</span><em id="stPlace">where would you like to start?</em></h1>
           <div class="lic-chip" id="stLic"></div>
-          <button class="opt" data-go="pos">
-            <span class="oi"
-              ><svg viewBox="0 0 24 24">
-                <rect x="5" y="3" width="14" height="18" rx="2" />
-                <path
-                  d="M9 7h6M9 11h.01M12 11h.01M15 11h.01M9 14h.01M12 14h.01M15 14h.01"
-                /></svg></span
-            ><span class="ot"
-              ><b>POS Terminal</b><span>Sell at the counter and take payments</span></span
-            ><span class="oa">→</span>
+        </section>
+        <nav class="st-grid" aria-label="Where to start">
+          <button class="st-tile big" data-go="pos">
+            <span class="st-ic"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2" /><path d="M9 7h6M9 11h.01M12 11h.01M15 11h.01M9 14h.01M12 14h.01M15 14h.01M9 17h6" /></svg></span>
+            <span class="st-tx"><b>POS Terminal</b><span>Sell at the counter, send orders to the kitchen and bar, and take payments.</span><span class="st-feat"><em>Tables and takeaway</em><em>Kitchen and bar tickets</em><em>Cash, M-Pesa and card</em><em>Split and merge bills</em><em>Post to room</em></span></span>
+            <span class="st-go"><kbd>P</kbd><i aria-hidden="true">→</i></span>
           </button>
-          <button class="opt" data-go="bo">
-            <span class="oi bo"
-              ><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" /></svg></span
-            ><span class="ot"
-              ><b>Back Office</b><span>Dashboard, reports, stock and staff</span></span
-            ><span class="oa">→</span>
+          <button class="st-tile " data-go="bo">
+            <span class="st-ic"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" /></svg></span>
+            <span class="st-tx"><b>Back Office</b><span>Dashboard, reports, stock, purchasing, accounts and staff.</span><span class="st-feat st-feat-bo"><em>Live dashboard</em><em>Stock and purchasing</em><em>Accounts</em><em>HR and payroll</em><em>Reports</em></span></span>
+            <span class="st-go"><kbd>B</kbd><i aria-hidden="true">→</i></span>
           </button>
-          <button class="opt" data-go="fd">
-            <span class="oi fd"
-              ><svg viewBox="0 0 24 24">
-                <path d="M3 18V7M3 14h18v4M21 14v-2a3 3 0 00-3-3h-7v5M7 11h.01" /></svg></span
-            ><span class="ot"
-              ><b>Front Desk</b><span>Rooms, bookings, check-in and guest bills</span></span
-            ><span class="oa">→</span>
+          <button class="st-tile " data-go="fd">
+            <span class="st-ic"><svg viewBox="0 0 24 24"><path d="M3 18V7M3 14h18v4M21 14v-2a3 3 0 00-3-3h-7v5M7 11h.01" /></svg></span>
+            <span class="st-tx"><b>Front Desk</b><span>Rooms, bookings, check-in, housekeeping and guest bills.</span></span>
+            <span class="st-go"><kbd id="stFdKey">F</kbd><i aria-hidden="true">→</i></span>
           </button>
-          <button class="opt" data-go="clock">
-            <span class="oi"
-              ><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg></span
-            ><span class="ot"><b>Staff clock</b><span>Clock in or out with your password</span></span
-            ><span class="oa">→</span>
+          <button class="st-tile " data-go="kds">
+            <span class="st-ic"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2" /><path d="M8 20h8M12 16v4M7 8h4M7 11h6" /></svg></span>
+            <span class="st-tx"><b>Kitchen display</b><span>Orders for the kitchen and bar, live from the POS.</span></span>
+            <span class="st-go"><kbd>K</kbd><i aria-hidden="true">→</i></span>
           </button>
-          <div class="lsep"></div>
-          <p class="lalt">
-            Tip: press <kbd>P</kbd> POS, <kbd>B</kbd> Back Office<span id="stFdKey"> or <kbd>F</kbd> Front Desk</span>
-          </p>
-          <p class="lalt" style="font-size: 11.5px">
-            Kaytia Flow · Version 1.8.0 · Build 26 Oct 2026
-          </p>
-        </div>
-      </div>
+          <button class="st-tile " data-go="clock">
+            <span class="st-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg></span>
+            <span class="st-tx"><b>Staff clock</b><span>Clock in or out with your password.</span></span>
+            <span class="st-go"><kbd>C</kbd><i aria-hidden="true">→</i></span>
+          </button>
+        </nav>
+      </main>
+      <footer class="st-foot">
+        <span id="stPc"></span>
+        <span id="stNet"></span>
+        <span>Version 1.8.0 · Developed by Kaytia Tech Services</span>
+      </footer>
     </div>
     <!-- ==================== Back Office ==================== -->
     <div id="bo">
@@ -28531,10 +31033,29 @@ function fdShow() {
 let fdUser = null,
   posUser = null;
 /** Shows or hides everything outside the Back Office that belongs to the Front Desk. */
+/** The start page arranges its cards for the modules that are on: POS is always the big one. */
+function stLayout() {
+  const grid = $("#start .st-grid");
+  if (!grid) return;
+  const others = [...grid.querySelectorAll(".st-tile:not(.big)")].filter(
+    b => b.style.display !== "none"
+  );
+  others.forEach(b => b.classList.remove("wide"));
+  if (others.length === 3) others[2].classList.add("wide");
+  grid.dataset.n = String(others.length);
+}
 function fdModuleApply() {
   const on = fdOn(),
     show = (el, yes) => el && (el.style.display = yes ? "" : "none");
   show($('#start [data-go="fd"]'), on);
+  show($('#start [data-go="kds"]'), kdsOn());
+  show($('#start [data-go="clock"]'), clockOn());
+  stLayout();
+  if (!kdsOn() && $("#kds").classList.contains("show")) kdsClose();
+  if (!clockOn() && $("#sClock").classList.contains("show")) {
+    $("#sClock").classList.remove("show");
+    $("#start").style.display = "grid";
+  }
   show($("#stFdKey"), on);
   const room = $("#fRoom");
   if (room) {
@@ -29627,6 +32148,7 @@ function bosave() {
         VP: VPAYS,
         BL: BILLLOG,
         OR: orders,
+        KD: KDS,
         RN: rno,
         TB: TBL,
         FB: FREE_BILLS,
@@ -29717,6 +32239,8 @@ function boLoad(s, again) {
     });
     if (Object.keys(o.lines || {}).length) orders.push(o);
   });
+  KDS.length = 0;
+  KDS.push(...(s.KD || []));
   ISSUES.length = 0;
   ISSUES.push(...(s.IS || []));
   PRODS.length = 0;
@@ -29842,18 +32366,29 @@ USERS.forEach((u, i) => {
   if (!u.role)
     u.role = u.d.filter(posSells).length >= ALLD.filter(posSells).length ? "Manager" : "Waiter";
 });
+/** The short hash older copies saved when the browser had no SHA-256 (phones and tills on plain http). */
+const Hold = t => {
+  let h = 5381;
+  for (const c of "kaytia|" + t) h = ((h * 33) ^ c.charCodeAt(0)) >>> 0;
+  return "x" + h;
+};
+/** SHA-256 of a password. On plain http (a phone on the Wi-Fi) the browser has none, so our own gives the same answer. */
 const H = async t => {
-  t = "kaytia|" + t;
+  const s = "kaytia|" + t;
   try {
-    return [...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(t)))]
-      .map(b => b.toString(16).padStart(2, "0"))
-      .join("");
+    if (window.crypto && crypto.subtle)
+      return [...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)))]
+        .map(b => b.toString(16).padStart(2, "0"))
+        .join("");
+  } catch (e) {}
+  try {
+    return LIC.sha256(s);
   } catch (e) {
-    let h = 5381;
-    for (const c of t) h = ((h * 33) ^ c.charCodeAt(0)) >>> 0;
-    return "x" + h;
+    return Hold(t);
   }
 };
+/** Does this saved hash belong to that password (either kind)? */
+const hashIs = async (saved, t) => !!saved && (saved === (await H(t)) || saved === Hold(t));
 if (!ADM.length)
   H("admin|admin123").then(h => {
     if (!ADM.length) {
@@ -30227,6 +32762,8 @@ const ACT_RIGHTS = {
   sy_setup: "set.manage",
   svc_auto: "set.manage",
   svc_restart: "set.manage",
+  web_onoff: "set.manage",
+  web_rm: "set.manage",
   sy_onoff: "set.manage",
   sy_forget: "set.manage",
   sy_now: "set.manage",
@@ -34625,6 +37162,167 @@ function makeRequisition(dept, store, note, lines, by) {
   return r;
 }
 invF.nrq = { open: false, to: "", store: "", note: "", pick: "", lines: [] };
+// ---- Issue items and New requisition share one entry row: the item picker (only what the store holds) and
+// Pieces or Boxes / crates. Crates use the item's own crate size, so stock always moves in exact pieces.
+/** "2 Crates = 48 pcs" or "6 pcs", as a badge that tells the two apart at a glance. */
+function unitBadge(k, units, per, un) {
+  const u = itemInfo(k),
+    p = +per || 0;
+  if (p > 1) {
+    const n = units / p;
+    return `<span class="u-badge crate"><b>${qn(n)}</b> ${esc(n === 1 ? un : rcPlural(un))}</span><small class="u-eq">= ${qn(units)} ${esc(u.uom)}</small>`;
+  }
+  return `<span class="u-badge pcs"><b>${qn(units)}</b> ${esc(u.uom)}</span>`;
+}
+/** What the store holds: pieces first, and the same in crates underneath when the item comes in crates. */
+function stockCell(k, left, short) {
+  const u = itemInfo(k),
+    p = +u.perBuy || 0,
+    un = u.buyUnit || "Crate",
+    cr =
+      p > 1 && left > 0
+        ? `<small class="u-eq">${qn(Math.floor(left / p))} ${esc(Math.floor(left / p) === 1 ? un : rcPlural(un))}${left % p ? " + " + qn(left % p) + " " + esc(u.uom) : ""}</small>`
+        : "";
+  return `<span class="st-have${short ? " short" : left > 0 ? "" : " none"}"><b>${qn(left)}</b> ${esc(u.uom)}</span>${cr}`;
+}
+/** The lines of a new purchase order, in the same look as issue and requisition. */
+function poLinesHTML(F) {
+  const L = F.lines.map(x => ({
+    k: x.k,
+    q: x.qty * (+x.per || 1),
+    per: +x.per > 1 ? +x.per : 0,
+    un: x.unit
+  }));
+  return `<div class="tw"><table class="t se-t po-t"><tr><th>Item</th><th>Quantity</th><th class="n">Price</th><th class="n">Total (KES)</th><th></th></tr>${F.lines
+    .map((x, i) => {
+      const u = itemInfo(x.k),
+        box = +x.per > 1;
+      return `<tr class="${box ? "is-crate" : "is-pcs"}"><td><span class="se-it"><span class="rc-av">${esc((pkName(x.k) || "?")[0].toUpperCase())}</span><span><b>${esc(pkName(x.k))}</b><small>${u.code ? esc(u.code) + " · " : ""}${esc(u.group || "")}</small></span></span></td><td>${unitBadge(x.k, L[i].q, L[i].per, x.unit)}</td><td class="n">${m2(x.price)}<small class="u-eq">per ${esc(box ? String(x.unit || "crate").toLowerCase() : u.uom)}</small></td><td class="n"><b>${m2(x.qty * x.price)}</b></td><td class="n"><button class="mini" data-a="inv_poldel" data-i="${i}" aria-label="Remove ${esc(pkName(x.k))}">✕</button></td></tr>`;
+    })
+    .join(
+      ""
+    )}<tr class="se-tot"><td>${plural(F.lines.length, "line")}</td><td>${seTotals(L)}</td><td class="n">Order total</td><td class="n po-sum">KES ${m2(lpoTotal(F))}</td><td></td></tr></table></div>`;
+}
+/** The store the stock comes from, for this form. */
+const seFrom = f => (f === "is" ? invF.is.from || STKT.loc : invF.nrq.store);
+const seKeys = f => {
+  const s = seFrom(f);
+  return pickKeys().filter(k => !isStore(s) || storeHolds(s, k));
+};
+function seChoose(f, k) {
+  const F = invF[f];
+  Object.assign(F, { eK: k, eName: pkName(k), eBy: rcHasBox(k) ? F.eBy || "uom" : "uom" });
+  all();
+  const q = $("#" + f + "Qty");
+  if (q) q.focus();
+}
+function seConv(f) {
+  const F = invF[f];
+  if (!F.eK) return "";
+  const u = itemInfo(F.eK),
+    q = parseFloat(F.eQty),
+    have0 = have(seFrom(f), F.eK),
+    inStore = `${seFrom(f)} has ${qtyBoth(F.eK, have0)}`;
+  if (F.eBy === "buy" && q > 0)
+    return `${qn(q)} ${(q === 1 ? u.buyUnit : rcPlural(u.buyUnit)).toLowerCase()} × ${qn(+u.perBuy)} = ${qn(q * u.perBuy)} ${u.uom} · ${inStore}`;
+  return inStore;
+}
+function seHTML(f, verb) {
+  const F = invF[f],
+    id = f + "Name";
+  PICKERS[id] = PICKERS[id] || {
+    box: f + "Pick",
+    text: () => invF[f].eName || "",
+    keys: () => seKeys(f),
+    dest: () => seFrom(f),
+    choose: k => seChoose(f, k)
+  };
+  if (F.eK && !seKeys(f).includes(F.eK)) Object.assign(F, { eK: "", eName: "" });
+  const u = F.eK ? itemInfo(F.eK) : null,
+    box = !!(F.eK && rcHasBox(F.eK)),
+    byBox = box && F.eBy === "buy";
+  return `<div class="grn-entry se-entry">
+   <label class="grn-e-item">Item<span class="grn-inl rc-combo"><input id="${id}" data-iv="${f}.eName" value="${esc(F.eName || "")}" placeholder="Type a name, code or category" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="${f}Pick"><div class="rc-pick" id="${f}Pick" role="listbox" hidden></div></span></label>
+   <div class="grn-by"><span>${verb} by</span><div class="seg2"><button class="${byBox ? "" : "on"}" data-a="inv_seby" data-f="${f}" data-v="uom">Pieces${u && u.uom !== "pcs" ? ` (${esc(u.uom)})` : ""}</button><button class="${byBox ? "on" : ""}" data-a="inv_seby" data-f="${f}" data-v="buy" ${box ? "" : 'disabled title="This item has no crate size yet. It gets one when it is received or ordered by the crate."'}>${box ? `${esc(rcPlural(u.buyUnit))} of ${qn(+u.perBuy)}` : "Boxes / crates"}</button></div></div>
+   <label>${byBox ? `${esc(rcPlural(u.buyUnit))}` : u && u.uom !== "pcs" ? esc(u.uom) : "Pieces"} to ${verb.toLowerCase()}<input id="${f}Qty" data-iv="${f}.eQty" type="number" min="0" step="any" value="${esc(F.eQty || "")}"></label>
+   <button class="chip on grn-add" data-a="inv_seadd" data-f="${f}">${I("plus")}Add line</button>
+  </div><div class="grn-conv se-conv" id="${f}Conv">${esc(seConv(f))}</div>`;
+}
+/** The lines on an issue or requisition: the item, how much in pieces or crates, and what the store holds. */
+function seLinesHTML(f, delAct) {
+  const F = invF[f],
+    s = seFrom(f);
+  if (!F.lines.length) return '<div class="se-empty">No lines yet. Pick an item above.</div>';
+  return `<div class="tw"><table class="t se-t"><tr><th>Item</th><th>Quantity</th><th class="n">In ${esc(s)}</th><th></th></tr>${F.lines
+    .map((x, i) => {
+      const u = itemInfo(x.k),
+        left = have(s, x.k),
+        short = left + 1e-9 < x.q;
+      return `<tr class="${+x.per > 1 ? "is-crate" : "is-pcs"}"><td><span class="se-it"><span class="rc-av">${esc((pkName(x.k) || "?")[0].toUpperCase())}</span><span><b>${esc(pkName(x.k))}</b><small>${u.code ? esc(u.code) + " · " : ""}${esc(u.group || "")}</small></span></span></td><td>${unitBadge(x.k, x.q, x.per, x.un)}</td><td class="n">${stockCell(x.k, left, short)}</td><td class="n"><button class="mini" data-a="${delAct}" data-f="${f}" data-i="${i}" aria-label="Remove ${esc(pkName(x.k))}">✕</button></td></tr>`;
+    })
+    .join(
+      ""
+    )}<tr class="se-tot"><td>${plural(F.lines.length, "line")}</td><td colspan="3">${seTotals(F.lines)}</td></tr></table></div>`;
+}
+/** Crates and pieces added up separately, then all in pieces. */
+function seTotals(L) {
+  const crates = {},
+    pcs = {};
+  L.forEach(x => {
+    const u = itemInfo(x.k);
+    if (+x.per > 1) crates[x.un] = (crates[x.un] || 0) + x.q / x.per;
+    else pcs[u.uom] = (pcs[u.uom] || 0) + x.q;
+  });
+  const parts = [
+    ...Object.entries(crates).map(
+      ([un, n]) =>
+        `<span class="u-badge crate"><b>${qn(n)}</b> ${esc(n === 1 ? un : rcPlural(un))}</span>`
+    ),
+    ...Object.entries(pcs).map(
+      ([uom, n]) => `<span class="u-badge pcs"><b>${qn(n)}</b> ${esc(uom)}</span>`
+    )
+  ];
+  return parts.join(" ");
+}
+function seSync(f, field) {
+  const F = invF[f];
+  if (field === "eName") {
+    pkShow(f + "Name", true);
+    const n = itemNorm(F.eName),
+      k = n && seKeys(f).find(x => itemNorm(pkName(x)) === n || itemNorm(itemInfo(x).code) === n);
+    if (k && k !== F.eK) return seChoose(f, k);
+    if (!k) F.eK = "";
+  }
+  const c = $("#" + f + "Conv");
+  if (c) c.textContent = seConv(f);
+}
+function seAdd(f) {
+  const F = invF[f],
+    k = F.eK,
+    n = parseFloat(F.eQty);
+  if (!k) return toast("Choose an item (type its name, then pick it from the list).");
+  if (!(n > 0)) return toast("Enter a quantity above zero.");
+  const u = itemInfo(k),
+    byBox = F.eBy === "buy" && rcHasBox(k),
+    per = byBox ? +u.perBuy : 0,
+    q = byBox ? n * per : n,
+    src = seFrom(f),
+    ex = F.lines.find(x => x.k === k),
+    want = q + (ex ? ex.q : 0);
+  if (f === "is" && want > have(src, k) + 1e-9)
+    return toast(`Only ${qtyBoth(k, have(src, k))} of ${pkName(k)} in ${src}.`);
+  if (ex) {
+    ex.q = want;
+    if (+ex.per !== per) {
+      delete ex.per;
+      delete ex.un;
+    }
+  } else F.lines.push({ k, q, ...(per ? { per, un: u.buyUnit } : {}) });
+  Object.assign(F, { eK: "", eName: "", eQty: "" });
+  all();
+  const x = $("#" + f + "Name");
+  if (x) x.focus();
+}
 /** Raise a requisition from the Back Office, for any selling point or department. */
 function reqNewHTML(here) {
   const F = invF.nrq,
@@ -34636,8 +37334,8 @@ function reqNewHTML(here) {
   F.store = pick(F.store || (isStore(here) ? here : ""), STORES);
   return `<div class="pn"><div class="inv-head"><h4>New requisition</h4><button class="mini" data-a="inv_nrq">Close</button></div>
   <div class="fr"><label>For<select data-iv="nrq.to">${opts(ALLD, F.to)}</select></label><label>From store<select data-iv="nrq.store">${opts(STORES, F.store)}</select></label><label>Note<input data-iv="nrq.note" value="${esc(F.note)}" placeholder="Optional"></label></div>
-  ${prLineEditor("nrq", itemsByName(), "Item", "Quantity")}
-  ${F.lines.length ? `<div class="tw"><table class="t"><tr><th>Item</th><th class="n">Quantity</th><th class="n">In ${esc(F.store)}</th><th></th></tr>${F.lines.map((x, i) => `<tr><td>${esc(itemInfo(x.k).name)}</td><td class="n">${qtyBoth(x.k, x.q)}</td><td class="n">${qtyAt(F.store, x.k)}</td><td><button class="mini" data-a="rec_ldel" data-f="nrq" data-i="${i}">✕</button></td></tr>`).join("")}</table></div>` : ""}
+  ${seHTML("nrq", "Request")}
+  ${seLinesHTML("nrq", "rec_ldel")}
   <div class="fr"><button class="chip on" data-a="inv_nrqgo">Send requisition</button></div></div>`;
 }
 function reqNewSend() {
@@ -34749,7 +37447,7 @@ function issHTML() {
   F.from = STKT.loc;
   // Until someone chooses, stock goes to the store's materials store first (Recipes & Production).
   F.to = ALLD.includes(F.to) ? F.to : issueDefault(F.from);
-  return `<div class="pn"><h4>Issue stock from ${placeLabel(F.from)} to a selling point</h4><div class="fr"><label>Issue to selling point<select data-iv="is.to">${opts(ALLD, F.to)}</select></label><label>Note<input data-iv="is.note" value="${esc(F.note)}" placeholder="Optional"></label></div>${lineEd("is")}<button class="chip on" data-a="inv_isspost">${boCan("inv.approve") ? "Issue stock" : "Raise issue note"}</button><div class="stk">${boCan("inv.approve") ? "No requisition needed. The stock moves as soon as you issue it." : "No requisition needed. The stock moves when a manager approves the issue note."}</div></div>
+  return `<div class="pn"><h4>Issue stock from ${placeLabel(F.from)} to a selling point</h4><div class="fr"><label>Issue to selling point<select data-iv="is.to">${opts(ALLD, F.to)}</select></label><label>Note<input data-iv="is.note" value="${esc(F.note)}" placeholder="Optional"></label></div>${seHTML("is", "Issue")}${seLinesHTML("is", "inv_ldel")}<button class="chip on" data-a="inv_isspost">${boCan("inv.approve") ? "Issue stock" : "Raise issue note"}</button><div class="stk">${boCan("inv.approve") ? "No requisition needed. The stock moves as soon as you issue it." : "No requisition needed. The stock moves when a manager approves the issue note."}</div></div>
  ${apIssueNotes(F.from)}
  <div class="pn tw"><h4>Recent issues</h4>${tb(
    ["Date", "Reference", "From", "To", "Item", "#Quantity", "By"],
@@ -34899,7 +37597,7 @@ function storesHTML() {
     supplies = l => ALLD.filter(o => (OUTLET_INFO[o] || {}).store === l);
   return `<div class="pn tw"><div class="inv-head"><h4>Stores (${STORES.length})</h4><button class="chip on" data-a="inv_stnew">New store</button></div><table class="t"><tr><th>Store</th><th>Holds</th><th class="n">Items in stock</th><th class="n">Stock value (KES)</th><th>Supplies</th><th class="n">Open requisitions</th><th class="n">Open LPOs</th><th></th></tr>${STORES.map(
     l =>
-      `<tr><td><b>${esc(l)}</b></td><td>${storeKindCell(l)}</td><td class="n">${Object.keys(ING).filter(k => have(l, k) > 0).length}</td><td class="n">${m2(storeValue(l))}</td><td>${esc(supplies(l).join(", ") || "-")}</td><td class="n">${reqOpen(l)}</td><td class="n">${lpoOpenN(l)}</td><td class="n"><span class="sp-acts"><button class="mini" data-a="inv_loc" data-l="${esc(l)}">Stock master</button><button class="mini" data-a="pur_go" data-l="${esc(l)}" data-t="receive">Receive</button><button class="mini" data-a="pur_go" data-l="${esc(l)}" data-t="lpo">LPO</button><button class="mini" data-a="inv_stedit" data-l="${esc(l)}">Edit</button><button class="mini cat-del" data-a="inv_stdel" data-l="${esc(l)}">Delete</button></span></td></tr>`
+      `<tr><td><b>${esc(l)}</b>${l === defaultStore() ? ' <span class="tag ok" title="Receive goods opens on this store">Default</span>' : ""}</td><td>${storeKindCell(l)}</td><td class="n">${Object.keys(ING).filter(k => have(l, k) > 0).length}</td><td class="n">${m2(storeValue(l))}</td><td>${esc(supplies(l).join(", ") || "-")}</td><td class="n">${reqOpen(l)}</td><td class="n">${lpoOpenN(l)}</td><td class="n"><span class="sp-acts"><button class="mini" data-a="inv_loc" data-l="${esc(l)}">Stock master</button><button class="mini" data-a="pur_go" data-l="${esc(l)}" data-t="receive">Receive</button><button class="mini" data-a="pur_go" data-l="${esc(l)}" data-t="lpo">LPO</button><button class="mini" data-a="inv_stedit" data-l="${esc(l)}">Edit</button><button class="mini cat-del" data-a="inv_stdel" data-l="${esc(l)}">Delete</button></span></td></tr>`
   ).join("")}</table></div>`;
 }
 /** A new store or selling point name must be unique across all places. */
@@ -34913,12 +37611,101 @@ function placeNameError(name) {
 }
 
 // ---- local purchase orders ----
+/** Pieces in one unit of an order line: its own (Crate of 24, or 1 for pieces), or for older orders the item's. */
+const lpoPer = x => +x.per || +itemInfo(x.k).perBuy || 1,
+  lpoUnit = x => x.unit || itemInfo(x.k).buyUnit;
+/** Before an item's box size changes, its open orders keep the size they were made with. */
+function lpoKeepUnits(k) {
+  const u = itemInfo(k);
+  LPOS.forEach(p =>
+    p.lines.forEach(x => {
+      if (x.k === k && !x.per) {
+        x.per = +u.perBuy || 1;
+        x.unit = u.buyUnit;
+      }
+    })
+  );
+}
 const lpoTotal = p => p.lines.reduce((a, x) => a + x.qty * x.price, 0),
   lpoOpen = p => p.status === "Open" || p.status === "Partly received";
-function lpoHTML() {
+/** The store an order is for: the one chosen above, or the default store. */
+const poStore = () => (isStore(invF.rc.dept) ? invF.rc.dept : defaultStore());
+const poKeys = () => {
+  const s = poStore();
+  return pickKeys().filter(k => storeHolds(s, k));
+};
+/** Choose the item to order: its own box if it has one, at its last price. */
+function poPickItem(k) {
   const F = invF.po,
-    keys = pickKeys().sort((a, b) => itemInfo(a).name.localeCompare(itemInfo(b).name));
-  F.store = STKT.loc;
+    u = itemInfo(k),
+    own = +u.perBuy !== 1 || u.buyUnit !== u.uom;
+  Object.assign(F, {
+    eK: k,
+    eName: u.name,
+    eUnits: own ? "buy" : "uom",
+    eBox: own ? u.buyUnit : F.eBox || "Crate",
+    ePer: own ? String(+u.perBuy) : "",
+    ePrice: +u.buyPrice
+      ? String(Math.round((own ? +u.buyPrice : +u.buyPrice / (+u.perBuy || 1)) * 100) / 100)
+      : ""
+  });
+  all();
+  const q = $("#po_q");
+  if (q) q.focus();
+}
+function poConvText() {
+  const F = invF.po;
+  if (!F.eK || F.eUnits !== "buy") return "";
+  const u = itemInfo(F.eK),
+    per = parseFloat(F.ePer),
+    q = parseFloat(F.eQty),
+    box = (F.eBox || "box").toLowerCase();
+  if (!(per > 0)) return `Type how many ${u.uom} are in one ${box}.`;
+  return q > 0
+    ? `${qn(q)} ${q === 1 ? box : rcPlural(box)} × ${qn(per)} = ${qn(q * per)} ${u.uom}`
+    : `One ${box} holds ${qn(per)} ${u.uom}`;
+}
+function poEntryHTML() {
+  const F = invF.po,
+    byBox = F.eUnits === "buy",
+    uom = F.eK ? itemInfo(F.eK).uom : "pcs",
+    boxWord = (F.eBox || "box").toLowerCase();
+  return `<div class="grn-entry po-entry">
+   <label class="grn-e-item">Item<span class="grn-inl rc-combo"><input id="poName" data-iv="po.eName" value="${esc(F.eName || "")}" placeholder="Type a name, code or category" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="poPick"><div class="rc-pick" id="poPick" role="listbox" hidden></div></span></label>
+   <div class="grn-by"><span>Order by</span><div class="seg2"><button class="${byBox ? "" : "on"}" data-a="inv_poby" data-v="uom">Pieces${F.eK && uom !== "pcs" ? ` (${esc(uom)})` : ""}</button><button class="${byBox ? "on" : ""}" data-a="inv_poby" data-v="buy">Boxes / crates</button></div></div>
+   ${byBox ? `<label>Box or crate<select data-iv="po.eBox">${[...new Set([F.eBox, ...RC_BOXES].filter(Boolean))].map(b => `<option ${b === F.eBox ? "selected" : ""}>${esc(b)}</option>`).join("")}</select></label><label>${esc(uom)} in one ${esc(boxWord)}<input id="poPer" data-iv="po.ePer" type="number" min="1" step="any" value="${esc(F.ePer || "")}" placeholder="e.g. 24"></label>` : ""}
+   <label>${byBox ? `${esc(rcPlural(F.eBox || "Box"))} to order` : `${esc(uom === "pcs" ? "Pieces" : uom)} to order`}<input id="po_q" data-iv="po.eQty" type="number" min="0" step="any" value="${esc(F.eQty || "")}"></label>
+   <label>Price per ${byBox ? esc(boxWord) : esc(uom === "pcs" ? "piece" : uom)} (KES)<input id="po_p" data-iv="po.ePrice" type="number" min="0" step="any" value="${esc(F.ePrice || "")}" placeholder="Last price"></label>
+   <button class="chip on grn-add" data-a="inv_poladd">${I("plus")}Add line</button>
+  </div><div class="grn-conv" id="poConv">${esc(poConvText())}</div>`;
+}
+/** Typing in the order's entry row: the list, the boxes-to-pieces line, and the price for a new box size. */
+function poSync(f) {
+  const F = invF.po;
+  if (f === "eName") {
+    pkShow("poName", true);
+    const n = itemNorm(F.eName),
+      k = n && poKeys().find(x => itemNorm(pkName(x)) === n || itemNorm(itemInfo(x).code) === n);
+    if (k && k !== F.eK) return poPickItem(k);
+    if (!k) F.eK = "";
+  }
+  if (f === "eBox") return all();
+  if (f === "ePer" && F.eK && F.eUnits === "buy") {
+    const u = itemInfo(F.eK),
+      pp = +u.buyPrice ? +u.buyPrice / (+u.perBuy || 1) : 0,
+      per = parseFloat(F.ePer);
+    if (pp && per > 0) {
+      F.ePrice = String(Math.round(pp * per * 100) / 100);
+      const p = $("#po_p");
+      if (p) p.value = F.ePrice;
+    }
+  }
+  const c = $("#poConv");
+  if (c) c.textContent = poConvText();
+}
+function lpoHTML() {
+  const F = invF.po;
+  F.store = STKT.loc = poStore();
   const tag = s => (s === "Received" ? "ok" : s === "Cancelled" || s === "Closed" ? "bad" : "warn"),
     mine = LPOS.map((p, i) => [p, i]).filter(([p]) => p.store === F.store);
   const showForm = invPoNew || F.lines.length > 0 || !mine.length;
@@ -34926,12 +37713,8 @@ function lpoHTML() {
     showForm
       ? `<div class="pn"><h4>New local purchase order (LPO) for ${placeLabel(F.store)}</h4>
   <div class="fr"><label>Vendor<span class="fr" style="flex-wrap:nowrap"><select data-iv="po.sup"><option value="">Choose a vendor…</option>${[...new Set([...vendorNames(), ...(F.sup ? [F.sup] : [])])].map(s => `<option ${s === F.sup ? "selected" : ""}>${esc(s)}</option>`).join("")}</select><button class="mini" data-a="inv_vnopen" title="Add a vendor">+</button></span></label><label>Expected delivery<input type="date" data-iv="po.due" value="${esc(F.due)}"></label><label>Note<input data-iv="po.note" value="${esc(F.note)}" placeholder="Optional"></label></div>
-  <div class="fr" style="align-items:end"><label>Item<select id="po_k">${keys.map(k => `<option value="${k}">${esc(itemInfo(k).name)} · ${esc(buyLabel(itemInfo(k)))}</option>`).join("")}</select></label><label>Quantity (buying units)<input id="po_q" type="number" min="0" step="any"></label><label>Price per buying unit (KES)<input id="po_p" type="number" min="0" step="any" placeholder="Last price"></label><button class="mini" data-a="inv_poladd">Add line</button></div>
-  ${
-    F.lines.length
-      ? `<div class="tw"><table class="t"><tr><th>Item</th><th class="n">Quantity</th><th class="n">Price</th><th class="n">Total (KES)</th><th></th></tr>${F.lines.map((x, i) => `<tr><td>${esc(itemInfo(x.k).name)}</td><td class="n">${qn(x.qty)} ${esc(itemInfo(x.k).buyUnit)}</td><td class="n">${m2(x.price)}</td><td class="n">${m2(x.qty * x.price)}</td><td><button class="mini" data-a="inv_poldel" data-i="${i}">✕</button></td></tr>`).join("")}<tr><td colspan="3"><b>Order total</b></td><td class="n"><b>${m2(lpoTotal(F))}</b></td><td></td></tr></table></div>`
-      : ""
-  }
+  ${poEntryHTML()}
+  ${F.lines.length ? poLinesHTML(F) : ""}
   <div class="fr"><button class="chip on" data-a="inv_pomake">Create LPO</button><button class="mini" data-a="inv_ponew">Cancel</button></div></div>`
       : ""
   }
@@ -34944,7 +37727,7 @@ function lpoHTML() {
              `<details ${lpoOpen(p) ? "open" : ""}><summary>${dt2(p.at)} · ${p.id} · ${esc(p.sup)} → ${esc(p.store)} · KES ${m2(lpoTotal(p))}${p.due ? " · due " + esc(p.due) : ""} <span class="tag ${tag(p.status)}" style="float:right">${p.status}</span></summary><div style="padding:8px 0"><div class="tw"><table class="t"><tr><th>Item</th><th class="n">Ordered</th><th class="n">Received</th><th class="n">Remaining</th><th class="n">Price</th><th class="n">Total (KES)</th>${lpoOpen(p) ? "<th>Receive now</th>" : ""}</tr>${p.lines
                .map((x, j) => {
                  const left = Math.max(0, x.qty - x.recv);
-                 return `<tr><td>${esc(itemInfo(x.k).name)}</td><td class="n">${qn(x.qty)} ${esc(itemInfo(x.k).buyUnit)}</td><td class="n">${qn(x.recv)}</td><td class="n">${qn(left)}</td><td class="n">${m2(x.price)}</td><td class="n">${m2(x.qty * x.price)}</td>${lpoOpen(p) ? `<td><input type="number" min="0" step="any" id="pr_${i}_${j}" value="${left}" style="max-width:110px"></td>` : ""}</tr>`;
+                 return `<tr><td>${esc(itemInfo(x.k).name)}</td><td class="n">${qn(x.qty)} ${esc(lpoUnit(x))}</td><td class="n">${qn(x.recv)}</td><td class="n">${qn(left)}</td><td class="n">${m2(x.price)}</td><td class="n">${m2(x.qty * x.price)}</td>${lpoOpen(p) ? `<td><input type="number" min="0" step="any" id="pr_${i}_${j}" value="${left}" style="max-width:110px"></td>` : ""}</tr>`;
                })
                .join(
                  ""
@@ -35361,7 +38144,7 @@ function invExport() {
   } catch (e) {}
   ta.remove();
   try {
-    navigator.clipboard.writeText(T).catch(() => {});
+    if (navigator.clipboard) navigator.clipboard.writeText(T).catch(() => {});
     ok = true;
   } catch (e) {}
   toast(ok ? "Stock master copied. Paste it into Excel." : "Could not copy. Try again.");
@@ -35511,7 +38294,7 @@ function invAct(a, b) {
     stE =
       a === "stnew"
         ? { was: "", name: "", kinds: [] }
-        : { was: d.l, name: d.l, kinds: storeKinds(d.l) };
+        : { was: d.l, name: d.l, kinds: storeKinds(d.l), def: !!(storeInfos()[d.l] || {}).def };
     all();
     return $("#stName").focus();
   }
@@ -35553,19 +38336,48 @@ function invAct(a, b) {
     return all();
   }
   // ---- local purchase orders
+  if (a === "poby") {
+    const F = invF.po,
+      was = F.eUnits;
+    F.eUnits = d.v === "buy" ? "buy" : "uom";
+    if (F.eUnits === "buy" && !F.eBox) F.eBox = "Crate";
+    const per = parseFloat(F.ePer),
+      p = parseFloat(F.ePrice);
+    if (was !== F.eUnits && p > 0 && per > 0)
+      F.ePrice = String(Math.round((F.eUnits === "buy" ? p * per : p / per) * 100) / 100);
+    all();
+    const n = $(F.eUnits === "buy" && !(per > 0) ? "#poPer" : "#po_q");
+    return n && n.focus();
+  }
   if (a === "poladd") {
-    const k = $("#po_k").value,
-      q = parseFloat($("#po_q").value),
-      pv = $("#po_p").value.trim(),
-      p = pv === "" ? +itemInfo(k).buyPrice : parseFloat(pv);
-    if (!k) return toast("Create items in Item setup first.");
+    const F = invF.po,
+      k = F.eK,
+      q = parseFloat(F.eQty),
+      pv = String(F.ePrice || "").trim(),
+      u = k ? itemInfo(k) : null,
+      byBox = F.eUnits === "buy",
+      per = byBox ? parseFloat(F.ePer) : 1,
+      unit = byBox ? (F.eBox || "Crate").trim() : u ? u.uom : "",
+      p =
+        pv === "" && u
+          ? byBox
+            ? (+u.buyPrice / (+u.perBuy || 1)) * per
+            : +u.buyPrice / (+u.perBuy || 1)
+          : parseFloat(pv);
+    if (!poKeys().length) return toast("Create items in Item setup first.");
+    if (!k) return toast("Choose an item (type its name, then pick it from the list).");
+    if (byBox && !(per > 0))
+      return toast(`Enter how many ${u.uom} are in one ${unit.toLowerCase()}.`);
     if (!(q > 0)) return toast("Enter the quantity to order.");
     if (!(p >= 0)) return toast("The price must be 0 or more.");
-    const L = invF.po.lines,
-      ex = L.find(x => x.k === k && x.price === p);
+    const L = F.lines,
+      ex = L.find(x => x.k === k && x.price === p && x.unit === unit && +x.per === per);
     if (ex) ex.qty += q;
-    else L.push({ k, qty: q, price: p });
-    return all();
+    else L.push({ k, qty: q, price: p, per, unit });
+    Object.assign(F, { eK: "", eName: "", eQty: "", ePrice: "", ePer: "", eUnits: F.eUnits });
+    all();
+    const n = $("#poName");
+    return n && n.focus();
   }
   if (a === "poldel") {
     invF.po.lines.splice(+d.i, 1);
@@ -35582,6 +38394,14 @@ function invAct(a, b) {
     if (!isStore(F.store)) return toast("Choose a store above. Only stores order from vendors.");
     if (!F.sup.trim()) return toast("Choose the vendor.");
     if (!F.lines.length) return toast("Add at least one line.");
+    // An item ordered in a box it didn't have before keeps that box size for next time.
+    F.lines.forEach(x => {
+      const u = itemInfo(x.k);
+      if (+x.per > 1 && +u.perBuy === 1 && u.buyUnit === u.uom) {
+        lpoKeepUnits(x.k);
+        INGU[x.k] = { ...u, perBuy: +x.per, buyUnit: x.unit, buyPrice: x.price };
+      }
+    });
     const p = {
       id: nid("LPO"),
       at: new Date().toISOString(),
@@ -35615,7 +38435,13 @@ function invAct(a, b) {
     if (!got.length) return toast("Enter the quantities delivered.");
     const r = receiveLines(
       p.store,
-      got.map(({ x, q }) => ({ k: x.k, qtyBuy: q, price: x.price })),
+      got.map(({ x, q }) => ({
+        k: x.k,
+        q: q * lpoPer(x),
+        qtyBuy: q,
+        cost: x.price / lpoPer(x),
+        buyPrice: (x.price / lpoPer(x)) * (+itemInfo(x.k).perBuy || 1)
+      })),
       p.sup,
       ref.trim(),
       p.id
@@ -35888,6 +38714,13 @@ function invAct(a, b) {
     STKT.full = false;
     return all();
   }
+  if (a === "seadd") return seAdd(d.f);
+  if (a === "seby") {
+    invF[d.f].eBy = d.v === "buy" ? "buy" : "uom";
+    all();
+    const q = $("#" + d.f + "Qty");
+    return q && q.focus();
+  }
   if (a === "ladd") {
     const k = $("#l_k_" + f).value,
       typed = parseFloat($("#l_q_" + f).value),
@@ -36024,6 +38857,8 @@ $("#vSub").oninput = e => {
     if (p === "spp") spPreview();
     if (p === "spr" && f === "store") all(); // show the new store's quantities
     if (p === "rc") rcSync(f); // direct receive (receive.js)
+    if (p === "po") poSync(f); // purchase order entry row
+    if ((p === "is" || p === "nrq") && (f === "eName" || f === "eQty")) seSync(p, f); // issue / requisition row
     if (p === "vs") vsSync(f); // vendor statement (vendors.js)
     if (p === "pr" || p === "rcp" || p === "recb" || p === "recr") prSync(p, f);
     if (p === "spe") speSync(f); // editing a selling point product (selling-points.js) // Recipes & Production (production.js)
@@ -36927,6 +39762,7 @@ const rcBlank = (keep = {}) => ({
   eQty: "",
   eTax: String(RC_TAX),
   lastGrn: null,
+  dept: "", // the receiving store; empty means the default store
   ...keep
 });
 invF.rc = rcBlank();
@@ -37008,8 +39844,7 @@ const rcIsBuy = (k, units) =>
 const rcExact = text => {
   const n = itemNorm(text);
   return n
-    ? pickKeys().find(k => itemNorm(itemInfo(k).name) === n || itemNorm(itemInfo(k).code) === n) ||
-        ""
+    ? rcKeys().find(k => itemNorm(itemInfo(k).name) === n || itemNorm(itemInfo(k).code) === n) || ""
     : "";
 };
 
@@ -37033,8 +39868,13 @@ function rcDest(R = invF.rc) {
     const p = LPOS.find(x => x.id === R.lpo);
     if (p) return p.store;
   }
-  return STKT.loc;
+  return isStore(R.dept) ? R.dept : defaultStore();
 }
+/** What can be received here: into a store, only the items that store holds. */
+const rcKeys = (R = invF.rc) => {
+  const d = rcDest(R);
+  return pickKeys().filter(k => R.mode === "sp" || !isStore(d) || storeHolds(d, k));
+};
 /** Supplier recorded on the GRN: the vendor, a typed name, or "Cash purchase". */
 const rcSupplier = (R = invF.rc) =>
   R.mode === "lpo" ? R.sup : R.sup || R.supText.trim() || "Cash purchase";
@@ -37044,7 +39884,7 @@ function recvHTML() {
   const R = invF.rc,
     dest = rcDest(R),
     lpoMode = R.mode === "lpo",
-    keys = pickKeys().sort((a, b) => itemInfo(a).name.localeCompare(itemInfo(b).name)),
+    keys = rcKeys(R),
     sups = vendorNames(),
     v = VENDORS.find(x => x.name === R.sup),
     lpo = R.lpo ? LPOS.find(x => x.id === R.lpo) : null,
@@ -37090,10 +39930,9 @@ function recvHTML() {
       ? `<label>Receiving selling point<select data-iv="rc.sp">${opts(ALLD, dest)}</select></label>`
       : lpoMode
         ? `<label>Receiving store<input value="${esc(lpo ? lpo.store : "From the LPO")}" readonly></label>`
-        : `<label>Receiving store<select data-iv="rc.dept">${opts(STORES, dest)}</select></label>`;
+        : `<label>Receiving store<select data-iv="rc.dept">${STORES.map(l => `<option value="${esc(l)}" ${l === dest ? "selected" : ""}>${esc(l)}${l === defaultStore() ? " (default)" : ""}</option>`).join("")}</select></label>`;
 
-  return `<datalist id="rcItemsL">${keys.map(k => `<option value="${esc(itemInfo(k).name)}">${esc(itemInfo(k).code || "")}</option>`).join("")}</datalist>
-<div class="grn">
+  return `<div class="grn">
  <div class="grn-head">
   <div><div class="grn-kicker">Purchasing · Receive goods</div><h2>Goods Received Note</h2>
    <div class="grn-meta"><span class="grn-chip draft">Draft · not posted</span><span class="grn-chip lpo">${RC_MODE_LABEL[R.mode]}</span><span>Into ${esc(dest)}${isStore(dest) ? "" : " (selling point)"}</span><span>Posted by ${esc(boUser ? boUser.n : "")}</span>${R.lpo ? `<span class="grn-chip lpo">Against ${esc(R.lpo)}</span>` : ""}</div></div>
@@ -37135,7 +39974,7 @@ function recvHTML() {
     lpoMode
       ? `<div class="grn-hint">${lpo ? "Lines come from the purchase order. For a part delivery, lower the quantity in the table (it cannot go above what is still due)." : "Choose an open purchase order in the Vendor card to load its lines."}</div>`
       : `<div class="grn-entry">
-   <label class="grn-e-item">Item<span class="grn-inl"><input id="rcName" data-iv="rc.eName" list="rcItemsL" value="${esc(R.eName)}" placeholder="Name or code" autocomplete="off"><button class="mini" data-a="inv_rcfind">Find</button></span></label>
+   <label class="grn-e-item">Item<span class="grn-inl rc-combo"><input id="rcName" data-iv="rc.eName" value="${esc(R.eName)}" placeholder="Type a name, code or category" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="rcPick"><button class="mini" data-a="inv_rcfind">Find</button><div class="rc-pick" id="rcPick" role="listbox" hidden></div></span></label>
    <div class="grn-by"><span>Receive by</span><div class="seg2"><button class="${byBox ? "" : "on"}" data-a="inv_rcby" data-v="uom">Pieces${R.eK && uom !== "pcs" ? ` (${esc(uom)})` : ""}</button><button class="${byBox ? "on" : ""}" data-a="inv_rcby" data-v="buy">Boxes / crates</button></div></div>
    ${byBox ? `<label>Box or crate<select data-iv="rc.eBox">${[...new Set([R.eBox, ...RC_BOXES].filter(Boolean))].map(b => `<option ${b === R.eBox ? "selected" : ""}>${esc(b)}</option>`).join("")}</select></label><label>${esc(uom)} in one ${esc(boxWord)}<input id="rcPer" data-iv="rc.ePer" type="number" min="1" step="any" value="${esc(R.ePer)}" placeholder="e.g. 24"></label>` : ""}
    <label>${byBox ? `${esc(rcPlural(R.eBox || "Box"))} received` : `${esc(uom === "pcs" ? "Pieces" : uom)} received`}<input id="rcQty" data-iv="rc.eQty" type="number" min="0" step="any" value="${esc(R.eQty)}"></label>
@@ -37236,6 +40075,7 @@ function rcSync(f) {
     if (p) p.value = R.ePrice;
   }
   if (f === "eName") {
+    rcPickShow(true);
     const k = rcExact(R.eName);
     if (k && k !== R.eK) rcPick(k, false);
     else if (!k && R.eK) R.eK = "";
@@ -37251,6 +40091,117 @@ function rcSync(f) {
   const t = rcCalc(R.ePrice, R.eQty, R.eTax, R.incl);
   set("rcTotal", R.ePrice !== "" && R.eQty !== "" ? m2(t.gross) : "");
 }
+// ---------------------------------------------------------------- the item picker
+// One searchable list for Receive goods (#rcName) and purchase orders (#poName): only the items the store holds,
+// with their code, category, unit, box size, stock in that store and last price.
+const PICKERS = {
+  rcName: {
+    box: "rcPick",
+    text: () => invF.rc.eName,
+    keys: () => rcKeys(),
+    dest: () => rcDest(),
+    choose: k => {
+      rcPick(k, false);
+      const n = $("#rcName");
+      if (n) n.value = itemInfo(k).name;
+      const q = $("#rcQty");
+      if (q) q.focus();
+    }
+  },
+  poName: {
+    box: "poPick",
+    text: () => invF.po.eName || "",
+    keys: () => poKeys(),
+    dest: () => poStore(),
+    choose: k => poPickItem(k)
+  }
+};
+let rcHi = 0;
+/** An item's name, even for older items whose name lives only in the item list. */
+const pkName = k => itemInfo(k).name || iN(k) || k;
+/** The items that match what is typed: name, code or category. */
+function pkMatches(P) {
+  const t = itemNorm(P.text()),
+    L = P.keys().filter(
+      k =>
+        !t ||
+        itemNorm(pkName(k)).includes(t) ||
+        itemNorm(itemInfo(k).code).includes(t) ||
+        itemNorm(itemInfo(k).group).includes(t)
+    );
+  return L.sort((a, b) => {
+    const A = itemNorm(pkName(a)),
+      B = itemNorm(pkName(b));
+    return (t && B.startsWith(t)) - (t && A.startsWith(t)) || A.localeCompare(B);
+  });
+}
+function pkHTML(P) {
+  const dest = P.dest(),
+    L = pkMatches(P),
+    all = P.keys().length;
+  rcHi = Math.min(rcHi, Math.max(0, L.length - 1));
+  const rows = L.slice(0, 60)
+    .map((k, i) => {
+      const u = itemInfo(k),
+        q = have(dest, k),
+        box = +u.perBuy !== 1 || u.buyUnit !== u.uom;
+      return `<button type="button" class="rc-opt ${i === rcHi ? "on" : ""}" data-rcpk="${esc(k)}" role="option" aria-selected="${i === rcHi}"><span class="rc-av">${esc((pkName(k) || "?")[0].toUpperCase())}</span><span class="rc-nm"><b>${esc(pkName(k))}</b><small>${u.code ? `<i>${esc(u.code)}</i>` : ""}${esc(u.group || "")} · ${esc(u.uom)}${box ? ` · ${esc(u.buyUnit)} of ${qn(+u.perBuy)}` : ""}</small></span><span class="rc-st"><b class="${q > 0 ? "" : "zero"}">${qn(q)} ${esc(u.uom)}</b><small>${+u.buyPrice ? `KES ${m2(+u.buyPrice)} / ${esc(u.buyUnit)}` : "No price yet"}</small></span></button>`;
+    })
+    .join("");
+  return `<div class="rc-ph"><span>${isStore(dest) ? `Items kept in <b>${esc(dest)}</b>` : `Items for <b>${esc(dest)}</b>`}</span><small>${L.length === all ? plural(all, "item") : `${L.length} of ${all}`}</small></div>${rows || `<div class="rc-none">${all ? "Nothing matches. Try part of the name or the code." : `${esc(dest)} doesn't hold any items yet.`}<button type="button" class="mini" data-a="inv_itnew">New item</button></div>`}${L.length > 60 ? `<div class="rc-more">Keep typing to narrow down ${L.length} items.</div>` : ""}`;
+}
+function pkShow(id, on) {
+  const P = PICKERS[id],
+    box = P && $("#" + P.box),
+    inp = $("#" + id);
+  if (!box || !inp) return;
+  if (on) box.innerHTML = pkHTML(P);
+  box.hidden = !on;
+  inp.setAttribute("aria-expanded", on ? "true" : "false");
+}
+const rcPickShow = on => pkShow("rcName", on);
+function pkChoose(id, k) {
+  pkShow(id, false);
+  PICKERS[id].choose(k);
+}
+$("#vSub").addEventListener("focusin", e => {
+  if (PICKERS[e.target.id]) {
+    rcHi = 0;
+    pkShow(e.target.id, true);
+  }
+});
+$("#vSub").addEventListener("focusout", e => {
+  // Closes when the person really leaves the box (not when a choice in the list is being clicked).
+  const id = e.target.id;
+  if (PICKERS[id])
+    setTimeout(() => document.activeElement !== $("#" + id) && pkShow(id, false), 160);
+});
+$("#vSub").addEventListener("mousedown", e => {
+  const o = e.target.closest && e.target.closest("[data-rcpk]");
+  if (!o) return;
+  e.preventDefault();
+  const id = Object.keys(PICKERS).find(x => o.closest("#" + PICKERS[x].box));
+  if (id) pkChoose(id, o.dataset.rcpk);
+});
+$("#vSub").addEventListener("keydown", e => {
+  const id = e.target.id,
+    P = PICKERS[id];
+  if (!P) return;
+  const box = $("#" + P.box),
+    L = pkMatches(P).slice(0, 60);
+  if (e.key === "Escape") return pkShow(id, false);
+  if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+    e.preventDefault();
+    rcHi = Math.max(0, Math.min(L.length - 1, rcHi + (e.key === "ArrowDown" ? 1 : -1)));
+    pkShow(id, true);
+    const on = $("#" + P.box + " .rc-opt.on");
+    if (on) on.scrollIntoView({ block: "nearest" });
+  }
+  if (e.key === "Enter" && box && !box.hidden && L[rcHi]) {
+    e.preventDefault();
+    pkChoose(id, L[rcHi]);
+  }
+});
 /** Choose item k in the entry row: default units = buying unit, price = last buying price. */
 function rcPick(k, redraw = true) {
   const R = invF.rc,
@@ -37281,17 +40232,18 @@ function rcLoadLpo(p) {
     .filter(o => o.left > 1e-9)
     .map(({ x, j, left }) => {
       const u = itemInfo(x.k),
-        isBuy = rcIsBuy(x.k, "buy"),
-        due = isBuy ? left : left * +u.perBuy;
+        per = lpoPer(x),
+        unit = lpoUnit(x),
+        isBuy = per !== 1 || unit !== u.uom;
       return {
         k: x.k,
         isBuy,
-        units: isBuy ? `${u.buyUnit} of ${qn(+u.perBuy)} ${u.uom}` : u.uom,
-        per: isBuy ? +u.perBuy : undefined,
-        box: isBuy ? u.buyUnit : undefined,
-        unitPrice: isBuy ? x.price : x.price / +u.perBuy,
-        qty: due,
-        lpoMax: due,
+        units: isBuy ? `${unit} of ${qn(per)} ${u.uom}` : u.uom,
+        per: isBuy ? per : undefined,
+        box: isBuy ? unit : undefined,
+        unitPrice: x.price,
+        qty: left,
+        lpoMax: left,
         taxRate: itemTaxRate(x.k),
         batch: "",
         expiry: "",
@@ -37458,11 +40410,18 @@ function rcAct(a, b) {
     const t = itemNorm(R.eName),
       k =
         rcExact(R.eName) ||
-        pickKeys().find(
+        rcKeys().find(
           x =>
             t && (itemNorm(itemInfo(x).name).includes(t) || itemNorm(itemInfo(x).code).includes(t))
         );
-    if (!k) return toast("No item matches. Use New item to add it.");
+    if (!k) {
+      const other = pickKeys().find(x => t && itemNorm(itemInfo(x).name).includes(t));
+      if (other && isStore(dest))
+        return toast(
+          `${itemInfo(other).name} isn't kept in ${dest}. Choose its store, or add ${itemInfo(other).group || "its category"} to ${dest} in Inventory → Stores.`
+        );
+      return toast("No item matches. Use New item to add it.");
+    }
     rcPick(k);
     const q = $("#rcQty");
     return q && q.focus();
@@ -37565,7 +40524,7 @@ function rcAct(a, b) {
     return all();
   }
   if (a === "rcexit") {
-    invF.rc = rcBlank({ date: R.date, mode: R.mode, sp: R.sp });
+    invF.rc = rcBlank({ date: R.date, mode: R.mode, sp: R.sp, dept: R.dept });
     return all();
   }
 
@@ -37666,9 +40625,10 @@ function rcPost() {
         : new Date(`${R.date}T${pad2(now.getHours())}:${pad2(now.getMinutes())}:00`);
   const learnt = [];
   R.lines.forEach(L => {
-    if (!L.isBuy || !(+L.per > 0)) return;
+    if (!L.isBuy || !(+L.per > 0) || L.lpoLine !== undefined) return;
     const u = itemInfo(L.k);
     if (+u.perBuy === +L.per && u.buyUnit === L.box) return;
+    lpoKeepUnits(L.k);
     if (!INGU[L.k]) INGU[L.k] = { ...u };
     INGU[L.k].perBuy = +L.per;
     INGU[L.k].buyUnit = L.box;
@@ -37682,7 +40642,7 @@ function rcPost() {
       k: L.k,
       q,
       cost: q > 0 ? c.net / q : 0, // stock is valued excluding VAT
-      buyPrice: L.isBuy ? L.unitPrice : L.unitPrice * +u.perBuy,
+      buyPrice: (L.isBuy ? L.unitPrice / (+L.per || +u.perBuy) : L.unitPrice) * +u.perBuy,
       units: L.units,
       unitPrice: L.unitPrice,
       qty: L.qty,
@@ -37692,7 +40652,7 @@ function rcPost() {
       batch: L.batch,
       expiry: L.expiry,
       lpoLine: L.lpoLine,
-      qtyBuy: q / +u.perBuy
+      qtyBuy: L.lpoLine !== undefined ? q / (+L.per || 1) : q / +u.perBuy
     };
   });
   const r = receiveLines(dest, lines, sup, R.inv || R.dnote, R.lpo || "", {
@@ -37719,6 +40679,7 @@ function rcPost() {
     date: R.date,
     mode: R.mode,
     sp: R.sp,
+    dept: R.dept,
     // Goods in a store can be issued on to selling points; goods received at a selling point are already there.
     lastGrn: intoStore
       ? { id: r.id, store: dest, lines: r.lines.map(x => ({ k: x.k, q: x.q })) }
@@ -37882,7 +40843,7 @@ function purchasingView() {
           ? invReportHTML("pur")
           : purT === "receive"
             ? recvHTML() // the receiving store is chosen inside the GRN
-            : storeBar("Purchase orders for") + lpoHTML(),
+            : ((STKT.loc = poStore()), storeBar("Purchase orders for") + lpoHTML()),
     popups = itemPopupIfOpen() + vendorPopupIfOpen() + apModalIfOpen();
   const [title, what] = PUR_PAGES[purT];
   return `<div class="inv invx inv-solo"><div class="inv-main"><nav class="ph-tabs" aria-label="Purchasing">${PUR_TABS.filter(
@@ -37899,7 +40860,7 @@ function purchasingView() {
 
 /** Compact store chooser (Purchasing doesn't need Inventory's stock cards). */
 const storeBar = label =>
-  `<div class="pn grn-storebar"><label>${label}<select data-iv="rc.dept">${opts(STORES, STKT.loc)}</select></label></div>`;
+  `<div class="pn grn-storebar"><label>${label}<select data-iv="rc.dept">${STORES.map(l => `<option value="${esc(l)}" ${l === STKT.loc ? "selected" : ""}>${esc(l)}${l === defaultStore() ? " (default)" : ""}</option>`).join("")}</select></label></div>`;
 
 function purAct(a, b) {
   const d = b.dataset;
@@ -37933,6 +40894,7 @@ function purAct(a, b) {
   if (a === "go") {
     // e.g. the Receive / LPO buttons on Inventory → Stores
     STKT.loc = d.l;
+    if (isStore(d.l)) invF.rc.dept = d.l;
     purT = d.t || "lpo";
     // "Receive" for a store means a direct receipt into that store.
     const R = invF.rc;
@@ -41187,14 +44149,16 @@ V.settings = () => {
         setTimeout(() => $("#modPw") && $("#modPw").focus(), 30);
         return `<div class="pn"><h4>Modules</h4><div class="stk">Enter the modules password to open this page.</div><div class="fr" style="align-items:end"><label>Password<input id="modPw" type="password" autocomplete="new-password" aria-label="Modules password"></label><button class="chip on" style="flex:none" data-a="hs_modgo">Open modules</button></div></div>`;
       }
-      const on = fdOn();
-      return `<div class="pn"><div class="fr" style="align-items:center;justify-content:space-between"><h4 style="margin:0">Modules</h4><button class="mini" style="flex:none" data-a="hs_modlock">Lock</button></div><div class="stk">Switch off what this business doesn't use. Nothing is deleted: switch it back on and everything returns as it was.</div><div class="tw"><table class="t"><tr><td><b>Front Desk and room reports</b><small class="pr-code">Rooms, bookings, check-in, housekeeping, guest bills, Room reports and Post to room. Switch it off for a business with no rooms.</small></td><td><span class="tag ${on ? "ok" : ""}">${on ? "On" : "Off"}</span></td><td class="n"><button class="pv-sw ${on ? "on" : ""}" data-a="hs_fdtog" role="switch" aria-checked="${on}" aria-label="Front Desk and room reports"><i></i></button></td></tr></table></div></div>`;
+      const row = (on, act, name, what) =>
+        `<tr><td><b>${name}</b><small class="pr-code">${what}</small></td><td><span class="tag ${on ? "ok" : ""}">${on ? "On" : "Off"}</span></td><td class="n"><button class="pv-sw ${on ? "on" : ""}" data-a="${act}" role="switch" aria-checked="${on}" aria-label="${name}"><i></i></button></td></tr>`;
+      return `<div class="pn"><div class="fr" style="align-items:center;justify-content:space-between"><h4 style="margin:0">Modules</h4><button class="mini" style="flex:none" data-a="hs_modlock">Lock</button></div><div class="stk">Switch off what this business doesn't use. Nothing is deleted: switch it back on and everything returns as it was.</div><div class="tw"><table class="t">${row(fdOn(), "hs_fdtog", "Front Desk and room reports", "Rooms, bookings, check-in, housekeeping, guest bills, Room reports and Post to room. Switch it off for a business with no rooms.")}${row(kdsOn(), "hs_kdstog", "Kitchen display", "The kitchen and bar screens, order status on the POS (In the queue, Preparing, Ready to serve), ready alerts for waiters, and Settings → Kitchen display. Orders still print as before.")}${row(stkOn(), "hs_stktog", "Product stickers and guest menu", "Print stickers in the Products List, and the menu of prices that a sticker's QR code opens on a guest's phone.")}${row(clockOn(), "hs_clocktog", "Staff clock", "Clocking in and out on the start screen, and HR & Payroll → Clock and biometric. Time already recorded stays in Time and attendance.")}</table></div></div>`;
     },
     email: repMailHTML,
     support: supportHTML,
     backup: backupHTML,
     network: networkHTML,
-    sync: syncHTML
+    sync: syncHTML,
+    kds: kdsSetupHTML
   };
   const lock = setTabOf(setTab)[4],
     body = lock === "owner" && !ownOpen ? ownerGateHTML() : (panels[setTab] || panels.hotel)();
@@ -41317,9 +44281,29 @@ function fdModuleToggle() {
   all();
   toast(on ? "Front Desk and room reports are on." : "Front Desk and room reports are off.");
 }
+/** Kitchen display and staff clock: one switch each. */
+function moduleToggle(key, name) {
+  if (!mdlOpen) return;
+  if (!boCan("set.manage")) return boDenied();
+  FD_SETTINGS[key] = !FD_SETTINGS[key];
+  const on = !FD_SETTINGS[key];
+  auditAdd("Settings", `${name} switched ${on ? "on" : "off"}`);
+  bosave();
+  fdModuleApply();
+  applyBoRights();
+  go("Settings");
+  setTab = "modules";
+  mdlOpen = true; // going back to Settings locks the page; this person just used it
+  all();
+  toast(`${name} is ${on ? "on" : "off"}.`);
+}
 async function settingsAct(a, b) {
+  if (a === "kdstog") return moduleToggle("kdsOff", "Kitchen display");
+  if (a === "clocktog") return moduleToggle("clockOff", "Staff clock");
+  if (a === "stktog") return moduleToggle("stickersOff", "Product stickers and guest menu");
   if (a === "modgo") return mdlUnlock();
   if (a === "owngo") return ownUnlock();
+  if (a === "kdstime") return kdsTimeSave();
   if (a === "ownlock") {
     ownLock();
     return all();
@@ -41386,6 +44370,88 @@ async function settingsAct(a, b) {
   toast("Details saved. New bills and receipts will use them.");
   all();
 }
+// ---- Settings → Kitchen display: what each screen shows, and when an order counts as late ----
+// Saved in FD_SETTINGS.kds = { late: { new, prep }, keepH, screens: { [computer name]: { station, points } } }.
+const kdsSet = () => FD_SETTINGS.kds || (FD_SETTINGS.kds = {});
+const kdsScreens = () => kdsSet().screens || (kdsSet().screens = {});
+function kdsSetupHTML() {
+  const S = kdsSet(),
+    late = { new: (S.late || {}).new || 8, prep: (S.late || {}).prep || 15 },
+    me = MACHINE.name(),
+    pcs = MACHINE.list().map(m => m.n),
+    pts = ALLD;
+  return `<div class="pn"><h4>Each kitchen screen</h4><div class="stk">Choose what the kitchen display shows on each computer: the kitchen, the bar or both, and which selling points. A screen set here shows its place instead of filter buttons. Untick every selling point to show them all.</div>
+  ${
+    pcs.length
+      ? `<div class="kdss">${pcs
+          .map(n => {
+            const s = kdsScreens()[n] || {},
+              st = s.station || "All",
+              on = s.points || [];
+            return `<div class="kdss-row"><div class="kdss-pc"><b>${esc(n)}</b>${n === me ? '<small class="ur-me">This computer</small>' : ""}</div>
+            <label>Shows<select data-kdsm="${esc(n)}">${[
+              ["All", "Kitchen and bar"],
+              ["Kitchen", "Kitchen only"],
+              ["Bar", "Bar only"]
+            ]
+              .map(([v, l]) => `<option value="${v}" ${v === st ? "selected" : ""}>${l}</option>`)
+              .join("")}</select></label>
+            <div class="kdss-pts"><span>Selling points</span>${pts
+              .map(
+                p =>
+                  `<label><input type="checkbox" data-kdsp="${esc(n)}" value="${esc(p)}" ${on.includes(p) ? "checked" : ""}> ${esc(p)}</label>`
+              )
+              .join(
+                ""
+              )}<small>${on.length ? `${on.length} of ${pts.length}` : "All of them"}</small></div></div>`;
+          })
+          .join("")}</div>`
+      : '<div class="empty">No computers are registered yet. Each computer registers its name the first time Kaytia Flow opens on it.</div>'
+  }</div>
+  <div class="pn"><h4>Timing</h4><div class="stk">When an order turns red on the screen, and how long served orders stay on the Served tab.</div>
+  <div class="fr"><label>Late when waiting more than (minutes)<input id="kdsLN" type="number" min="1" max="120" step="1" value="${late.new}"></label><label>Late when preparing more than (minutes)<input id="kdsLP" type="number" min="1" max="240" step="1" value="${late.prep}"></label><label>Keep served orders for (hours)<input id="kdsKH" type="number" min="1" max="72" step="1" value="${S.keepH || 12}"></label><button class="chip on" data-a="hs_kdstime">Save timing</button></div></div>`;
+}
+function kdsSetupSave(n, change) {
+  if (!boCan("set.manage")) return boDenied();
+  const s = (kdsScreens()[n] = kdsScreens()[n] || { station: "All", points: [] });
+  change(s);
+  if (s.station === "All" && !s.points.length) delete kdsScreens()[n];
+  bosave();
+  const now = kdsScreens()[n];
+  auditAdd(
+    "Settings",
+    `Kitchen display on ${n}: ${now ? `${now.station === "All" ? "kitchen and bar" : now.station.toLowerCase()} · ${now.points.length ? now.points.join(", ") : "every selling point"}` : "chooses on screen"}`
+  );
+  toast(`Saved for ${n}.`);
+  all();
+}
+$("#vSub").addEventListener("change", e => {
+  const t = e.target;
+  if (t.dataset.kdsm !== undefined) return kdsSetupSave(t.dataset.kdsm, s => (s.station = t.value));
+  if (t.dataset.kdsp !== undefined)
+    return kdsSetupSave(t.dataset.kdsp, s => {
+      s.points = (s.points || []).filter(p => p !== t.value);
+      if (t.checked) s.points.push(t.value);
+    });
+});
+function kdsTimeSave() {
+  if (!boCan("set.manage")) return boDenied();
+  const n = Math.round(+$("#kdsLN").value),
+    p = Math.round(+$("#kdsLP").value),
+    h = Math.round(+$("#kdsKH").value);
+  if (!(n >= 1 && n <= 120) || !(p >= 1 && p <= 240))
+    return toast("Late times should be 1 to 120 minutes waiting and 1 to 240 preparing.");
+  if (!(h >= 1 && h <= 72)) return toast("Keep served orders for 1 to 72 hours.");
+  kdsSet().late = { new: n, prep: p };
+  kdsSet().keepH = h;
+  bosave();
+  auditAdd(
+    "Settings",
+    `Kitchen display: late after ${n} min waiting or ${p} min preparing; served kept ${h} h`
+  );
+  toast("Timing saved.");
+  all();
+}
 // ---- Settings → Help and logs: every error the system has met, and a message to the developer ----
 const supS = { loaded: false, server: [] };
 const supLocal = () => {
@@ -41411,7 +44477,9 @@ function supRows() {
       e = kfErrOf(msg);
     return { at: m[1] || "", where: m[2] || "Program", msg, code: e ? e[0] : 0 };
   });
-  return [...supLocal(), ...prog].sort((a, b) => String(b.at).localeCompare(String(a.at)));
+  return [...supLocal(), ...prog.filter(x => !/^Screen /.test(x.where))].sort((a, b) =>
+    String(b.at).localeCompare(String(a.at))
+  );
 }
 const supText = L =>
   L.map(x => `${x.at}  [${x.where}]  ${x.code ? `Error ${x.code}  ` : ""}${x.msg}`).join("\r\n") ||
@@ -41595,6 +44663,7 @@ function clockTick() {
   });
 }
 function clockOpen() {
+  if (!clockOn()) return;
   $("#start").style.display = "none";
   $("#sClock").classList.add("show");
   clockFill();
@@ -42301,7 +45370,7 @@ const STK_CSS = `.stk1{display:grid;grid-template-columns:32% 1fr;gap:.55em;box-
 .l60 .stk1{width:60mm;height:40mm;padding:1.3mm 1.6mm;font-size:7.8pt}
 .a4 .stk1{height:39mm;padding:1.5mm 1.8mm;font-size:7.8pt;border:.2mm dashed #999}`;
 function stkModal() {
-  if (!prS) return "";
+  if (!prS || !stkOn()) return "";
   const F = prS,
     L = stkItems(),
     n = Math.max(1, Math.min(50, parseInt(F.copies, 10) || 1)),
@@ -42340,6 +45409,10 @@ function stkPrint() {
   all();
 }
 function stkAct(a) {
+  if (!stkOn()) {
+    prS = null;
+    return all();
+  }
   if (a === "prl_stk") {
     prS = { from: stkDefault(), copies: "1", size: "l80", url: FD_SETTINGS.menuUrl || "" };
     stkFindUrl();
@@ -42391,7 +45464,7 @@ async function mpLoad() {
   const good = r.ok && r.j.daraja && r.j.modem && Array.isArray(r.j.list);
   mpS.err = good
     ? ""
-    : r.status === 409
+    : r.status === 409 || (r.status === 403 && LAN.browser)
       ? "M-Pesa is set up on the main computer."
       : "This page works in the installed Kaytia Flow program.";
   if (good) Object.assign(mpS, { d: r.j.daraja, m: r.j.modem, ports: r.j.ports, list: r.j.list });
@@ -42868,6 +45941,14 @@ const SET_GROUPS = [
         "print",
         "",
         "Which printer takes receipts, kitchen orders and bar orders, on each computer."
+      ],
+      [
+        "kds",
+        "Kitchen display",
+        "What each kitchen screen shows",
+        "chef",
+        "",
+        "Choose what the kitchen display shows on each computer, and when an order counts as late."
       ]
     ]
   ],
@@ -42921,13 +46002,17 @@ const SET_TABS = SET_GROUPS.flatMap(g => g[1]);
 const setTabOf = k => SET_TABS.find(t => t[0] === k) || SET_TABS[0];
 let setTab = "hotel";
 invF.gp = { pt: "*", m: "", v: "", a: "" };
+/** Pages for modules that are switched off are left out. */
+const setTabShown = k => k !== "kds" || kdsOn();
 const setTabsHTML = () =>
   `<nav class="set-tabs set-nav" role="tablist" aria-label="Settings"><div class="set-title"><h1>Settings</h1><p>How Kaytia Flow runs for your business</p></div>${SET_GROUPS.map(
     ([g, L]) =>
-      `<div class="set-grp"><h5>${g}</h5>${L.map(([k, l, d, ic, lock]) => {
-        const shut = (lock === "owner" && !ownOpen) || (lock === "mod" && !mdlOpen);
-        return `<button role="tab" aria-selected="${k === setTab}" class="set-nv ${k === setTab ? "on" : ""}" data-a="hs_tab" data-k="${k}"><i aria-hidden="true">${I(ic)}</i><span><b>${l}</b><small>${d}</small></span>${lock ? `<em class="set-lk ${shut ? "" : "open"}" title="${lock === "owner" ? "System owner only" : "Modules password"}" aria-label="${shut ? "Locked" : "Open"}">${I(shut ? "lock" : "unlock")}</em>` : ""}</button>`;
-      }).join("")}</div>`
+      `<div class="set-grp"><h5>${g}</h5>${L.filter(([k]) => setTabShown(k))
+        .map(([k, l, d, ic, lock]) => {
+          const shut = (lock === "owner" && !ownOpen) || (lock === "mod" && !mdlOpen);
+          return `<button role="tab" aria-selected="${k === setTab}" class="set-nv ${k === setTab ? "on" : ""}" data-a="hs_tab" data-k="${k}"><i aria-hidden="true">${I(ic)}</i><span><b>${l}</b><small>${d}</small></span>${lock ? `<em class="set-lk ${shut ? "" : "open"}" title="${lock === "owner" ? "System owner only" : "Modules password"}" aria-label="${shut ? "Locked" : "Open"}">${I(shut ? "lock" : "unlock")}</em>` : ""}</button>`;
+        })
+        .join("")}</div>`
   ).join("")}</nav>`;
 /** The page's own heading, with a Lock button on an owner page that is open. */
 function setHeadHTML() {
@@ -44172,7 +47257,7 @@ function productsHTML() {
   <div class="pn tw" data-findscope><div class="pr-bar">${findBox("prod", "Search product, category or code")}<div class="pr-pills">${pill("All", "All selling points", L.length)}${P.map(p => pill(p, p, L.filter(i => i.d === p).length)).join("")}</div></div>
   ${
     shown.length
-      ? `<div class="tw"><table class="t pr-t"><thead><tr><th></th><th>Code</th><th>Product</th><th>Selling point</th><th>Category</th><th>Selling price</th><th>Track Stock</th><th>eTIMS Uploaded</th><th>eTIMS Code</th><th>eTIMS ID</th><th></th></tr></thead>${shown.map(prRow).join("")}</table></div><div class="pr-foot"><button class="mini" data-a="prl_usestock" title="Give the ticked products, or all shown, a stock item">Use in stock</button><button class="mini" data-a="prl_stk">Print stickers</button><label class="pr-selall"><input type="checkbox" data-a="prl_etall"> Select All</label><button class="chip on" id="etSendAll" data-a="prl_etup">${prEtSendWord()}</button></div>`
+      ? `<div class="tw"><table class="t pr-t"><thead><tr><th></th><th>Code</th><th>Product</th><th>Selling point</th><th>Category</th><th>Selling price</th><th>Track Stock</th><th>eTIMS Uploaded</th><th>eTIMS Code</th><th>eTIMS ID</th><th></th></tr></thead>${shown.map(prRow).join("")}</table></div><div class="pr-foot"><button class="mini" data-a="prl_usestock" title="Give the ticked products, or all shown, a stock item">Use in stock</button>${stkOn() ? '<button class="mini" data-a="prl_stk">Print stickers</button>' : ""}<label class="pr-selall"><input type="checkbox" data-a="prl_etall"> Select All</label><button class="chip on" id="etSendAll" data-a="prl_etup">${prEtSendWord()}</button></div>`
       : '<div class="empty">Nothing here yet. Use Add item to put the first product on the POS.</div>'
   }</div></div>${prAddModal()}${prEditModal()}${prEtAdjModal()}${prImportModal()}${stkModal()}${itemPopupIfOpen()}${speModal()}`;
 }
@@ -44467,6 +47552,8 @@ const storeHolds = (l, k) => {
     K = storeKinds(l).map(norm);
   return !K.length || K.includes(norm(itemInfo(k).group));
 };
+/** The store Receive goods opens on: the one marked as default, or the first store (Main Store). */
+const defaultStore = () => STORES.find(l => (storeInfos()[l] || {}).def) || STORES[0];
 /** The store that holds this kind of item, if one says so. */
 const storeForKind = g => {
   const x = String(g || "")
@@ -44495,7 +47582,7 @@ function storeModal() {
   const G = [...new Set([...groupList(), ...stE.kinds])].sort((a, b) => a.localeCompare(b));
   return `<div class="modal show" id="stEd" style="z-index:63"><div class="box itm sp-new">
   <header class="itm-h"><div><h3>${stE.was ? `Edit ${esc(stE.was)}` : "New store"}</h3><p>Stores hold the stock you buy. Selling points get their stock from a store.</p></div><button class="itm-x" data-a="inv_stclose" aria-label="Close">✕</button></header>
-  <div class="itm-b"><section class="itm-s"><div class="itm-g"><label>Store name<input id="stName" maxlength="40" value="${esc(stE.name)}" placeholder="e.g. Beverages Store, Kitchen Store" autocomplete="off"></label></div></section>
+  <div class="itm-b"><section class="itm-s"><div class="itm-g"><label>Store name<input id="stName" maxlength="40" value="${esc(stE.name)}" placeholder="e.g. Beverages Store, Kitchen Store" autocomplete="off"></label></div><label class="mp-on" style="margin-top:12px"><input id="stDef" type="checkbox" ${stE.def ? "checked" : ""}><span><b>Default store for receiving goods</b><small>Receive goods opens on this store, and lists only the items it holds.</small></span></label></section>
   <section class="itm-s"><div class="sp-acts" style="justify-content:space-between"><h4>Kinds of items it holds</h4><span class="sp-acts"><button class="mini" data-a="inv_stall">Select all</button><button class="mini" data-a="inv_stnone">Clear</button></span></div><div class="itm-hint">Tick what belongs here. Its Stock Master lists these categories. New items in them go to this store unless you choose another. Leave them all unticked if it holds anything.</div><div class="pr-ticks">${G.map(k => `<label><input type="checkbox" data-stk="${esc(k)}" ${stE.kinds.includes(k) ? "checked" : ""}> ${esc(k)}</label>`).join("")}</div></section></div>
   <footer class="itm-f"><button class="mini" data-a="inv_stclose">Cancel</button><button class="chip on" data-a="inv_stsave">${stE.was ? "Save changes" : "Create store"}</button></footer></div></div>`;
 }
@@ -44541,7 +47628,9 @@ function storeSave() {
     STORES.push(name);
     syncLocs();
   }
-  storeInfos()[name] = { kinds };
+  const def = !!($("#stDef") && $("#stDef").checked);
+  if (def) Object.values(storeInfos()).forEach(i => delete i.def);
+  storeInfos()[name] = { kinds, ...(def ? { def: true } : {}) };
   auditAdd(
     "Store",
     was ? (name === was ? `${name} edited` : `${was} renamed to ${name}`) : `${name} created`
@@ -45661,7 +48750,7 @@ const DOC_SPECS = {
       r: p.lines.map(x => [
         ...docCode(x, code),
         itemInfo(x.k).name,
-        itemInfo(x.k).buyUnit,
+        x.unit ? (+x.per > 1 ? `${x.unit} of ${qn(+x.per)}` : x.unit) : itemInfo(x.k).buyUnit,
         qn(x.qty),
         m2(x.price),
         m2(x.qty * x.price)
@@ -46923,7 +50012,8 @@ const HR_TABS = [
 /** The tabs, in their groups. */
 const hrGroups = () => {
   const G = [];
-  HR_TABS.forEach(([t, l, ic]) => {
+  if (hrS.tab === "clock" && !clockOn()) hrS.tab = "home";
+  HR_TABS.filter(([t]) => t !== "clock" || clockOn()).forEach(([t, l, ic]) => {
     if (t === "h") G.push({ name: l, tabs: [] });
     else G[G.length - 1].tabs.push([t, l, ic]);
   });
@@ -47610,7 +50700,9 @@ function hrAct(a, b) {
       // Stored as a hash, so nobody can read a person's password back.
       const pw = E.clockNew;
       if (pw.length < 4) return toast("The clock password needs at least 4 characters.");
-      E.clockSalt = crypto.randomUUID();
+      E.clockSalt = [...crypto.getRandomValues(new Uint8Array(16))]
+        .map(b => b.toString(16).padStart(2, "0"))
+        .join(""); // randomUUID needs https; this works on phones too
       delete E.clockNew;
       return clockHashOf(E.clockSalt, pw).then(h => {
         E.clockHash = h;
@@ -49517,6 +52609,9 @@ const BK_KEEP_SETTINGS = [
   "tax",
   "dayTime",
   "frontDeskOff",
+  "kdsOff",
+  "clockOff",
+  "stickersOff",
   "customRoles",
   "payModes",
   "voidReasons",
@@ -49906,7 +53001,9 @@ async function lanTick() {
     idx: s.idx,
     epoch: s.epoch,
     main: s.main,
-    home: s.home
+    home: s.home,
+    browser: !!s.browser, // a phone or browser signed in to the Main, not a computer with the program
+    device: s.device || ""
   });
   if (s.numbered) window.__lan = { idx: s.idx, mod: 20 };
   const saved = JSON.parse(localStorage.getItem(LAN_REV) || "null");
@@ -49915,7 +53012,55 @@ async function lanTick() {
   LAN.lastRaw = LAN.base === null ? null : localStorage.getItem(LS);
   lanTick();
   setInterval(lanTick, LAN_EVERY);
+  licShare();
+  setInterval(licShare, 60000);
 })();
+// ---- company license: entered once on the main computer, the tills get it from there
+LAN.lic = null;
+async function licShare() {
+  if (!LAN.on) return;
+  let j = null;
+  try {
+    j = await fetch("/lan/license").then(r => r.json());
+  } catch (e) {
+    return;
+  }
+  if (!j || j.offline) return;
+  const mine = LIC.s.key || "",
+    myKey = mine ? LIC.read(mine) : null;
+  if (LAN.role === "main" && myKey && myKey.i === "*" && myKey.m && mine !== j.key) {
+    // Entered here before the program kept it, or the program was reinstalled: hand it over.
+    try {
+      j = await fetch("/lan/license", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ key: mine })
+      }).then(r => r.json());
+    } catch (e) {}
+  } else if (j.key && j.key !== mine) {
+    const err = LIC.apply(j.key);
+    if (!err) {
+      bosave();
+      if (typeof all === "function" && $("#bo").classList.contains("show")) all();
+    }
+  }
+  LAN.lic = j && j.m ? { m: j.m, used: j.used } : null;
+}
+addEventListener("kf:license", e => {
+  if (!LAN.on || LAN.role !== "main") return;
+  const K = LIC.read(e.detail);
+  if (!K || K.i !== "*") return;
+  fetch("/lan/license", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ key: e.detail })
+  })
+    .then(r => r.json())
+    .then(j => {
+      LAN.lic = j && j.m ? { m: j.m, used: j.used } : null;
+    })
+    .catch(() => {});
+});
 /** Settings → Computers on the network. */
 function networkHTML() {
   if (!LAN.on)
@@ -49923,10 +53068,114 @@ function networkHTML() {
   const live = LAN.state !== "offline",
     ago = LAN.at ? Math.round((Date.now() - LAN.at) / 1000) : null;
   return `<div class="pn"><div class="inv-head"><h4>Computers on the network</h4><span class="tag ${live ? "ok" : "bad"}">${live ? "Connected" : "Main not reachable"}</span></div>
-  <div class="stm-tiles">${msTile("This computer", LAN.role === "main" ? "Main" : "Till")}${LAN.role === "till" ? msTile("Main computer", esc(LAN.main)) : msTile("Data saved in", esc(LAN.home + "\\data"))}${msTile("Last checked", ago === null ? "-" : `${ago} seconds ago`)}${msTile("Waiting to update", LAN.pending ? "Yes" : "No")}</div>
+  <div class="stm-tiles">${LAN.browser ? msTile("This device", esc(LAN.device || "Phone")) : msTile("This computer", LAN.role === "main" ? "Main" : "Till")}${LAN.role === "till" ? msTile("Main computer", esc(LAN.main)) : msTile("Data saved in", esc(LAN.home + "\\data"))}${msTile("Last checked", ago === null ? "-" : `${ago} seconds ago`)}${msTile("Waiting to update", LAN.pending ? "Yes" : "No")}</div>
   <div class="stk">Changes reach other computers within seconds. If a screen is busy, they wait until it's free, and nothing is lost.</div>
-  <div class="pv-form"><a class="chip on" href="/connect" target="_blank" rel="noopener">Connect computers</a></div></div>${svcHTML()}`;
+  ${LAN.browser ? "" : '<div class="pv-form"><a class="chip on" href="/connect" target="_blank" rel="noopener">Connect computers</a></div>'}</div>${webHTML()}${svcHTML()}`;
 }
+// ---- Settings → Network: phones, tablets and other computers opening Kaytia Flow in a browser, on this Wi-Fi
+const webS = { loaded: false, s: null, busy: false };
+async function webLoad() {
+  webS.loaded = true;
+  try {
+    const r = await fetch("/lan/web-access");
+    webS.s = r.ok ? await r.json() : null;
+  } catch (e) {
+    webS.s = null;
+  }
+  if (view === "settings" && setTab === "network") all();
+}
+function webHTML() {
+  if (LAN.browser)
+    return `<div class="pn web-acc"><div class="inv-head"><h4>Phones and browsers</h4><span class="tag ok">Signed in</span></div><div class="stk">This device is signed in to the main computer as <b>${esc(LAN.device || "Phone")}</b>. Only the main computer can remove it.</div></div>`;
+  if (!webS.loaded) webLoad();
+  const s = webS.s;
+  if (!s || !s.main) return "";
+  const url = s.urls[0] || "",
+    D = s.devices || [],
+    live = d => d.seen && Date.now() - new Date(d.seen).getTime() < 90000;
+  const sw = `<button class="pv-sw ${s.on ? "on" : ""}" data-a="web_onoff" role="switch" aria-checked="${s.on}" aria-label="Allow phones and browsers" ${webS.busy ? "disabled" : ""}><i></i></button>`;
+  return `<div class="pn web-acc"><div class="inv-head"><h4>Phones and browsers</h4><span class="tag ${s.on ? "ok" : ""}">${s.on ? "Allowed on this network" : "Off"}</span></div>
+  <div class="svc-row"><div><b>Allow phones, tablets and other computers</b><small>They open Kaytia Flow in a browser on the same Wi-Fi or network, with nothing to install. Not reachable from the internet.</small></div>${sw}</div>
+  ${
+    s.on
+      ? `<div class="web-go">${url ? `<div class="web-qr" aria-hidden="true">${qrSvg(url)}</div>` : ""}<div><span class="web-k">Open this address</span><b class="web-url">${esc(url || "No network address found. Connect this computer to the Wi-Fi.")}</b>${s.urls.length > 1 ? `<small>Also: ${s.urls.slice(1).map(esc).join(", ")}</small>` : ""}
+      <ol class="web-steps"><li>Join the same Wi-Fi as this computer.</li><li>Scan the code or type the address in the browser.</li><li>Sign in the device once with ${s.hasLogin ? "the server username and password" : "the connect code"}.</li><li>Staff then sign in with their own username or PIN, and see only what their role allows.</li></ol><small class="web-fw">Phone can't open it? Make sure Windows Firewall on this computer allows Kaytia Flow${url ? " (port " + esc(url.split(":").pop()) + ")" : ""}.</small></div></div>
+  <div class="stk">Each device counts as one computer on your license. Settings for the program itself, the license key and the cloud stay on this computer.</div>
+  <h5 class="sy-sub">Signed-in devices (${D.length})</h5>${
+    D.length
+      ? `<div class="web-devs">${D.map(d => `<div class="web-dev ${live(d) ? "on" : ""}"><span class="sy-dot" aria-hidden="true"></span><span class="web-dn"><b>${esc(d.name)}</b><small>${esc(d.ip || "-")} · ${live(d) ? "online" : d.seen ? "last seen " + dt2(d.seen) : "not seen since the program restarted"} · bills ${esc(String(d.idx))}</small></span><button class="mini cat-del" data-a="web_rm" data-id="${esc(d.id)}">Remove</button></div>`).join("")}</div>`
+      : '<div class="stk">No devices yet. Scan the code with a phone to add one.</div>'
+  }`
+      : ""
+  }</div>`;
+}
+async function webAct(a, b) {
+  if (a === "web_onoff") {
+    if (!webS.s) return;
+    const on = !webS.s.on;
+    webS.busy = true;
+    all();
+    try {
+      const r = await fetch("/lan/web-access", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ on })
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) toast(j.error || "That didn't work.");
+      else {
+        webS.s = j;
+        auditAdd("Network", `Phones and browsers on the network turned ${on ? "on" : "off"}`, {
+          pri: "Important"
+        });
+        toast(
+          on
+            ? "Phones and browsers on this network can now sign in."
+            : "Phones and browsers can no longer open Kaytia Flow."
+        );
+      }
+    } catch (e) {
+      toast("The program on this computer can't be reached.");
+    }
+    webS.busy = false;
+    return all();
+  }
+  if (a === "web_rm") {
+    const id = b.dataset.id,
+      d = ((webS.s && webS.s.devices) || []).find(x => x.id === id);
+    return tapConfirm(
+      b,
+      async () => {
+        try {
+          const r = await fetch("/lan/web-access/remove", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ id })
+          });
+          if (r.ok) webS.s = await r.json();
+        } catch (e) {}
+        auditAdd("Network", `Device removed: ${d ? d.name : id}`, { pri: "Important" });
+        toast(
+          `${d ? d.name : "The device"} was removed. It must sign in again to use Kaytia Flow.`
+        );
+        all();
+      },
+      "Tap again to remove"
+    );
+  }
+}
+setInterval(() => {
+  if (
+    typeof view !== "undefined" &&
+    view === "settings" &&
+    setTab === "network" &&
+    webS.s &&
+    webS.s.on &&
+    !syTyping()
+  )
+    webLoad();
+}, 15000);
+
 // ---- Settings → Network: Kaytia Flow running quietly in the background, and starting with Windows
 const svcS = { loaded: false, s: null, busy: "" };
 async function svcLoad() {
@@ -50024,7 +53273,7 @@ async function syLoad() {
     const r = await fetch("/lan/sync-status");
     if (r.ok) s = await r.json();
   } catch (e) {}
-  syS.s = s || { role: "browser" };
+  syS.s = s || (LAN.browser ? { role: "till", main: LAN.main, device: true } : { role: "browser" });
   syS.at = Date.now();
   if (syOnPage() && !syTyping()) all();
 }
@@ -50104,7 +53353,7 @@ function syLanCard() {
     T = s.tills || [],
     live = t => t.seen && Date.now() - new Date(t.seen).getTime() < 90000;
   return `<div class="pn sy-card"><div class="inv-head"><h4>Local network</h4>${syTag(lan, lan === "on" ? "Connected" : lan === "off" ? "Main not reachable" : "No other computers")}</div>
-  ${syRow("This computer", main ? "Main computer" : `Till ${esc(String(LAN.idx || ""))}`)}${main ? syRow("Data kept in", esc((s.home || LAN.home) + "\\data")) : syRow("Main computer", esc(s.main || LAN.main || "-"))}${syRow("Data version", s.rev == null ? "-" : esc(String(s.rev)))}${syRow("Last synced", LAN.at ? syAgo(new Date(LAN.at).toISOString()) : "never")}${syRow("Changes waiting", LAN.pending ? "Yes, until the screen is free" : "None")}
+  ${syRow(s.device ? "This device" : "This computer", main ? "Main computer" : s.device ? esc(LAN.device || "Phone") : `Till ${esc(String(LAN.idx || ""))}`)}${main ? syRow("Data kept in", esc((s.home || LAN.home) + "\\data")) : syRow("Main computer", esc(s.main || LAN.main || "-"))}${syRow("Data version", s.rev == null ? "-" : esc(String(s.rev)))}${syRow("Last synced", LAN.at ? syAgo(new Date(LAN.at).toISOString()) : "never")}${syRow("Changes waiting", LAN.pending ? "Yes, until the screen is free" : "None")}
   ${main ? `<h5 class="sy-sub">Computers on this network (${T.length})</h5>${T.length ? `<div class="sy-list">${T.map(t => `<div class="${live(t) ? "on" : ""}"><span class="sy-dot" aria-hidden="true"></span><b>${esc(t.name)}</b><small>${esc(t.ip || "-")} · ${live(t) ? "online" : "last seen " + syAgo(t.seen)}</small></div>`).join("")}</div>` : '<div class="stk">No other computers yet.</div>'}` : ""}
   <div class="sy-acts">${main ? '<a class="chip on" href="/connect" target="_blank" rel="noopener">Connect computers</a>' : ""}<button class="mini" data-a="sy_lan">Sync now</button></div></div>`;
 }
@@ -50113,7 +53362,7 @@ function syCloudCard() {
     c = s.cloud,
     main = s.role === "main",
     [, cl] = syModes();
-  if (s.role === "browser")
+  if (s.role === "browser" || s.device)
     return `<div class="pn sy-card"><div class="inv-head"><h4>Cloud copy</h4>${syTag("none", "Not used")}</div><div class="stk">The cloud copy is kept by the main computer, in the installed program.</div></div>`;
   if (!main && !c)
     return `<div class="pn sy-card"><div class="inv-head"><h4>Cloud copy</h4>${syTag("off", "Unknown")}</div><div class="stk">The main computer can't be reached, so its cloud copy can't be checked from here.</div></div>`;
@@ -52934,10 +56183,23 @@ V.license = () => {
               `${st.left} day${st.left === 1 ? "" : "s"} left`,
               `Ends ${licDate(st.end)}${st.client ? ` · For ${esc(st.client)}` : ""}`
             ];
+  const K = LIC.s.key ? LIC.read(LIC.s.key) : null,
+    seats = K && K.m ? K.m : 0,
+    used = LAN.lic && LAN.lic.m ? LAN.lic.used : null;
+  if (seats && st.state !== "locked")
+    head[2] += `${head[2] ? " · " : ""}${used === null ? `For ${seats} computer${seats === 1 ? "" : "s"}` : `Computers: ${used} of ${seats} in use`}`;
   return `<div class="pn lic-st ${st.state}"><div><span>${head[0]}</span><b>${head[1]}</b><small>${head[2]}</small></div></div>
- <div class="pn"><h4>Installation code</h4><div class="stk">Send this code to Kaytia Tech Services when asking for a key. Each key only works for its own installation.</div><div class="lic-code"><input id="licPgCode" readonly value="${esc(LIC.s.code)}"><button class="mini" data-a="lic_copy">Copy</button></div></div>
+ <div class="pn"><h4>Installation code</h4><div class="stk">A company key covers a number of computers: enter it on the main computer and the tills get it by themselves. A key for one computer needs this code: send it to Kaytia Tech Services when asking for one.</div><div class="lic-code"><input id="licPgCode" readonly value="${esc(LIC.s.code)}"><button class="mini" data-a="lic_copy">Copy</button></div></div>
  <div class="pn"><h4>Enter a license key</h4><textarea id="licPgKey" rows="4" spellcheck="false" placeholder="Paste the license key here" style="width:100%;box-sizing:border-box"></textarea><div class="fr" style="margin-top:10px"><button class="chip on" data-a="lic_apply">Activate</button></div></div>
- <div class="pn tw"><h4>Keys used here</h4><table class="t"><tr><th>Date</th><th>Type</th><th>Client</th><th>Ends</th></tr>${L.map(x => `<tr><td>${new Date(x.at).toLocaleDateString("en-GB")}</td><td>${{ full: "Full license", trial: "Trial extension", lock: "Lock" }[x.t] || esc(x.t)}</td><td>${esc(x.c || "")}</td><td>${x.t === "lock" ? "" : x.e ? licDate(x.e) : "No end date"}</td></tr>`).join("") || '<tr><td colspan="4"><div class="empty">No keys used yet.</div></td></tr>'}</table></div>`;
+ <div class="pn tw"><h4>Current key</h4><table class="t"><tr><th>Activated</th><th>Type</th><th>Client</th><th>Computers</th><th>Ends</th></tr>${
+   L.slice(0, 1)
+     .map(
+       x =>
+         `<tr><td>${new Date(x.at).toLocaleDateString("en-GB")}</td><td>${{ full: "Full license", trial: "Trial extension", lock: "Lock" }[x.t] || esc(x.t)}</td><td>${esc(x.c || "")}</td><td>${x.t === "lock" ? "" : x.m ? x.m : "This computer"}</td><td>${x.t === "lock" ? "" : x.e ? licDate(x.e) : "No end date"}</td></tr>`
+     )
+     .join("") ||
+   '<tr><td colspan="5"><div class="empty">No key yet. This computer is on the free trial.</div></td></tr>'
+ }</table></div>`;
 };
 function licAct(a) {
   if (a === "lic_copy") {
@@ -53335,6 +56597,7 @@ $("#vSub").onclick = e => {
   if (a.slice(0, 3) === "su_") return supAct(a, b);
   if (a.slice(0, 3) === "sy_") return syncAct(a, b);
   if (a.slice(0, 4) === "svc_") return svcAct(a, b);
+  if (a.slice(0, 4) === "web_") return webAct(a, b);
   if (a.slice(0, 3) === "rm_") return repMailAct(a, b);
   if (a.slice(0, 3) === "mp_") return mpAct(a, b);
   if (a.slice(0, 3) === "hs_") {
@@ -53796,7 +57059,7 @@ const boTry = async () => {
   g.disabled = true;
   g.textContent = "Signing in…";
   const a = ADM.find(x => x.u === u),
-    ok = a && a.ph === (await H(u + "|" + p));
+    ok = a && (await hashIs(a.ph, u + "|" + p));
   g.disabled = false;
   g.textContent = "Sign in";
   if (ok && a.off) return bad("This account is disabled. Ask your administrator.");
@@ -53847,7 +57110,7 @@ async function fdLoginTry() {
   if (Date.now() < flLock) return bad("Too many attempts. Try again in 30 seconds.");
   g.disabled = true;
   const a = ADM.find(x => x.u === u),
-    ok = a && a.ph === (await H(u + "|" + p));
+    ok = a && (await hashIs(a.ph, u + "|" + p));
   g.disabled = false;
   if (!ok) {
     if (++flFails >= 5) {
@@ -53939,21 +57202,79 @@ $("#boOut").onclick = () => {
   boShow();
 };
 const stHi = () => {
+  const now = new Date();
   $("#stHi").textContent = (h =>
-    h < 12 ? "Good morning," : h < 17 ? "Good afternoon," : "Good evening,")(new Date().getHours());
+    h < 12 ? "Good morning," : h < 17 ? "Good afternoon," : "Good evening,")(now.getHours());
+  // The rest of the start page: the hotel, the time, the business day, this computer and its network.
+  const set = (id, t) => {
+    const e = document.getElementById(id);
+    if (e && e.textContent !== t) e.textContent = t;
+  };
+  set("stHotel", FD_SETTINGS.name || "Kaytia Flow");
+  set("stTime", now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }));
+  set(
+    "stDate",
+    now.toLocaleDateString("en-GB", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric"
+    })
+  );
+  try {
+    const d = curDay();
+    set(
+      "stBiz",
+      d
+        ? `Business day ${new Date(bizDate() + "T12:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short" })} is open`
+        : "No business day open yet"
+    );
+  } catch (e) {
+    set("stBiz", "");
+  }
+  const logo = $("#stLogo"),
+    src = (FD_SETTINGS.logos || {}).company || "";
+  if (logo && logo.dataset.src !== src) {
+    logo.dataset.src = src;
+    logo.innerHTML = src
+      ? `<img src="${esc(src)}" alt="">`
+      : `<b>${esc(
+          (FD_SETTINGS.name || "K")
+            .split(/\s+/)
+            .filter(w => !/^(the|of|and)$/i.test(w))
+            .map(w => w[0])
+            .join("")
+            .slice(0, 2)
+            .toUpperCase()
+        )}</b>`;
+  }
+  const pc = typeof MACHINE !== "undefined" ? MACHINE.name() : "";
+  set("stPc", pc ? `This computer: ${pc}` : "");
+  set(
+    "stNet",
+    typeof LAN === "undefined" || !LAN.on
+      ? "Working on this computer"
+      : LAN.role === "main"
+        ? "Main computer"
+        : LAN.state === "offline"
+          ? "Main computer not reachable"
+          : "Connected to the main computer"
+  );
 };
 stHi();
-setInterval(stHi, 6e4);
+setInterval(stHi, 15e3);
 document.addEventListener("keydown", e => {
   if ($("#start").style.display === "none" || e.ctrlKey || e.metaKey || e.altKey) return;
   const k = e.key.toLowerCase();
   if (k === "p") posOpen();
   else if (k === "b") boOpen();
   else if (k === "f") fdOpen();
+  else if (k === "k" && kdsOn()) kdsOpen();
+  else if (k === "c" && clockOn()) clockOpen();
 });
 $("#start").onclick = e => {
   const g = e.target.closest("[data-go]");
-  if (g) (({ bo: boOpen, fd: fdOpen, clock: clockOpen })[g.dataset.go] || posOpen)();
+  if (g) (({ bo: boOpen, fd: fdOpen, clock: clockOpen, kds: kdsOpen })[g.dataset.go] || posOpen)();
 };
 $("#home").onclick = boOpen;
 $("#fdBack").onclick = () => fdExit(true); // leaving the Front Office signs out

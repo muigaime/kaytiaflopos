@@ -56,11 +56,12 @@ try{
   // issuing converts crates to pieces
   click('[data-a="inv_rcexit"]'); await wait(30);
   await nav("Inventory"); const issueTab=q('.ph-c[data-t="issue"]')||q('[data-a="inv_tab"][data-t="issue"]'); if(issueTab) issueTab.click(); await wait(120);
-  const sel=q("#l_k_is"); if(sel){ sel.value=k; sel.dispatchEvent(new Event("change",{bubbles:true})); await wait(40); }
-  const uo=q("#l_u_is");
-  must(!!uo&&[...uo.options].some(o=>/Crate [(]24 pcs[)]/.test(o.textContent)),"issuing offers crates of 24: "+(uo&&[...uo.options].map(o=>o.textContent).join("|")));
-  uo.value="buy"; q("#l_q_is").value="1"; click('[data-a="inv_ladd"][data-f="is"]'); await wait(40);
-  must(/24 pcs [(]1 Crate[)]/.test(q("#vSub").textContent),"one crate issued is 24 pieces");
+  { const n=q("#isName"); n.focus(); n.dispatchEvent(new FocusEvent("focusin",{bubbles:true})); await wait(30); const o=q('#isPick [data-rcpk="'+k+'"]'); if(o) o.dispatchEvent(new MouseEvent("mousedown",{bubbles:true})); await wait(50); }
+  const cb=q('[data-a="inv_seby"][data-f="is"][data-v="buy"]');
+  must(!!cb&&!cb.disabled&&/Crates of 24/.test(cb.textContent),"issuing offers crates of 24: "+(cb&&cb.textContent));
+  cb.click(); await wait(40); { const e=q("#isQty"); e.value="1"; e.dispatchEvent(new Event("input",{bubbles:true})); } click('[data-a="inv_seadd"][data-f="is"]'); await wait(50);
+  const ib=q("#vSub .se-t .u-badge.crate");
+  must(!!ib&&/1 Crate/.test(ib.textContent)&&/= 24 pcs/.test(ib.parentElement.textContent),"one crate issued shows 1 Crate = 24 pcs: "+(ib&&ib.parentElement.textContent));
 }catch(e){log("X "+e.message)}
 document.documentElement.setAttribute("data-test",__E.join(" @@ "));document.title="done";})();</script>`;
 const html = fs.readFileSync(file, "utf8").replace("<head>", "<head>" + head).replace(/<\/body>(?![\s\S]*<\/body>)/, tail + "</body>");

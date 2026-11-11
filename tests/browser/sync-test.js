@@ -32,7 +32,7 @@ try{
   click("#lock"); await wait(25); q("#bo").classList.add("show"); click("#home"); await wait(20); q("#boU").value="admin"; q("#boP").value="admin123"; await wait(700); click("#boGo"); await wait(1400);
   const nav=async n=>{ qa("#nav .nv").find(x=>x.dataset.n===n).click(); await wait(120); }, tab=async k=>{ click('[data-a="hs_tab"][data-k="'+k+'"]'); await wait(120); };
   await nav("Settings");
-  must(qa(".set-grp h5").map(x=>x.textContent).join("|")==="Your business|Point of sale|System"&&qa(".set-nv").length===13,"Settings is grouped: "+qa(".set-grp h5").map(x=>x.textContent).join("|")+" / "+qa(".set-nv").length);
+  must(qa(".set-grp h5").map(x=>x.textContent).join("|")==="Your business|Point of sale|System"&&qa(".set-nv").length===14,"Settings is grouped: "+qa(".set-grp h5").map(x=>x.textContent).join("|")+" / "+qa(".set-nv").length);
   must(q(".set-head h2").textContent==="Hotel and logos"&&!!q(".set-head p").textContent&&!!q('[data-iv="hs.name"]'),"each page has its own heading");
   must(["sync","backup","support"].every(k=>!!q('[data-a="hs_tab"][data-k="'+k+'"] .set-lk:not(.open)')),"the owner pages show a lock");
   // the owner password

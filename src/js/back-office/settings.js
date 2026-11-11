@@ -50,14 +50,16 @@ V.settings = () => {
         setTimeout(() => $("#modPw") && $("#modPw").focus(), 30);
         return `<div class="pn"><h4>Modules</h4><div class="stk">Enter the modules password to open this page.</div><div class="fr" style="align-items:end"><label>Password<input id="modPw" type="password" autocomplete="new-password" aria-label="Modules password"></label><button class="chip on" style="flex:none" data-a="hs_modgo">Open modules</button></div></div>`;
       }
-      const on = fdOn();
-      return `<div class="pn"><div class="fr" style="align-items:center;justify-content:space-between"><h4 style="margin:0">Modules</h4><button class="mini" style="flex:none" data-a="hs_modlock">Lock</button></div><div class="stk">Switch off what this business doesn't use. Nothing is deleted: switch it back on and everything returns as it was.</div><div class="tw"><table class="t"><tr><td><b>Front Desk and room reports</b><small class="pr-code">Rooms, bookings, check-in, housekeeping, guest bills, Room reports and Post to room. Switch it off for a business with no rooms.</small></td><td><span class="tag ${on ? "ok" : ""}">${on ? "On" : "Off"}</span></td><td class="n"><button class="pv-sw ${on ? "on" : ""}" data-a="hs_fdtog" role="switch" aria-checked="${on}" aria-label="Front Desk and room reports"><i></i></button></td></tr></table></div></div>`;
+      const row = (on, act, name, what) =>
+        `<tr><td><b>${name}</b><small class="pr-code">${what}</small></td><td><span class="tag ${on ? "ok" : ""}">${on ? "On" : "Off"}</span></td><td class="n"><button class="pv-sw ${on ? "on" : ""}" data-a="${act}" role="switch" aria-checked="${on}" aria-label="${name}"><i></i></button></td></tr>`;
+      return `<div class="pn"><div class="fr" style="align-items:center;justify-content:space-between"><h4 style="margin:0">Modules</h4><button class="mini" style="flex:none" data-a="hs_modlock">Lock</button></div><div class="stk">Switch off what this business doesn't use. Nothing is deleted: switch it back on and everything returns as it was.</div><div class="tw"><table class="t">${row(fdOn(), "hs_fdtog", "Front Desk and room reports", "Rooms, bookings, check-in, housekeeping, guest bills, Room reports and Post to room. Switch it off for a business with no rooms.")}${row(kdsOn(), "hs_kdstog", "Kitchen display", "The kitchen and bar screens, order status on the POS (In the queue, Preparing, Ready to serve), ready alerts for waiters, and Settings → Kitchen display. Orders still print as before.")}${row(stkOn(), "hs_stktog", "Product stickers and guest menu", "Print stickers in the Products List, and the menu of prices that a sticker's QR code opens on a guest's phone.")}${row(clockOn(), "hs_clocktog", "Staff clock", "Clocking in and out on the start screen, and HR & Payroll → Clock and biometric. Time already recorded stays in Time and attendance.")}</table></div></div>`;
     },
     email: repMailHTML,
     support: supportHTML,
     backup: backupHTML,
     network: networkHTML,
-    sync: syncHTML
+    sync: syncHTML,
+    kds: kdsSetupHTML
   };
   const lock = setTabOf(setTab)[4],
     body = lock === "owner" && !ownOpen ? ownerGateHTML() : (panels[setTab] || panels.hotel)();
@@ -180,9 +182,29 @@ function fdModuleToggle() {
   all();
   toast(on ? "Front Desk and room reports are on." : "Front Desk and room reports are off.");
 }
+/** Kitchen display and staff clock: one switch each. */
+function moduleToggle(key, name) {
+  if (!mdlOpen) return;
+  if (!boCan("set.manage")) return boDenied();
+  FD_SETTINGS[key] = !FD_SETTINGS[key];
+  const on = !FD_SETTINGS[key];
+  auditAdd("Settings", `${name} switched ${on ? "on" : "off"}`);
+  bosave();
+  fdModuleApply();
+  applyBoRights();
+  go("Settings");
+  setTab = "modules";
+  mdlOpen = true; // going back to Settings locks the page; this person just used it
+  all();
+  toast(`${name} is ${on ? "on" : "off"}.`);
+}
 async function settingsAct(a, b) {
+  if (a === "kdstog") return moduleToggle("kdsOff", "Kitchen display");
+  if (a === "clocktog") return moduleToggle("clockOff", "Staff clock");
+  if (a === "stktog") return moduleToggle("stickersOff", "Product stickers and guest menu");
   if (a === "modgo") return mdlUnlock();
   if (a === "owngo") return ownUnlock();
+  if (a === "kdstime") return kdsTimeSave();
   if (a === "ownlock") {
     ownLock();
     return all();

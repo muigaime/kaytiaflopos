@@ -27,6 +27,7 @@ function clockTick() {
   });
 }
 function clockOpen() {
+  if (!clockOn()) return;
   $("#start").style.display = "none";
   $("#sClock").classList.add("show");
   clockFill();

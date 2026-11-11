@@ -86,7 +86,7 @@ const STK_CSS = `.stk1{display:grid;grid-template-columns:32% 1fr;gap:.55em;box-
 .l60 .stk1{width:60mm;height:40mm;padding:1.3mm 1.6mm;font-size:7.8pt}
 .a4 .stk1{height:39mm;padding:1.5mm 1.8mm;font-size:7.8pt;border:.2mm dashed #999}`;
 function stkModal() {
-  if (!prS) return "";
+  if (!prS || !stkOn()) return "";
   const F = prS,
     L = stkItems(),
     n = Math.max(1, Math.min(50, parseInt(F.copies, 10) || 1)),
@@ -125,6 +125,10 @@ function stkPrint() {
   all();
 }
 function stkAct(a) {
+  if (!stkOn()) {
+    prS = null;
+    return all();
+  }
   if (a === "prl_stk") {
     prS = { from: stkDefault(), copies: "1", size: "l80", url: FD_SETTINGS.menuUrl || "" };
     stkFindUrl();

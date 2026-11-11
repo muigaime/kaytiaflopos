@@ -71,9 +71,9 @@ try{
   await nav("Inventory"); q('[data-a="inv_tab"][data-t="req"]').click(); await wait(100);
   must(!!q('[data-a="inv_nrq"]'),"Requisitions has a New requisition button");
   must(/Housekeeping/.test(q("#vSub").textContent),"and lists the Front Desk's request");
-  click('[data-a="inv_nrq"]'); await wait(60); must(!!q("#nrq_k")&&!!q('[data-iv="nrq.to"]'),"the form opens");
+  click('[data-a="inv_nrq"]'); await wait(60); must(!!q("#nrqName")&&!!q('[data-iv="nrq.to"]'),"the form opens");
   click('[data-a="inv_nrqgo"]'); await wait(30); must(/at least one/.test((q("#toast")||{}).textContent||""),"an empty one is refused");
-  val('[data-iv="nrq.to"]',"Bar"); await wait(30); q("#nrq_k").value="a"; q("#nrq_q").value="3"; click('[data-a="rec_ladd"][data-f="nrq"]'); await wait(50);
+  val('[data-iv="nrq.to"]',"Bar"); await wait(30); { const n=q("#nrqName"); n.focus(); n.dispatchEvent(new FocusEvent("focusin",{bubbles:true})); await wait(30); const o=q('#nrqPick [data-rcpk="a"]'); if(o) o.dispatchEvent(new MouseEvent("mousedown",{bubbles:true})); await wait(50); } { const e=q("#nrqQty"); e.value="3"; e.dispatchEvent(new Event("input",{bubbles:true})); } click('[data-a="inv_seadd"][data-f="nrq"]'); await wait(50);
   click('[data-a="inv_nrqgo"]'); await wait(60);
   const N=disk().RQ.at(-1); must(N.dept==="Bar"&&N.store==="Main Store"&&N.lines[0].q===3&&N.by==="Administrator","a requisition is raised from the Back Office");
   await nav("Selling points"); must(/Housekeeping/.test(q("#vSub").textContent),"Housekeeping shows under places that hold stock");

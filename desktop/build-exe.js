@@ -17,8 +17,14 @@ const OUT = process.argv[2] || "C:\\Users\\LIAM\\Desktop\\compiled";
   fs.writeFileSync(path.join(work, "app.html"), buildHtml());
 
   const esbuild = require(path.join(SRV, "node_modules", "esbuild"));
+  // Kaytia Flow's public key, so the program can check license keys (it can't make them).
+  const licN = /const LIC_N =\s*"([A-Za-z0-9_-]+)"/.exec(
+    fs.readFileSync(path.join(ROOT, "src", "js", "shared", "license.js"), "utf8")
+  );
+  if (!licN) throw new Error("Kaytia Flow's public key wasn't found in license.js");
   const r = await esbuild.build({
     entryPoints: [path.join(HERE, "launcher.ts")],
+    define: { LIC_N_BUILD: JSON.stringify(licN[1]) },
     outfile: path.join(work, "bundle.cjs"),
     bundle: true,
     platform: "node",

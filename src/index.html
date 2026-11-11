@@ -117,7 +117,11 @@
           ><button class="b" id="selBtn">Select</button><button class="b" id="findBtn">Find</button>
         </div>
       </section>
-      <section class="rp">
+      <section class="rp" id="rpSheet" aria-label="Bill">
+        <div class="rp-hd">
+          <button class="b" id="rpClose" type="button" aria-label="Back to the menu">← Menu</button
+          ><b>Bill</b><span id="rpSum"></span>
+        </div>
         <div class="paper">
           <div class="rh">
             Date <span id="hDate"></span>, Shift no 1043, Cashier <b id="cname"></b>
@@ -169,6 +173,12 @@
           ><button class="act a7" id="billBtn">Bill options</button>
         </div>
       </section>
+      <!-- phones: the bill rides along at the bottom, and opens over the menu -->
+      <button class="pbar" id="pBar" type="button" aria-controls="rpSheet">
+        <span class="pb-n" id="pbN">0</span
+        ><span class="pb-t"><b id="pbTot">0.00</b><small id="pbS">Tap an item to start</small></span
+        ><span class="pb-go">View bill <i aria-hidden="true">→</i></span>
+      </button>
     </div>
     <!-- ==================== POS: modals ==================== -->
     <div class="modal" id="mSel">
@@ -497,6 +507,7 @@
     <script src="js/pos/exchange.js"></script>
     <script src="js/pos/modifiers.js"></script>
     <script src="js/pos/slips.js"></script>
+    <script src="js/pos/kds.js"></script>
     <script src="js/pos/printers.js"></script>
     <script src="js/pos/bill-options.js"></script>
     <script src="js/pos/bill-transfer.js"></script>
@@ -505,6 +516,7 @@
     <script src="js/pos/login-session.js"></script>
 
     <!-- ==================== Start menu (POS / Back Office / Front Desk) ==================== -->
+    <div id="kds" role="application" aria-label="Kitchen display"></div>
     <div id="sClock">
       <div class="sc-card">
         <div class="sc-time"><b id="scT"></b><span id="scD"></span></div>
@@ -518,77 +530,52 @@
         <button class="sc-back" id="scBack">Back to main page</button>
       </div>
     </div>
-    <div id="start">
-      <div class="lbrand">
+    <div id="start" class="st2">
+      <div class="st-glow" aria-hidden="true"></div>
+      <header class="st-top">
         <div class="kf-brand"><span class="kf-m" aria-hidden="true">K</span><span class="kf-t"><b>Kaytia <em>Flow</em></b></span></div>
-        <h2>Everything your hotel needs.<br /><em>One smart place.</em></h2>
-        <p>
-          Sell at the counter, then watch sales, stock and staff update in the Back Office, all from
-          the same system.
-        </p>
-        <div class="sfloat">
-          <div class="fc c1">
-            <svg viewBox="0 0 24 24"><path d="M3 4h3l2 11h10l2-8H7M9 20h.01M17 20h.01" /></svg
-            ><b>Sell</b><span>One fast till for bar, kitchen and restaurant</span>
-          </div>
-          <div class="fc c2">
-            <svg viewBox="0 0 24 24"><path d="M12 3l8 4v10l-8 4-8-4V7zM4 7l8 4 8-4M12 11v10" /></svg
-            ><b>Track</b><span>Stock that updates with every sale</span>
-          </div>
-          <div class="fc c3">
-            <svg viewBox="0 0 24 24">
-              <path d="M5 4h11a3 3 0 013 3v13H8a3 3 0 01-3-3zM5 17a3 3 0 013-3h11" /></svg
-            ><b>Report</b><span>18 sales reports at your fingertips</span>
-          </div>
-        </div>
-        <small>Kaytia Flow · Developed by Kaytia Tech Services · POS Software · POS Hardware</small>
-      </div>
-      <div class="lform">
-        <div class="lcard">
-          <h3 id="stHi">Good evening,</h3>
-          <p class="ls">Welcome to Kaytia Flow. Where would you like to start?</p>
+        <div class="st-hotel"><span class="st-logo" id="stLogo" aria-hidden="true"></span><div><b id="stHotel"></b><small id="stBiz"></small></div></div>
+        <div class="st-clock"><b id="stTime"></b><small id="stDate"></small></div>
+      </header>
+      <main class="st-main">
+        <section class="st-hero">
+          <p class="st-kicker">Welcome to Kaytia Flow</p>
+          <h1><span id="stHi">Good evening,</span><em id="stPlace">where would you like to start?</em></h1>
           <div class="lic-chip" id="stLic"></div>
-          <button class="opt" data-go="pos">
-            <span class="oi"
-              ><svg viewBox="0 0 24 24">
-                <rect x="5" y="3" width="14" height="18" rx="2" />
-                <path
-                  d="M9 7h6M9 11h.01M12 11h.01M15 11h.01M9 14h.01M12 14h.01M15 14h.01"
-                /></svg></span
-            ><span class="ot"
-              ><b>POS Terminal</b><span>Sell at the counter and take payments</span></span
-            ><span class="oa">→</span>
+        </section>
+        <nav class="st-grid" aria-label="Where to start">
+          <button class="st-tile big" data-go="pos">
+            <span class="st-ic"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2" /><path d="M9 7h6M9 11h.01M12 11h.01M15 11h.01M9 14h.01M12 14h.01M15 14h.01M9 17h6" /></svg></span>
+            <span class="st-tx"><b>POS Terminal</b><span>Sell at the counter, send orders to the kitchen and bar, and take payments.</span><span class="st-feat"><em>Tables and takeaway</em><em>Kitchen and bar tickets</em><em>Cash, M-Pesa and card</em><em>Split and merge bills</em><em>Post to room</em></span></span>
+            <span class="st-go"><kbd>P</kbd><i aria-hidden="true">→</i></span>
           </button>
-          <button class="opt" data-go="bo">
-            <span class="oi bo"
-              ><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" /></svg></span
-            ><span class="ot"
-              ><b>Back Office</b><span>Dashboard, reports, stock and staff</span></span
-            ><span class="oa">→</span>
+          <button class="st-tile " data-go="bo">
+            <span class="st-ic"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" /></svg></span>
+            <span class="st-tx"><b>Back Office</b><span>Dashboard, reports, stock, purchasing, accounts and staff.</span><span class="st-feat st-feat-bo"><em>Live dashboard</em><em>Stock and purchasing</em><em>Accounts</em><em>HR and payroll</em><em>Reports</em></span></span>
+            <span class="st-go"><kbd>B</kbd><i aria-hidden="true">→</i></span>
           </button>
-          <button class="opt" data-go="fd">
-            <span class="oi fd"
-              ><svg viewBox="0 0 24 24">
-                <path d="M3 18V7M3 14h18v4M21 14v-2a3 3 0 00-3-3h-7v5M7 11h.01" /></svg></span
-            ><span class="ot"
-              ><b>Front Desk</b><span>Rooms, bookings, check-in and guest bills</span></span
-            ><span class="oa">→</span>
+          <button class="st-tile " data-go="fd">
+            <span class="st-ic"><svg viewBox="0 0 24 24"><path d="M3 18V7M3 14h18v4M21 14v-2a3 3 0 00-3-3h-7v5M7 11h.01" /></svg></span>
+            <span class="st-tx"><b>Front Desk</b><span>Rooms, bookings, check-in, housekeeping and guest bills.</span></span>
+            <span class="st-go"><kbd id="stFdKey">F</kbd><i aria-hidden="true">→</i></span>
           </button>
-          <button class="opt" data-go="clock">
-            <span class="oi"
-              ><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg></span
-            ><span class="ot"><b>Staff clock</b><span>Clock in or out with your password</span></span
-            ><span class="oa">→</span>
+          <button class="st-tile " data-go="kds">
+            <span class="st-ic"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2" /><path d="M8 20h8M12 16v4M7 8h4M7 11h6" /></svg></span>
+            <span class="st-tx"><b>Kitchen display</b><span>Orders for the kitchen and bar, live from the POS.</span></span>
+            <span class="st-go"><kbd>K</kbd><i aria-hidden="true">→</i></span>
           </button>
-          <div class="lsep"></div>
-          <p class="lalt">
-            Tip: press <kbd>P</kbd> POS, <kbd>B</kbd> Back Office<span id="stFdKey"> or <kbd>F</kbd> Front Desk</span>
-          </p>
-          <p class="lalt" style="font-size: 11.5px">
-            Kaytia Flow · Version 1.8.0 · Build 26 Oct 2026
-          </p>
-        </div>
-      </div>
+          <button class="st-tile " data-go="clock">
+            <span class="st-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg></span>
+            <span class="st-tx"><b>Staff clock</b><span>Clock in or out with your password.</span></span>
+            <span class="st-go"><kbd>C</kbd><i aria-hidden="true">→</i></span>
+          </button>
+        </nav>
+      </main>
+      <footer class="st-foot">
+        <span id="stPc"></span>
+        <span id="stNet"></span>
+        <span>Version 1.8.0 · Developed by Kaytia Tech Services</span>
+      </footer>
     </div>
     <!-- ==================== Back Office ==================== -->
     <div id="bo">
@@ -973,6 +960,7 @@
     <script src="js/back-office/selling-points.js" data-private></script>
     <script src="js/back-office/production.js" data-private></script>
     <script src="js/back-office/settings.js" data-private></script>
+    <script src="js/back-office/kds-setup.js" data-private></script>
     <script src="js/back-office/support-page.js" data-private></script>
     <script src="js/back-office/staff-clock.js" data-private></script>
     <script src="js/back-office/product-import.js" data-private></script>

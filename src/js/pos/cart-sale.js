@@ -482,7 +482,7 @@ function selRender() {
     ? `<div class="sr sh"><label><input type="checkbox" id="selAll" ${ch.length === L.length ? "checked" : ""}></label><span>Bill no</span><span>Table no</span><span>Waiter</span><span>Guest name</span><span>Date</span><span>Time</span><span>Curr</span><span class="n">Amount</span><span>S point</span></div>` +
       L.map(
         o =>
-          `<div class="sr ${selSet.has(o.no) ? "on" : ""} ${o.printed ? "printed" : ""} ${o.billCopies ? "rep" : ""}" data-row="${o.no}"><label><input type="checkbox" data-s="${o.no}" ${selSet.has(o.no) ? "checked" : ""}></label><span class="sr-no" title="Bill ${slipEsc(o.no)}, order ${slipEsc(o.ord)}">${slipEsc(o.no)}<small>Order ${slipEsc(o.ord)}${emptyTag(o)}</small></span><span class="sr-t" title="${slipEsc(o.label)}"><b>${slipEsc(o.label)}</b></span>${cell(o.waiter || "–")}${cell(o.guest || "N/A")}${cell(o.at.toLocaleDateString("en-GB"))}${cell(o.at.toLocaleTimeString("en-GB"))}${cell("KES", "sr-cur")}<span class="n"><b>${bill2(totals(o.lines, o).g)}</b></span>${cell(billWhere(o))}</div>`
+          `<div class="sr ${selSet.has(o.no) ? "on" : ""} ${o.printed ? "printed" : ""} ${o.billCopies ? "rep" : ""}" data-row="${o.no}"><label><input type="checkbox" data-s="${o.no}" ${selSet.has(o.no) ? "checked" : ""}></label><span class="sr-no" title="Bill ${slipEsc(o.no)}, order ${slipEsc(o.ord)}">${slipEsc(o.no)}<small>Order ${slipEsc(o.ord)}${emptyTag(o)}</small>${kdsChip(o.no)}</span><span class="sr-t" title="${slipEsc(o.label)}"><b>${slipEsc(o.label)}</b></span>${cell(o.waiter || "–")}${cell(o.guest || "N/A")}${cell(o.at.toLocaleDateString("en-GB"))}${cell(o.at.toLocaleTimeString("en-GB"))}${cell("KES", "sr-cur")}<span class="n"><b>${bill2(totals(o.lines, o).g)}</b></span>${cell(billWhere(o))}</div>`
       ).join("")
     : '<div class="empty">No pending bills for ' + w + ".</div>";
   // These work on one bill: highlight exactly one.
@@ -799,3 +799,41 @@ document.addEventListener("click", e => {
   if (e.target.dataset.close !== undefined) e.target.closest(".modal").classList.remove("show");
   if (e.target.classList.contains("modal")) e.target.classList.remove("show");
 });
+
+// ---- phones: a bar at the bottom shows the bill's count and total; tapping it opens the bill over the menu
+function pbarDraw() {
+  const b = $("#pBar");
+  if (!b) return;
+  const n = Object.values(cart).reduce((a, q) => a + q, 0),
+    t = totals(),
+    who = cur ? cur.label : draft ? draft.no : "";
+  $("#pbN").textContent = n;
+  $("#pbTot").textContent = bill2(t.g);
+  $("#pbS").textContent = n
+    ? `${n} item${n === 1 ? "" : "s"}${who ? " · " + who : ""}`
+    : who
+      ? `${who} · tap items to add`
+      : "Tap an item to start";
+  $("#rpSum").textContent = n ? `${n} item${n === 1 ? "" : "s"} · ${bill2(t.g)}` : "";
+  b.classList.toggle("has", n > 0);
+}
+const billSheet = on => document.body.classList.toggle("bill-open", !!on);
+$("#pBar").onclick = () => billSheet(true);
+$("#rpClose").onclick = () => billSheet(false);
+{
+  const draw0 = drawCart;
+  drawCart = function () {
+    draw0.apply(this, arguments);
+    pbarDraw();
+  };
+}
+addEventListener("keydown", e => {
+  if (
+    e.key === "Escape" &&
+    document.body.classList.contains("bill-open") &&
+    !document.querySelector(".modal.show")
+  )
+    billSheet(false);
+});
+// leaving the till closes the bill, so the next person starts on the menu
+$("#lock").addEventListener("click", () => billSheet(false));

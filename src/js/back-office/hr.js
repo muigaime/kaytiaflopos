@@ -19,7 +19,8 @@ const HR_TABS = [
 /** The tabs, in their groups. */
 const hrGroups = () => {
   const G = [];
-  HR_TABS.forEach(([t, l, ic]) => {
+  if (hrS.tab === "clock" && !clockOn()) hrS.tab = "home";
+  HR_TABS.filter(([t]) => t !== "clock" || clockOn()).forEach(([t, l, ic]) => {
     if (t === "h") G.push({ name: l, tabs: [] });
     else G[G.length - 1].tabs.push([t, l, ic]);
   });
@@ -706,7 +707,9 @@ function hrAct(a, b) {
       // Stored as a hash, so nobody can read a person's password back.
       const pw = E.clockNew;
       if (pw.length < 4) return toast("The clock password needs at least 4 characters.");
-      E.clockSalt = crypto.randomUUID();
+      E.clockSalt = [...crypto.getRandomValues(new Uint8Array(16))]
+        .map(b => b.toString(16).padStart(2, "0"))
+        .join(""); // randomUUID needs https; this works on phones too
       delete E.clockNew;
       return clockHashOf(E.clockSalt, pw).then(h => {
         E.clockHash = h;

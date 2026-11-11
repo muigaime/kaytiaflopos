@@ -109,6 +109,7 @@ function bosave() {
         VP: VPAYS,
         BL: BILLLOG,
         OR: orders,
+        KD: KDS,
         RN: rno,
         TB: TBL,
         FB: FREE_BILLS,
@@ -199,6 +200,8 @@ function boLoad(s, again) {
     });
     if (Object.keys(o.lines || {}).length) orders.push(o);
   });
+  KDS.length = 0;
+  KDS.push(...(s.KD || []));
   ISSUES.length = 0;
   ISSUES.push(...(s.IS || []));
   PRODS.length = 0;
@@ -324,18 +327,29 @@ USERS.forEach((u, i) => {
   if (!u.role)
     u.role = u.d.filter(posSells).length >= ALLD.filter(posSells).length ? "Manager" : "Waiter";
 });
+/** The short hash older copies saved when the browser had no SHA-256 (phones and tills on plain http). */
+const Hold = t => {
+  let h = 5381;
+  for (const c of "kaytia|" + t) h = ((h * 33) ^ c.charCodeAt(0)) >>> 0;
+  return "x" + h;
+};
+/** SHA-256 of a password. On plain http (a phone on the Wi-Fi) the browser has none, so our own gives the same answer. */
 const H = async t => {
-  t = "kaytia|" + t;
+  const s = "kaytia|" + t;
   try {
-    return [...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(t)))]
-      .map(b => b.toString(16).padStart(2, "0"))
-      .join("");
+    if (window.crypto && crypto.subtle)
+      return [...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)))]
+        .map(b => b.toString(16).padStart(2, "0"))
+        .join("");
+  } catch (e) {}
+  try {
+    return LIC.sha256(s);
   } catch (e) {
-    let h = 5381;
-    for (const c of t) h = ((h * 33) ^ c.charCodeAt(0)) >>> 0;
-    return "x" + h;
+    return Hold(t);
   }
 };
+/** Does this saved hash belong to that password (either kind)? */
+const hashIs = async (saved, t) => !!saved && (saved === (await H(t)) || saved === Hold(t));
 if (!ADM.length)
   H("admin|admin123").then(h => {
     if (!ADM.length) {

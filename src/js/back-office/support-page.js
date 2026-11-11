@@ -23,7 +23,9 @@ function supRows() {
       e = kfErrOf(msg);
     return { at: m[1] || "", where: m[2] || "Program", msg, code: e ? e[0] : 0 };
   });
-  return [...supLocal(), ...prog].sort((a, b) => String(b.at).localeCompare(String(a.at)));
+  return [...supLocal(), ...prog.filter(x => !/^Screen /.test(x.where))].sort((a, b) =>
+    String(b.at).localeCompare(String(a.at))
+  );
 }
 const supText = L =>
   L.map(x => `${x.at}  [${x.where}]  ${x.code ? `Error ${x.code}  ` : ""}${x.msg}`).join("\r\n") ||

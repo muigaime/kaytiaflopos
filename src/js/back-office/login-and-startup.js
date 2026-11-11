@@ -63,7 +63,7 @@ const boTry = async () => {
   g.disabled = true;
   g.textContent = "Signing in…";
   const a = ADM.find(x => x.u === u),
-    ok = a && a.ph === (await H(u + "|" + p));
+    ok = a && (await hashIs(a.ph, u + "|" + p));
   g.disabled = false;
   g.textContent = "Sign in";
   if (ok && a.off) return bad("This account is disabled. Ask your administrator.");
@@ -114,7 +114,7 @@ async function fdLoginTry() {
   if (Date.now() < flLock) return bad("Too many attempts. Try again in 30 seconds.");
   g.disabled = true;
   const a = ADM.find(x => x.u === u),
-    ok = a && a.ph === (await H(u + "|" + p));
+    ok = a && (await hashIs(a.ph, u + "|" + p));
   g.disabled = false;
   if (!ok) {
     if (++flFails >= 5) {
@@ -206,21 +206,79 @@ $("#boOut").onclick = () => {
   boShow();
 };
 const stHi = () => {
+  const now = new Date();
   $("#stHi").textContent = (h =>
-    h < 12 ? "Good morning," : h < 17 ? "Good afternoon," : "Good evening,")(new Date().getHours());
+    h < 12 ? "Good morning," : h < 17 ? "Good afternoon," : "Good evening,")(now.getHours());
+  // The rest of the start page: the hotel, the time, the business day, this computer and its network.
+  const set = (id, t) => {
+    const e = document.getElementById(id);
+    if (e && e.textContent !== t) e.textContent = t;
+  };
+  set("stHotel", FD_SETTINGS.name || "Kaytia Flow");
+  set("stTime", now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }));
+  set(
+    "stDate",
+    now.toLocaleDateString("en-GB", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric"
+    })
+  );
+  try {
+    const d = curDay();
+    set(
+      "stBiz",
+      d
+        ? `Business day ${new Date(bizDate() + "T12:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short" })} is open`
+        : "No business day open yet"
+    );
+  } catch (e) {
+    set("stBiz", "");
+  }
+  const logo = $("#stLogo"),
+    src = (FD_SETTINGS.logos || {}).company || "";
+  if (logo && logo.dataset.src !== src) {
+    logo.dataset.src = src;
+    logo.innerHTML = src
+      ? `<img src="${esc(src)}" alt="">`
+      : `<b>${esc(
+          (FD_SETTINGS.name || "K")
+            .split(/\s+/)
+            .filter(w => !/^(the|of|and)$/i.test(w))
+            .map(w => w[0])
+            .join("")
+            .slice(0, 2)
+            .toUpperCase()
+        )}</b>`;
+  }
+  const pc = typeof MACHINE !== "undefined" ? MACHINE.name() : "";
+  set("stPc", pc ? `This computer: ${pc}` : "");
+  set(
+    "stNet",
+    typeof LAN === "undefined" || !LAN.on
+      ? "Working on this computer"
+      : LAN.role === "main"
+        ? "Main computer"
+        : LAN.state === "offline"
+          ? "Main computer not reachable"
+          : "Connected to the main computer"
+  );
 };
 stHi();
-setInterval(stHi, 6e4);
+setInterval(stHi, 15e3);
 document.addEventListener("keydown", e => {
   if ($("#start").style.display === "none" || e.ctrlKey || e.metaKey || e.altKey) return;
   const k = e.key.toLowerCase();
   if (k === "p") posOpen();
   else if (k === "b") boOpen();
   else if (k === "f") fdOpen();
+  else if (k === "k" && kdsOn()) kdsOpen();
+  else if (k === "c" && clockOn()) clockOpen();
 });
 $("#start").onclick = e => {
   const g = e.target.closest("[data-go]");
-  if (g) (({ bo: boOpen, fd: fdOpen, clock: clockOpen })[g.dataset.go] || posOpen)();
+  if (g) (({ bo: boOpen, fd: fdOpen, clock: clockOpen, kds: kdsOpen })[g.dataset.go] || posOpen)();
 };
 $("#home").onclick = boOpen;
 $("#fdBack").onclick = () => fdExit(true); // leaving the Front Office signs out

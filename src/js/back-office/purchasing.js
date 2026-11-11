@@ -145,7 +145,7 @@ function purchasingView() {
           ? invReportHTML("pur")
           : purT === "receive"
             ? recvHTML() // the receiving store is chosen inside the GRN
-            : storeBar("Purchase orders for") + lpoHTML(),
+            : ((STKT.loc = poStore()), storeBar("Purchase orders for") + lpoHTML()),
     popups = itemPopupIfOpen() + vendorPopupIfOpen() + apModalIfOpen();
   const [title, what] = PUR_PAGES[purT];
   return `<div class="inv invx inv-solo"><div class="inv-main"><nav class="ph-tabs" aria-label="Purchasing">${PUR_TABS.filter(
@@ -162,7 +162,7 @@ function purchasingView() {
 
 /** Compact store chooser (Purchasing doesn't need Inventory's stock cards). */
 const storeBar = label =>
-  `<div class="pn grn-storebar"><label>${label}<select data-iv="rc.dept">${opts(STORES, STKT.loc)}</select></label></div>`;
+  `<div class="pn grn-storebar"><label>${label}<select data-iv="rc.dept">${STORES.map(l => `<option value="${esc(l)}" ${l === STKT.loc ? "selected" : ""}>${esc(l)}${l === defaultStore() ? " (default)" : ""}</option>`).join("")}</select></label></div>`;
 
 function purAct(a, b) {
   const d = b.dataset;
@@ -196,6 +196,7 @@ function purAct(a, b) {
   if (a === "go") {
     // e.g. the Receive / LPO buttons on Inventory → Stores
     STKT.loc = d.l;
+    if (isStore(d.l)) invF.rc.dept = d.l;
     purT = d.t || "lpo";
     // "Receive" for a store means a direct receipt into that store.
     const R = invF.rc;

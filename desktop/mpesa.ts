@@ -379,7 +379,6 @@ export function createMpesa(home: string, saveEnv: (v: Record<string, string>) =
           "-Command",
           "[System.IO.Ports.SerialPort]::GetPortNames()"
         ],
-        { windowsHide: true },
         { timeout: 15000, windowsHide: true },
         (_e, out) =>
           ok(

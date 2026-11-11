@@ -364,6 +364,8 @@ const ACT_RIGHTS = {
   sy_setup: "set.manage",
   svc_auto: "set.manage",
   svc_restart: "set.manage",
+  web_onoff: "set.manage",
+  web_rm: "set.manage",
   sy_onoff: "set.manage",
   sy_forget: "set.manage",
   sy_now: "set.manage",

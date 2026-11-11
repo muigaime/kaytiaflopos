@@ -72,6 +72,14 @@ const SET_GROUPS = [
         "print",
         "",
         "Which printer takes receipts, kitchen orders and bar orders, on each computer."
+      ],
+      [
+        "kds",
+        "Kitchen display",
+        "What each kitchen screen shows",
+        "chef",
+        "",
+        "Choose what the kitchen display shows on each computer, and when an order counts as late."
       ]
     ]
   ],
@@ -125,13 +133,17 @@ const SET_TABS = SET_GROUPS.flatMap(g => g[1]);
 const setTabOf = k => SET_TABS.find(t => t[0] === k) || SET_TABS[0];
 let setTab = "hotel";
 invF.gp = { pt: "*", m: "", v: "", a: "" };
+/** Pages for modules that are switched off are left out. */
+const setTabShown = k => k !== "kds" || kdsOn();
 const setTabsHTML = () =>
   `<nav class="set-tabs set-nav" role="tablist" aria-label="Settings"><div class="set-title"><h1>Settings</h1><p>How Kaytia Flow runs for your business</p></div>${SET_GROUPS.map(
     ([g, L]) =>
-      `<div class="set-grp"><h5>${g}</h5>${L.map(([k, l, d, ic, lock]) => {
-        const shut = (lock === "owner" && !ownOpen) || (lock === "mod" && !mdlOpen);
-        return `<button role="tab" aria-selected="${k === setTab}" class="set-nv ${k === setTab ? "on" : ""}" data-a="hs_tab" data-k="${k}"><i aria-hidden="true">${I(ic)}</i><span><b>${l}</b><small>${d}</small></span>${lock ? `<em class="set-lk ${shut ? "" : "open"}" title="${lock === "owner" ? "System owner only" : "Modules password"}" aria-label="${shut ? "Locked" : "Open"}">${I(shut ? "lock" : "unlock")}</em>` : ""}</button>`;
-      }).join("")}</div>`
+      `<div class="set-grp"><h5>${g}</h5>${L.filter(([k]) => setTabShown(k))
+        .map(([k, l, d, ic, lock]) => {
+          const shut = (lock === "owner" && !ownOpen) || (lock === "mod" && !mdlOpen);
+          return `<button role="tab" aria-selected="${k === setTab}" class="set-nv ${k === setTab ? "on" : ""}" data-a="hs_tab" data-k="${k}"><i aria-hidden="true">${I(ic)}</i><span><b>${l}</b><small>${d}</small></span>${lock ? `<em class="set-lk ${shut ? "" : "open"}" title="${lock === "owner" ? "System owner only" : "Modules password"}" aria-label="${shut ? "Locked" : "Open"}">${I(shut ? "lock" : "unlock")}</em>` : ""}</button>`;
+        })
+        .join("")}</div>`
   ).join("")}</nav>`;
 /** The page's own heading, with a Lock button on an owner page that is open. */
 function setHeadHTML() {

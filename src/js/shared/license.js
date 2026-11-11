@@ -129,7 +129,8 @@ const LIC = (() => {
       };
       save();
     }
-    s.log = s.log || [];
+    // Only the key in use now is kept on record (older copies kept every key ever entered).
+    s.log = (s.log || []).slice(-1);
     return s;
   }
   function save() {
@@ -211,9 +212,12 @@ const LIC = (() => {
     }
     s.bad = false;
     s.lastAt = K.at;
-    s.log.push({ at: Date.now(), t: K.t, c: K.c, e: K.e });
+    s.log = [{ at: Date.now(), t: K.t, c: K.c, e: K.e, m: K.m }];
     save();
     gate();
+    try {
+      dispatchEvent(new CustomEvent("kf:license", { detail: raw }));
+    } catch (e) {}
     return "";
   }
   let box;

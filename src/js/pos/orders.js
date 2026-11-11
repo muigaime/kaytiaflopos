@@ -302,6 +302,10 @@ function doSend(label) {
     null,
     "Close"
   );
+  if (kdsOn()) {
+    kdsAdd(tickets, o, kmsg);
+    kdsSave();
+  }
   printOrderTickets(tickets).then(async r => {
     if (both && (await printSlips("GUEST BILL", true)) !== "ok") r = "bad";
     rcDone(r, both ? "Order sent and bill printed." : "Order sent.");
@@ -338,7 +342,7 @@ function ordList() {
   $("#ordList").innerHTML = L.length
     ? L.map(o => {
         const t = totals(o.lines, o);
-        return `<div class="ord ${o.printed ? "printed" : ""} ${o.billCopies ? "rep" : ""}"><div class="h"><span>${o.label} · ${billWhere(o)}</span><span>${KES(t.g)}</span></div><div class="m">Bill ${o.no} · Order ${o.ord}${emptyTag(o)} · ${seesAllBills(user) ? slipEsc(o.waiter || "No waiter") + " · " : ""}${cnt(o.lines)} items · ${o.rounds} round${o.rounds > 1 ? "s" : ""} · sent ${hhmm(o.at)} · <b>${o.billCopies ? "REPRINTED" : o.printed ? "PRINTED" : "SENT"}</b></div><div class="row"><button class="mini" data-oa="add" data-o="${o.no}">Add items</button><button class="mini" data-oa="bill" data-o="${o.no}">Print bill</button>${can("swap") ? `<button class="mini" data-oa="swap" data-o="${o.no}">Swap</button>` : ""}<button class="chip on" data-oa="pay" data-o="${o.no}">Charge</button></div></div>`;
+        return `<div class="ord ${o.printed ? "printed" : ""} ${o.billCopies ? "rep" : ""}"><div class="h"><span>${o.label} · ${billWhere(o)}</span><span>${KES(t.g)}</span></div><div class="m">Bill ${o.no} · Order ${o.ord}${emptyTag(o)} · ${seesAllBills(user) ? slipEsc(o.waiter || "No waiter") + " · " : ""}${cnt(o.lines)} items · ${o.rounds} round${o.rounds > 1 ? "s" : ""} · sent ${hhmm(o.at)} · <b>${o.billCopies ? "REPRINTED" : o.printed ? "PRINTED" : "SENT"}</b> ${kdsChip(o.no)}</div><div class="row"><button class="mini" data-oa="add" data-o="${o.no}">Add items</button><button class="mini" data-oa="bill" data-o="${o.no}">Print bill</button>${can("swap") ? `<button class="mini" data-oa="swap" data-o="${o.no}">Swap</button>` : ""}<button class="chip on" data-oa="pay" data-o="${o.no}">Charge</button></div></div>`;
       }).join("")
     : '<div class="empty">No open orders. Use Send order to start one.</div>';
 }

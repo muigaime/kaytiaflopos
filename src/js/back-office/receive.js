@@ -28,6 +28,7 @@ const rcBlank = (keep = {}) => ({
   eQty: "",
   eTax: String(RC_TAX),
   lastGrn: null,
+  dept: "", // the receiving store; empty means the default store
   ...keep
 });
 invF.rc = rcBlank();
@@ -109,8 +110,7 @@ const rcIsBuy = (k, units) =>
 const rcExact = text => {
   const n = itemNorm(text);
   return n
-    ? pickKeys().find(k => itemNorm(itemInfo(k).name) === n || itemNorm(itemInfo(k).code) === n) ||
-        ""
+    ? rcKeys().find(k => itemNorm(itemInfo(k).name) === n || itemNorm(itemInfo(k).code) === n) || ""
     : "";
 };
 
@@ -134,8 +134,13 @@ function rcDest(R = invF.rc) {
     const p = LPOS.find(x => x.id === R.lpo);
     if (p) return p.store;
   }
-  return STKT.loc;
+  return isStore(R.dept) ? R.dept : defaultStore();
 }
+/** What can be received here: into a store, only the items that store holds. */
+const rcKeys = (R = invF.rc) => {
+  const d = rcDest(R);
+  return pickKeys().filter(k => R.mode === "sp" || !isStore(d) || storeHolds(d, k));
+};
 /** Supplier recorded on the GRN: the vendor, a typed name, or "Cash purchase". */
 const rcSupplier = (R = invF.rc) =>
   R.mode === "lpo" ? R.sup : R.sup || R.supText.trim() || "Cash purchase";
@@ -145,7 +150,7 @@ function recvHTML() {
   const R = invF.rc,
     dest = rcDest(R),
     lpoMode = R.mode === "lpo",
-    keys = pickKeys().sort((a, b) => itemInfo(a).name.localeCompare(itemInfo(b).name)),
+    keys = rcKeys(R),
     sups = vendorNames(),
     v = VENDORS.find(x => x.name === R.sup),
     lpo = R.lpo ? LPOS.find(x => x.id === R.lpo) : null,
@@ -191,10 +196,9 @@ function recvHTML() {
       ? `<label>Receiving selling point<select data-iv="rc.sp">${opts(ALLD, dest)}</select></label>`
       : lpoMode
         ? `<label>Receiving store<input value="${esc(lpo ? lpo.store : "From the LPO")}" readonly></label>`
-        : `<label>Receiving store<select data-iv="rc.dept">${opts(STORES, dest)}</select></label>`;
+        : `<label>Receiving store<select data-iv="rc.dept">${STORES.map(l => `<option value="${esc(l)}" ${l === dest ? "selected" : ""}>${esc(l)}${l === defaultStore() ? " (default)" : ""}</option>`).join("")}</select></label>`;
 
-  return `<datalist id="rcItemsL">${keys.map(k => `<option value="${esc(itemInfo(k).name)}">${esc(itemInfo(k).code || "")}</option>`).join("")}</datalist>
-<div class="grn">
+  return `<div class="grn">
  <div class="grn-head">
   <div><div class="grn-kicker">Purchasing · Receive goods</div><h2>Goods Received Note</h2>
    <div class="grn-meta"><span class="grn-chip draft">Draft · not posted</span><span class="grn-chip lpo">${RC_MODE_LABEL[R.mode]}</span><span>Into ${esc(dest)}${isStore(dest) ? "" : " (selling point)"}</span><span>Posted by ${esc(boUser ? boUser.n : "")}</span>${R.lpo ? `<span class="grn-chip lpo">Against ${esc(R.lpo)}</span>` : ""}</div></div>
@@ -236,7 +240,7 @@ function recvHTML() {
     lpoMode
       ? `<div class="grn-hint">${lpo ? "Lines come from the purchase order. For a part delivery, lower the quantity in the table (it cannot go above what is still due)." : "Choose an open purchase order in the Vendor card to load its lines."}</div>`
       : `<div class="grn-entry">
-   <label class="grn-e-item">Item<span class="grn-inl"><input id="rcName" data-iv="rc.eName" list="rcItemsL" value="${esc(R.eName)}" placeholder="Name or code" autocomplete="off"><button class="mini" data-a="inv_rcfind">Find</button></span></label>
+   <label class="grn-e-item">Item<span class="grn-inl rc-combo"><input id="rcName" data-iv="rc.eName" value="${esc(R.eName)}" placeholder="Type a name, code or category" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="rcPick"><button class="mini" data-a="inv_rcfind">Find</button><div class="rc-pick" id="rcPick" role="listbox" hidden></div></span></label>
    <div class="grn-by"><span>Receive by</span><div class="seg2"><button class="${byBox ? "" : "on"}" data-a="inv_rcby" data-v="uom">Pieces${R.eK && uom !== "pcs" ? ` (${esc(uom)})` : ""}</button><button class="${byBox ? "on" : ""}" data-a="inv_rcby" data-v="buy">Boxes / crates</button></div></div>
    ${byBox ? `<label>Box or crate<select data-iv="rc.eBox">${[...new Set([R.eBox, ...RC_BOXES].filter(Boolean))].map(b => `<option ${b === R.eBox ? "selected" : ""}>${esc(b)}</option>`).join("")}</select></label><label>${esc(uom)} in one ${esc(boxWord)}<input id="rcPer" data-iv="rc.ePer" type="number" min="1" step="any" value="${esc(R.ePer)}" placeholder="e.g. 24"></label>` : ""}
    <label>${byBox ? `${esc(rcPlural(R.eBox || "Box"))} received` : `${esc(uom === "pcs" ? "Pieces" : uom)} received`}<input id="rcQty" data-iv="rc.eQty" type="number" min="0" step="any" value="${esc(R.eQty)}"></label>
@@ -337,6 +341,7 @@ function rcSync(f) {
     if (p) p.value = R.ePrice;
   }
   if (f === "eName") {
+    rcPickShow(true);
     const k = rcExact(R.eName);
     if (k && k !== R.eK) rcPick(k, false);
     else if (!k && R.eK) R.eK = "";
@@ -352,6 +357,117 @@ function rcSync(f) {
   const t = rcCalc(R.ePrice, R.eQty, R.eTax, R.incl);
   set("rcTotal", R.ePrice !== "" && R.eQty !== "" ? m2(t.gross) : "");
 }
+// ---------------------------------------------------------------- the item picker
+// One searchable list for Receive goods (#rcName) and purchase orders (#poName): only the items the store holds,
+// with their code, category, unit, box size, stock in that store and last price.
+const PICKERS = {
+  rcName: {
+    box: "rcPick",
+    text: () => invF.rc.eName,
+    keys: () => rcKeys(),
+    dest: () => rcDest(),
+    choose: k => {
+      rcPick(k, false);
+      const n = $("#rcName");
+      if (n) n.value = itemInfo(k).name;
+      const q = $("#rcQty");
+      if (q) q.focus();
+    }
+  },
+  poName: {
+    box: "poPick",
+    text: () => invF.po.eName || "",
+    keys: () => poKeys(),
+    dest: () => poStore(),
+    choose: k => poPickItem(k)
+  }
+};
+let rcHi = 0;
+/** An item's name, even for older items whose name lives only in the item list. */
+const pkName = k => itemInfo(k).name || iN(k) || k;
+/** The items that match what is typed: name, code or category. */
+function pkMatches(P) {
+  const t = itemNorm(P.text()),
+    L = P.keys().filter(
+      k =>
+        !t ||
+        itemNorm(pkName(k)).includes(t) ||
+        itemNorm(itemInfo(k).code).includes(t) ||
+        itemNorm(itemInfo(k).group).includes(t)
+    );
+  return L.sort((a, b) => {
+    const A = itemNorm(pkName(a)),
+      B = itemNorm(pkName(b));
+    return (t && B.startsWith(t)) - (t && A.startsWith(t)) || A.localeCompare(B);
+  });
+}
+function pkHTML(P) {
+  const dest = P.dest(),
+    L = pkMatches(P),
+    all = P.keys().length;
+  rcHi = Math.min(rcHi, Math.max(0, L.length - 1));
+  const rows = L.slice(0, 60)
+    .map((k, i) => {
+      const u = itemInfo(k),
+        q = have(dest, k),
+        box = +u.perBuy !== 1 || u.buyUnit !== u.uom;
+      return `<button type="button" class="rc-opt ${i === rcHi ? "on" : ""}" data-rcpk="${esc(k)}" role="option" aria-selected="${i === rcHi}"><span class="rc-av">${esc((pkName(k) || "?")[0].toUpperCase())}</span><span class="rc-nm"><b>${esc(pkName(k))}</b><small>${u.code ? `<i>${esc(u.code)}</i>` : ""}${esc(u.group || "")} · ${esc(u.uom)}${box ? ` · ${esc(u.buyUnit)} of ${qn(+u.perBuy)}` : ""}</small></span><span class="rc-st"><b class="${q > 0 ? "" : "zero"}">${qn(q)} ${esc(u.uom)}</b><small>${+u.buyPrice ? `KES ${m2(+u.buyPrice)} / ${esc(u.buyUnit)}` : "No price yet"}</small></span></button>`;
+    })
+    .join("");
+  return `<div class="rc-ph"><span>${isStore(dest) ? `Items kept in <b>${esc(dest)}</b>` : `Items for <b>${esc(dest)}</b>`}</span><small>${L.length === all ? plural(all, "item") : `${L.length} of ${all}`}</small></div>${rows || `<div class="rc-none">${all ? "Nothing matches. Try part of the name or the code." : `${esc(dest)} doesn't hold any items yet.`}<button type="button" class="mini" data-a="inv_itnew">New item</button></div>`}${L.length > 60 ? `<div class="rc-more">Keep typing to narrow down ${L.length} items.</div>` : ""}`;
+}
+function pkShow(id, on) {
+  const P = PICKERS[id],
+    box = P && $("#" + P.box),
+    inp = $("#" + id);
+  if (!box || !inp) return;
+  if (on) box.innerHTML = pkHTML(P);
+  box.hidden = !on;
+  inp.setAttribute("aria-expanded", on ? "true" : "false");
+}
+const rcPickShow = on => pkShow("rcName", on);
+function pkChoose(id, k) {
+  pkShow(id, false);
+  PICKERS[id].choose(k);
+}
+$("#vSub").addEventListener("focusin", e => {
+  if (PICKERS[e.target.id]) {
+    rcHi = 0;
+    pkShow(e.target.id, true);
+  }
+});
+$("#vSub").addEventListener("focusout", e => {
+  // Closes when the person really leaves the box (not when a choice in the list is being clicked).
+  const id = e.target.id;
+  if (PICKERS[id])
+    setTimeout(() => document.activeElement !== $("#" + id) && pkShow(id, false), 160);
+});
+$("#vSub").addEventListener("mousedown", e => {
+  const o = e.target.closest && e.target.closest("[data-rcpk]");
+  if (!o) return;
+  e.preventDefault();
+  const id = Object.keys(PICKERS).find(x => o.closest("#" + PICKERS[x].box));
+  if (id) pkChoose(id, o.dataset.rcpk);
+});
+$("#vSub").addEventListener("keydown", e => {
+  const id = e.target.id,
+    P = PICKERS[id];
+  if (!P) return;
+  const box = $("#" + P.box),
+    L = pkMatches(P).slice(0, 60);
+  if (e.key === "Escape") return pkShow(id, false);
+  if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+    e.preventDefault();
+    rcHi = Math.max(0, Math.min(L.length - 1, rcHi + (e.key === "ArrowDown" ? 1 : -1)));
+    pkShow(id, true);
+    const on = $("#" + P.box + " .rc-opt.on");
+    if (on) on.scrollIntoView({ block: "nearest" });
+  }
+  if (e.key === "Enter" && box && !box.hidden && L[rcHi]) {
+    e.preventDefault();
+    pkChoose(id, L[rcHi]);
+  }
+});
 /** Choose item k in the entry row: default units = buying unit, price = last buying price. */
 function rcPick(k, redraw = true) {
   const R = invF.rc,
@@ -382,17 +498,18 @@ function rcLoadLpo(p) {
     .filter(o => o.left > 1e-9)
     .map(({ x, j, left }) => {
       const u = itemInfo(x.k),
-        isBuy = rcIsBuy(x.k, "buy"),
-        due = isBuy ? left : left * +u.perBuy;
+        per = lpoPer(x),
+        unit = lpoUnit(x),
+        isBuy = per !== 1 || unit !== u.uom;
       return {
         k: x.k,
         isBuy,
-        units: isBuy ? `${u.buyUnit} of ${qn(+u.perBuy)} ${u.uom}` : u.uom,
-        per: isBuy ? +u.perBuy : undefined,
-        box: isBuy ? u.buyUnit : undefined,
-        unitPrice: isBuy ? x.price : x.price / +u.perBuy,
-        qty: due,
-        lpoMax: due,
+        units: isBuy ? `${unit} of ${qn(per)} ${u.uom}` : u.uom,
+        per: isBuy ? per : undefined,
+        box: isBuy ? unit : undefined,
+        unitPrice: x.price,
+        qty: left,
+        lpoMax: left,
         taxRate: itemTaxRate(x.k),
         batch: "",
         expiry: "",
@@ -559,11 +676,18 @@ function rcAct(a, b) {
     const t = itemNorm(R.eName),
       k =
         rcExact(R.eName) ||
-        pickKeys().find(
+        rcKeys().find(
           x =>
             t && (itemNorm(itemInfo(x).name).includes(t) || itemNorm(itemInfo(x).code).includes(t))
         );
-    if (!k) return toast("No item matches. Use New item to add it.");
+    if (!k) {
+      const other = pickKeys().find(x => t && itemNorm(itemInfo(x).name).includes(t));
+      if (other && isStore(dest))
+        return toast(
+          `${itemInfo(other).name} isn't kept in ${dest}. Choose its store, or add ${itemInfo(other).group || "its category"} to ${dest} in Inventory → Stores.`
+        );
+      return toast("No item matches. Use New item to add it.");
+    }
     rcPick(k);
     const q = $("#rcQty");
     return q && q.focus();
@@ -666,7 +790,7 @@ function rcAct(a, b) {
     return all();
   }
   if (a === "rcexit") {
-    invF.rc = rcBlank({ date: R.date, mode: R.mode, sp: R.sp });
+    invF.rc = rcBlank({ date: R.date, mode: R.mode, sp: R.sp, dept: R.dept });
     return all();
   }
 
@@ -767,9 +891,10 @@ function rcPost() {
         : new Date(`${R.date}T${pad2(now.getHours())}:${pad2(now.getMinutes())}:00`);
   const learnt = [];
   R.lines.forEach(L => {
-    if (!L.isBuy || !(+L.per > 0)) return;
+    if (!L.isBuy || !(+L.per > 0) || L.lpoLine !== undefined) return;
     const u = itemInfo(L.k);
     if (+u.perBuy === +L.per && u.buyUnit === L.box) return;
+    lpoKeepUnits(L.k);
     if (!INGU[L.k]) INGU[L.k] = { ...u };
     INGU[L.k].perBuy = +L.per;
     INGU[L.k].buyUnit = L.box;
@@ -783,7 +908,7 @@ function rcPost() {
       k: L.k,
       q,
       cost: q > 0 ? c.net / q : 0, // stock is valued excluding VAT
-      buyPrice: L.isBuy ? L.unitPrice : L.unitPrice * +u.perBuy,
+      buyPrice: (L.isBuy ? L.unitPrice / (+L.per || +u.perBuy) : L.unitPrice) * +u.perBuy,
       units: L.units,
       unitPrice: L.unitPrice,
       qty: L.qty,
@@ -793,7 +918,7 @@ function rcPost() {
       batch: L.batch,
       expiry: L.expiry,
       lpoLine: L.lpoLine,
-      qtyBuy: q / +u.perBuy
+      qtyBuy: L.lpoLine !== undefined ? q / (+L.per || 1) : q / +u.perBuy
     };
   });
   const r = receiveLines(dest, lines, sup, R.inv || R.dnote, R.lpo || "", {
@@ -820,6 +945,7 @@ function rcPost() {
     date: R.date,
     mode: R.mode,
     sp: R.sp,
+    dept: R.dept,
     // Goods in a store can be issued on to selling points; goods received at a selling point are already there.
     lastGrn: intoStore
       ? { id: r.id, store: dest, lines: r.lines.map(x => ({ k: x.k, q: x.q })) }

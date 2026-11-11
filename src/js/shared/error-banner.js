@@ -17,6 +17,12 @@ function kfLogError(msg, code) {
       msg: String(msg).slice(0, 2000)
     });
     localStorage.setItem(KF_ERRLOG, JSON.stringify(L.slice(0, 300)));
+    if (/^https?:$/.test(location.protocol) && code >= 9000)
+      fetch("/lan/errlog/add", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ where, code, msg: String(msg).slice(0, 2000) })
+      }).catch(() => {});
   } catch (e) {}
 }
 (function () {

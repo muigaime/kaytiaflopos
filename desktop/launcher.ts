@@ -18,6 +18,7 @@ import {
 } from "../server/src/modules/mail/mail.routes.ts";
 import { printRouter } from "../server/src/modules/printing/print.routes.ts";
 import { CONNECT_PAGE } from "./connect-page.ts";
+import { webJoinPage } from "./web-join.ts";
 import { merge } from "./merge.js";
 import { createAttendance } from "./attendance.ts";
 import { createEtims } from "./etims.ts";
@@ -26,6 +27,7 @@ import { menuLogo, menuPage } from "./menu.ts";
 import { createCloud } from "./cloud.ts";
 import { readImage } from "./ocr.ts";
 
+declare const LIC_N_BUILD: string; // Kaytia Flow's public key, put in when the program is built
 const HOME = process.env.KAYTIA_HOME ?? "C:\\KaytiaFlow";
 const PORT = Number(process.env.KAYTIA_PORT ?? 5500);
 const API_PORT = Number(process.env.KAYTIA_API_PORT ?? 4000);
@@ -61,10 +63,37 @@ type Config = {
   main?: string; // a till's Main computer, as host:port
   mainCode?: string;
   idx: number; // this computer's bill number series
-  tills: Record<string, { idx: number; name: string; at: string; ip?: string }>;
+  // web: a phone or browser signed in on the network (tok is the hash of its key, never the key itself)
+  tills: Record<
+    string,
+    { idx: number; name: string; at: string; ip?: string; web?: boolean; tok?: string }
+  >;
+  web?: boolean; // phones and other browsers on the local network may open the app
   net?: { user: string; salt: string; hash: string }; // the server login other computers join with
   machines?: { name: string; ip: string }[]; // computers added on the server before they join
+  lic?: string; // the company license key, which the tills get from here
 };
+
+// ---------------------------------------------------------------- company license keys
+// A company key (installation "*") says how many computers may use it (m). The Main keeps it, hands it to
+// the tills, and doesn't let more computers join than it allows.
+type LicKey = { c: string; i: string; t: string; e: string; at: number; m?: number };
+function licRead(raw: string): LicKey | null {
+  try {
+    const [v, p, g] = String(raw || "").split(".");
+    if (v !== "KF1" || !p || !g || typeof LIC_N_BUILD === "undefined") return null;
+    const pub = crypto.createPublicKey({
+      key: { kty: "RSA", n: LIC_N_BUILD, e: "AQAB" },
+      format: "jwk"
+    });
+    if (!crypto.verify("sha256", Buffer.from(p), pub, Buffer.from(g, "base64url"))) return null;
+    return JSON.parse(Buffer.from(p, "base64url").toString("utf8")) as LicKey;
+  } catch {
+    return null;
+  }
+}
+const licLive = (k: LicKey | null) =>
+  !!k && k.t !== "lock" && (!k.e || Date.now() <= new Date(k.e + "T23:59:59").getTime());
 const randomCode = () => {
   const A = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   return Array.from(crypto.randomBytes(8), b => A[b % A.length]).join("");
@@ -617,6 +646,28 @@ function ownBrowserOnly(req: Request, res: Response, next: NextFunction) {
     return void res.status(403).json({ error: "This computer only." });
   next();
 }
+// ---- phones and other browsers on the network
+const DEV_COOKIE = "kfdev";
+const tokHash = (tok: string) => crypto.createHash("sha256").update(tok).digest("hex");
+/** The address typed into the browser must be this computer's, so no other website can borrow a signed-in phone. */
+function webHostOk(req: Request) {
+  const host = (req.get("host") ?? "").toLowerCase(),
+    name = host.replace(/:\d+$/, ""),
+    me = os.hostname().toLowerCase(),
+    origin = req.get("origin");
+  const nameOk =
+    (/^\d{1,3}(\.\d{1,3}){3}$/.test(name) && isPrivate(name)) ||
+    name === me ||
+    name === me + ".local";
+  return nameOk && (!origin || origin === `http://${host}`);
+}
+function cookieOf(req: Request, k: string) {
+  for (const p of (req.get("cookie") ?? "").split(";")) {
+    const i = p.indexOf("=");
+    if (i > 0 && p.slice(0, i).trim() === k) return p.slice(i + 1).trim();
+  }
+  return "";
+}
 const tries = new Map<string, { n: number; at: number }>();
 function tooMany(ip: string) {
   const t = tries.get(ip);
@@ -676,11 +727,27 @@ async function main() {
       !req.path.startsWith("/net/") &&
       !req.path.startsWith("/iclock/") &&
       req.path !== "/menu" &&
-      req.path !== "/menu/logo"
+      req.path !== "/menu/logo" &&
+      !(
+        cfg.role === "main" &&
+        cfg.web &&
+        isPrivate(address(req)) &&
+        webHostOk(req) &&
+        (req.path === "/" || req.path === "/web/join" || req.path.startsWith("/lan/"))
+      )
     )
       return void res.status(403).end();
     next();
   });
+  /** The signed-in phone or browser making this request, if any. */
+  const deviceOf = (req: Request) => {
+    if (cfg.role !== "main" || !cfg.web || isLocal(req) || !isPrivate(address(req))) return null;
+    const tok = cookieOf(req, DEV_COOKIE);
+    if (!/^[a-f0-9]{64}$/.test(tok)) return null;
+    const h = tokHash(tok),
+      hit = Object.entries(cfg.tills).find(([, x]) => x.web && x.tok === h);
+    return hit ? { id: hit[0], till: hit[1] } : null;
+  };
   const big = express.json({ limit: "64mb" });
 
   // ---- the door for tills, on the Main
@@ -728,6 +795,16 @@ async function main() {
     const r = await fxLatest();
     res.status(r.status).json(r.json);
   });
+  const licNow = () => {
+    const k = cfg.lic ? licRead(cfg.lic) : null;
+    return {
+      key: licLive(k) ? cfg.lic : "",
+      m: licLive(k) ? Math.max(0, Number(k!.m) || 0) : 0,
+      used: 1 + Object.keys(cfg.tills).length,
+      company: k?.c ?? ""
+    };
+  };
+  door.get("/license", (_req, res) => void res.json(licNow()));
   door.post("/pair", big, (req, res) => {
     const id = String(req.body?.id ?? ""),
       name = String(req.body?.name ?? "Till").slice(0, 40);
@@ -741,6 +818,11 @@ async function main() {
       saveConfig(cfg);
     }
     if (!till) {
+      const lic = licNow();
+      if (lic.m && lic.used >= lic.m)
+        return void res.status(409).json({
+          error: `This license covers ${lic.m} computer${lic.m === 1 ? "" : "s"}, and ${lic.m === 1 ? "it is" : "they are all"} in use. Ask Kaytia Tech Services for a license with more computers.`
+        });
       const used = new Set(Object.values(cfg.tills).map(t => t.idx));
       let idx = 1;
       while (used.has(idx)) idx++;
@@ -795,6 +877,14 @@ async function main() {
     next();
   });
   menu.get("/", (req, res) => {
+    const d = readStore().data as { FS?: { stickersOff?: boolean; name?: string } } | null;
+    if (d?.FS?.stickersOff)
+      return void res
+        .status(404)
+        .type("html")
+        .send(
+          `<!DOCTYPE html><meta name="viewport" content="width=device-width,initial-scale=1"><title>Menu</title><body style="margin:0;display:grid;place-items:center;min-height:100vh;background:#f7f3ea;color:#1d1a16;font:17px Georgia,serif;text-align:center"><div><h1 style="font-weight:400">The menu isn't available right now</h1><p>Please ask our staff.</p></div></body>`
+        );
     res.set(
       "content-security-policy",
       "default-src 'none'; img-src 'self'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'"
@@ -815,7 +905,24 @@ async function main() {
 
   // ---- this computer's own browser
   const lan = express.Router();
-  lan.use(ownBrowserOnly);
+  // What a signed-in phone or browser may ask for: the same as a till's own program asks the Main for.
+  // Setup, the service, the license key, the cloud and the error log stay on the Main computer itself.
+  const DEVICE_OK =
+    /^(GET \/(status|rev|license|menu-url)|POST \/(sync|fx|ocr|errlog\/add|mpesa\/[a-z-]+|etims\/[a-z-]+))$/;
+  lan.use((req, res, next) => {
+    if (isLocal(req)) return ownBrowserOnly(req, res, next);
+    const d = deviceOf(req);
+    if (!d || !webHostOk(req) || !DEVICE_OK.test(`${req.method} ${req.path}`))
+      return void res.status(403).json({ error: "This computer only." });
+    const ip = address(req);
+    seen.set(ip, Date.now());
+    if (d.till.ip !== ip) {
+      d.till.ip = ip;
+      saveConfig(cfg);
+    }
+    res.locals.dev = d;
+    next();
+  });
   lan.get("/sync-status", async (_req, res) => {
     if (cfg.role === "main")
       return void res.json({
@@ -826,6 +933,7 @@ async function main() {
           name: t.name,
           idx: t.idx,
           ip: t.ip ?? "",
+          web: !!t.web,
           seen: t.ip && seen.get(t.ip) ? new Date(seen.get(t.ip)!).toISOString() : ""
         })),
         cloud: cloud.status()
@@ -853,6 +961,31 @@ async function main() {
       return void res.status(409).json({ error: "Set this up on the main computer." });
     const r = await cloud.admin(String(req.params.op), (req.body ?? {}) as Record<string, unknown>);
     res.status(r.status).json(r.json);
+  });
+  lan.get("/license", async (_req, res) => {
+    if (cfg.role === "main") return void res.json(licNow());
+    try {
+      const r = await toMain(cfg, "/net/license", undefined, 4000);
+      res.json(r.status === 200 ? r.json : { key: "", m: 0, used: 0, offline: true });
+    } catch {
+      res.json({ key: "", m: 0, used: 0, offline: true });
+    }
+  });
+  lan.post("/license", big, (req, res) => {
+    if (cfg.role !== "main")
+      return void res.status(409).json({ error: "Enter the license on the main computer." });
+    const raw = String(req.body?.key ?? "").replace(/\s+/g, ""),
+      k = licRead(raw);
+    if (!k) return void res.status(400).json({ error: "That key isn't valid." });
+    if (k.i !== "*") return void res.json({ ...licNow(), kept: false }); // a key for one computer only
+    const had = cfg.lic ? licRead(cfg.lic) : null;
+    if (had && had.at > k.at)
+      return void res
+        .status(409)
+        .json({ error: "That key is older than the one already used here." });
+    cfg.lic = raw;
+    saveConfig(cfg);
+    res.json({ ...licNow(), kept: true });
   });
   lan.get("/service", async (_req, res) => {
     res.json({
@@ -890,16 +1023,30 @@ async function main() {
   });
   lan.get(
     "/status",
-    (_req, res) =>
-      void res.json({
-        kaytia: true,
-        role: cfg.role,
-        idx: cfg.idx,
-        numbered: cfg.role === "till" || Object.keys(cfg.tills).length > 0,
-        epoch: cfg.epoch,
-        home: HOME,
-        main: cfg.main ?? ""
-      })
+    (req, res) =>
+      void res.json(
+        res.locals.dev
+          ? {
+              kaytia: true,
+              role: "till",
+              idx: res.locals.dev.till.idx,
+              numbered: true,
+              epoch: cfg.epoch,
+              home: "",
+              main: req.get("host") ?? "",
+              browser: true,
+              device: res.locals.dev.till.name
+            }
+          : {
+              kaytia: true,
+              role: cfg.role,
+              idx: cfg.idx,
+              numbered: cfg.role === "till" || Object.keys(cfg.tills).length > 0,
+              epoch: cfg.epoch,
+              home: HOME,
+              main: cfg.main ?? ""
+            }
+      )
   );
   lan.get("/rev", async (_req, res) => {
     if (cfg.role === "main")
@@ -916,7 +1063,10 @@ async function main() {
     }
   });
   lan.post("/sync", big, async (req, res) => {
-    if (cfg.role === "main") return void res.json(syncOnMain(req.body as SyncIn, "main"));
+    if (cfg.role === "main")
+      return void res.json(
+        syncOnMain(req.body as SyncIn, res.locals.dev ? res.locals.dev.id : "main")
+      );
     try {
       const r = await toMain(cfg, "/net/sync", { ...req.body, client: cfg.id });
       res.status(r.status).json(r.json);
@@ -1065,6 +1215,17 @@ async function main() {
     }
     res.json({ lines });
   });
+  lan.post("/errlog/add", big, (req, res) => {
+    const where = String(req.body?.where ?? "Screen")
+        .replace(/[^\w &-]/g, "")
+        .slice(0, 30),
+      code = Number(req.body?.code) || 0,
+      msg = String(req.body?.msg ?? "")
+        .replace(/\s+/g, " ")
+        .slice(0, 2000);
+    if (msg) logError(`[Screen ${where}] Error ${code}: ${msg}`);
+    res.json({ ok: true });
+  });
   lan.post("/errlog/clear", (_req, res) => {
     fs.rmSync(ERRLOG, { force: true });
     res.json({ ok: true });
@@ -1092,6 +1253,41 @@ async function main() {
     cfg.machines.push({ name, ip });
     saveConfig(cfg);
     res.json({ ok: true });
+  });
+  const webInfo = () => ({
+    main: cfg.role === "main",
+    on: !!cfg.web,
+    hasLogin: !!cfg.net,
+    urls: lanAddresses()
+      .filter(isPrivate)
+      .filter(a => a !== "127.0.0.1")
+      .map(a => `http://${a}:${PORT}`),
+    devices: Object.entries(cfg.tills)
+      .filter(([, x]) => x.web)
+      .map(([id, x]) => ({
+        id,
+        name: x.name,
+        idx: x.idx,
+        at: x.at,
+        ip: x.ip ?? "",
+        seen: x.ip && seen.get(x.ip) ? new Date(seen.get(x.ip)!).toISOString() : ""
+      }))
+  });
+  lan.get("/web-access", (_req, res) => void res.json(webInfo()));
+  lan.post("/web-access", big, (req, res) => {
+    if (cfg.role !== "main")
+      return void res.status(409).json({ error: "Turn this on at the main computer." });
+    cfg.web = !!req.body?.on;
+    saveConfig(cfg);
+    res.json(webInfo());
+  });
+  lan.post("/web-access/remove", big, (req, res) => {
+    const id = String(req.body?.id ?? "");
+    if (cfg.tills[id]?.web) {
+      delete cfg.tills[id];
+      saveConfig(cfg);
+    }
+    res.json(webInfo());
   });
   lan.post("/machine/remove", big, (req, res) => {
     cfg.machines = (cfg.machines ?? []).filter(m => m.ip !== String(req.body?.ip ?? ""));
@@ -1161,8 +1357,61 @@ async function main() {
 
   const page = (req: Request, res: Response) => {
     res.set({ "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" });
+    if (!isLocal(req)) {
+      res.set({ "X-Frame-Options": "DENY", "Referrer-Policy": "no-referrer" });
+      return void res.send(deviceOf(req) ? html : webJoinPage(!!cfg.net));
+    }
     res.send(req.path === "/connect" ? CONNECT_PAGE : html);
   };
+  app.post("/web/join", big, (req, res) => {
+    const ip = address(req);
+    if (isLocal(req) || cfg.role !== "main" || !cfg.web || !isPrivate(ip) || !webHostOk(req))
+      return void res.status(403).json({ error: "Not allowed." });
+    if (tooMany(ip))
+      return void res.status(429).json({ error: "Too many wrong tries. Wait a minute." });
+    const pass = String(req.body?.pass ?? ""),
+      okLogin = cfg.net
+        ? netOk(cfg, String(req.body?.user ?? "").trim(), pass)
+        : pass.length === cfg.code.length &&
+          crypto.timingSafeEqual(
+            Buffer.from(pass.toUpperCase()),
+            Buffer.from(cfg.code.toUpperCase())
+          );
+    if (!okLogin) {
+      badTry(ip);
+      return void res
+        .status(401)
+        .json({
+          error: cfg.net
+            ? "That username or password isn't right."
+            : "That connect code isn't right."
+        });
+    }
+    const lic = licNow();
+    if (lic.m && lic.used >= lic.m)
+      return void res.status(409).json({
+        error: `This license covers ${lic.m} device${lic.m === 1 ? "" : "s"}, and ${lic.m === 1 ? "it is" : "they are all"} in use. Remove one under Settings, Database sync, or ask Kaytia Tech Services for more.`
+      });
+    const used = new Set(Object.values(cfg.tills).map(x => x.idx));
+    let idx = 1;
+    while (used.has(idx)) idx++;
+    if (idx >= 20)
+      return void res.status(409).json({ error: "This Main already has 19 tills and devices." });
+    const tok = crypto.randomBytes(32).toString("hex"),
+      id = "web-" + crypto.randomUUID(),
+      name =
+        String(req.body?.name ?? "")
+          .trim()
+          .slice(0, 40) || "Phone";
+    cfg.tills[id] = { idx, name, at: new Date().toISOString(), ip, web: true, tok: tokHash(tok) };
+    saveConfig(cfg);
+    seen.set(ip, Date.now());
+    res.set(
+      "Set-Cookie",
+      `${DEV_COOKIE}=${tok}; Path=/; Max-Age=31536000; HttpOnly; SameSite=Strict`
+    );
+    res.json({ ok: true });
+  });
   app.get("/", page);
   app.get("/connect", page);
   app.use((_q, r) => void r.status(404).end());

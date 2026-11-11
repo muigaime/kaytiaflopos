@@ -8,6 +8,11 @@ const PAY_BUILT = [
   ["room", "Post to room", "Charged to a guest's room."]
 ];
 /** A business without rooms switches the Front Desk off in Settings → Modules. Its data stays. */
+/** Kitchen display and staff clock: on unless switched off in Settings → Modules. */
+const kdsOn = () => typeof FD_SETTINGS === "undefined" || !FD_SETTINGS.kdsOff;
+/** Product stickers and the guest menu their QR codes open. */
+const stkOn = () => typeof FD_SETTINGS === "undefined" || !FD_SETTINGS.stickersOff;
+const clockOn = () => typeof FD_SETTINGS === "undefined" || !FD_SETTINGS.clockOff;
 const fdOn = () => typeof FD_SETTINGS === "undefined" || !FD_SETTINGS.frontDeskOff;
 const payCfg = () => {
   if (typeof FD_SETTINGS === "undefined") return { off: {}, custom: [] };

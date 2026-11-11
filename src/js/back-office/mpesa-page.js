@@ -29,7 +29,7 @@ async function mpLoad() {
   const good = r.ok && r.j.daraja && r.j.modem && Array.isArray(r.j.list);
   mpS.err = good
     ? ""
-    : r.status === 409
+    : r.status === 409 || (r.status === 403 && LAN.browser)
       ? "M-Pesa is set up on the main computer."
       : "This page works in the installed Kaytia Flow program.";
   if (good) Object.assign(mpS, { d: r.j.daraja, m: r.j.modem, ports: r.j.ports, list: r.j.list });

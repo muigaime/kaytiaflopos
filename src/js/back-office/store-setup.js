@@ -12,6 +12,8 @@ const storeHolds = (l, k) => {
     K = storeKinds(l).map(norm);
   return !K.length || K.includes(norm(itemInfo(k).group));
 };
+/** The store Receive goods opens on: the one marked as default, or the first store (Main Store). */
+const defaultStore = () => STORES.find(l => (storeInfos()[l] || {}).def) || STORES[0];
 /** The store that holds this kind of item, if one says so. */
 const storeForKind = g => {
   const x = String(g || "")
@@ -40,7 +42,7 @@ function storeModal() {
   const G = [...new Set([...groupList(), ...stE.kinds])].sort((a, b) => a.localeCompare(b));
   return `<div class="modal show" id="stEd" style="z-index:63"><div class="box itm sp-new">
   <header class="itm-h"><div><h3>${stE.was ? `Edit ${esc(stE.was)}` : "New store"}</h3><p>Stores hold the stock you buy. Selling points get their stock from a store.</p></div><button class="itm-x" data-a="inv_stclose" aria-label="Close">✕</button></header>
-  <div class="itm-b"><section class="itm-s"><div class="itm-g"><label>Store name<input id="stName" maxlength="40" value="${esc(stE.name)}" placeholder="e.g. Beverages Store, Kitchen Store" autocomplete="off"></label></div></section>
+  <div class="itm-b"><section class="itm-s"><div class="itm-g"><label>Store name<input id="stName" maxlength="40" value="${esc(stE.name)}" placeholder="e.g. Beverages Store, Kitchen Store" autocomplete="off"></label></div><label class="mp-on" style="margin-top:12px"><input id="stDef" type="checkbox" ${stE.def ? "checked" : ""}><span><b>Default store for receiving goods</b><small>Receive goods opens on this store, and lists only the items it holds.</small></span></label></section>
   <section class="itm-s"><div class="sp-acts" style="justify-content:space-between"><h4>Kinds of items it holds</h4><span class="sp-acts"><button class="mini" data-a="inv_stall">Select all</button><button class="mini" data-a="inv_stnone">Clear</button></span></div><div class="itm-hint">Tick what belongs here. Its Stock Master lists these categories. New items in them go to this store unless you choose another. Leave them all unticked if it holds anything.</div><div class="pr-ticks">${G.map(k => `<label><input type="checkbox" data-stk="${esc(k)}" ${stE.kinds.includes(k) ? "checked" : ""}> ${esc(k)}</label>`).join("")}</div></section></div>
   <footer class="itm-f"><button class="mini" data-a="inv_stclose">Cancel</button><button class="chip on" data-a="inv_stsave">${stE.was ? "Save changes" : "Create store"}</button></footer></div></div>`;
 }
@@ -86,7 +88,9 @@ function storeSave() {
     STORES.push(name);
     syncLocs();
   }
-  storeInfos()[name] = { kinds };
+  const def = !!($("#stDef") && $("#stDef").checked);
+  if (def) Object.values(storeInfos()).forEach(i => delete i.def);
+  storeInfos()[name] = { kinds, ...(def ? { def: true } : {}) };
   auditAdd(
     "Store",
     was ? (name === was ? `${name} edited` : `${was} renamed to ${name}`) : `${name} created`

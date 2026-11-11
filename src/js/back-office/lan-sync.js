@@ -147,7 +147,9 @@ async function lanTick() {
     idx: s.idx,
     epoch: s.epoch,
     main: s.main,
-    home: s.home
+    home: s.home,
+    browser: !!s.browser, // a phone or browser signed in to the Main, not a computer with the program
+    device: s.device || ""
   });
   if (s.numbered) window.__lan = { idx: s.idx, mod: 20 };
   const saved = JSON.parse(localStorage.getItem(LAN_REV) || "null");
@@ -156,7 +158,55 @@ async function lanTick() {
   LAN.lastRaw = LAN.base === null ? null : localStorage.getItem(LS);
   lanTick();
   setInterval(lanTick, LAN_EVERY);
+  licShare();
+  setInterval(licShare, 60000);
 })();
+// ---- company license: entered once on the main computer, the tills get it from there
+LAN.lic = null;
+async function licShare() {
+  if (!LAN.on) return;
+  let j = null;
+  try {
+    j = await fetch("/lan/license").then(r => r.json());
+  } catch (e) {
+    return;
+  }
+  if (!j || j.offline) return;
+  const mine = LIC.s.key || "",
+    myKey = mine ? LIC.read(mine) : null;
+  if (LAN.role === "main" && myKey && myKey.i === "*" && myKey.m && mine !== j.key) {
+    // Entered here before the program kept it, or the program was reinstalled: hand it over.
+    try {
+      j = await fetch("/lan/license", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ key: mine })
+      }).then(r => r.json());
+    } catch (e) {}
+  } else if (j.key && j.key !== mine) {
+    const err = LIC.apply(j.key);
+    if (!err) {
+      bosave();
+      if (typeof all === "function" && $("#bo").classList.contains("show")) all();
+    }
+  }
+  LAN.lic = j && j.m ? { m: j.m, used: j.used } : null;
+}
+addEventListener("kf:license", e => {
+  if (!LAN.on || LAN.role !== "main") return;
+  const K = LIC.read(e.detail);
+  if (!K || K.i !== "*") return;
+  fetch("/lan/license", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ key: e.detail })
+  })
+    .then(r => r.json())
+    .then(j => {
+      LAN.lic = j && j.m ? { m: j.m, used: j.used } : null;
+    })
+    .catch(() => {});
+});
 /** Settings → Computers on the network. */
 function networkHTML() {
   if (!LAN.on)
@@ -164,10 +214,114 @@ function networkHTML() {
   const live = LAN.state !== "offline",
     ago = LAN.at ? Math.round((Date.now() - LAN.at) / 1000) : null;
   return `<div class="pn"><div class="inv-head"><h4>Computers on the network</h4><span class="tag ${live ? "ok" : "bad"}">${live ? "Connected" : "Main not reachable"}</span></div>
-  <div class="stm-tiles">${msTile("This computer", LAN.role === "main" ? "Main" : "Till")}${LAN.role === "till" ? msTile("Main computer", esc(LAN.main)) : msTile("Data saved in", esc(LAN.home + "\\data"))}${msTile("Last checked", ago === null ? "-" : `${ago} seconds ago`)}${msTile("Waiting to update", LAN.pending ? "Yes" : "No")}</div>
+  <div class="stm-tiles">${LAN.browser ? msTile("This device", esc(LAN.device || "Phone")) : msTile("This computer", LAN.role === "main" ? "Main" : "Till")}${LAN.role === "till" ? msTile("Main computer", esc(LAN.main)) : msTile("Data saved in", esc(LAN.home + "\\data"))}${msTile("Last checked", ago === null ? "-" : `${ago} seconds ago`)}${msTile("Waiting to update", LAN.pending ? "Yes" : "No")}</div>
   <div class="stk">Changes reach other computers within seconds. If a screen is busy, they wait until it's free, and nothing is lost.</div>
-  <div class="pv-form"><a class="chip on" href="/connect" target="_blank" rel="noopener">Connect computers</a></div></div>${svcHTML()}`;
+  ${LAN.browser ? "" : '<div class="pv-form"><a class="chip on" href="/connect" target="_blank" rel="noopener">Connect computers</a></div>'}</div>${webHTML()}${svcHTML()}`;
 }
+// ---- Settings → Network: phones, tablets and other computers opening Kaytia Flow in a browser, on this Wi-Fi
+const webS = { loaded: false, s: null, busy: false };
+async function webLoad() {
+  webS.loaded = true;
+  try {
+    const r = await fetch("/lan/web-access");
+    webS.s = r.ok ? await r.json() : null;
+  } catch (e) {
+    webS.s = null;
+  }
+  if (view === "settings" && setTab === "network") all();
+}
+function webHTML() {
+  if (LAN.browser)
+    return `<div class="pn web-acc"><div class="inv-head"><h4>Phones and browsers</h4><span class="tag ok">Signed in</span></div><div class="stk">This device is signed in to the main computer as <b>${esc(LAN.device || "Phone")}</b>. Only the main computer can remove it.</div></div>`;
+  if (!webS.loaded) webLoad();
+  const s = webS.s;
+  if (!s || !s.main) return "";
+  const url = s.urls[0] || "",
+    D = s.devices || [],
+    live = d => d.seen && Date.now() - new Date(d.seen).getTime() < 90000;
+  const sw = `<button class="pv-sw ${s.on ? "on" : ""}" data-a="web_onoff" role="switch" aria-checked="${s.on}" aria-label="Allow phones and browsers" ${webS.busy ? "disabled" : ""}><i></i></button>`;
+  return `<div class="pn web-acc"><div class="inv-head"><h4>Phones and browsers</h4><span class="tag ${s.on ? "ok" : ""}">${s.on ? "Allowed on this network" : "Off"}</span></div>
+  <div class="svc-row"><div><b>Allow phones, tablets and other computers</b><small>They open Kaytia Flow in a browser on the same Wi-Fi or network, with nothing to install. Not reachable from the internet.</small></div>${sw}</div>
+  ${
+    s.on
+      ? `<div class="web-go">${url ? `<div class="web-qr" aria-hidden="true">${qrSvg(url)}</div>` : ""}<div><span class="web-k">Open this address</span><b class="web-url">${esc(url || "No network address found. Connect this computer to the Wi-Fi.")}</b>${s.urls.length > 1 ? `<small>Also: ${s.urls.slice(1).map(esc).join(", ")}</small>` : ""}
+      <ol class="web-steps"><li>Join the same Wi-Fi as this computer.</li><li>Scan the code or type the address in the browser.</li><li>Sign in the device once with ${s.hasLogin ? "the server username and password" : "the connect code"}.</li><li>Staff then sign in with their own username or PIN, and see only what their role allows.</li></ol><small class="web-fw">Phone can't open it? Make sure Windows Firewall on this computer allows Kaytia Flow${url ? " (port " + esc(url.split(":").pop()) + ")" : ""}.</small></div></div>
+  <div class="stk">Each device counts as one computer on your license. Settings for the program itself, the license key and the cloud stay on this computer.</div>
+  <h5 class="sy-sub">Signed-in devices (${D.length})</h5>${
+    D.length
+      ? `<div class="web-devs">${D.map(d => `<div class="web-dev ${live(d) ? "on" : ""}"><span class="sy-dot" aria-hidden="true"></span><span class="web-dn"><b>${esc(d.name)}</b><small>${esc(d.ip || "-")} · ${live(d) ? "online" : d.seen ? "last seen " + dt2(d.seen) : "not seen since the program restarted"} · bills ${esc(String(d.idx))}</small></span><button class="mini cat-del" data-a="web_rm" data-id="${esc(d.id)}">Remove</button></div>`).join("")}</div>`
+      : '<div class="stk">No devices yet. Scan the code with a phone to add one.</div>'
+  }`
+      : ""
+  }</div>`;
+}
+async function webAct(a, b) {
+  if (a === "web_onoff") {
+    if (!webS.s) return;
+    const on = !webS.s.on;
+    webS.busy = true;
+    all();
+    try {
+      const r = await fetch("/lan/web-access", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ on })
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) toast(j.error || "That didn't work.");
+      else {
+        webS.s = j;
+        auditAdd("Network", `Phones and browsers on the network turned ${on ? "on" : "off"}`, {
+          pri: "Important"
+        });
+        toast(
+          on
+            ? "Phones and browsers on this network can now sign in."
+            : "Phones and browsers can no longer open Kaytia Flow."
+        );
+      }
+    } catch (e) {
+      toast("The program on this computer can't be reached.");
+    }
+    webS.busy = false;
+    return all();
+  }
+  if (a === "web_rm") {
+    const id = b.dataset.id,
+      d = ((webS.s && webS.s.devices) || []).find(x => x.id === id);
+    return tapConfirm(
+      b,
+      async () => {
+        try {
+          const r = await fetch("/lan/web-access/remove", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ id })
+          });
+          if (r.ok) webS.s = await r.json();
+        } catch (e) {}
+        auditAdd("Network", `Device removed: ${d ? d.name : id}`, { pri: "Important" });
+        toast(
+          `${d ? d.name : "The device"} was removed. It must sign in again to use Kaytia Flow.`
+        );
+        all();
+      },
+      "Tap again to remove"
+    );
+  }
+}
+setInterval(() => {
+  if (
+    typeof view !== "undefined" &&
+    view === "settings" &&
+    setTab === "network" &&
+    webS.s &&
+    webS.s.on &&
+    !syTyping()
+  )
+    webLoad();
+}, 15000);
+
 // ---- Settings → Network: Kaytia Flow running quietly in the background, and starting with Windows
 const svcS = { loaded: false, s: null, busy: "" };
 async function svcLoad() {

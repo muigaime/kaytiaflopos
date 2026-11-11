@@ -39,10 +39,29 @@ function fdShow() {
 let fdUser = null,
   posUser = null;
 /** Shows or hides everything outside the Back Office that belongs to the Front Desk. */
+/** The start page arranges its cards for the modules that are on: POS is always the big one. */
+function stLayout() {
+  const grid = $("#start .st-grid");
+  if (!grid) return;
+  const others = [...grid.querySelectorAll(".st-tile:not(.big)")].filter(
+    b => b.style.display !== "none"
+  );
+  others.forEach(b => b.classList.remove("wide"));
+  if (others.length === 3) others[2].classList.add("wide");
+  grid.dataset.n = String(others.length);
+}
 function fdModuleApply() {
   const on = fdOn(),
     show = (el, yes) => el && (el.style.display = yes ? "" : "none");
   show($('#start [data-go="fd"]'), on);
+  show($('#start [data-go="kds"]'), kdsOn());
+  show($('#start [data-go="clock"]'), clockOn());
+  stLayout();
+  if (!kdsOn() && $("#kds").classList.contains("show")) kdsClose();
+  if (!clockOn() && $("#sClock").classList.contains("show")) {
+    $("#sClock").classList.remove("show");
+    $("#start").style.display = "grid";
+  }
   show($("#stFdKey"), on);
   const room = $("#fRoom");
   if (room) {
